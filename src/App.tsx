@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import Experience from "./components/Experience";
 import { OrbitControls } from "@react-three/drei";
 import { FPSCounter } from "./components/FPSCounter";
-import { useEffect, useState } from "react";
 
-function App() {
-  const [isDebug, setIsDebug] = useState(false);
+function App(): JSX.Element {
+  const [isDebug, setIsDebug] = useState<boolean>(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

@@ -1,10 +1,25 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { Vector3 } from "three";
+import { Vector3, Camera, Object3D } from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+
+interface CameraConfigType {
+  PAN_SPEED: number;
+  MIN_DISTANCE: number;
+  MAX_DISTANCE: number;
+  MIN_POLAR_ANGLE: number;
+  MAX_POLAR_ANGLE: number;
+  PAN_BOUNDS: {
+    MIN_X: number;
+    MAX_X: number;
+    MIN_Z: number;
+    MAX_Z: number;
+  };
+}
 
 // Camera configuration
-const CAMERA_CONFIG = {
-  PAN_SPEED: 15, // Units per second (adjusted for delta time)
+const CAMERA_CONFIG: CameraConfigType = {
+  PAN_SPEED: 12, // Units per second (adjusted for delta time)
   MIN_DISTANCE: 5,
   MAX_DISTANCE: 12,
   MIN_POLAR_ANGLE: 0,
@@ -17,16 +32,21 @@ const CAMERA_CONFIG = {
   },
 };
 
-export function CameraController() {
+interface KeyMap {
+  [key: string]: boolean;
+}
+
+export function CameraController(): JSX.Element | null {
   const { camera, controls } = useThree();
-  const keys = useRef({});
-  const lastTime = useRef(performance.now());
+  const keys = useRef<KeyMap>({});
+  const lastTime = useRef<number>(performance.now());
 
   // Helper function to clamp a value between min and max
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const clamp = (value: number, min: number, max: number): number =>
+    Math.max(min, Math.min(max, value));
 
   // Helper function to check if a position is within bounds
-  const isWithinBounds = (position, axis) => {
+  const isWithinBounds = (position: number, axis: "X" | "Z"): boolean => {
     const min = CAMERA_CONFIG.PAN_BOUNDS[`MIN_${axis}`];
     const max = CAMERA_CONFIG.PAN_BOUNDS[`MAX_${axis}`];
     return position >= min && position <= max;
@@ -34,60 +54,30 @@ export function CameraController() {
 
   useEffect(() => {
     if (controls) {
-      controls.enableKeys = false;
-      controls.enablePan = false;
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.minDistance = CAMERA_CONFIG.MIN_DISTANCE;
-      controls.maxDistance = CAMERA_CONFIG.MAX_DISTANCE;
-      controls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
-      controls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
-
-      const originalUpdate = controls.update;
-      controls.update = function () {
-        originalUpdate.call(this);
-
-        // Clamp target position
-        controls.target.x = clamp(
-          controls.target.x,
-          CAMERA_CONFIG.PAN_BOUNDS.MIN_X,
-          CAMERA_CONFIG.PAN_BOUNDS.MAX_X
-        );
-        controls.target.z = clamp(
-          controls.target.z,
-          CAMERA_CONFIG.PAN_BOUNDS.MIN_Z,
-          CAMERA_CONFIG.PAN_BOUNDS.MAX_Z
-        );
-        controls.target.y = 0;
-
-        // Clamp camera position
-        camera.position.x = clamp(
-          camera.position.x,
-          CAMERA_CONFIG.PAN_BOUNDS.MIN_X,
-          CAMERA_CONFIG.PAN_BOUNDS.MAX_X
-        );
-        camera.position.z = clamp(
-          camera.position.z,
-          CAMERA_CONFIG.PAN_BOUNDS.MIN_Z,
-          CAMERA_CONFIG.PAN_BOUNDS.MAX_Z
-        );
-      };
+      const orbitControls = controls as OrbitControls;
+      orbitControls.enablePan = false;
+      orbitControls.enableDamping = true;
+      orbitControls.dampingFactor = 0.05;
+      orbitControls.minDistance = CAMERA_CONFIG.MIN_DISTANCE;
+      orbitControls.maxDistance = CAMERA_CONFIG.MAX_DISTANCE;
+      orbitControls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
+      orbitControls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
     }
   }, [controls, camera]);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
       keys.current[e.key.toLowerCase()] = true;
     };
 
-    const handleKeyUp = (e) => {
+    const handleKeyUp = (e: KeyboardEvent): void => {
       keys.current[e.key.toLowerCase()] = false;
     };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
-    const panCamera = () => {
+    const panCamera = (): void => {
       if (!controls) return;
 
       // Calculate delta time in seconds
@@ -119,7 +109,9 @@ export function CameraController() {
 
         // Calculate new positions
         const newCameraPos = camera.position.clone().add(movement);
-        const newTargetPos = controls.target.clone().add(movement);
+        const newTargetPos = (controls as OrbitControls).target
+          .clone()
+          .add(movement);
 
         // Check and apply movement for each axis independently
         const canMoveX =
@@ -131,11 +123,11 @@ export function CameraController() {
 
         if (canMoveX) {
           camera.position.x = newCameraPos.x;
-          controls.target.x = newTargetPos.x;
+          (controls as OrbitControls).target.x = newTargetPos.x;
         }
         if (canMoveZ) {
           camera.position.z = newCameraPos.z;
-          controls.target.z = newTargetPos.z;
+          (controls as OrbitControls).target.z = newTargetPos.z;
         }
       }
 

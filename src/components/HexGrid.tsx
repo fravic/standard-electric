@@ -2,18 +2,67 @@ import React, { useMemo, useEffect, useState } from "react";
 import {
   CylinderGeometry,
   Color,
-  DoubleSide,
   PlaneGeometry,
   BackSide,
+  Vector3,
 } from "three";
-import {
-  initializeMapData,
-  isPointInUS,
-  getStateInfo,
-} from "../utils/geoUtils";
+import { initializeMapData, getStateInfo } from "../utils/geoUtils";
+
+interface MapConfig {
+  PROJECTION_WIDTH: number;
+  PROJECTION_HEIGHT: number;
+  GRID_WIDTH: number;
+  GRID_HEIGHT: number;
+  X_OFFSET: number;
+  Y_OFFSET: number;
+}
+
+interface ColorConfig {
+  LAND_BASE: Color;
+  SATURATION_RANGE: number;
+  LIGHTNESS_RANGE: number;
+  WATER: Color;
+  WATER_OPACITY: number;
+}
+
+interface TerrainTypes {
+  PLAINS: {
+    baseColor: Color;
+    stateColorVariation: number;
+    tileVariation: number;
+  };
+  WATER: {
+    baseColor: Color;
+    variations: number[];
+  };
+}
+
+interface HexConfig {
+  RADIUS: number;
+  WATER_HEIGHT: number;
+  LAND_HEIGHT: number;
+  WATER_VERTICAL_OFFSET: number;
+  SCALE: number;
+  VERTICAL_SPACING: number;
+  HORIZONTAL_SPACING: number;
+}
+
+interface TerrainInfo {
+  type: "WATER" | "PLAINS";
+  color: Color;
+  stateName?: string;
+}
+
+interface HexData {
+  position: [number, number, number];
+  color: Color;
+  terrainType: "WATER" | "PLAINS";
+  stateName?: string;
+  key: string;
+}
 
 // Map dimensions and scale
-const MAP_CONFIG = {
+const MAP_CONFIG: MapConfig = {
   PROJECTION_WIDTH: 1200,
   PROJECTION_HEIGHT: 800,
   GRID_WIDTH: 200,
@@ -23,7 +72,7 @@ const MAP_CONFIG = {
 };
 
 // Color configuration
-const COLOR_CONFIG = {
+const COLOR_CONFIG: ColorConfig = {
   LAND_BASE: new Color("#68dba2"),
   SATURATION_RANGE: 0.25,
   LIGHTNESS_RANGE: 0.2,
@@ -32,7 +81,7 @@ const COLOR_CONFIG = {
 };
 
 // Terrain types configuration
-const TERRAIN_TYPES = {
+const TERRAIN_TYPES: TerrainTypes = {
   PLAINS: {
     baseColor: COLOR_CONFIG.LAND_BASE,
     stateColorVariation: 0.3,
@@ -45,18 +94,18 @@ const TERRAIN_TYPES = {
 };
 
 // Hex geometry configuration
-const HEX_CONFIG = {
+const HEX_CONFIG: HexConfig = {
   RADIUS: 0.3,
   WATER_HEIGHT: 0.05,
-  LAND_HEIGHT: 0.3, // Much taller for land hexes
-  WATER_VERTICAL_OFFSET: 0.15, // Half of LAND_HEIGHT to position water tiles halfway up
+  LAND_HEIGHT: 0.2,
+  WATER_VERTICAL_OFFSET: 0.15,
   SCALE: 1.01,
   VERTICAL_SPACING: 0.745,
   HORIZONTAL_SPACING: 0.995,
 };
 
-const HexGrid = () => {
-  const [mapDataLoaded, setMapDataLoaded] = useState(false);
+export function HexGrid(): JSX.Element | null {
+  const [mapDataLoaded, setMapDataLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     initializeMapData().then(() => {
@@ -64,7 +113,12 @@ const HexGrid = () => {
     });
   }, []);
 
-  const getTerrainTypeAndColor = (x, y, maxX, maxY) => {
+  const getTerrainTypeAndColor = (
+    x: number,
+    y: number,
+    maxX: number,
+    maxY: number
+  ): TerrainInfo => {
     const projX =
       (x / maxX) * MAP_CONFIG.PROJECTION_WIDTH - MAP_CONFIG.X_OFFSET;
     const projY =
@@ -79,12 +133,10 @@ const HexGrid = () => {
         };
       }
 
-      // Generate a state-specific color variation
       const baseColor = TERRAIN_TYPES.PLAINS.baseColor.clone();
-      const hsl = {};
+      const hsl: { h: number; s: number; l: number } = { h: 0, s: 0, l: 0 };
       baseColor.getHSL(hsl);
 
-      // Vary saturation and lightness based on state ID
       const saturationOffset =
         (stateInfo.numericId * COLOR_CONFIG.SATURATION_RANGE) / 50 -
         COLOR_CONFIG.SATURATION_RANGE / 2;
@@ -97,7 +149,6 @@ const HexGrid = () => {
         Math.max(0.25, Math.min(0.65, hsl.l + lightnessOffset))
       );
 
-      // Add subtle random variation
       const variation =
         1 + (Math.random() - 0.5) * TERRAIN_TYPES.PLAINS.tileVariation;
       baseColor.multiplyScalar(variation);
@@ -116,9 +167,7 @@ const HexGrid = () => {
     }
   };
 
-  // Create separate geometries for water and land
   const { waterGeometry, landGeometry } = useMemo(() => {
-    // For land hexes, use cylinder with full height
     const landGeo = new CylinderGeometry(
       HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
       HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
@@ -128,20 +177,18 @@ const HexGrid = () => {
       false
     );
 
-    // For water, use a simple plane (much fewer vertices)
     const waterGeo = new PlaneGeometry(
       HEX_CONFIG.RADIUS * 2 * HEX_CONFIG.SCALE,
       HEX_CONFIG.RADIUS * 2 * HEX_CONFIG.SCALE
     );
-    waterGeo.rotateX(-Math.PI / 2); // Rotate to be horizontal
+    waterGeo.rotateX(-Math.PI / 2);
 
     return { waterGeometry: waterGeo, landGeometry: landGeo };
   }, []);
 
-  // Separate water and land hexes into different arrays
   const { waterHexes, landHexes } = useMemo(() => {
-    const water = [];
-    const land = [];
+    const water: HexData[] = [];
+    const land: HexData[] = [];
     const width = HEX_CONFIG.RADIUS * Math.sqrt(3);
     const height = HEX_CONFIG.RADIUS * 2;
     const verticalSpacing = height * HEX_CONFIG.VERTICAL_SPACING;
@@ -170,7 +217,7 @@ const HexGrid = () => {
             ? HEX_CONFIG.WATER_VERTICAL_OFFSET
             : (HEX_CONFIG.LAND_HEIGHT * heightVar) / 2;
 
-        const hex = {
+        const hex: HexData = {
           position: [
             x - (MAP_CONFIG.GRID_WIDTH * horizontalSpacing) / 2,
             baseHeight,
@@ -198,31 +245,31 @@ const HexGrid = () => {
 
   return (
     <group>
-      {/* Render water hexes first */}
       <group>
         {waterHexes.map(({ position, color, key }) => (
-          <mesh key={key} geometry={waterGeometry} position={position}>
+          <mesh
+            key={key}
+            geometry={waterGeometry}
+            position={new Vector3(...position)}
+          >
             <meshStandardMaterial
               color={color}
               roughness={0.7}
               metalness={0.1}
               envMapIntensity={0.3}
-              side={BackSide} // Render only back faces for better performance
-              transparent={false} // Disable transparency for better performance
+              side={BackSide}
+              transparent={false}
             />
           </mesh>
         ))}
       </group>
 
-      {/* Render land hexes on top */}
       <group position={[0, 0.01, 0]}>
-        {" "}
-        {/* Slight Y offset to prevent z-fighting */}
         {landHexes.map(({ position, color, stateName, key }) => (
           <mesh
             key={key}
             geometry={landGeometry}
-            position={position}
+            position={new Vector3(...position)}
             onPointerOver={(e) => {
               e.stopPropagation();
               document.body.style.cursor = "pointer";
@@ -248,6 +295,4 @@ const HexGrid = () => {
       </group>
     </group>
   );
-};
-
-export default HexGrid;
+}
