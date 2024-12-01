@@ -1,0 +1,25 @@
+{
+  "name": "your-project-name",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npx vite --host 0.0.0.0 --port 3000",
+    "build": "npx vite build",
+    "preview": "npx vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.118.0",
+    "@react-three/fiber": "^8.17.10",
+    "@vitejs/plugin-react": "^4.3.4",
+    "d3-geo": "^3.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.171.0",
+    "topojson-client": "^3.1.0",
+    "zustand": "^5.0.1"
+  }
+}
