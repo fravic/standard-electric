@@ -8,21 +8,20 @@ import {
 
 // Map dimensions and scale
 const MAP_CONFIG = {
-  PROJECTION_WIDTH: 1000, // Width of the projection space
-  PROJECTION_HEIGHT: 600, // Height of the projection space
-  GRID_WIDTH: 150, // Number of hexes horizontally
-  GRID_HEIGHT: 90, // Number of hexes vertically
+  PROJECTION_WIDTH: 1000,
+  PROJECTION_HEIGHT: 600,
+  GRID_WIDTH: 150,
+  GRID_HEIGHT: 90,
 };
 
 // Color configuration
 const COLOR_CONFIG = {
-  // Base green for land (a soft, pastel green)
-  LAND_BASE: new Color("#93c9a1"),
+  // More vibrant but still natural green for land
+  LAND_BASE: new Color("#68dba2"),
   // Color variation parameters
-  SATURATION_RANGE: 0.2, // How much to vary the saturation
-  LIGHTNESS_RANGE: 0.15, // How much to vary the lightness
-  WATER: new Color("#a8d0e6"), // Pastel blue for water
-  WATER_OPACITY: 0.85, // Slight transparency for water
+  SATURATION_RANGE: 0.25,
+  LIGHTNESS_RANGE: 0.2,
+  WATER: new Color("#5d8bca"), // Deeper blue for water
 };
 
 // Terrain types configuration
@@ -34,16 +33,15 @@ const TERRAIN_TYPES = {
   },
   WATER: {
     baseColor: COLOR_CONFIG.WATER,
-    opacity: COLOR_CONFIG.WATER_OPACITY,
     variations: [0.95, 0.975, 1, 1.025, 1.05],
   },
 };
 
 // Hex geometry configuration
 const HEX_CONFIG = {
-  RADIUS: 0.3, // Smaller radius for higher density
+  RADIUS: 0.3,
   HEIGHT: 0.05,
-  SCALE: 1.01, // Slight scale up to prevent gaps
+  SCALE: 1.01,
   VERTICAL_SPACING: 0.745,
   HORIZONTAL_SPACING: 0.995,
 };
@@ -78,7 +76,6 @@ const HexGrid = () => {
         return {
           type: "WATER",
           color: TERRAIN_TYPES.WATER.baseColor.clone(),
-          opacity: TERRAIN_TYPES.WATER.opacity,
         };
       }
 
@@ -96,8 +93,8 @@ const HexGrid = () => {
 
       baseColor.setHSL(
         hsl.h,
-        Math.max(0.1, Math.min(1, hsl.s + saturationOffset)),
-        Math.max(0.2, Math.min(0.8, hsl.l + lightnessOffset))
+        Math.max(0.3, Math.min(0.9, hsl.s + saturationOffset)),
+        Math.max(0.25, Math.min(0.65, hsl.l + lightnessOffset))
       );
 
       // Add subtle random variation
@@ -108,7 +105,6 @@ const HexGrid = () => {
       return {
         type: "PLAINS",
         color: baseColor,
-        opacity: 1,
         stateName: stateInfo.name,
       };
     } catch (error) {
@@ -116,7 +112,6 @@ const HexGrid = () => {
       return {
         type: "WATER",
         color: TERRAIN_TYPES.WATER.baseColor.clone(),
-        opacity: TERRAIN_TYPES.WATER.opacity,
       };
     }
   };
@@ -136,7 +131,6 @@ const HexGrid = () => {
         const {
           type: terrainType,
           color,
-          opacity,
           stateName,
         } = getTerrainTypeAndColor(
           col,
@@ -155,7 +149,6 @@ const HexGrid = () => {
             z - (MAP_CONFIG.GRID_HEIGHT * verticalSpacing) / 2,
           ],
           color,
-          opacity,
           terrainType,
           stateName,
           key: `${row}-${col}`,
@@ -171,37 +164,33 @@ const HexGrid = () => {
 
   return (
     <group>
-      {hexagons.map(
-        ({ position, color, opacity, terrainType, stateName, key }) => (
-          <mesh
-            key={key}
-            geometry={hexGeometry}
-            position={position}
-            onPointerOver={(e) => {
-              e.stopPropagation();
-              document.body.style.cursor = "pointer";
-            }}
-            onPointerOut={() => {
-              document.body.style.cursor = "auto";
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (stateName) {
-                console.log(`Clicked on ${stateName}`);
-              }
-            }}
-          >
-            <meshStandardMaterial
-              color={color}
-              flatShading={true}
-              transparent={true}
-              opacity={opacity}
-              roughness={terrainType === "WATER" ? 0.3 : 0.8}
-              metalness={terrainType === "WATER" ? 0.3 : 0}
-            />
-          </mesh>
-        )
-      )}
+      {hexagons.map(({ position, color, terrainType, stateName, key }) => (
+        <mesh
+          key={key}
+          geometry={hexGeometry}
+          position={position}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={() => {
+            document.body.style.cursor = "auto";
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (stateName) {
+              console.log(`Clicked on ${stateName}`);
+            }
+          }}
+        >
+          <meshStandardMaterial
+            color={color}
+            roughness={terrainType === "WATER" ? 0.7 : 0.8}
+            metalness={terrainType === "WATER" ? 0.1 : 0}
+            envMapIntensity={terrainType === "WATER" ? 0.5 : 0.2}
+          />
+        </mesh>
+      ))}
     </group>
   );
 };
