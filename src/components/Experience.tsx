@@ -1,5 +1,5 @@
 import React from "react";
-import { HexGrid } from "./HexGrid";
+import { HexGrid } from "./HexGrid/HexGrid";
 import { CameraController } from "./CameraController";
 
 export default function Experience(): JSX.Element {

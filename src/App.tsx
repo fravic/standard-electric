@@ -3,11 +3,23 @@ import { Canvas } from "@react-three/fiber";
 import Experience from "./components/Experience";
 import { OrbitControls } from "@react-three/drei";
 import { FPSCounter } from "./components/FPSCounter";
+import { useGameStore } from "./store/gameStore";
+import { loadUnitedStatesMapData } from "./lib/unitedStatesGeoUtils";
 
 function App(): JSX.Element {
-  const [isDebug, setIsDebug] = useState<boolean>(false);
+  const isDebug = useGameStore((state) => state.isDebug);
+  const setIsDebug = useGameStore((state) => state.setIsDebug);
+  const loadHexGrid = useGameStore((state) => state.loadHexGrid);
 
   useEffect(() => {
+    const loadMapData = async () => {
+      const mapData = await loadUnitedStatesMapData();
+      if (mapData) {
+        loadHexGrid(mapData);
+      }
+    };
+    loadMapData();
+
     const params = new URLSearchParams(window.location.search);
     setIsDebug(params.get("debug") === "true");
   }, []);
