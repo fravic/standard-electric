@@ -2,9 +2,11 @@ import React, { useMemo, useEffect, useState } from "react";
 import {
   CylinderGeometry,
   Color,
-  PlaneGeometry,
-  BackSide,
   Vector3,
+  DoubleSide,
+  BufferGeometry,
+  BufferAttribute,
+  Matrix4,
 } from "three";
 import { initializeMapData, getStateInfo } from "../utils/geoUtils";
 
@@ -96,7 +98,7 @@ const TERRAIN_TYPES: TerrainTypes = {
 // Hex geometry configuration
 const HEX_CONFIG: HexConfig = {
   RADIUS: 0.3,
-  WATER_HEIGHT: 0.05,
+  WATER_HEIGHT: 0.1,
   LAND_HEIGHT: 0.2,
   WATER_VERTICAL_OFFSET: 0.15,
   SCALE: 1.01,
@@ -177,22 +179,32 @@ export function HexGrid(): JSX.Element | null {
       false
     );
 
-    const waterGeo = new PlaneGeometry(
-      HEX_CONFIG.RADIUS * 2 * HEX_CONFIG.SCALE,
-      HEX_CONFIG.RADIUS * 2 * HEX_CONFIG.SCALE
+    const singleWaterHex = new CylinderGeometry(
+      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
+      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
+      HEX_CONFIG.WATER_HEIGHT,
+      6,
+      1,
+      false
     );
-    waterGeo.rotateX(-Math.PI / 2);
 
-    return { waterGeometry: waterGeo, landGeometry: landGeo };
+    return { waterGeometry: singleWaterHex, landGeometry: landGeo };
   }, []);
 
-  const { waterHexes, landHexes } = useMemo(() => {
-    const water: HexData[] = [];
+  const { waterMesh, landHexes } = useMemo(() => {
+    const water: { positions: number[]; indices: number[] } = {
+      positions: [],
+      indices: [],
+    };
     const land: HexData[] = [];
     const width = HEX_CONFIG.RADIUS * Math.sqrt(3);
     const height = HEX_CONFIG.RADIUS * 2;
     const verticalSpacing = height * HEX_CONFIG.VERTICAL_SPACING;
     const horizontalSpacing = width * HEX_CONFIG.HORIZONTAL_SPACING;
+
+    // Matrix for transforming each hex instance
+    const matrix = new Matrix4();
+    let vertexOffset = 0;
 
     for (let row = 0; row < MAP_CONFIG.GRID_HEIGHT; row++) {
       for (let col = 0; col < MAP_CONFIG.GRID_WIDTH; col++) {
@@ -214,30 +226,63 @@ export function HexGrid(): JSX.Element | null {
           1 + (Math.random() - 0.5) * (terrainType === "WATER" ? 0.005 : 0.01);
         const baseHeight =
           terrainType === "WATER"
-            ? HEX_CONFIG.WATER_VERTICAL_OFFSET
+            ? HEX_CONFIG.WATER_HEIGHT / 2
             : (HEX_CONFIG.LAND_HEIGHT * heightVar) / 2;
 
-        const hex: HexData = {
-          position: [
-            x - (MAP_CONFIG.GRID_WIDTH * horizontalSpacing) / 2,
-            baseHeight,
-            z - (MAP_CONFIG.GRID_HEIGHT * verticalSpacing) / 2,
-          ],
-          color,
-          terrainType,
-          stateName,
-          key: `${row}-${col}`,
-        };
+        const position: [number, number, number] = [
+          x - (MAP_CONFIG.GRID_WIDTH * horizontalSpacing) / 2,
+          baseHeight,
+          z - (MAP_CONFIG.GRID_HEIGHT * verticalSpacing) / 2,
+        ];
 
         if (terrainType === "WATER") {
-          water.push(hex);
+          // Add the water hex to the merged geometry
+          matrix.setPosition(position[0], position[1], position[2]);
+          const positions = Array.from(waterGeometry.attributes.position.array);
+          const indices = Array.from(waterGeometry.index!.array);
+
+          // Transform vertices
+          for (let i = 0; i < positions.length; i += 3) {
+            const vertex = new Vector3(
+              positions[i],
+              positions[i + 1],
+              positions[i + 2]
+            );
+            vertex.applyMatrix4(matrix);
+            water.positions.push(vertex.x, vertex.y, vertex.z);
+          }
+
+          // Add indices with offset
+          for (let i = 0; i < indices.length; i++) {
+            water.indices.push(indices[i] + vertexOffset);
+          }
+          vertexOffset += positions.length / 3;
         } else {
-          land.push(hex);
+          land.push({
+            position,
+            color,
+            terrainType,
+            stateName,
+            key: `${row}-${col}`,
+          });
         }
       }
     }
-    return { waterHexes: water, landHexes: land };
-  }, [mapDataLoaded]);
+
+    // Create the merged water geometry
+    const mergedWaterGeometry = new BufferGeometry();
+    mergedWaterGeometry.setAttribute(
+      "position",
+      new BufferAttribute(new Float32Array(water.positions), 3)
+    );
+    mergedWaterGeometry.setIndex(water.indices);
+    mergedWaterGeometry.computeVertexNormals();
+
+    return {
+      waterMesh: mergedWaterGeometry,
+      landHexes: land,
+    };
+  }, [mapDataLoaded, waterGeometry]);
 
   if (!mapDataLoaded) {
     return null;
@@ -245,24 +290,17 @@ export function HexGrid(): JSX.Element | null {
 
   return (
     <group>
-      <group>
-        {waterHexes.map(({ position, color, key }) => (
-          <mesh
-            key={key}
-            geometry={waterGeometry}
-            position={new Vector3(...position)}
-          >
-            <meshStandardMaterial
-              color={color}
-              roughness={0.7}
-              metalness={0.1}
-              envMapIntensity={0.3}
-              side={BackSide}
-              transparent={false}
-            />
-          </mesh>
-        ))}
-      </group>
+      <mesh geometry={waterMesh}>
+        <meshStandardMaterial
+          color={TERRAIN_TYPES.WATER.baseColor}
+          roughness={0.7}
+          metalness={0.1}
+          envMapIntensity={0.3}
+          side={DoubleSide}
+          transparent={true}
+          opacity={COLOR_CONFIG.WATER_OPACITY}
+        />
+      </mesh>
 
       <group position={[0, 0.01, 0]}>
         {landHexes.map(({ position, color, stateName, key }) => (

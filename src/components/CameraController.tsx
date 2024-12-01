@@ -21,7 +21,7 @@ interface CameraConfigType {
 const CAMERA_CONFIG: CameraConfigType = {
   PAN_SPEED: 12, // Units per second (adjusted for delta time)
   MIN_DISTANCE: 5,
-  MAX_DISTANCE: 12,
+  MAX_DISTANCE: 10,
   MIN_POLAR_ANGLE: 0,
   MAX_POLAR_ANGLE: Math.PI / 8,
   PAN_BOUNDS: {
