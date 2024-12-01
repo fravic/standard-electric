@@ -3,7 +3,8 @@ import {
   CylinderGeometry,
   Color,
   DoubleSide,
-  Float32BufferAttribute,
+  PlaneGeometry,
+  BackSide,
 } from "three";
 import {
   initializeMapData,
@@ -63,49 +64,6 @@ const HexGrid = () => {
     });
   }, []);
 
-  // Create separate geometries for water and land
-  const { waterGeometry, landGeometry } = useMemo(() => {
-    const waterGeo = new CylinderGeometry(
-      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
-      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
-      HEX_CONFIG.WATER_HEIGHT,
-      6,
-      1,
-      false
-    );
-
-    const landGeo = new CylinderGeometry(
-      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
-      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
-      HEX_CONFIG.LAND_HEIGHT,
-      6,
-      1,
-      false
-    );
-
-    // For water, we only want to render the top face
-    const positions = waterGeo.attributes.position.array;
-    const newPositions = [];
-    const indices = [];
-
-    // Only keep the top vertices (last 6 vertices)
-    for (let i = positions.length - 18; i < positions.length; i++) {
-      newPositions.push(positions[i]);
-    }
-
-    // Create triangles for the top face
-    indices.push(0, 1, 2, 2, 3, 0, 3, 4, 0, 4, 5, 0);
-
-    waterGeo.setAttribute(
-      "position",
-      new Float32BufferAttribute(newPositions, 3)
-    );
-    waterGeo.setIndex(indices);
-    waterGeo.computeVertexNormals();
-
-    return { waterGeometry: waterGeo, landGeometry: landGeo };
-  }, []);
-
   const getTerrainTypeAndColor = (x, y, maxX, maxY) => {
     const projX =
       (x / maxX) * MAP_CONFIG.PROJECTION_WIDTH - MAP_CONFIG.X_OFFSET;
@@ -158,8 +116,32 @@ const HexGrid = () => {
     }
   };
 
-  const hexagons = useMemo(() => {
-    const hexes = [];
+  // Create separate geometries for water and land
+  const { waterGeometry, landGeometry } = useMemo(() => {
+    // For land hexes, use cylinder with full height
+    const landGeo = new CylinderGeometry(
+      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
+      HEX_CONFIG.RADIUS * HEX_CONFIG.SCALE,
+      HEX_CONFIG.LAND_HEIGHT,
+      6,
+      1,
+      false
+    );
+
+    // For water, use a simple plane (much fewer vertices)
+    const waterGeo = new PlaneGeometry(
+      HEX_CONFIG.RADIUS * 2 * HEX_CONFIG.SCALE,
+      HEX_CONFIG.RADIUS * 2 * HEX_CONFIG.SCALE
+    );
+    waterGeo.rotateX(-Math.PI / 2); // Rotate to be horizontal
+
+    return { waterGeometry: waterGeo, landGeometry: landGeo };
+  }, []);
+
+  // Separate water and land hexes into different arrays
+  const { waterHexes, landHexes } = useMemo(() => {
+    const water = [];
+    const land = [];
     const width = HEX_CONFIG.RADIUS * Math.sqrt(3);
     const height = HEX_CONFIG.RADIUS * 2;
     const verticalSpacing = height * HEX_CONFIG.VERTICAL_SPACING;
@@ -188,7 +170,7 @@ const HexGrid = () => {
             ? HEX_CONFIG.WATER_VERTICAL_OFFSET
             : (HEX_CONFIG.LAND_HEIGHT * heightVar) / 2;
 
-        hexes.push({
+        const hex = {
           position: [
             x - (MAP_CONFIG.GRID_WIDTH * horizontalSpacing) / 2,
             baseHeight,
@@ -198,10 +180,16 @@ const HexGrid = () => {
           terrainType,
           stateName,
           key: `${row}-${col}`,
-        });
+        };
+
+        if (terrainType === "WATER") {
+          water.push(hex);
+        } else {
+          land.push(hex);
+        }
       }
     }
-    return hexes;
+    return { waterHexes: water, landHexes: land };
   }, [mapDataLoaded]);
 
   if (!mapDataLoaded) {
@@ -210,36 +198,54 @@ const HexGrid = () => {
 
   return (
     <group>
-      {hexagons.map(({ position, color, terrainType, stateName, key }) => (
-        <mesh
-          key={key}
-          geometry={terrainType === "WATER" ? waterGeometry : landGeometry}
-          position={position}
-          onPointerOver={(e) => {
-            e.stopPropagation();
-            document.body.style.cursor = "pointer";
-          }}
-          onPointerOut={() => {
-            document.body.style.cursor = "auto";
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (stateName) {
-              console.log(`Clicked on ${stateName}`);
-            }
-          }}
-        >
-          <meshStandardMaterial
-            color={color}
-            roughness={terrainType === "WATER" ? 0.7 : 0.8}
-            metalness={terrainType === "WATER" ? 0.1 : 0}
-            envMapIntensity={terrainType === "WATER" ? 0.5 : 0.2}
-            transparent={terrainType === "WATER"}
-            opacity={terrainType === "WATER" ? COLOR_CONFIG.WATER_OPACITY : 1}
-            side={terrainType === "WATER" ? DoubleSide : undefined}
-          />
-        </mesh>
-      ))}
+      {/* Render water hexes first */}
+      <group>
+        {waterHexes.map(({ position, color, key }) => (
+          <mesh key={key} geometry={waterGeometry} position={position}>
+            <meshStandardMaterial
+              color={color}
+              roughness={0.7}
+              metalness={0.1}
+              envMapIntensity={0.3}
+              side={BackSide} // Render only back faces for better performance
+              transparent={false} // Disable transparency for better performance
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Render land hexes on top */}
+      <group position={[0, 0.01, 0]}>
+        {" "}
+        {/* Slight Y offset to prevent z-fighting */}
+        {landHexes.map(({ position, color, stateName, key }) => (
+          <mesh
+            key={key}
+            geometry={landGeometry}
+            position={position}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={() => {
+              document.body.style.cursor = "auto";
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (stateName) {
+                console.log(`Clicked on ${stateName}`);
+              }
+            }}
+          >
+            <meshStandardMaterial
+              color={color}
+              roughness={0.8}
+              metalness={0}
+              envMapIntensity={0.2}
+            />
+          </mesh>
+        ))}
+      </group>
     </group>
   );
 };

@@ -4,66 +4,72 @@ import { Vector3 } from "three";
 
 // Camera configuration
 const CAMERA_CONFIG = {
-  PAN_SPEED: 0.2,
+  PAN_SPEED: 15, // Units per second (adjusted for delta time)
   MIN_DISTANCE: 5,
-  MAX_DISTANCE: 10,
+  MAX_DISTANCE: 12,
   MIN_POLAR_ANGLE: 0,
   MAX_POLAR_ANGLE: Math.PI / 8,
   PAN_BOUNDS: {
     MIN_X: -35,
     MAX_X: 35,
-    MIN_Z: -20,
-    MAX_Z: 20,
+    MIN_Z: -25,
+    MAX_Z: 25,
   },
 };
 
 export function CameraController() {
   const { camera, controls } = useThree();
-  const panSpeed = CAMERA_CONFIG.PAN_SPEED;
   const keys = useRef({});
+  const lastTime = useRef(performance.now());
+
+  // Helper function to clamp a value between min and max
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  // Helper function to check if a position is within bounds
+  const isWithinBounds = (position, axis) => {
+    const min = CAMERA_CONFIG.PAN_BOUNDS[`MIN_${axis}`];
+    const max = CAMERA_CONFIG.PAN_BOUNDS[`MAX_${axis}`];
+    return position >= min && position <= max;
+  };
 
   useEffect(() => {
     if (controls) {
-      // Disable automatic orbit controls during WASD movement
       controls.enableKeys = false;
       controls.enablePan = false;
-
-      // Set camera limits
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
-
-      // Set zoom limits
       controls.minDistance = CAMERA_CONFIG.MIN_DISTANCE;
       controls.maxDistance = CAMERA_CONFIG.MAX_DISTANCE;
-
-      // Restrict rotation
       controls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
       controls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
 
-      // Add bounds to the existing update
       const originalUpdate = controls.update;
       controls.update = function () {
         originalUpdate.call(this);
 
-        // Enforce pan limits
-        controls.target.x = Math.max(
+        // Clamp target position
+        controls.target.x = clamp(
+          controls.target.x,
           CAMERA_CONFIG.PAN_BOUNDS.MIN_X,
-          Math.min(CAMERA_CONFIG.PAN_BOUNDS.MAX_X, controls.target.x)
+          CAMERA_CONFIG.PAN_BOUNDS.MAX_X
         );
-        controls.target.z = Math.max(
+        controls.target.z = clamp(
+          controls.target.z,
           CAMERA_CONFIG.PAN_BOUNDS.MIN_Z,
-          Math.min(CAMERA_CONFIG.PAN_BOUNDS.MAX_Z, controls.target.z)
+          CAMERA_CONFIG.PAN_BOUNDS.MAX_Z
         );
         controls.target.y = 0;
 
-        // Ensure camera position stays within bounds
-        camera.position.x = Math.max(
+        // Clamp camera position
+        camera.position.x = clamp(
+          camera.position.x,
           CAMERA_CONFIG.PAN_BOUNDS.MIN_X,
-          Math.min(CAMERA_CONFIG.PAN_BOUNDS.MAX_X, camera.position.x)
+          CAMERA_CONFIG.PAN_BOUNDS.MAX_X
         );
-        camera.position.z = Math.max(
+        camera.position.z = clamp(
+          camera.position.z,
           CAMERA_CONFIG.PAN_BOUNDS.MIN_Z,
-          Math.min(CAMERA_CONFIG.PAN_BOUNDS.MAX_Z, camera.position.z)
+          CAMERA_CONFIG.PAN_BOUNDS.MAX_Z
         );
       };
     }
@@ -81,51 +87,55 @@ export function CameraController() {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
-    // Animation loop for smooth panning
     const panCamera = () => {
       if (!controls) return;
 
-      // Get the current look direction
+      // Calculate delta time in seconds
+      const currentTime = performance.now();
+      const deltaTime = (currentTime - lastTime.current) / 1000; // Convert to seconds
+      lastTime.current = currentTime;
+
       const lookDir = new Vector3();
       camera.getWorldDirection(lookDir);
       lookDir.y = 0;
       lookDir.normalize();
 
-      // Calculate right vector from look direction
       const right = new Vector3(-lookDir.z, 0, lookDir.x);
-
-      // Create movement vectors
       const movement = new Vector3(0, 0, 0);
 
-      // Adjust movement speed based on zoom level
-      const zoomFactor = camera.position.y / 10;
-      const currentSpeed = panSpeed * Math.max(1, zoomFactor);
-
+      // Calculate movement vector
       if (keys.current["w"]) movement.add(lookDir);
       if (keys.current["s"]) movement.sub(lookDir);
       if (keys.current["a"]) movement.sub(right);
       if (keys.current["d"]) movement.add(right);
 
       if (movement.length() > 0) {
-        movement.normalize().multiplyScalar(currentSpeed);
+        // Normalize and apply speed with delta time
+        movement.normalize();
+        const zoomFactor = camera.position.y / 10;
+        const currentSpeed =
+          CAMERA_CONFIG.PAN_SPEED * Math.max(1, zoomFactor) * deltaTime;
+        movement.multiplyScalar(currentSpeed);
 
         // Calculate new positions
         const newCameraPos = camera.position.clone().add(movement);
         const newTargetPos = controls.target.clone().add(movement);
 
-        // Check if new positions are within bounds
-        if (
-          newCameraPos.x >= CAMERA_CONFIG.PAN_BOUNDS.MIN_X &&
-          newCameraPos.x <= CAMERA_CONFIG.PAN_BOUNDS.MAX_X &&
-          newCameraPos.z >= CAMERA_CONFIG.PAN_BOUNDS.MIN_Z &&
-          newCameraPos.z <= CAMERA_CONFIG.PAN_BOUNDS.MAX_Z &&
-          newTargetPos.x >= CAMERA_CONFIG.PAN_BOUNDS.MIN_X &&
-          newTargetPos.x <= CAMERA_CONFIG.PAN_BOUNDS.MAX_X &&
-          newTargetPos.z >= CAMERA_CONFIG.PAN_BOUNDS.MIN_Z &&
-          newTargetPos.z <= CAMERA_CONFIG.PAN_BOUNDS.MAX_Z
-        ) {
-          camera.position.copy(newCameraPos);
-          controls.target.copy(newTargetPos);
+        // Check and apply movement for each axis independently
+        const canMoveX =
+          isWithinBounds(newCameraPos.x, "X") &&
+          isWithinBounds(newTargetPos.x, "X");
+        const canMoveZ =
+          isWithinBounds(newCameraPos.z, "Z") &&
+          isWithinBounds(newTargetPos.z, "Z");
+
+        if (canMoveX) {
+          camera.position.x = newCameraPos.x;
+          controls.target.x = newTargetPos.x;
+        }
+        if (canMoveZ) {
+          camera.position.z = newCameraPos.z;
+          controls.target.z = newTargetPos.z;
         }
       }
 
