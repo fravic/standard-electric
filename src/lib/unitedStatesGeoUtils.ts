@@ -9,8 +9,8 @@ import type {
 } from "./MapData";
 
 const EXCLUDED_STATES = ["15", "02", "72"];
-const PROJECTION_SCALE = 100;
-const PROJECTION_TRANSLATE: [number, number] = [40, 30];
+const PROJECTION_SCALE = 120;
+const PROJECTION_TRANSLATE: [number, number] = [50, 35];
 
 export async function loadUnitedStatesMapData(): Promise<MapData | null> {
   try {

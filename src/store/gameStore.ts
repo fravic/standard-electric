@@ -27,7 +27,7 @@ type Actions = {
 const loadHexGrid = (set: Setter) => (mapData: MapData) => {
   set(
     (state) => {
-      state.hexGrid = new HexGrid(100, 90);
+      state.hexGrid = new HexGrid(100, 60);
       state.hexGrid.constructFromMapData(mapData);
     },
     undefined,

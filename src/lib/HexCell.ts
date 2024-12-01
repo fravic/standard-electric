@@ -19,6 +19,11 @@ export class HexCell {
 
     this.coordinates = HexCoordinates.fromOffsetCoordinates(x, z);
     this.stateInfo = stateInfo;
+
+    if (!stateInfo) {
+      this.elevation = -0.2;
+      this.waterLevel = 0.5;
+    }
   }
 
   get isUnderwater(): boolean {
@@ -64,5 +69,14 @@ export class HexCell {
     }
 
     return color;
+  }
+
+  centerPoint(): [number, number, number] {
+    const x =
+      (this.coordinates.X + this.coordinates.Z * 0.5) *
+      (HexMetrics.innerRadius * 2);
+    const y = this.elevation * HexMetrics.elevationStep;
+    const z = this.coordinates.Z * (HexMetrics.outerRadius * 1.5);
+    return [x, y, z];
   }
 }

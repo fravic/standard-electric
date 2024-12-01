@@ -42,6 +42,8 @@ export interface MapData {
   states: { [key: string]: StateGeometryMultiPolygon | StateGeometryPolygon };
 }
 
+const PROJECTION_SCALE = [1, 0.7];
+
 export function getStateInfoAtCoordinates(
   mapData: MapData,
 
@@ -52,7 +54,10 @@ export function getStateInfoAtCoordinates(
   if (!mapData.projection || !mapData.polygon) return null;
 
   try {
-    const projectedPoint = mapData.projection.invert?.([x, y]);
+    const projectedPoint = mapData.projection.invert?.([
+      x * PROJECTION_SCALE[0],
+      y * PROJECTION_SCALE[1],
+    ]);
     if (!projectedPoint) return null;
     const [lon, lat] = projectedPoint;
 
