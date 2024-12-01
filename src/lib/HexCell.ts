@@ -1,14 +1,16 @@
 import { immerable } from "immer";
+import { Color, HSL } from "three";
 
 import { HexCoordinates } from "./HexCoordinates";
 import { HexMetrics } from "./HexMetrics";
 import { StateInfo } from "./MapData";
 
+const BASE_GREEN = new Color(0x90ee90); // Light green base color
+
 export class HexCell {
   coordinates: HexCoordinates;
   elevation: number = 0;
   waterLevel: number = 0;
-  color: string = "#aaffbb";
   roads: boolean[] = [false, false, false, false, false, false];
   stateInfo: StateInfo | null = null;
 
@@ -38,5 +40,29 @@ export class HexCell {
     if (!this.roads[direction]) {
       this.roads[direction] = true;
     }
+  }
+
+  stateHash(): number {
+    return Array.from(this.stateInfo?.name ?? "").reduce(
+      (acc, char) => char.charCodeAt(0) + ((acc << 5) - acc),
+      0
+    );
+  }
+
+  color(): Color {
+    const color = BASE_GREEN.clone();
+
+    if (this.stateInfo?.name) {
+      const hsl: HSL = { h: 0, s: 0, l: 0 };
+      color.getHSL(hsl);
+      // Vary lightness slightly based on state hash
+      hsl.l = Math.max(
+        0.6,
+        Math.min(0.9, hsl.l + ((this.stateHash() % 50) - 25) / 100)
+      );
+      color.setHSL(hsl.h, hsl.s, hsl.l);
+    }
+
+    return color;
   }
 }

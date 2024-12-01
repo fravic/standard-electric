@@ -39,7 +39,7 @@ export function HexGrid({}: HexGridProps) {
 
       const center = getCellCenter(cell);
       const baseVertex = vertices.length / 3;
-      const color = new THREE.Color(cell.color);
+      const color = cell.color();
 
       // Add center vertex
       vertices.push(center[0], center[1], center[2]);
