@@ -7,6 +7,7 @@ export class HexGrid {
   width: number;
   height: number;
   cells: HexCell[];
+  cellsByHexCoordinates: Record<string, HexCell>;
 
   constructor(width: number, height: number) {
     this[immerable] = true;
@@ -14,6 +15,7 @@ export class HexGrid {
     this.width = width;
     this.height = height;
     this.cells = [];
+    this.cellsByHexCoordinates = {};
   }
 
   constructFromMapData(mapData: MapData) {
@@ -26,6 +28,7 @@ export class HexGrid {
         );
         const cell = new HexCell(x, z, stateInfo);
         this.cells.push(cell);
+        this.cellsByHexCoordinates[cell.coordinates.toString()] = cell;
       }
     }
   }

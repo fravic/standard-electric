@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import Experience from "./components/Experience";
 import { OrbitControls } from "@react-three/drei";
@@ -10,6 +10,7 @@ function App(): JSX.Element {
   const isDebug = useGameStore((state) => state.isDebug);
   const setIsDebug = useGameStore((state) => state.setIsDebug);
   const loadHexGrid = useGameStore((state) => state.loadHexGrid);
+  const mapDataLoaded = useRef(false);
 
   useEffect(() => {
     const loadMapData = async () => {
@@ -18,7 +19,10 @@ function App(): JSX.Element {
         loadHexGrid(mapData);
       }
     };
-    loadMapData();
+    if (!mapDataLoaded.current) {
+      loadMapData();
+      mapDataLoaded.current = true;
+    }
 
     const params = new URLSearchParams(window.location.search);
     setIsDebug(params.get("debug") === "true");

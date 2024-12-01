@@ -1,16 +1,31 @@
 import { useEffect, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { Canvas, useFrame, ThreeEvent } from "@react-three/fiber";
+
 import { HexCell } from "../../lib/HexCell";
 import { HexMetrics } from "../../lib/HexMetrics";
-import * as THREE from "three";
-import { Water } from "./Water";
 import React from "react";
 import { useGameStore } from "../../store/gameStore";
-
+import { HexCoordinates } from "../../lib/HexCoordinates";
 interface HexGridProps {}
 
 export function HexGrid({}: HexGridProps) {
   const hexGrid = useGameStore((state) => state.hexGrid);
+
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    event.stopPropagation();
+    const coords = HexCoordinates.fromPosition(event.point.toArray());
+    const cell = hexGrid.cellsByHexCoordinates[coords.toString()];
+    console.log(
+      "Clicked cell at coordinates",
+      coords.X,
+      coords.Y,
+      coords.Z,
+      "for state",
+      cell?.stateInfo?.name
+    );
+  };
+
   const geometry = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
     const vertices: number[] = [];
@@ -64,7 +79,7 @@ export function HexGrid({}: HexGridProps) {
 
   return (
     <>
-      <mesh geometry={geometry}>
+      <mesh geometry={geometry} onClick={handleClick}>
         <meshStandardMaterial vertexColors />
       </mesh>
     </>

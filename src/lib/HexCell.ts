@@ -8,7 +8,7 @@ export class HexCell {
   coordinates: HexCoordinates;
   elevation: number = 0;
   waterLevel: number = 0;
-  color: string = "#ffaabb";
+  color: string = "#aaffbb";
   roads: boolean[] = [false, false, false, false, false, false];
   stateInfo: StateInfo | null = null;
 
