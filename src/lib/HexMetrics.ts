@@ -5,6 +5,8 @@ export class HexMetrics {
   static readonly waterFactor = 0.6;
   static readonly elevationStep = 5;
   static readonly waterElevationOffset = -0.5;
+  static chunkSizeX: number = 5;
+  static chunkSizeZ: number = 5;
 
   // Corners for pointy-top hexagon
   static readonly corners = [
