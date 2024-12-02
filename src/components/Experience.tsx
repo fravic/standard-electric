@@ -6,14 +6,8 @@ export default function Experience(): JSX.Element {
   return (
     <>
       <CameraController />
-      <ambientLight intensity={0.5} />
-      <directionalLight
-        position={[10, 10, 5]}
-        intensity={1}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
+      <ambientLight intensity={1} />
+      <directionalLight position={[10, 10, 5]} intensity={1} />
       <HexGrid />
     </>
   );

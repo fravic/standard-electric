@@ -5,7 +5,7 @@ import { HexCoordinates, Vertex } from "./HexCoordinates";
 import { HexMetrics } from "./HexMetrics";
 import { StateInfo } from "./MapData";
 
-const BASE_GREEN = new Color(0x90ee90); // Light green base color
+const BASE_GREEN = new Color(0xc9eba1); // Light green base color
 
 export class HexCell {
   coordinates: HexCoordinates;
@@ -53,10 +53,11 @@ export class HexCell {
     if (this.stateInfo?.name) {
       const hsl: HSL = { h: 0, s: 0, l: 0 };
       color.getHSL(hsl);
+      hsl.s = 0.8;
       // Vary lightness slightly based on state hash
       hsl.l = Math.max(
-        0.6,
-        Math.min(0.9, hsl.l + ((this.stateHash() % 50) - 25) / 100)
+        0.4,
+        Math.min(0.9, hsl.l + ((this.stateHash() % 40) - 20) / 100)
       );
       color.setHSL(hsl.h, hsl.s, hsl.l);
     }

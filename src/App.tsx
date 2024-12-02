@@ -37,7 +37,7 @@ function App(): JSX.Element {
             fov: 75,
           }}
         >
-          <color attach="background" args={["#87ceeb"]} />
+          <color attach="background" args={["#667FFF"]} />
           <OrbitControls makeDefault />
           <Experience />
         </Canvas>
