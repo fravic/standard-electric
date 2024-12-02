@@ -31,6 +31,7 @@ export function HexGrid({}: HexGridProps) {
             chunk={chunk.cells}
             chunkX={chunkX}
             chunkZ={chunkZ}
+            grid={hexGrid}
             onCellClick={handleCellClick}
           />
         );

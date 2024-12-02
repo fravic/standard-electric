@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { HexMetrics } from "../../lib/HexMetrics";
 import { HexCoordinates } from "../../lib/HexCoordinates";
 import { HexCell } from "../../lib/HexCell";
+import { HexMesh } from "../../lib/HexMesh";
 
 interface HexGridTerrainProps {
   chunk: HexCell[];
@@ -13,47 +14,32 @@ interface HexGridTerrainProps {
 
 export function HexGridTerrain({ chunk, onClick }: HexGridTerrainProps) {
   const { terrainGeometry } = useMemo(() => {
-    const terrainVertices: number[] = [];
-    const terrainIndices: number[] = [];
-    const terrainColors: number[] = [];
-
+    const hexMesh = new HexMesh();
     chunk.forEach((cell, i) => {
       const center = cell.centerPoint();
-      const baseTerrainVertex = terrainVertices.length / 3;
       const color = cell.color();
-
-      terrainVertices.push(center[0], center[1], center[2]);
-      terrainColors.push(color.r, color.g, color.b);
-
       for (let d = 0; d < 6; d++) {
-        const corner = HexMetrics.getFirstCorner(d);
-        terrainVertices.push(
-          center[0] + corner[0],
-          center[1] + corner[1],
-          center[2] + corner[2]
-        );
-        terrainColors.push(color.r, color.g, color.b);
-      }
-
-      for (let d = 0; d < 6; d++) {
-        terrainIndices.push(
-          baseTerrainVertex,
-          baseTerrainVertex + d + 1,
-          baseTerrainVertex + ((d + 1) % 6) + 1
-        );
+        if (!cell.isUnderwater) {
+          hexMesh.addTriangle(
+            center,
+            HexMetrics.getFirstCorner(center, d),
+            HexMetrics.getSecondCorner(center, d),
+            color
+          );
+        }
       }
     });
 
     const terrainGeometry = new THREE.BufferGeometry();
     terrainGeometry.setAttribute(
       "position",
-      new THREE.Float32BufferAttribute(terrainVertices, 3)
+      new THREE.Float32BufferAttribute(hexMesh.vertices, 3)
     );
     terrainGeometry.setAttribute(
       "color",
-      new THREE.Float32BufferAttribute(terrainColors, 3)
+      new THREE.Float32BufferAttribute(hexMesh.colors, 3)
     );
-    terrainGeometry.setIndex(terrainIndices);
+    terrainGeometry.setIndex(hexMesh.indices);
     terrainGeometry.computeVertexNormals();
 
     return { terrainGeometry };

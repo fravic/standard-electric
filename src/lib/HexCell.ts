@@ -1,7 +1,7 @@
 import { immerable } from "immer";
 import { Color, HSL } from "three";
 
-import { HexCoordinates } from "./HexCoordinates";
+import { HexCoordinates, Vertex } from "./HexCoordinates";
 import { HexMetrics } from "./HexMetrics";
 import { StateInfo } from "./MapData";
 
@@ -22,19 +22,12 @@ export class HexCell {
 
     if (!stateInfo) {
       this.elevation = -0.2;
-      this.waterLevel = 0.5;
+      this.waterLevel = 0;
     }
   }
 
   get isUnderwater(): boolean {
     return this.waterLevel > this.elevation;
-  }
-
-  get waterSurfaceY(): number {
-    return (
-      (this.waterLevel + HexMetrics.waterElevationOffset) *
-      HexMetrics.elevationStep
-    );
   }
 
   hasRoadThroughEdge(direction: number): boolean {
@@ -71,12 +64,16 @@ export class HexCell {
     return color;
   }
 
-  centerPoint(): [number, number, number] {
+  centerPoint(): Vertex {
     const x =
       (this.coordinates.X + this.coordinates.Z * 0.5) *
       (HexMetrics.innerRadius * 2);
-    const y = this.elevation * HexMetrics.elevationStep;
+    const y = this.elevation;
     const z = this.coordinates.Z * (HexMetrics.outerRadius * 1.5);
     return [x, y, z];
+  }
+
+  waterCenterPoint(): Vertex {
+    return [this.centerPoint()[0], this.waterLevel, this.centerPoint()[2]];
   }
 }

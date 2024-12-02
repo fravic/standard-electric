@@ -1,4 +1,6 @@
-import { HexMetrics } from "./HexMetrics";
+import { HexDirection, HexMetrics } from "./HexMetrics";
+
+export type Vertex = readonly [number, number, number];
 
 export class HexCoordinates {
   constructor(private x: number, private z: number) {}
@@ -10,6 +12,7 @@ export class HexCoordinates {
     return this.z;
   }
   get Y(): number {
+    // X + Y + Z = 0, so we can just infer Y
     return -this.x - this.z;
   }
 
@@ -42,6 +45,34 @@ export class HexCoordinates {
     }
 
     return new HexCoordinates(iX, iZ);
+  }
+
+  static fromHexCoordinates(coordinates: HexCoordinates): HexCoordinates {
+    return new HexCoordinates(coordinates.x, coordinates.z);
+  }
+
+  getNeighbor(direction: HexDirection): HexCoordinates {
+    if (direction < 0) {
+      direction = direction + 6;
+    }
+    direction = (direction % 6) as HexDirection;
+    switch (direction) {
+      case HexDirection.NE:
+        return new HexCoordinates(this.x, this.z + 1);
+      case HexDirection.E:
+        return new HexCoordinates(this.x + 1, this.z);
+      case HexDirection.SE:
+        return new HexCoordinates(this.x + 1, this.z - 1);
+      case HexDirection.SW:
+        return new HexCoordinates(this.x, this.z - 1);
+      case HexDirection.W:
+        return new HexCoordinates(this.x - 1, this.z);
+      case HexDirection.NW:
+        return new HexCoordinates(this.x - 1, this.z + 1);
+    }
+    throw new Error(
+      "Invalid HexDirection passed to HexCoordinates.getNeighbor: " + direction
+    );
   }
 
   toString(): string {

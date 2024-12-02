@@ -1,10 +1,10 @@
+import { Vertex } from "./HexCoordinates";
+
 export class HexMetrics {
   static readonly outerRadius = 1;
   static readonly innerRadius = HexMetrics.outerRadius * 0.866025404; // sqrt(3)/2
   static readonly solidFactor = 0.8;
   static readonly waterFactor = 0.6;
-  static readonly elevationStep = 5;
-  static readonly waterElevationOffset = -0.5;
   static chunkSizeX: number = 5;
   static chunkSizeZ: number = 5;
 
@@ -19,11 +19,28 @@ export class HexMetrics {
     [0, 0, HexMetrics.outerRadius], // Repeated first point for convenience
   ] as const;
 
-  static getFirstCorner(direction: number): readonly [number, number, number] {
-    return this.corners[direction];
+  static getFirstCorner(center: Vertex, direction: number): Vertex {
+    return [
+      center[0] + this.corners[direction % 6][0],
+      center[1] + this.corners[direction % 6][1],
+      center[2] + this.corners[direction % 6][2],
+    ];
   }
 
-  static getSecondCorner(direction: number): readonly [number, number, number] {
-    return this.corners[direction + 1];
+  static getSecondCorner(center: Vertex, direction: number): Vertex {
+    return [
+      center[0] + this.corners[(direction + 1) % 6][0],
+      center[1] + this.corners[(direction + 1) % 6][1],
+      center[2] + this.corners[(direction + 1) % 6][2],
+    ];
   }
+}
+
+export enum HexDirection {
+  NE,
+  E,
+  SE,
+  SW,
+  W,
+  NW,
 }

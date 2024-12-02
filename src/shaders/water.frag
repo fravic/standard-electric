@@ -2,42 +2,45 @@ precision highp float;
 
 uniform float time;
 uniform vec3 waterColor;
-uniform sampler2D noiseTexture;
 
 varying vec2 vUv;
-varying vec3 vPosition;
-varying vec3 vNormal;
-varying vec3 vViewPosition;
+
+#define SHORE_FOAM_COLOR vec3(0.6, 0.9, 1.0)
+#define SHALLOW_COLOR vec3(0.4, 0.5451, 1.0)
+#define WAVE_SCALE 0.1
 
 void main() {
-    // Sample noise texture for two different wave patterns
-    vec2 uv1 = vPosition.xz * 0.025;
-    uv1.y += time * 0.25;
-    vec4 noise1 = texture2D(noiseTexture, uv1);
+    // Create waves moving towards the shore
+    float waveFrequency = 8.0;
+    float waveSpeed = 1.0;
+    float baseWave = sin(vUv.y * waveFrequency - time * waveSpeed) * 0.5 + 0.5;
     
-    vec2 uv2 = vPosition.xz * 0.025;
-    uv2.x += time * 0.25;
-    vec4 noise2 = texture2D(noiseTexture, uv2);
+    // Calculate distance fade
+    float distanceFromShore = 1.0 - vUv.y;
+    float waveFalloff = 1.0 - distanceFromShore * distanceFromShore; // Quadratic falloff
+    float waves = baseWave * waveFalloff;
     
-    // Combine wave patterns
-    float waves = noise1.z + noise2.x;
-    waves = smoothstep(0.75, 2.0, waves);
+    // Create depth based on UV.y (0 = deep, 1 = shallow)
+    float depth = vUv.y;
     
-    // Create blend wave for animation
-    float blendWave = sin((vPosition.x + vPosition.z) * 0.1 + 
-                         (noise1.y + noise2.z) + time);
-    blendWave *= blendWave;
+    // Add wave movement to the shoreline
+    float shorelineOffset = waves * WAVE_SCALE;
+    depth = clamp(depth + shorelineOffset, 0.0, 1.0);
     
-    // Blend between different noise channels
-    float finalWaves = mix(noise1.z, noise1.w, blendWave) +
-                      mix(noise2.x, noise2.y, blendWave);
-    finalWaves = smoothstep(0.75, 2.0, finalWaves);
+    // Create sharp toon-style transitions
+    float deepWater = smoothstep(0.0, 0.3, depth);
     
-    // Combine with base color
-    vec3 color = waterColor + vec3(finalWaves * 0.2);
+    // Mix colors based on depth
+    vec3 color = waterColor; // Start with deep water
+    color = mix(color, SHALLOW_COLOR, deepWater);
     
-    // Add transparency
-    float alpha = 0.8;
+    // Add foam at the shoreline
+    float foam = smoothstep(0.9, 0.95, depth + waves * 0.2);
+    color = mix(color, SHORE_FOAM_COLOR, foam * waveFalloff);
     
-    gl_FragColor = vec4(color, alpha);
+    // Add wave highlights that fade with depth
+    float waveHighlight = smoothstep(0.4, 0.6, waves) * waveFalloff;
+    color = mix(color, SHORE_FOAM_COLOR, waveHighlight * 0.3);
+    
+    gl_FragColor = vec4(color, 1.0);
 } 

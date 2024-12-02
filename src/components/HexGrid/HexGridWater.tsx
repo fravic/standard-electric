@@ -2,54 +2,36 @@ import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
-import { HexCell } from "../../lib/HexCell";
-import { HexMetrics } from "../../lib/HexMetrics";
-
 import waterVertexShader from "../../shaders/water.vert";
 import waterFragmentShader from "../../shaders/water.frag";
 
+import { HexCell } from "../../lib/HexCell";
+import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
+import { HexMesh } from "../../lib/HexMesh";
+import { HexGrid } from "../../lib/HexGrid";
+
 interface HexGridWaterProps {
+  grid: HexGrid;
   chunk: HexCell[];
 }
 
-export function HexGridWater({ chunk }: HexGridWaterProps) {
+export function HexGridWater({ grid, chunk }: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
-    const waterVertices: number[] = [];
-    const waterIndices: number[] = [];
-    const waterUVs: number[] = [];
-
+    const hexMesh = new HexMesh();
     chunk.forEach((cell, i) => {
-      const center = cell.centerPoint();
-
       if (cell.isUnderwater) {
-        const baseWaterVertex = waterVertices.length / 3;
-        const waterY =
-          (cell.waterLevel + HexMetrics.waterElevationOffset) *
-          HexMetrics.elevationStep;
-
-        waterVertices.push(center[0], waterY, center[2]);
-        waterUVs.push(0.5, 0.5);
-
+        const center = cell.waterCenterPoint();
         for (let d = 0; d < 6; d++) {
-          const corner = HexMetrics.getFirstCorner(d);
-          waterVertices.push(
-            center[0] + corner[0],
-            waterY,
-            center[2] + corner[2]
-          );
-
-          const angle = (d / 6) * Math.PI * 2;
-          waterUVs.push(
-            0.5 + Math.cos(angle) * 0.5,
-            0.5 + Math.sin(angle) * 0.5
-          );
-        }
-
-        for (let d = 0; d < 6; d++) {
-          waterIndices.push(
-            baseWaterVertex,
-            baseWaterVertex + d + 1,
-            baseWaterVertex + ((d + 1) % 6) + 1
+          hexMesh.addTriangleWithUVs(
+            center,
+            HexMetrics.getFirstCorner(center, d),
+            HexMetrics.getSecondCorner(center, d),
+            new THREE.Color(0xaaaaff),
+            [0, 0],
+            // UVs depend on whether the cell is on the shoreline or not. 1 is
+            // shoreline, 0 is deep water.
+            cornerIsShoreline(grid, cell, d - 1, d) ? [1, 1] : [0, 0],
+            cornerIsShoreline(grid, cell, d, d + 1) ? [1, 1] : [0, 0]
           );
         }
       }
@@ -57,13 +39,13 @@ export function HexGridWater({ chunk }: HexGridWaterProps) {
     const waterGeometry = new THREE.BufferGeometry();
     waterGeometry.setAttribute(
       "position",
-      new THREE.Float32BufferAttribute(waterVertices, 3)
+      new THREE.Float32BufferAttribute(hexMesh.vertices, 3)
     );
     waterGeometry.setAttribute(
       "uv",
-      new THREE.Float32BufferAttribute(waterUVs, 2)
+      new THREE.Float32BufferAttribute(hexMesh.uvs, 2)
     );
-    waterGeometry.setIndex(waterIndices);
+    waterGeometry.setIndex(hexMesh.indices);
     waterGeometry.computeVertexNormals();
 
     return { waterGeometry };
@@ -84,12 +66,27 @@ export function HexGridWater({ chunk }: HexGridWaterProps) {
         transparent
         uniforms={{
           time: { value: 0 },
-          waterColor: { value: new THREE.Color(0xaaaaff) },
+          waterColor: { value: new THREE.Color(0xaabbff) },
           cameraPosition: { value: new THREE.Vector3() },
         }}
         vertexShader={waterVertexShader}
         fragmentShader={waterFragmentShader}
       />
     </mesh>
+  );
+}
+
+// Return whether the corner between dPrev and dNext should be UV'd as a
+// shoreline.
+function cornerIsShoreline(
+  grid: HexGrid,
+  cell: HexCell,
+  dPrev: HexDirection,
+  dNext: HexDirection
+): boolean {
+  const neighborPrev = grid.getCell(cell.coordinates.getNeighbor(dPrev));
+  const neighborNext = grid.getCell(cell.coordinates.getNeighbor(dNext));
+  return (
+    neighborPrev?.isUnderwater === false || neighborNext?.isUnderwater === false
   );
 }
