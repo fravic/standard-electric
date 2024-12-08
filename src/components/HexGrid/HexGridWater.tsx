@@ -1,6 +1,7 @@
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
 
 import waterVertexShader from "../../shaders/water.vert";
 import waterFragmentShader from "../../shaders/water.frag";
@@ -52,6 +53,10 @@ export function HexGridWater({ grid, chunk }: HexGridWaterProps) {
   }, [chunk]);
 
   const waterMaterialRef = useRef<THREE.ShaderMaterial>(null);
+  const [waveNoiseTexture, waveDistortionTexture] = useTexture([
+    "/textures/water_wave_noise.png",
+    "/textures/water_wave_distortion.png",
+  ]);
 
   useFrame((state) => {
     if (waterMaterialRef.current) {
@@ -66,8 +71,14 @@ export function HexGridWater({ grid, chunk }: HexGridWaterProps) {
         transparent
         uniforms={{
           time: { value: 0 },
-          waterColor: { value: new THREE.Color(0xaabbff) },
-          cameraPosition: { value: new THREE.Vector3() },
+          deepColor: { value: new THREE.Color(0xc1e4ff) },
+          shallowColor: { value: new THREE.Color(0xd3ecff) },
+          waveNoiseTexture: {
+            value: waveNoiseTexture,
+          },
+          waveDistortionTexture: {
+            value: waveDistortionTexture,
+          },
         }}
         vertexShader={waterVertexShader}
         fragmentShader={waterFragmentShader}

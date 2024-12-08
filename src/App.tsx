@@ -68,19 +68,17 @@ function App(): JSX.Element {
 
   return (
     <div className="game-container">
-      <div className="game-board">
-        <Canvas
-          camera={{
-            position: [0, 5, 5],
-            fov: 75,
-          }}
-        >
-          <color attach="background" args={["#667FFF"]} />
-          <OrbitControls makeDefault />
-          <Experience />
-        </Canvas>
-        {isDebug && <FPSCounter />}
-      </div>
+      <Canvas
+        camera={{
+          position: [0, 5, 5],
+          fov: 75,
+        }}
+      >
+        <color attach="background" args={["#ffffff"]} />
+        <OrbitControls makeDefault />
+        <Experience />
+      </Canvas>
+      {isDebug && <FPSCounter />}
     </div>
   );
 }

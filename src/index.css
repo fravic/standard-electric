@@ -6,22 +6,12 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  background-color: #fff;
 }
 
 .game-container {
   width: 100vw;
   height: 100vh;
-  padding: 20px;
-}
-
-.game-board {
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 canvas {

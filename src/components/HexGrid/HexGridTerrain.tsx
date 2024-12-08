@@ -84,7 +84,7 @@ export function HexGridTerrain({
             key={cell.coordinates.toString()}
             position={[
               cell.centerPoint()[0],
-              cell.centerPoint()[1] + 0.5,
+              cell.centerPoint()[1] + 0.3,
               cell.centerPoint()[2],
             ]}
             rotation={[-Math.PI / 2, 0, 0]}
@@ -92,6 +92,7 @@ export function HexGridTerrain({
             color="black"
             anchorX="center"
             anchorY="middle"
+            fillOpacity={0.3}
           >
             {`${cell.coordinates.toStringCubic()}`}
           </Text>
