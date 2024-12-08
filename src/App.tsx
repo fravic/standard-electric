@@ -10,6 +10,9 @@ function App(): JSX.Element {
   const isDebug = useGameStore((state) => state.isDebug);
   const setIsDebug = useGameStore((state) => state.setIsDebug);
   const loadHexGrid = useGameStore((state) => state.loadHexGrid);
+  const exportHexGridToJSON = useGameStore(
+    (state) => state.exportHexGridToJSON
+  );
   const mapDataLoaded = useRef(false);
 
   useEffect(() => {
@@ -27,6 +30,19 @@ function App(): JSX.Element {
     const params = new URLSearchParams(window.location.search);
     setIsDebug(params.get("debug") === "true");
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + E to export hex map to console
+      if (isDebug && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        exportHexGridToJSON();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [exportHexGridToJSON]);
 
   return (
     <div className="game-container">

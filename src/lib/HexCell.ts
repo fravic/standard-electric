@@ -1,22 +1,36 @@
 import { immerable } from "immer";
 import { Color, HSL } from "three";
+import { z } from "zod";
 
-import { HexCoordinates, Vertex } from "./HexCoordinates";
+import { HexCoordinates, HexCoordinatesSchema, Vertex } from "./HexCoordinates";
 import { HexMetrics } from "./HexMetrics";
 import { StateInfo } from "./MapData";
 
 const BASE_GREEN = new Color(0xc9eba1); // Light green base color
 
+export const HexCellSchema = z.object({
+  coordinates: HexCoordinatesSchema,
+  elevation: z.number(),
+  waterLevel: z.number(),
+  stateInfo: z
+    .object({
+      name: z.string(),
+      id: z.string(),
+    })
+    .nullable(),
+});
+
+export type HexCellData = z.infer<typeof HexCellSchema>;
+
 export class HexCell {
+  [immerable] = true;
+
   coordinates: HexCoordinates;
   elevation: number = 0;
   waterLevel: number = 0;
-  roads: boolean[] = [false, false, false, false, false, false];
   stateInfo: StateInfo | null = null;
 
   constructor(x: number, z: number, stateInfo: StateInfo | null = null) {
-    this[immerable] = true;
-
     this.coordinates = HexCoordinates.fromOffsetCoordinates(x, z);
     this.stateInfo = stateInfo;
 
@@ -28,16 +42,6 @@ export class HexCell {
 
   get isUnderwater(): boolean {
     return this.waterLevel > this.elevation;
-  }
-
-  hasRoadThroughEdge(direction: number): boolean {
-    return this.roads[direction];
-  }
-
-  addRoad(direction: number): void {
-    if (!this.roads[direction]) {
-      this.roads[direction] = true;
-    }
   }
 
   stateHash(): number {

@@ -1,6 +1,14 @@
 import { HexDirection, HexMetrics } from "./HexMetrics";
+import { z } from "zod";
 
 export type Vertex = readonly [number, number, number];
+
+export const HexCoordinatesSchema = z.object({
+  x: z.number(),
+  z: z.number(),
+});
+
+export type HexCoordinatesData = z.infer<typeof HexCoordinatesSchema>;
 
 export class HexCoordinates {
   constructor(private x: number, private z: number) {}

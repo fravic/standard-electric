@@ -1,11 +1,23 @@
 import { immerable } from "immer";
-import { HexCell } from "./HexCell";
+import { z } from "zod";
+
+import { HexCell, HexCellSchema } from "./HexCell";
 import { HexCoordinates } from "./HexCoordinates";
 import { HexGridChunk } from "./HexGridChunk";
 import { HexMetrics } from "./HexMetrics";
 import { getStateInfoAtCoordinates, type MapData } from "./MapData";
 
+export const HexGridSchema = z.object({
+  width: z.number(),
+  height: z.number(),
+  cells: z.array(HexCellSchema),
+});
+
+export type HexGridData = z.infer<typeof HexGridSchema>;
+
 export class HexGrid {
+  [immerable] = true;
+
   width: number;
   height: number;
   chunks: HexGridChunk[];
@@ -24,8 +36,6 @@ export class HexGrid {
   }
 
   constructor(width: number, height: number) {
-    this[immerable] = true;
-
     this.width = width;
     this.height = height;
 
