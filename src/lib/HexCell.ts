@@ -31,7 +31,7 @@ export class HexCell {
   stateInfo: StateInfo | null = null;
 
   constructor(x: number, z: number, stateInfo: StateInfo | null = null) {
-    this.coordinates = HexCoordinates.fromOffsetCoordinates(x, z);
+    this.coordinates = new HexCoordinates(x, z);
     this.stateInfo = stateInfo;
 
     if (!stateInfo) {
@@ -71,10 +71,10 @@ export class HexCell {
 
   centerPoint(): Vertex {
     const x =
-      (this.coordinates.X + this.coordinates.Z * 0.5) *
+      (this.coordinates.Q + this.coordinates.R * 0.5) *
       (HexMetrics.innerRadius * 2);
     const y = this.elevation;
-    const z = this.coordinates.Z * (HexMetrics.outerRadius * 1.5);
+    const z = this.coordinates.R * (HexMetrics.outerRadius * 1.5);
     return [x, y, z];
   }
 

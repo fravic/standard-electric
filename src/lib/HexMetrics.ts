@@ -8,7 +8,8 @@ export class HexMetrics {
   static chunkSizeX: number = 5;
   static chunkSizeZ: number = 5;
 
-  // Corners for pointy-top hexagon
+  // Corners for pointy-top hexagon. Note these are in counter-clockwise order
+  // for Three.JS rendering.
   static readonly corners = [
     [0, 0, HexMetrics.outerRadius],
     [HexMetrics.innerRadius, 0, 0.5 * HexMetrics.outerRadius],
@@ -36,11 +37,12 @@ export class HexMetrics {
   }
 }
 
+// These match the indices of HexMetrics.corners
 export enum HexDirection {
-  NE,
-  E,
-  SE,
-  SW,
-  W,
-  NW,
+  SE = 0,
+  E = 1,
+  NE = 2,
+  NW = 3,
+  W = 4,
+  SW = 5,
 }

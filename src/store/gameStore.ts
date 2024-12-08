@@ -6,6 +6,8 @@ import { z } from "zod";
 
 import { HexGrid, HexGridSchema, type HexGridData } from "../lib/HexGrid";
 import { MapData } from "../lib/MapData";
+import { HexCell } from "../lib/HexCell";
+import { HexCoordinates } from "../lib/HexCoordinates";
 
 interface GameState {
   isDebug: boolean;
@@ -21,20 +23,20 @@ type Setter = (
 // Actions
 
 type Actions = {
-  loadHexGrid: (mapData: MapData) => void;
+  makeNewHexGridFromMapData: (mapData: MapData) => void;
   setIsDebug: (isDebug: boolean) => void;
-  exportHexGridToJSON: () => void;
+  exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
 };
 
-const loadHexGrid = (set: Setter) => (mapData: MapData) => {
+const makeNewHexGridFromMapData = (set: Setter) => (mapData: MapData) => {
   set(
     (state) => {
       state.hexGrid = new HexGrid(100, 60);
       state.hexGrid.constructFromMapData(mapData);
     },
     undefined,
-    "loadHexGrid"
+    "makeNewHexGridFromMapData"
   );
 };
 
@@ -48,22 +50,22 @@ const setIsDebug = (set: Setter) => (isDebug: boolean) => {
   );
 };
 
-const exportHexGridToJSON = (set: Setter) => (): void => {
+const exportHexGridToJSON = (set: Setter) => (): string => {
   const state = useGameStore.getState();
   const exportData: HexGridData = {
     width: state.hexGrid.width,
     height: state.hexGrid.height,
     cells: state.hexGrid.cells.map((cell) => ({
       coordinates: {
-        x: cell.coordinates.X,
-        z: cell.coordinates.Z,
+        x: cell.coordinates.x,
+        z: cell.coordinates.z,
       },
       elevation: cell.elevation,
       waterLevel: cell.waterLevel,
       stateInfo: cell.stateInfo,
     })),
   };
-  console.log(JSON.stringify(exportData, null, 2));
+  return JSON.stringify(exportData, null, 2);
 };
 
 const importHexGridFromJSON = (set: Setter) => (jsonString: string) => {
@@ -75,16 +77,18 @@ const importHexGridFromJSON = (set: Setter) => (jsonString: string) => {
       (state) => {
         state.hexGrid = new HexGrid(validatedData.width, validatedData.height);
         validatedData.cells.forEach((cellData) => {
-          const cell = state.hexGrid.cells.find(
-            (c) =>
-              c.coordinates.X === cellData.coordinates.x &&
-              c.coordinates.Z === cellData.coordinates.z
+          const cell = new HexCell(
+            cellData.coordinates.x,
+            cellData.coordinates.z
           );
-          if (cell) {
-            cell.elevation = cellData.elevation;
-            cell.waterLevel = cellData.waterLevel;
-            cell.stateInfo = cellData.stateInfo;
-          }
+          cell.elevation = cellData.elevation;
+          cell.waterLevel = cellData.waterLevel;
+          cell.stateInfo = cellData.stateInfo;
+          state.hexGrid.addCell(
+            cell,
+            cellData.coordinates.x,
+            cellData.coordinates.z
+          );
         });
       },
       undefined,
@@ -104,7 +108,7 @@ export const useGameStore = create<GameState & Actions>()(
       isDebug: false,
       hexGrid: new HexGrid(10, 10),
 
-      loadHexGrid: loadHexGrid(set),
+      makeNewHexGridFromMapData: makeNewHexGridFromMapData(set),
       setIsDebug: setIsDebug(set),
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),

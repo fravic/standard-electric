@@ -10,53 +10,66 @@ export const HexCoordinatesSchema = z.object({
 
 export type HexCoordinatesData = z.infer<typeof HexCoordinatesSchema>;
 
+/**
+ * There are many ways to represent a hex coordinate. This class takes in and
+ * stores odd-r offset coordinates (x, z) and enables conversion to cube
+ * coordinates (q, r, s).
+ *
+ * A good reference: https://www.redblobgames.com/grids/hexagons/
+ */
 export class HexCoordinates {
-  constructor(private x: number, private z: number) {}
+  x: number;
+  z: number;
 
-  get X(): number {
-    return this.x;
+  constructor(x: number, z: number) {
+    this.x = x;
+    this.z = z;
   }
-  get Z(): number {
+
+  get Q(): number {
+    return this.x - (this.z - (this.z & 1)) / 2;
+  }
+  get R(): number {
     return this.z;
   }
-  get Y(): number {
-    // X + Y + Z = 0, so we can just infer Y
-    return -this.x - this.z;
+  get S(): number {
+    // Q + R + S = 0, so we can just infer S
+    return -this.Q - this.R;
   }
 
-  static fromOffsetCoordinates(x: number, z: number): HexCoordinates {
-    return new HexCoordinates(x - Math.floor(z / 2), z);
+  static fromCubeCoordinates(q: number, r: number, s: number): HexCoordinates {
+    const x = q + (r - (r & 1)) / 2;
+    const z = r;
+    return new HexCoordinates(x, z);
   }
 
-  static fromPosition(position: [number, number, number]): HexCoordinates {
-    let x = position[0] / (HexMetrics.innerRadius * 2);
-    let z = position[2] / (HexMetrics.outerRadius * 1.5);
+  static fromWorldPoint(position: [number, number, number]): HexCoordinates {
+    // Convert from world point (ignoring y elevation) to hex cube coordinates
+    let q = position[0] / (HexMetrics.innerRadius * 2);
+    let r = position[2] / (HexMetrics.outerRadius * 1.5);
 
-    let offset = Math.floor(z / 2);
-    x -= offset;
+    // Account for the odd-r offset
+    const offset = position[2] / (HexMetrics.outerRadius * 3);
+    q -= offset;
 
-    let iX = Math.round(x);
-    let iZ = Math.round(z);
-    let iY = Math.round(-x - z);
+    let iQ = Math.round(q);
+    let iR = Math.round(r);
+    let iS = Math.round(-q - r);
 
-    if (iX + iY + iZ !== 0) {
+    if (iQ + iR + iS !== 0) {
       // Fix rounding errors
-      let dX = Math.abs(x - iX);
-      let dZ = Math.abs(z - iZ);
-      let dY = Math.abs(-x - z - iY);
+      let dQ = Math.abs(q - iQ);
+      let dR = Math.abs(r - iR);
+      let dS = Math.abs(-q - r - iS);
 
-      if (dX > dZ && dX > dY) {
-        iX = -iY - iZ;
-      } else if (dZ > dY) {
-        iZ = -iX - iY;
+      if (dQ > dR && dQ > dS) {
+        iQ = -iR - iS;
+      } else if (dR > dS) {
+        iR = -iQ - iS;
       }
     }
 
-    return new HexCoordinates(iX, iZ);
-  }
-
-  static fromHexCoordinates(coordinates: HexCoordinates): HexCoordinates {
-    return new HexCoordinates(coordinates.x, coordinates.z);
+    return HexCoordinates.fromCubeCoordinates(iQ, iR, iS);
   }
 
   getNeighbor(direction: HexDirection): HexCoordinates {
@@ -66,24 +79,49 @@ export class HexCoordinates {
     direction = (direction % 6) as HexDirection;
     switch (direction) {
       case HexDirection.NE:
-        return new HexCoordinates(this.x, this.z + 1);
+        return HexCoordinates.fromCubeCoordinates(
+          this.Q + 1,
+          this.R - 1,
+          this.S
+        );
       case HexDirection.E:
-        return new HexCoordinates(this.x + 1, this.z);
+        return HexCoordinates.fromCubeCoordinates(
+          this.Q + 1,
+          this.R,
+          this.S - 1
+        );
       case HexDirection.SE:
-        return new HexCoordinates(this.x + 1, this.z - 1);
+        return HexCoordinates.fromCubeCoordinates(
+          this.Q,
+          this.R + 1,
+          this.S - 1
+        );
       case HexDirection.SW:
-        return new HexCoordinates(this.x, this.z - 1);
+        return HexCoordinates.fromCubeCoordinates(
+          this.Q - 1,
+          this.R + 1,
+          this.S
+        );
       case HexDirection.W:
-        return new HexCoordinates(this.x - 1, this.z);
+        return HexCoordinates.fromCubeCoordinates(
+          this.Q - 1,
+          this.R,
+          this.S + 1
+        );
       case HexDirection.NW:
-        return new HexCoordinates(this.x - 1, this.z + 1);
+        return HexCoordinates.fromCubeCoordinates(
+          this.Q,
+          this.R - 1,
+          this.S + 1
+        );
     }
-    throw new Error(
-      "Invalid HexDirection passed to HexCoordinates.getNeighbor: " + direction
-    );
   }
 
   toString(): string {
-    return `(${this.x}, ${this.Y}, ${this.z})`;
+    return `${this.x},${this.z}`;
+  }
+
+  toStringCubic(): string {
+    return `${this.Q},${this.R},${this.S}`;
   }
 }

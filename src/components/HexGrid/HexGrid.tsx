@@ -7,14 +7,13 @@ interface HexGridProps {}
 
 export function HexGrid({}: HexGridProps) {
   const hexGrid = useGameStore((state) => state.hexGrid);
+  const isDebug = useGameStore((state) => state.isDebug);
 
   const handleCellClick = (coordinates: HexCoordinates) => {
     const cell = hexGrid.cellsByHexCoordinates[coordinates.toString()];
     console.log(
       "Clicked cell at coordinates",
-      coordinates.X,
-      coordinates.Y,
-      coordinates.Z,
+      coordinates.toStringCubic(),
       "for state",
       cell?.stateInfo?.name
     );
@@ -29,10 +28,9 @@ export function HexGrid({}: HexGridProps) {
           <HexGridChunk
             key={`chunk-${chunkX}-${chunkZ}`}
             chunk={chunk.cells}
-            chunkX={chunkX}
-            chunkZ={chunkZ}
             grid={hexGrid}
             onCellClick={handleCellClick}
+            debug={isDebug}
           />
         );
       })}

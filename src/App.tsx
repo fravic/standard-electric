@@ -9,25 +9,46 @@ import { loadUnitedStatesMapData } from "./lib/unitedStatesGeoUtils";
 function App(): JSX.Element {
   const isDebug = useGameStore((state) => state.isDebug);
   const setIsDebug = useGameStore((state) => state.setIsDebug);
-  const loadHexGrid = useGameStore((state) => state.loadHexGrid);
+  const makeNewHexGridFromMapData = useGameStore(
+    (state) => state.makeNewHexGridFromMapData
+  );
+  const importHexGridFromJSON = useGameStore(
+    (state) => state.importHexGridFromJSON
+  );
   const exportHexGridToJSON = useGameStore(
     (state) => state.exportHexGridToJSON
   );
   const mapDataLoaded = useRef(false);
 
   useEffect(() => {
-    const loadMapData = async () => {
-      const mapData = await loadUnitedStatesMapData();
-      if (mapData) {
-        loadHexGrid(mapData);
+    const params = new URLSearchParams(window.location.search);
+
+    const loadInitialData = async () => {
+      if (params.get("map") === "us") {
+        const mapData = await loadUnitedStatesMapData();
+        if (mapData) {
+          makeNewHexGridFromMapData(mapData);
+        }
+      } else {
+        try {
+          const response = await fetch("/hexgrid.json");
+          if (response.ok) {
+            const jsonData = await response.text();
+            importHexGridFromJSON(jsonData);
+          } else {
+            console.error("Failed to load hexgrid.json");
+          }
+        } catch (error) {
+          console.error("Failed to load hex grid:", error);
+        }
       }
-    };
-    if (!mapDataLoaded.current) {
-      loadMapData();
       mapDataLoaded.current = true;
+    };
+
+    if (!mapDataLoaded.current) {
+      loadInitialData();
     }
 
-    const params = new URLSearchParams(window.location.search);
     setIsDebug(params.get("debug") === "true");
   }, []);
 
@@ -36,13 +57,14 @@ function App(): JSX.Element {
       // Ctrl/Cmd + E to export hex map to console
       if (isDebug && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
         e.preventDefault();
-        exportHexGridToJSON();
+        const jsonData = exportHexGridToJSON();
+        console.log(jsonData);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [exportHexGridToJSON]);
+  }, [exportHexGridToJSON, isDebug]);
 
   return (
     <div className="game-container">

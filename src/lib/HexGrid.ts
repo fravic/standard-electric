@@ -46,17 +46,32 @@ export class HexGrid {
     this.chunks = [];
     this.cells = [];
     this.cellsByHexCoordinates = {};
-  }
 
-  constructFromMapData(mapData: MapData) {
-    // First create the chunks
     for (let z = 0; z < this._chunkCountZ; z++) {
       for (let x = 0; x < this._chunkCountX; x++) {
         this.chunks.push(new HexGridChunk());
       }
     }
+  }
 
-    // Then create cells and assign them to chunks
+  addCell(cell: HexCell, x: number, z: number) {
+    this.cells.push(cell);
+    this.cellsByHexCoordinates[cell.coordinates.toString()] = cell;
+
+    // Add to appropriate chunk
+    const chunkX = Math.floor(x / HexMetrics.chunkSizeX);
+    const chunkZ = Math.floor(z / HexMetrics.chunkSizeZ);
+    const chunk = this.chunks[chunkX + chunkZ * this._chunkCountX];
+    if (!chunk) {
+      throw new Error(`Chunk not found for cell ${x}, ${z}`);
+    }
+
+    const localX = x - chunkX * HexMetrics.chunkSizeX;
+    const localZ = z - chunkZ * HexMetrics.chunkSizeZ;
+    chunk.addCell(localX + localZ * HexMetrics.chunkSizeX, cell);
+  }
+
+  constructFromMapData(mapData: MapData) {
     for (let x = 0; x < this.width; x++) {
       for (let z = 0; z < this.height; z++) {
         const stateInfo = getStateInfoAtCoordinates(
@@ -65,19 +80,7 @@ export class HexGrid {
           (z / this.height) * 100
         );
         const cell = new HexCell(x, z, stateInfo);
-
-        // Add to main cell arrays
-        this.cells.push(cell);
-        this.cellsByHexCoordinates[cell.coordinates.toString()] = cell;
-
-        // Add to appropriate chunk
-        const chunkX = Math.floor(x / HexMetrics.chunkSizeX);
-        const chunkZ = Math.floor(z / HexMetrics.chunkSizeZ);
-        const chunk = this.chunks[chunkX + chunkZ * this._chunkCountX];
-
-        const localX = x - chunkX * HexMetrics.chunkSizeX;
-        const localZ = z - chunkZ * HexMetrics.chunkSizeZ;
-        chunk.addCell(localX + localZ * HexMetrics.chunkSizeX, cell);
+        this.addCell(cell, x, z);
       }
     }
   }
