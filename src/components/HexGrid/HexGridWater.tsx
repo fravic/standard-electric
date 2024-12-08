@@ -22,7 +22,7 @@ export function HexGridWater({ grid, chunk }: HexGridWaterProps) {
     chunk.forEach((cell, i) => {
       if (cell.isUnderwater) {
         const center = cell.waterCenterPoint();
-        for (let d = 0; d <= 6; d++) {
+        for (let d = 0; d < 6; d++) {
           hexMesh.addTriangleWithUVs(
             center,
             HexMetrics.getFirstCorner(center, d),
