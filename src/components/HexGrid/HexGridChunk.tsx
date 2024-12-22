@@ -3,6 +3,7 @@ import { HexCoordinates } from "../../lib/HexCoordinates";
 import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
 import { HexGrid } from "../../lib/HexGrid";
+import { PowerLines } from "../PowerSystem/PowerLines";
 
 interface HexGridChunkProps {
   chunk: HexCell[];
@@ -21,6 +22,7 @@ export function HexGridChunk({
     <group>
       <HexGridTerrain chunk={chunk} onClick={onCellClick} debug={debug} />
       <HexGridWater chunk={chunk} grid={grid} />
+      <PowerLines chunkCells={chunk.map((cell) => cell.coordinates)} />
     </group>
   );
 }

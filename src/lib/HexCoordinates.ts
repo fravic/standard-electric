@@ -72,6 +72,12 @@ export class HexCoordinates {
     return HexCoordinates.fromCubeCoordinates(iQ, iR, iS);
   }
 
+  toWorldPoint(): Vertex {
+    const x = (this.Q + this.R * 0.5) * (HexMetrics.innerRadius * 2);
+    const z = this.R * (HexMetrics.outerRadius * 1.5);
+    return [x, 0, z];
+  }
+
   getNeighbor(direction: HexDirection): HexCoordinates {
     if (direction < 0) {
       direction = direction + 6;
@@ -123,5 +129,9 @@ export class HexCoordinates {
 
   toStringCubic(): string {
     return `${this.Q},${this.R},${this.S}`;
+  }
+
+  equals(other: HexCoordinates): boolean {
+    return this.x === other.x && this.z === other.z;
   }
 }

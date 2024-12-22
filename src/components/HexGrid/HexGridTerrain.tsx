@@ -3,10 +3,11 @@ import { ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { Text } from "@react-three/drei";
 
-import { HexMetrics } from "../../lib/HexMetrics";
-import { HexCoordinates } from "../../lib/HexCoordinates";
+import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
+import { HexCoordinates, Vertex } from "../../lib/HexCoordinates";
 import { HexCell } from "../../lib/HexCell";
 import { HexMesh } from "../../lib/HexMesh";
+import { useGameStore } from "../../store/gameStore";
 
 interface HexGridTerrainProps {
   chunk: HexCell[];
@@ -22,6 +23,7 @@ export function HexGridTerrain({
   const [clickPoint, setClickPoint] = React.useState<THREE.Vector3 | null>(
     null
   );
+  const addPowerPole = useGameStore((state) => state.addPowerPole);
 
   const { terrainGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
@@ -58,11 +60,45 @@ export function HexGridTerrain({
   const handleClick = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
       event.stopPropagation();
-      setClickPoint(event.point.clone());
-      const coords = HexCoordinates.fromWorldPoint(event.point.toArray());
-      onClick(coords);
+      const point = event.point.clone();
+      setClickPoint(point);
+
+      if (event.shiftKey) {
+        // When shift is held, place a power pole at the nearest vertex
+        const cell = HexCoordinates.fromWorldPoint(point.toArray());
+        const cellCenter = chunk
+          .find((c) => c.coordinates.toString() === cell.toString())
+          ?.centerPoint();
+
+        if (cellCenter) {
+          // Find the nearest vertex
+          let nearestDirection: HexDirection | null = null;
+          let minDistance = Infinity;
+
+          for (let d = 0; d < 6; d++) {
+            const vertex = HexMetrics.getFirstCorner(cellCenter, d);
+            const dx = vertex[0] - point.x;
+            const dy = vertex[1] - point.y;
+            const dz = vertex[2] - point.z;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              nearestDirection = d as HexDirection;
+            }
+          }
+
+          if (nearestDirection !== null) {
+            addPowerPole(cell, nearestDirection);
+          }
+        }
+      } else {
+        // Normal click behavior
+        const coords = HexCoordinates.fromWorldPoint(point.toArray());
+        onClick(coords);
+      }
     },
-    [onClick, debug]
+    [onClick, debug, chunk, addPowerPole]
   );
 
   return (
@@ -94,7 +130,7 @@ export function HexGridTerrain({
             anchorY="middle"
             fillOpacity={0.3}
           >
-            {`${cell.coordinates.toStringCubic()}`}
+            {`${cell.coordinates.toString()}`}
           </Text>
         ))}
     </group>

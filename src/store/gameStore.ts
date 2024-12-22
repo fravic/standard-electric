@@ -3,15 +3,20 @@ import { immer } from "zustand/middleware/immer";
 import { devtools } from "zustand/middleware";
 import { WritableDraft } from "immer";
 import { z } from "zod";
+import { nanoid } from "nanoid";
 
 import { HexGrid, HexGridSchema, type HexGridData } from "../lib/HexGrid";
 import { MapData } from "../lib/MapData";
 import { HexCell } from "../lib/HexCell";
 import { HexCoordinates } from "../lib/HexCoordinates";
+import { PowerPole } from "../lib/PowerSystem";
+import { HexDirection } from "../lib/HexMetrics";
+import { CornerCoordinates } from "../lib/CornerCoordinates";
 
 interface GameState {
   isDebug: boolean;
   hexGrid: HexGrid;
+  powerPoles: PowerPole[];
 }
 
 type Setter = (
@@ -27,6 +32,7 @@ type Actions = {
   setIsDebug: (isDebug: boolean) => void;
   exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
+  addPowerPole: (coordinates: HexCoordinates, direction: HexDirection) => void;
 };
 
 const makeNewHexGridFromMapData = (set: Setter) => (mapData: MapData) => {
@@ -102,16 +108,42 @@ const importHexGridFromJSON = (set: Setter) => (jsonString: string) => {
   }
 };
 
+const addPowerPole =
+  (set: Setter) => (coordinates: HexCoordinates, direction: HexDirection) => {
+    set(
+      (state) => {
+        const cornerCoords = CornerCoordinates.fromHexAndDirection(
+          coordinates,
+          direction
+        );
+        const existingPole = state.powerPoles.find((p) =>
+          p.cornerCoordinates.equals(cornerCoords)
+        );
+
+        if (!existingPole) {
+          const id = nanoid(6);
+          const newPole = new PowerPole(id, cornerCoords);
+          newPole.createConnections(state.powerPoles);
+          state.powerPoles.push(newPole);
+        }
+      },
+      undefined,
+      "addPowerPole"
+    );
+  };
+
 export const useGameStore = create<GameState & Actions>()(
   devtools(
     immer((set) => ({
       isDebug: false,
       hexGrid: new HexGrid(10, 10),
+      powerPoles: [],
 
       makeNewHexGridFromMapData: makeNewHexGridFromMapData(set),
       setIsDebug: setIsDebug(set),
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),
+      addPowerPole: addPowerPole(set),
     }))
   )
 );

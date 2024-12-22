@@ -70,12 +70,8 @@ export class HexCell {
   }
 
   centerPoint(): Vertex {
-    const x =
-      (this.coordinates.Q + this.coordinates.R * 0.5) *
-      (HexMetrics.innerRadius * 2);
-    const y = this.elevation;
-    const z = this.coordinates.R * (HexMetrics.outerRadius * 1.5);
-    return [x, y, z];
+    const vertex = this.coordinates.toWorldPoint();
+    return [vertex[0], this.elevation, vertex[2]];
   }
 
   waterCenterPoint(): Vertex {
