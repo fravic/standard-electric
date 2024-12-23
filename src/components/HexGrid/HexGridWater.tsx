@@ -16,7 +16,10 @@ interface HexGridWaterProps {
   chunk: HexCell[];
 }
 
-export function HexGridWater({ grid, chunk }: HexGridWaterProps) {
+export const HexGridWater = React.memo(function HexGridWater({
+  grid,
+  chunk,
+}: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
     chunk.forEach((cell, i) => {
@@ -85,7 +88,7 @@ export function HexGridWater({ grid, chunk }: HexGridWaterProps) {
       />
     </mesh>
   );
-}
+});
 
 // Return whether the corner between dPrev and dNext should be UV'd as a
 // shoreline.

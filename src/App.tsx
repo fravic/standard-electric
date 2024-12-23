@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import Experience from "./components/Experience";
 import { OrbitControls } from "@react-three/drei";
 import { FPSCounter } from "./components/FPSCounter";
+import { GameUI } from "./components/UI/GameUI";
 import { useGameStore } from "./store/gameStore";
 import { loadUnitedStatesMapData } from "./lib/unitedStatesGeoUtils";
 
@@ -79,6 +80,7 @@ function App(): JSX.Element {
         <Experience />
       </Canvas>
       {isDebug && <FPSCounter />}
+      <GameUI />
     </div>
   );
 }

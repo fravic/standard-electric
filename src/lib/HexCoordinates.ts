@@ -1,5 +1,8 @@
 import { HexDirection, HexMetrics } from "./HexMetrics";
+import { HexCell } from "./HexCell";
+import * as THREE from "three";
 import { z } from "zod";
+import { CornerCoordinates } from "./CornerCoordinates";
 
 export type Vertex = readonly [number, number, number];
 
@@ -133,5 +136,38 @@ export class HexCoordinates {
 
   equals(other: HexCoordinates): boolean {
     return this.x === other.x && this.z === other.z;
+  }
+
+  static getNearestCornerInChunk(
+    point: THREE.Vector3,
+    chunk: HexCell[]
+  ): CornerCoordinates | null {
+    const cell = HexCoordinates.fromWorldPoint([point.x, point.y, point.z]);
+    const cellCenter = chunk
+      .find((c) => c.coordinates.toString() === cell.toString())
+      ?.centerPoint();
+
+    if (cellCenter) {
+      let nearestDirection: HexDirection | null = null;
+      let minDistance = Infinity;
+
+      for (let d = 0; d < 6; d++) {
+        const vertex = HexMetrics.getFirstCorner(cellCenter, d);
+        const dx = vertex[0] - point.x;
+        const dy = vertex[1] - point.y;
+        const dz = vertex[2] - point.z;
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestDirection = d as HexDirection;
+        }
+      }
+
+      if (nearestDirection !== null) {
+        return CornerCoordinates.fromHexAndDirection(cell, nearestDirection);
+      }
+    }
+    return null;
   }
 }

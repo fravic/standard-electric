@@ -22,10 +22,16 @@ export class PowerPole {
   id: string;
   cornerCoordinates: CornerCoordinates;
   connectedToIds: string[] = [];
+  isGhost: boolean;
 
-  constructor(id: string, cornerCoordinates: CornerCoordinates) {
+  constructor(
+    id: string,
+    cornerCoordinates: CornerCoordinates,
+    isGhost: boolean = false
+  ) {
     this.id = id;
     this.cornerCoordinates = cornerCoordinates;
+    this.isGhost = isGhost;
   }
 
   static fromHexAndDirection(
@@ -51,7 +57,9 @@ export class PowerPole {
 
       if (this.cornerCoordinates.adjacentTo(otherPole.cornerCoordinates)) {
         this.connectedToIds.push(otherPole.id);
-        otherPole.connectedToIds.push(this.id);
+        if (!this.isGhost) {
+          otherPole.connectedToIds.push(this.id);
+        }
       }
     }
   }
