@@ -10,14 +10,14 @@ import { HexMesh } from "../../lib/HexMesh";
 import { HexMetrics } from "../../lib/HexMetrics";
 
 interface HexGridTerrainProps {
-  chunk: HexCell[];
+  cells: HexCell[];
   onClick: (event: ThreeEvent<MouseEvent>) => void;
   onHover: (event: ThreeEvent<PointerEvent>) => void;
   debug?: boolean;
 }
 
 export const HexGridTerrain = React.memo(function HexGridTerrain({
-  chunk,
+  cells,
   onClick,
   onHover,
   debug = false,
@@ -41,7 +41,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
 
   const { terrainGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
-    chunk.forEach((cell, i) => {
+    cells.forEach((cell) => {
       const center = cell.centerPoint();
       const color = cell.color();
       for (let d = 0; d < 6; d++) {
@@ -69,44 +69,35 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     terrainGeometry.computeVertexNormals();
 
     return { terrainGeometry };
-  }, [chunk]);
+  }, [cells]);
 
   return (
-    <group>
-      <mesh
-        geometry={terrainGeometry}
-        onClick={onClick}
-        onPointerMove={debouncedOnHover}
-      >
-        <meshStandardMaterial vertexColors />
-      </mesh>
-
-      {debug && clickPoint && (
-        <mesh position={clickPoint}>
-          <sphereGeometry args={[0.1]} />
-          <meshBasicMaterial color="red" />
-        </mesh>
-      )}
-
+    <mesh
+      geometry={terrainGeometry}
+      onClick={onClick}
+      onPointerMove={debouncedOnHover}
+    >
+      <meshStandardMaterial
+        vertexColors
+        side={THREE.DoubleSide}
+        metalness={0.0}
+        roughness={0.8}
+      />
       {debug &&
-        chunk.map((cell) => (
-          <Text
-            key={cell.coordinates.toString()}
-            position={[
-              cell.centerPoint()[0],
-              cell.centerPoint()[1] + 0.3,
-              cell.centerPoint()[2],
-            ]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            fontSize={0.3}
-            color="black"
-            anchorX="center"
-            anchorY="middle"
-            fillOpacity={0.3}
-          >
-            {`${cell.coordinates.toString()}`}
-          </Text>
-        ))}
-    </group>
+        cells.map((cell) => {
+          const [x, y, z] = cell.centerPoint();
+          return (
+            <Text
+              key={cell.coordinates.toString()}
+              position={[x, y + 0.1, z]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              fontSize={0.2}
+              color="black"
+            >
+              {cell.coordinates.toString()}
+            </Text>
+          );
+        })}
+    </mesh>
   );
 });

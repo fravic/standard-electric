@@ -14,9 +14,10 @@ import { PowerPole } from "../PowerSystem/PowerPole";
 import { CornerCoordinates } from "../../lib/CornerCoordinates";
 import { PLAYER_ID } from "../../store/constants";
 import { useStoreWithEqualityFn } from "zustand/traditional";
+import { HexGridChunk as HexGridChunkType } from "../../lib/HexGridChunk";
 
 interface HexGridChunkProps {
-  chunk: HexCell[];
+  chunk: HexGridChunkType;
   grid: HexGrid;
   onCellClick: (coordinates: HexCoordinates) => void;
   debug?: boolean;
@@ -41,6 +42,11 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const isBuildMode = useGameStore(
     (state) => state.players[PLAYER_ID].isBuildMode
   );
+
+  const validCoordinates = useMemo(() => {
+    return chunk.coordinates.filter((c): c is HexCoordinates => c !== null);
+  }, [chunk.coordinates]);
+
   const hoverCorner = useStoreWithEqualityFn(
     useGameStore,
     (state) => {
@@ -52,7 +58,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           hoverLocation.worldPoint[1],
           hoverLocation.worldPoint[2]
         ),
-        chunk
+        validCoordinates
       );
     },
     (a, b) => (a && b ? a.equals(b) : a === b)
@@ -73,7 +79,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       const point = event.point.clone();
       const nearestCorner = HexCoordinates.getNearestCornerInChunk(
         point,
-        chunk
+        validCoordinates
       );
       if (nearestCorner) {
         if (isBuildMode) {
@@ -82,19 +88,25 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         onCellClick(nearestCorner.hex);
       }
     },
-    [addPowerPole, chunk, isBuildMode]
+    [addPowerPole, validCoordinates, isBuildMode, onCellClick]
   );
+
+  const cells = useMemo(() => {
+    return validCoordinates
+      .map((coordinates: HexCoordinates) => grid.getCell(coordinates))
+      .filter((cell): cell is HexCell => cell !== null);
+  }, [grid, validCoordinates]);
 
   return (
     <group>
       <HexGridTerrain
-        chunk={chunk}
+        cells={cells}
         onClick={handleClick}
         onHover={handleHover}
         debug={debug}
       />
-      <HexGridWater chunk={chunk} grid={grid} />
-      <PowerLines chunkCells={chunk.map((cell) => cell.coordinates)} />
+      <HexGridWater cells={cells} grid={grid} />
+      <PowerLines chunkCells={cells.map((cell: HexCell) => cell.coordinates)} />
       {isBuildMode && hoverCorner && (
         <GhostPowerPole hoverCorner={hoverCorner} />
       )}

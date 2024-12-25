@@ -3,8 +3,8 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 
-import waterVertexShader from "../../shaders/water.vert";
-import waterFragmentShader from "../../shaders/water.frag";
+import waterVertexShader from "../../shaders/water.vert?raw";
+import waterFragmentShader from "../../shaders/water.frag?raw";
 
 import { HexCell } from "../../lib/HexCell";
 import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
@@ -12,17 +12,17 @@ import { HexMesh } from "../../lib/HexMesh";
 import { HexGrid } from "../../lib/HexGrid";
 
 interface HexGridWaterProps {
+  cells: HexCell[];
   grid: HexGrid;
-  chunk: HexCell[];
 }
 
 export const HexGridWater = React.memo(function HexGridWater({
+  cells,
   grid,
-  chunk,
 }: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
-    chunk.forEach((cell, i) => {
+    cells.forEach((cell) => {
       if (cell.isUnderwater) {
         const center = cell.waterCenterPoint();
         for (let d = 0; d < 6; d++) {
@@ -40,6 +40,7 @@ export const HexGridWater = React.memo(function HexGridWater({
         }
       }
     });
+
     const waterGeometry = new THREE.BufferGeometry();
     waterGeometry.setAttribute(
       "position",
@@ -53,7 +54,7 @@ export const HexGridWater = React.memo(function HexGridWater({
     waterGeometry.computeVertexNormals();
 
     return { waterGeometry };
-  }, [chunk]);
+  }, [cells, grid]);
 
   const waterMaterialRef = useRef<THREE.ShaderMaterial>(null);
   const [waveNoiseTexture, waveDistortionTexture] = useTexture([

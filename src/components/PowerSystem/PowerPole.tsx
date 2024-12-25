@@ -29,7 +29,7 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
   return (
     <group>
       <group position={position}>
-        <primitive object={clonedPole} castShadow receiveShadow />
+        <primitive object={clonedPole} />
       </group>
 
       {/* Power lines with curves */}

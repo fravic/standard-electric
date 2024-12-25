@@ -7,10 +7,9 @@ import { nanoid } from "nanoid";
 
 import { HexGrid, HexGridSchema, type HexGridData } from "../lib/HexGrid";
 import { MapData } from "../lib/MapData";
-import { HexCell } from "../lib/HexCell";
+import { HexCell, TerrainType } from "../lib/HexCell";
 import { HexCoordinates } from "../lib/HexCoordinates";
 import { PowerPole } from "../lib/PowerSystem";
-import { HexDirection } from "../lib/HexMetrics";
 import { CornerCoordinates } from "../lib/CornerCoordinates";
 
 interface Player {
@@ -19,6 +18,7 @@ interface Player {
   hoverLocation: {
     worldPoint: [number, number, number];
   } | null;
+  selectedHexCoordinates: HexCoordinates | null;
 }
 
 interface GameState {
@@ -50,6 +50,11 @@ type Actions = {
   setHoverLocation: (
     playerId: string,
     worldPoint: [number, number, number] | null
+  ) => void;
+  selectHex: (coordinates: HexCoordinates | null) => void;
+  updateHexTerrain: (
+    coordinates: HexCoordinates,
+    terrainType: TerrainType
   ) => void;
 };
 
@@ -214,6 +219,34 @@ const addPowerPole = (set: Setter) => (corner: CornerCoordinates) => {
   return success;
 };
 
+const selectHex = (set: Setter) => (coordinates: HexCoordinates | null) => {
+  set(
+    (state) => {
+      // For now, just use the first player
+      const playerId = Object.keys(state.players)[0];
+      if (state.players[playerId]) {
+        state.players[playerId].selectedHexCoordinates = coordinates;
+      }
+    },
+    undefined,
+    "selectHex"
+  );
+};
+
+const updateHexTerrain =
+  (set: Setter) => (coordinates: HexCoordinates, terrainType: TerrainType) => {
+    set(
+      (state) => {
+        const cell = state.hexGrid.getCell(coordinates);
+        if (cell) {
+          cell.terrainType = terrainType;
+        }
+      },
+      undefined,
+      "updateHexTerrain"
+    );
+  };
+
 export const useGameStore = create<GameState & Actions>()(
   devtools(
     immer((set) => ({
@@ -225,6 +258,7 @@ export const useGameStore = create<GameState & Actions>()(
           money: 10,
           isBuildMode: false,
           hoverLocation: null,
+          selectedHexCoordinates: null,
         },
       },
 
@@ -237,6 +271,8 @@ export const useGameStore = create<GameState & Actions>()(
       spendMoney: spendMoney(set),
       setBuildMode: setBuildMode(set),
       setHoverLocation: setHoverLocation(set),
+      selectHex: selectHex(set),
+      updateHexTerrain: updateHexTerrain(set),
     }))
   )
 );

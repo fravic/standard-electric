@@ -8,15 +8,10 @@ interface HexGridProps {}
 export function HexGrid({}: HexGridProps) {
   const hexGrid = useGameStore((state) => state.hexGrid);
   const isDebug = useGameStore((state) => state.isDebug);
+  const selectHex = useGameStore((state) => state.selectHex);
 
   const handleCellClick = (coordinates: HexCoordinates) => {
-    const cell = hexGrid.cellsByHexCoordinates[coordinates.toString()];
-    console.log(
-      "Clicked cell at coordinates",
-      coordinates.toStringCubic(),
-      "for state",
-      cell?.stateInfo?.name
-    );
+    selectHex(coordinates);
   };
 
   return (
@@ -27,7 +22,7 @@ export function HexGrid({}: HexGridProps) {
         return (
           <HexGridChunk
             key={`chunk-${chunkX}-${chunkZ}`}
-            chunk={chunk.cells}
+            chunk={chunk}
             grid={hexGrid}
             onCellClick={handleCellClick}
             debug={isDebug}

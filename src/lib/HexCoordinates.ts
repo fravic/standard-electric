@@ -140,17 +140,18 @@ export class HexCoordinates {
 
   static getNearestCornerInChunk(
     point: THREE.Vector3,
-    chunk: HexCell[]
+    chunkCoordinates: HexCoordinates[]
   ): CornerCoordinates | null {
     const cell = HexCoordinates.fromWorldPoint([point.x, point.y, point.z]);
-    const cellCenter = chunk
-      .find((c) => c.coordinates.toString() === cell.toString())
-      ?.centerPoint();
+    const matchingCoordinates = chunkCoordinates.find(
+      (c) => c.toString() === cell.toString()
+    );
 
-    if (cellCenter) {
+    if (matchingCoordinates) {
       let nearestDirection: HexDirection | null = null;
       let minDistance = Infinity;
 
+      const cellCenter = matchingCoordinates.toWorldPoint();
       for (let d = 0; d < 6; d++) {
         const vertex = HexMetrics.getFirstCorner(cellCenter, d);
         const dx = vertex[0] - point.x;

@@ -1,5 +1,6 @@
 import React from "react";
 import { useGameStore } from "../../store/gameStore";
+import { PLAYER_ID } from "../../store/constants";
 
 const styles = {
   container: {
@@ -44,9 +45,6 @@ const styles = {
 };
 
 export function GameUI() {
-  // For now, just use player1
-  const PLAYER_ID = "player1";
-
   const player = useGameStore((state) => state.players[PLAYER_ID]);
   const setBuildMode = useGameStore((state) => state.setBuildMode);
 

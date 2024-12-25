@@ -1,15 +1,23 @@
-import { HexCell } from "./HexCell";
+import { immerable } from "immer";
+import { HexCoordinates } from "./HexCoordinates";
 import { HexMetrics } from "./HexMetrics";
 
 export class HexGridChunk {
-  cells: HexCell[];
+  [immerable] = true;
+
+  coordinates: (HexCoordinates | null)[];
 
   constructor() {
-    this.cells = new Array(HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ);
+    this.coordinates = new Array(
+      HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ
+    ).fill(null);
   }
 
-  addCell(index: number, cell: HexCell): void {
-    this.cells[index] = cell;
-    // In the tutorial this sets parent transforms, but we don't need that for our implementation
+  addCoordinates(index: number, coordinates: HexCoordinates): void {
+    this.coordinates[index] = coordinates;
+  }
+
+  getCoordinates(index: number): HexCoordinates | null {
+    return this.coordinates[index];
   }
 }

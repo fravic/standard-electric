@@ -21,7 +21,6 @@ export class HexGrid {
   width: number;
   height: number;
   chunks: HexGridChunk[];
-  cells: HexCell[];
   cellsByHexCoordinates: Record<string, HexCell>;
 
   private _chunkCountX: number;
@@ -35,6 +34,10 @@ export class HexGrid {
     return this._chunkCountZ;
   }
 
+  get cells(): HexCell[] {
+    return Object.values(this.cellsByHexCoordinates);
+  }
+
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
@@ -44,7 +47,6 @@ export class HexGrid {
     this._chunkCountZ = Math.ceil(height / HexMetrics.chunkSizeZ);
 
     this.chunks = [];
-    this.cells = [];
     this.cellsByHexCoordinates = {};
 
     for (let z = 0; z < this._chunkCountZ; z++) {
@@ -55,7 +57,6 @@ export class HexGrid {
   }
 
   addCell(cell: HexCell, x: number, z: number) {
-    this.cells.push(cell);
     this.cellsByHexCoordinates[cell.coordinates.toString()] = cell;
 
     // Add to appropriate chunk
@@ -68,7 +69,10 @@ export class HexGrid {
 
     const localX = x - chunkX * HexMetrics.chunkSizeX;
     const localZ = z - chunkZ * HexMetrics.chunkSizeZ;
-    chunk.addCell(localX + localZ * HexMetrics.chunkSizeX, cell);
+    chunk.addCoordinates(
+      localX + localZ * HexMetrics.chunkSizeX,
+      cell.coordinates
+    );
   }
 
   constructFromMapData(mapData: MapData) {
@@ -87,6 +91,12 @@ export class HexGrid {
 
   getCell(coordinates: HexCoordinates): HexCell | null {
     return this.cellsByHexCoordinates[coordinates.toString()] || null;
+  }
+
+  getCellFromChunkIndex(chunk: HexGridChunk, index: number): HexCell | null {
+    const coordinates = chunk.getCoordinates(index);
+    if (!coordinates) return null;
+    return this.getCell(coordinates);
   }
 
   getChunk(x: number, z: number): HexGridChunk | null {

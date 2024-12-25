@@ -4,6 +4,7 @@ import Experience from "./components/Experience";
 import { OrbitControls } from "@react-three/drei";
 import { FPSCounter } from "./components/FPSCounter";
 import { GameUI } from "./components/UI/GameUI";
+import { HexDetailsUI } from "./components/HexGrid/HexDetailsUI";
 import { useGameStore } from "./store/gameStore";
 import { loadUnitedStatesMapData } from "./lib/unitedStatesGeoUtils";
 
@@ -81,6 +82,7 @@ function App(): JSX.Element {
       </Canvas>
       {isDebug && <FPSCounter />}
       <GameUI />
+      <HexDetailsUI />
     </div>
   );
 }
