@@ -13,6 +13,15 @@ export enum TerrainType {
   Water = "Water",
 }
 
+export enum Population {
+  Unpopulated = 0,
+  Village = 1,
+  Town = 2,
+  City = 3,
+  Metropolis = 4,
+  Megalopolis = 5,
+}
+
 export const HexCellSchema = z.object({
   coordinates: HexCoordinatesSchema,
   stateInfo: z
@@ -22,6 +31,7 @@ export const HexCellSchema = z.object({
     })
     .nullable(),
   terrainType: z.nativeEnum(TerrainType).optional().nullable(),
+  population: z.nativeEnum(Population).optional().nullable(),
 });
 
 export type HexCellData = z.infer<typeof HexCellSchema>;
@@ -32,6 +42,7 @@ export class HexCell {
   coordinates: HexCoordinates;
   stateInfo: StateInfo | null = null;
   terrainType: TerrainType = TerrainType.Plains;
+  population: Population = Population.Unpopulated;
 
   constructor(x: number, z: number, stateInfo: StateInfo | null = null) {
     this.coordinates = new HexCoordinates(x, z);

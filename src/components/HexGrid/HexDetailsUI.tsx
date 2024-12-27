@@ -1,6 +1,6 @@
 import React from "react";
 import { useGameStore } from "../../store/gameStore";
-import { TerrainType } from "../../lib/HexCell";
+import { TerrainType, Population } from "../../lib/HexCell";
 
 const styles = {
   container: {
@@ -52,6 +52,10 @@ export function HexDetailsUI() {
       <div>
         <span style={styles.label}>Terrain: </span>
         {cell.terrainType || TerrainType.Plains}
+      </div>
+      <div>
+        <span style={styles.label}>Population: </span>
+        {Population[cell.population] || "Unpopulated"}
       </div>
     </div>
   );

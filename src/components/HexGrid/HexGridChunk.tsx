@@ -2,7 +2,7 @@ import * as THREE from "three";
 import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 
-import { HexCell, TerrainType } from "../../lib/HexCell";
+import { HexCell, TerrainType, Population } from "../../lib/HexCell";
 import { HexCoordinates } from "../../lib/HexCoordinates";
 import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
@@ -33,6 +33,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const buildMode = useGameStore((state) => state.players[PLAYER_ID].buildMode);
   const buildables = useGameStore((state) => state.buildables);
   const updateHexTerrain = useGameStore((state) => state.updateHexTerrain);
+  const updateHexPopulation = useGameStore(
+    (state) => state.updateHexPopulation
+  );
   const addBuildable = useGameStore((state) => state.addBuildable);
 
   const validCoordinates = useMemo(() => {
@@ -66,7 +69,11 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           return ghostPole;
         }
       } else if (buildMode.type === "coal_plant") {
-        const coords = HexCoordinates.fromWorldPoint([point.x, point.y, point.z]);
+        const coords = HexCoordinates.fromWorldPoint([
+          point.x,
+          point.y,
+          point.z,
+        ]);
         if (validCoordinates.some((c) => c.equals(coords))) {
           return new CoalPlant("ghost", coords, true);
         }
@@ -128,11 +135,16 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     [addBuildable, validCoordinates, buildMode, onCellClick]
   );
 
-  const handleTerrainUpdate = useCallback(
-    (coordinates: HexCoordinates, terrainType: TerrainType) => {
-      updateHexTerrain(coordinates, terrainType);
+  const handleCellUpdate = useCallback(
+    (coordinates: HexCoordinates, updates: Partial<HexCell>) => {
+      if (updates.terrainType !== undefined) {
+        updateHexTerrain(coordinates, updates.terrainType);
+      }
+      if (updates.population !== undefined) {
+        updateHexPopulation(coordinates, updates.population);
+      }
     },
-    [updateHexTerrain]
+    [updateHexTerrain, updateHexPopulation]
   );
 
   const cells = useMemo(() => {
@@ -164,7 +176,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         cells={cells}
         onClick={handleClick}
         onHover={handleHover}
-        onUpdateTerrain={handleTerrainUpdate}
+        onUpdateCell={handleCellUpdate}
         debug={debug}
       />
       <HexGridWater cells={cells} grid={grid} />

@@ -5,7 +5,7 @@ import { Text } from "@react-three/drei";
 import { debounce } from "lodash";
 
 import { HexCoordinates } from "../../lib/HexCoordinates";
-import { HexCell, TerrainType } from "../../lib/HexCell";
+import { HexCell, TerrainType, Population } from "../../lib/HexCell";
 import { HexMesh } from "../../lib/HexMesh";
 import { HexMetrics } from "../../lib/HexMetrics";
 import { useGameStore } from "../../store/gameStore";
@@ -14,9 +14,9 @@ interface HexGridTerrainProps {
   cells: HexCell[];
   onClick: (event: ThreeEvent<MouseEvent | PointerEvent>) => void;
   onHover: (event: ThreeEvent<PointerEvent>) => void;
-  onUpdateTerrain?: (
+  onUpdateCell?: (
     coordinates: HexCoordinates,
-    terrainType: TerrainType
+    updates: Partial<HexCell>
   ) => void;
   debug?: boolean;
 }
@@ -25,7 +25,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   cells,
   onClick,
   onHover,
-  onUpdateTerrain,
+  onUpdateCell,
   debug = false,
 }: HexGridTerrainProps) {
   const isPaintbrushMode = useGameStore(
@@ -33,6 +33,9 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   );
   const selectedTerrainType = useGameStore(
     (state) => state.mapBuilder.selectedTerrainType
+  );
+  const selectedPopulation = useGameStore(
+    (state) => state.mapBuilder.selectedPopulation
   );
 
   const debouncedOnHover = useMemo(
@@ -48,9 +51,13 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     };
   }, [debouncedOnHover]);
 
-  const paintTerrain = useCallback(
+  const paintCell = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
-      if (isPaintbrushMode && selectedTerrainType && onUpdateTerrain) {
+      if (
+        isPaintbrushMode &&
+        (selectedTerrainType || selectedPopulation !== null) &&
+        onUpdateCell
+      ) {
         // Get intersection point from the event
         const point = event.point;
         const hexCoords = HexCoordinates.fromWorldPoint([
@@ -58,22 +65,40 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
           point.y,
           point.z,
         ]);
-        onUpdateTerrain(hexCoords, selectedTerrainType);
+
+        const updates: Partial<HexCell> = {};
+        if (selectedTerrainType) {
+          updates.terrainType = selectedTerrainType;
+        }
+        if (selectedPopulation !== null) {
+          updates.population = selectedPopulation;
+        }
+
+        onUpdateCell(hexCoords, updates);
         event.stopPropagation();
       }
     },
-    [isPaintbrushMode, selectedTerrainType, onUpdateTerrain]
+    [isPaintbrushMode, selectedTerrainType, selectedPopulation, onUpdateCell]
   );
 
   const handleClick = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
-      if (isPaintbrushMode && selectedTerrainType) {
-        paintTerrain(event);
+      if (
+        isPaintbrushMode &&
+        (selectedTerrainType || selectedPopulation !== null)
+      ) {
+        paintCell(event);
       } else {
         onClick(event);
       }
     },
-    [onClick, paintTerrain, isPaintbrushMode, selectedTerrainType]
+    [
+      onClick,
+      paintCell,
+      isPaintbrushMode,
+      selectedTerrainType,
+      selectedPopulation,
+    ]
   );
 
   const { terrainGeometry } = useMemo(() => {
@@ -131,7 +156,11 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
               fontSize={0.2}
               color="black"
             >
-              {cell.coordinates.toString()}
+              {`${cell.coordinates.toString()}${
+                cell.population !== Population.Unpopulated
+                  ? `\n${Population[cell.population]}`
+                  : ""
+              }`}
             </Text>
           );
         })}

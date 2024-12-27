@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 
 import { HexGrid, HexGridSchema, type HexGridData } from "../lib/HexGrid";
 import { MapData } from "../lib/MapData";
-import { HexCell, TerrainType } from "../lib/HexCell";
+import { HexCell, TerrainType, Population } from "../lib/HexCell";
 import { HexCoordinates } from "../lib/HexCoordinates";
 import { PowerPole } from "../lib/PowerSystem";
 import { CoalPlant } from "../lib/CoalPlant";
@@ -30,6 +30,7 @@ interface Player {
 interface MapBuilder {
   isPaintbrushMode: boolean;
   selectedTerrainType: TerrainType | null;
+  selectedPopulation: Population | null;
 }
 
 interface GameState {
@@ -61,6 +62,7 @@ type Actions = {
   setIsDebug: (isDebug: boolean) => void;
   setPaintbrushMode: (enabled: boolean) => void;
   setSelectedTerrainType: (terrainType: TerrainType | null) => void;
+  setSelectedPopulation: (population: Population | null) => void;
   exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
   addBuildable: (buildableData: BuildableData) => boolean;
@@ -75,6 +77,10 @@ type Actions = {
   updateHexTerrain: (
     coordinates: HexCoordinates,
     terrainType: TerrainType
+  ) => void;
+  updateHexPopulation: (
+    coordinates: HexCoordinates,
+    population: Population
   ) => void;
 };
 
@@ -100,6 +106,7 @@ const exportHexGridToJSON = (set: Setter) => (): string => {
       },
       stateInfo: cell.stateInfo,
       terrainType: cell.terrainType,
+      population: cell.population,
     })),
   };
   return JSON.stringify(exportData, null, 2);
@@ -121,6 +128,12 @@ const importHexGridFromJSON = (set: Setter) => (jsonString: string) => {
           cell.stateInfo = cellData.stateInfo;
           if (cellData.terrainType) {
             cell.terrainType = cellData.terrainType;
+          }
+          if (
+            cellData.population !== undefined &&
+            cellData.population !== null
+          ) {
+            cell.population = cellData.population;
           }
           state.hexGrid.addCell(
             cell,
@@ -203,6 +216,17 @@ const setSelectedTerrainType =
       },
       undefined,
       "setSelectedTerrainType"
+    );
+  };
+
+const setSelectedPopulation =
+  (set: Setter) => (population: Population | null) => {
+    set(
+      (state) => {
+        state.mapBuilder.selectedPopulation = population;
+      },
+      undefined,
+      "setSelectedPopulation"
     );
   };
 
@@ -317,6 +341,20 @@ const updateHexTerrain =
     );
   };
 
+const updateHexPopulation =
+  (set: Setter) => (coordinates: HexCoordinates, population: Population) => {
+    set(
+      (state) => {
+        const cell = state.hexGrid.getCell(coordinates);
+        if (cell) {
+          cell.population = population;
+        }
+      },
+      undefined,
+      "updateHexPopulation"
+    );
+  };
+
 export const useGameStore = create<GameState & Actions>()(
   devtools(
     immer((set) => ({
@@ -324,6 +362,7 @@ export const useGameStore = create<GameState & Actions>()(
       mapBuilder: {
         isPaintbrushMode: false,
         selectedTerrainType: null,
+        selectedPopulation: null,
       },
       hexGrid: new HexGrid(10, 10),
       buildables: [],
@@ -339,6 +378,7 @@ export const useGameStore = create<GameState & Actions>()(
       setIsDebug: setIsDebug(set),
       setPaintbrushMode: setPaintbrushMode(set),
       setSelectedTerrainType: setSelectedTerrainType(set),
+      setSelectedPopulation: setSelectedPopulation(set),
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),
       addBuildable: addBuildable(set),
@@ -348,6 +388,7 @@ export const useGameStore = create<GameState & Actions>()(
       setHoverLocation: setHoverLocation(set),
       selectHex: selectHex(set),
       updateHexTerrain: updateHexTerrain(set),
+      updateHexPopulation: updateHexPopulation(set),
     }))
   )
 );
