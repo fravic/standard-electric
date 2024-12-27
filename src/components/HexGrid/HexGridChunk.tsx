@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
+import { Box } from "@react-three/drei";
 
 import { HexCell, TerrainType } from "../../lib/HexCell";
 import { HexCoordinates } from "../../lib/HexCoordinates";
@@ -33,16 +34,25 @@ function GhostPowerPole({ hoverCorner }: { hoverCorner: CornerCoordinates }) {
   return <PowerPole pole={poleModel} isGhost />;
 }
 
+function PowerPlant({ coordinates }: { coordinates: HexCoordinates }) {
+  const point = coordinates.toWorldPoint();
+  return (
+    <Box position={[point[0], 0.5, point[2]]} args={[0.5, 0.5, 0.5]}>
+      <meshStandardMaterial color="#666666" />
+    </Box>
+  );
+}
+
 export const HexGridChunk = React.memo(function HexGridChunk({
   chunk,
   grid,
   onCellClick,
   debug = false,
 }: HexGridChunkProps) {
-  const isBuildMode = useGameStore(
-    (state) => state.players[PLAYER_ID].isBuildMode
-  );
+  const buildMode = useGameStore((state) => state.players[PLAYER_ID].buildMode);
+  const powerPlants = useGameStore((state) => state.powerPlants);
   const updateHexTerrain = useGameStore((state) => state.updateHexTerrain);
+  const addPowerPlant = useGameStore((state) => state.addPowerPlant);
 
   const validCoordinates = useMemo(() => {
     return chunk.coordinates.filter((c): c is HexCoordinates => c !== null);
@@ -52,7 +62,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     useGameStore,
     (state) => {
       const hoverLocation = state.players[PLAYER_ID].hoverLocation;
-      if (!hoverLocation) return null;
+      if (!hoverLocation || buildMode?.type !== "power_pole") return null;
       return HexCoordinates.getNearestCornerInChunk(
         new THREE.Vector3(
           hoverLocation.worldPoint[0],
@@ -78,18 +88,22 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const handleClick = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
       const point = event.point.clone();
-      const nearestCorner = HexCoordinates.getNearestCornerInChunk(
-        point,
-        validCoordinates
-      );
-      if (nearestCorner) {
-        if (isBuildMode) {
+      const coords = HexCoordinates.fromWorldPoint([point.x, point.y, point.z]);
+      if (buildMode?.type === "power_pole") {
+        const nearestCorner = HexCoordinates.getNearestCornerInChunk(
+          point,
+          validCoordinates
+        );
+        if (nearestCorner) {
           addPowerPole(nearestCorner);
         }
-        onCellClick(nearestCorner.hex);
+      } else if (buildMode?.type === "coal_plant") {
+        addPowerPlant(coords);
+      } else {
+        onCellClick(coords);
       }
     },
-    [addPowerPole, validCoordinates, isBuildMode, onCellClick]
+    [addPowerPole, addPowerPlant, validCoordinates, buildMode, onCellClick]
   );
 
   const handleTerrainUpdate = useCallback(
@@ -105,6 +119,13 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       .filter((cell): cell is HexCell => cell !== null);
   }, [grid, validCoordinates]);
 
+  // Filter power plants in this chunk
+  const chunkPowerPlants = useMemo(() => {
+    return powerPlants.filter((plant) =>
+      validCoordinates.some((coord) => coord.equals(plant.coordinates))
+    );
+  }, [powerPlants, validCoordinates]);
+
   return (
     <group>
       <HexGridTerrain
@@ -116,9 +137,12 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       />
       <HexGridWater cells={cells} grid={grid} />
       <PowerLines chunkCells={cells.map((cell: HexCell) => cell.coordinates)} />
-      {isBuildMode && hoverCorner && (
+      {buildMode?.type === "power_pole" && hoverCorner && (
         <GhostPowerPole hoverCorner={hoverCorner} />
       )}
+      {chunkPowerPlants.map((plant) => (
+        <PowerPlant key={plant.id} coordinates={plant.coordinates} />
+      ))}
     </group>
   );
 });

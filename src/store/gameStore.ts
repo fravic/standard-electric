@@ -12,9 +12,13 @@ import { HexCoordinates } from "../lib/HexCoordinates";
 import { PowerPole } from "../lib/PowerSystem";
 import { CornerCoordinates } from "../lib/CornerCoordinates";
 
+export type BuildMode = null | {
+  type: "power_pole" | "coal_plant";
+};
+
 interface Player {
   money: number;
-  isBuildMode: boolean;
+  buildMode: BuildMode;
   hoverLocation: {
     worldPoint: [number, number, number];
   } | null;
@@ -31,6 +35,11 @@ interface GameState {
   mapBuilder: MapBuilder;
   hexGrid: HexGrid;
   powerPoles: PowerPole[];
+  powerPlants: {
+    id: string;
+    coordinates: HexCoordinates;
+    type: "coal";
+  }[];
   players: {
     [playerId: string]: Player;
   };
@@ -51,9 +60,10 @@ type Actions = {
   exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
   addPowerPole: (corner: CornerCoordinates) => void;
+  addPowerPlant: (coordinates: HexCoordinates) => boolean;
   setMoney: (playerId: string, amount: number) => void;
   spendMoney: (playerId: string, amount: number) => boolean;
-  setBuildMode: (playerId: string, enabled: boolean) => void;
+  setBuildMode: (playerId: string, mode: BuildMode) => void;
   setHoverLocation: (
     playerId: string,
     worldPoint: [number, number, number] | null
@@ -157,12 +167,12 @@ const spendMoney =
     return success;
   };
 
-const setBuildMode = (set: Setter) => (playerId: string, enabled: boolean) => {
+const setBuildMode = (set: Setter) => (playerId: string, mode: BuildMode) => {
   set(
     (state) => {
       if (state.players[playerId]) {
-        state.players[playerId].isBuildMode = enabled;
-        if (!enabled) {
+        state.players[playerId].buildMode = mode;
+        if (!mode) {
           state.players[playerId].hoverLocation = null;
         }
       }
@@ -236,6 +246,37 @@ const addPowerPole = (set: Setter) => (corner: CornerCoordinates) => {
   return success;
 };
 
+const addPowerPlant =
+  (set: Setter) =>
+  (coordinates: HexCoordinates): boolean => {
+    let success = false;
+    set(
+      (state) => {
+        const existingPlant = state.powerPlants.find((p) =>
+          p.coordinates.equals(coordinates)
+        );
+
+        // For now, just use the first player
+        const playerId = Object.keys(state.players)[0];
+        const player = state.players[playerId];
+
+        if (!existingPlant && player && player.money >= 5) {
+          const id = nanoid(6);
+          state.powerPlants.push({
+            id,
+            coordinates,
+            type: "coal",
+          });
+          player.money -= 5;
+          success = true;
+        }
+      },
+      undefined,
+      "addPowerPlant"
+    );
+    return success;
+  };
+
 const selectHex = (set: Setter) => (coordinates: HexCoordinates | null) => {
   set(
     (state) => {
@@ -274,10 +315,11 @@ export const useGameStore = create<GameState & Actions>()(
       },
       hexGrid: new HexGrid(10, 10),
       powerPoles: [],
+      powerPlants: [],
       players: {
         player1: {
           money: 10,
-          isBuildMode: false,
+          buildMode: null,
           hoverLocation: null,
           selectedHexCoordinates: null,
         },
@@ -289,6 +331,7 @@ export const useGameStore = create<GameState & Actions>()(
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),
       addPowerPole: addPowerPole(set),
+      addPowerPlant: addPowerPlant(set),
       setMoney: setMoney(set),
       spendMoney: spendMoney(set),
       setBuildMode: setBuildMode(set),
