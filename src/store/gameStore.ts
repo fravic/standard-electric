@@ -10,10 +10,12 @@ import { MapData } from "../lib/MapData";
 import { HexCell, TerrainType } from "../lib/HexCell";
 import { HexCoordinates } from "../lib/HexCoordinates";
 import { PowerPole } from "../lib/PowerSystem";
+import { CoalPlant } from "../lib/CoalPlant";
+import { Buildable, BuildableType } from "../lib/Buildable";
 import { CornerCoordinates } from "../lib/CornerCoordinates";
 
 export type BuildMode = null | {
-  type: "power_pole" | "coal_plant";
+  type: BuildableType;
 };
 
 interface Player {
@@ -34,12 +36,7 @@ interface GameState {
   isDebug: boolean;
   mapBuilder: MapBuilder;
   hexGrid: HexGrid;
-  powerPoles: PowerPole[];
-  powerPlants: {
-    id: string;
-    coordinates: HexCoordinates;
-    type: "coal";
-  }[];
+  buildables: Buildable[];
   players: {
     [playerId: string]: Player;
   };
@@ -53,14 +50,20 @@ type Setter = (
 
 // Actions
 
+type BuildableData = {
+  type: BuildableType;
+  coordinates?: HexCoordinates;
+  cornerCoordinates?: CornerCoordinates;
+  isGhost?: boolean;
+};
+
 type Actions = {
   setIsDebug: (isDebug: boolean) => void;
   setPaintbrushMode: (enabled: boolean) => void;
   setSelectedTerrainType: (terrainType: TerrainType | null) => void;
   exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
-  addPowerPole: (corner: CornerCoordinates) => void;
-  addPowerPlant: (coordinates: HexCoordinates) => boolean;
+  addBuildable: (buildableData: BuildableData) => boolean;
   setMoney: (playerId: string, amount: number) => void;
   spendMoney: (playerId: string, amount: number) => boolean;
   setBuildMode: (playerId: string, mode: BuildMode) => void;
@@ -219,60 +222,69 @@ const setHoverLocation =
     );
   };
 
-const addPowerPole = (set: Setter) => (corner: CornerCoordinates) => {
-  let success = false;
-  set(
-    (state) => {
-      const existingPole = state.powerPoles.find((p) =>
-        p.cornerCoordinates.equals(corner)
-      );
-
-      // For now, just use the first player
-      const playerId = Object.keys(state.players)[0];
-      const player = state.players[playerId];
-
-      if (!existingPole && player && player.money >= 1) {
-        const id = nanoid(6);
-        const newPole = new PowerPole(id, corner);
-        newPole.createConnections(state.powerPoles);
-        state.powerPoles.push(newPole);
-        player.money -= 1;
-        success = true;
-      }
-    },
-    undefined,
-    "addPowerPole"
-  );
-  return success;
-};
-
-const addPowerPlant =
+const addBuildable =
   (set: Setter) =>
-  (coordinates: HexCoordinates): boolean => {
+  (buildableData: BuildableData): boolean => {
     let success = false;
     set(
       (state) => {
-        const existingPlant = state.powerPlants.find((p) =>
-          p.coordinates.equals(coordinates)
-        );
-
         // For now, just use the first player
         const playerId = Object.keys(state.players)[0];
         const player = state.players[playerId];
 
-        if (!existingPlant && player && player.money >= 5) {
-          const id = nanoid(6);
-          state.powerPlants.push({
-            id,
-            coordinates,
-            type: "coal",
-          });
-          player.money -= 5;
-          success = true;
+        // Check if there's already a buildable at this location
+        const existingBuildable = state.buildables.find((b) => {
+          if (buildableData.coordinates && b.coordinates) {
+            return b.coordinates.equals(buildableData.coordinates);
+          }
+          if (buildableData.cornerCoordinates && b.cornerCoordinates) {
+            return b.cornerCoordinates.equals(buildableData.cornerCoordinates);
+          }
+          return false;
+        });
+
+        if (!existingBuildable && player) {
+          const cost = buildableData.type === "power_pole" ? 1 : 5;
+          if (player.money >= cost) {
+            const id = nanoid(6);
+            let buildable: Buildable;
+
+            if (
+              buildableData.type === "power_pole" &&
+              buildableData.cornerCoordinates
+            ) {
+              const pole = new PowerPole(
+                id,
+                buildableData.cornerCoordinates,
+                buildableData.isGhost
+              );
+              // Create connections with existing power poles
+              const otherPoles = state.buildables.filter(
+                (b): b is PowerPole => b instanceof PowerPole
+              );
+              pole.createConnections(otherPoles);
+              buildable = pole;
+            } else if (
+              buildableData.type === "coal_plant" &&
+              buildableData.coordinates
+            ) {
+              buildable = new CoalPlant(
+                id,
+                buildableData.coordinates,
+                buildableData.isGhost
+              );
+            } else {
+              throw new Error("Invalid buildable data");
+            }
+
+            state.buildables.push(buildable);
+            player.money -= cost;
+            success = true;
+          }
         }
       },
       undefined,
-      "addPowerPlant"
+      "addBuildable"
     );
     return success;
   };
@@ -314,8 +326,7 @@ export const useGameStore = create<GameState & Actions>()(
         selectedTerrainType: null,
       },
       hexGrid: new HexGrid(10, 10),
-      powerPoles: [],
-      powerPlants: [],
+      buildables: [],
       players: {
         player1: {
           money: 10,
@@ -330,8 +341,7 @@ export const useGameStore = create<GameState & Actions>()(
       setSelectedTerrainType: setSelectedTerrainType(set),
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),
-      addPowerPole: addPowerPole(set),
-      addPowerPlant: addPowerPlant(set),
+      addBuildable: addBuildable(set),
       setMoney: setMoney(set),
       spendMoney: spendMoney(set),
       setBuildMode: setBuildMode(set),

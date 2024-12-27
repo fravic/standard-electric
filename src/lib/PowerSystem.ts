@@ -1,66 +1,31 @@
-import { z } from "zod";
-import { immerable } from "immer";
+import { CornerCoordinates } from "./CornerCoordinates";
+import { Buildable } from "./Buildable";
 
-import { HexCoordinates, Vertex } from "./HexCoordinates";
-import { HexDirection } from "./HexMetrics";
-import {
-  CornerCoordinates,
-  CornerCoordinatesSchema,
-} from "./CornerCoordinates";
-
-export const PowerPoleSchema = z.object({
-  id: z.string(),
-  cornerCoordinates: CornerCoordinatesSchema,
-  connectedToIds: z.array(z.string()),
-});
-
-export type PowerPoleData = z.infer<typeof PowerPoleSchema>;
-
-export class PowerPole {
-  [immerable] = true;
-
-  id: string;
+export class PowerPole extends Buildable {
   cornerCoordinates: CornerCoordinates;
   connectedToIds: string[] = [];
-  isGhost: boolean;
 
   constructor(
     id: string,
     cornerCoordinates: CornerCoordinates,
-    isGhost: boolean = false
+    isGhost?: boolean
   ) {
-    this.id = id;
+    super(id, "power_pole", isGhost);
     this.cornerCoordinates = cornerCoordinates;
-    this.isGhost = isGhost;
   }
 
-  static fromHexAndDirection(
-    id: string,
-    coordinates: HexCoordinates,
-    direction: HexDirection
-  ): PowerPole {
-    return new PowerPole(
-      id,
-      CornerCoordinates.fromHexAndDirection(coordinates, direction)
-    );
+  getWorldPoint(): [number, number, number] {
+    const point = this.cornerCoordinates.toWorldPoint();
+    return [point[0], 0, point[2]];
   }
 
-  getWorldPoint(): Vertex {
-    return this.cornerCoordinates.toWorldPoint();
-  }
-
-  public createConnections(existingPoles: PowerPole[]) {
-    // For each existing pole, check if it's at an adjacent corner
-    // TODO: Make this more efficient
-    for (const otherPole of existingPoles) {
-      if (otherPole.id === this.id) continue;
-
-      if (this.cornerCoordinates.adjacentTo(otherPole.cornerCoordinates)) {
-        this.connectedToIds.push(otherPole.id);
-        if (!this.isGhost) {
-          otherPole.connectedToIds.push(this.id);
-        }
-      }
-    }
+  createConnections(otherPoles: PowerPole[]) {
+    this.connectedToIds = otherPoles
+      .filter(
+        (pole) =>
+          pole !== this &&
+          this.cornerCoordinates.adjacentTo(pole.cornerCoordinates)
+      )
+      .map((pole) => pole.id);
   }
 }

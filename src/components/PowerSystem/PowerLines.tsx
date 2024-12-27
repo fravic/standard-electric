@@ -8,14 +8,17 @@ interface PowerLinesProps {
 }
 
 export function PowerLines({ chunkCells }: PowerLinesProps) {
-  const powerPoles = useGameStore((state) => state.powerPoles);
+  const buildables = useGameStore((state) => state.buildables);
 
   // Filter power poles that belong to this chunk
-  const chunkPowerPoles = powerPoles.filter((pole) =>
-    chunkCells.some(
-      (cell) => cell.toString() === pole.cornerCoordinates.hex.toString()
-    )
-  );
+  const chunkPowerPoles = buildables
+    .filter((b) => b.type === "power_pole" && !b.isGhost && b.cornerCoordinates)
+    .map((b) => new PowerPoleModel(b.id, b.cornerCoordinates!, false))
+    .filter((pole) =>
+      chunkCells.some(
+        (cell) => cell.toString() === pole.cornerCoordinates.hex.toString()
+      )
+    );
 
   return (
     <group>

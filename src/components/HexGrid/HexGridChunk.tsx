@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
-import { Box } from "@react-three/drei";
 
 import { HexCell, TerrainType } from "../../lib/HexCell";
 import { HexCoordinates } from "../../lib/HexCoordinates";
@@ -10,37 +9,19 @@ import { HexGridWater } from "./HexGridWater";
 import { HexGrid } from "../../lib/HexGrid";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { useGameStore } from "../../store/gameStore";
-import { PowerPole as PowerPoleModel } from "../../lib/PowerSystem";
-import { PowerPole } from "../PowerSystem/PowerPole";
 import { CornerCoordinates } from "../../lib/CornerCoordinates";
 import { PLAYER_ID } from "../../store/constants";
 import { useStoreWithEqualityFn } from "zustand/traditional";
 import { HexGridChunk as HexGridChunkType } from "../../lib/HexGridChunk";
+import { Buildable } from "../Buildable";
+import { PowerPole } from "../../lib/PowerSystem";
+import { CoalPlant } from "../../lib/CoalPlant";
 
 interface HexGridChunkProps {
   chunk: HexGridChunkType;
   grid: HexGrid;
   onCellClick: (coordinates: HexCoordinates) => void;
   debug?: boolean;
-}
-
-function GhostPowerPole({ hoverCorner }: { hoverCorner: CornerCoordinates }) {
-  const powerPoles = useGameStore((state) => state.powerPoles);
-  const poleModel = useMemo(() => {
-    const pole = new PowerPoleModel("ghost", hoverCorner, true);
-    pole.createConnections(powerPoles);
-    return pole;
-  }, [hoverCorner, powerPoles]);
-  return <PowerPole pole={poleModel} isGhost />;
-}
-
-function PowerPlant({ coordinates }: { coordinates: HexCoordinates }) {
-  const point = coordinates.toWorldPoint();
-  return (
-    <Box position={[point[0], 0.5, point[2]]} args={[0.5, 0.5, 0.5]}>
-      <meshStandardMaterial color="#666666" />
-    </Box>
-  );
 }
 
 export const HexGridChunk = React.memo(function HexGridChunk({
@@ -50,31 +31,62 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   debug = false,
 }: HexGridChunkProps) {
   const buildMode = useGameStore((state) => state.players[PLAYER_ID].buildMode);
-  const powerPlants = useGameStore((state) => state.powerPlants);
+  const buildables = useGameStore((state) => state.buildables);
   const updateHexTerrain = useGameStore((state) => state.updateHexTerrain);
-  const addPowerPlant = useGameStore((state) => state.addPowerPlant);
+  const addBuildable = useGameStore((state) => state.addBuildable);
 
   const validCoordinates = useMemo(() => {
     return chunk.coordinates.filter((c): c is HexCoordinates => c !== null);
   }, [chunk.coordinates]);
 
-  const hoverCorner = useStoreWithEqualityFn(
+  const ghostBuildable = useStoreWithEqualityFn(
     useGameStore,
     (state) => {
       const hoverLocation = state.players[PLAYER_ID].hoverLocation;
-      if (!hoverLocation || buildMode?.type !== "power_pole") return null;
-      return HexCoordinates.getNearestCornerInChunk(
-        new THREE.Vector3(
-          hoverLocation.worldPoint[0],
-          hoverLocation.worldPoint[1],
-          hoverLocation.worldPoint[2]
-        ),
-        validCoordinates
+      if (!hoverLocation || !buildMode) return null;
+
+      const point = new THREE.Vector3(
+        hoverLocation.worldPoint[0],
+        hoverLocation.worldPoint[1],
+        hoverLocation.worldPoint[2]
       );
+
+      if (buildMode.type === "power_pole") {
+        const nearestCorner = HexCoordinates.getNearestCornerInChunk(
+          point,
+          validCoordinates
+        );
+        if (nearestCorner) {
+          const ghostPole = new PowerPole("ghost", nearestCorner, true);
+          // Create connections with existing power poles
+          const otherPoles = buildables.filter(
+            (b): b is PowerPole => b instanceof PowerPole
+          );
+          ghostPole.createConnections(otherPoles);
+          return ghostPole;
+        }
+      } else if (buildMode.type === "coal_plant") {
+        const coords = HexCoordinates.fromWorldPoint([point.x, point.y, point.z]);
+        if (validCoordinates.some((c) => c.equals(coords))) {
+          return new CoalPlant("ghost", coords, true);
+        }
+      }
+      return null;
     },
-    (a, b) => (a && b ? a.equals(b) : a === b)
+    (a, b) => {
+      if (!a && !b) return true;
+      if (!a || !b) return false;
+      if (a.type !== b.type) return false;
+      if (a.coordinates && b.coordinates) {
+        return a.coordinates.equals(b.coordinates);
+      }
+      if (a.cornerCoordinates && b.cornerCoordinates) {
+        return a.cornerCoordinates.equals(b.cornerCoordinates);
+      }
+      return false;
+    }
   );
-  const addPowerPole = useGameStore((state) => state.addPowerPole);
+
   const setHoverLocation = useGameStore((state) => state.setHoverLocation);
 
   const handleHover = useCallback(
@@ -89,21 +101,31 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     (event: ThreeEvent<MouseEvent>) => {
       const point = event.point.clone();
       const coords = HexCoordinates.fromWorldPoint([point.x, point.y, point.z]);
+      const isValidCoord = validCoordinates.some((c) => c.equals(coords));
+
+      if (!isValidCoord) return;
+
       if (buildMode?.type === "power_pole") {
         const nearestCorner = HexCoordinates.getNearestCornerInChunk(
           point,
           validCoordinates
         );
         if (nearestCorner) {
-          addPowerPole(nearestCorner);
+          addBuildable({
+            type: "power_pole",
+            cornerCoordinates: nearestCorner,
+          });
         }
       } else if (buildMode?.type === "coal_plant") {
-        addPowerPlant(coords);
+        addBuildable({
+          type: "coal_plant",
+          coordinates: coords,
+        });
       } else {
         onCellClick(coords);
       }
     },
-    [addPowerPole, addPowerPlant, validCoordinates, buildMode, onCellClick]
+    [addBuildable, validCoordinates, buildMode, onCellClick]
   );
 
   const handleTerrainUpdate = useCallback(
@@ -119,12 +141,22 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       .filter((cell): cell is HexCell => cell !== null);
   }, [grid, validCoordinates]);
 
-  // Filter power plants in this chunk
-  const chunkPowerPlants = useMemo(() => {
-    return powerPlants.filter((plant) =>
-      validCoordinates.some((coord) => coord.equals(plant.coordinates))
-    );
-  }, [powerPlants, validCoordinates]);
+  // Filter buildables in this chunk
+  const chunkBuildables = useMemo(() => {
+    return buildables.filter((buildable) => {
+      if (buildable.coordinates) {
+        return validCoordinates.some((coord) =>
+          coord.equals(buildable.coordinates!)
+        );
+      }
+      if (buildable.cornerCoordinates) {
+        return validCoordinates.some((coord) =>
+          buildable.cornerCoordinates!.hex.equals(coord)
+        );
+      }
+      return false;
+    });
+  }, [buildables, validCoordinates]);
 
   return (
     <group>
@@ -137,12 +169,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       />
       <HexGridWater cells={cells} grid={grid} />
       <PowerLines chunkCells={cells.map((cell: HexCell) => cell.coordinates)} />
-      {buildMode?.type === "power_pole" && hoverCorner && (
-        <GhostPowerPole hoverCorner={hoverCorner} />
-      )}
-      {chunkPowerPlants.map((plant) => (
-        <PowerPlant key={plant.id} coordinates={plant.coordinates} />
+      {chunkBuildables.map((buildable) => (
+        <Buildable key={buildable.id} buildable={buildable} />
       ))}
+      {ghostBuildable && <Buildable buildable={ghostBuildable} />}
     </group>
   );
 });

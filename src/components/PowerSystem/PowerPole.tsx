@@ -4,6 +4,8 @@ import { useGLTF, QuadraticBezierLine } from "@react-three/drei";
 import { PowerPole as PowerPoleModel } from "../../lib/PowerSystem";
 import { useGameStore } from "../../store/gameStore";
 import { cloneAndPrepareMesh } from "../../lib/gltfUtils";
+import { shallow } from "zustand/shallow";
+import { useStoreWithEqualityFn } from "zustand/traditional";
 
 interface PowerPoleProps {
   pole: PowerPoleModel;
@@ -14,7 +16,15 @@ const POLE_HEIGHT_Y = 0.3;
 const POWER_LINE_DROOP_Y = 0.2; // How much the power line droops
 
 export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
-  const powerPoles = useGameStore((state) => state.powerPoles);
+  const powerPoles = useStoreWithEqualityFn(
+    useGameStore,
+    (state) =>
+      state.buildables.filter(
+        (b): b is PowerPoleModel => b.type === "power_pole"
+      ),
+    shallow
+  );
+
   const position = pole.getWorldPoint();
   const { nodes } = useGLTF("/models/Logistico.glb");
 
@@ -34,8 +44,8 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
 
       {/* Power lines with curves */}
       {pole.connectedToIds.map((connectionId, connectionIndex) => {
-        const connectionPole = powerPoles.find((p) => p.id === connectionId);
-        if (!connectionPole) return null;
+        const connectedPole = powerPoles.find((p) => p.id === connectionId);
+        if (!connectedPole) return null;
 
         const start = new THREE.Vector3(
           position[0],
@@ -43,9 +53,9 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
           position[2]
         );
         const end = new THREE.Vector3(
-          connectionPole.getWorldPoint()[0],
-          connectionPole.getWorldPoint()[1] + POLE_HEIGHT_Y,
-          connectionPole.getWorldPoint()[2]
+          connectedPole.getWorldPoint()[0],
+          connectedPole.getWorldPoint()[1] + POLE_HEIGHT_Y,
+          connectedPole.getWorldPoint()[2]
         );
 
         // Calculate middle control point for the curve
