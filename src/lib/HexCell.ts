@@ -10,19 +10,18 @@ export enum TerrainType {
   Plains = "Plains",
   Mountains = "Mountains",
   Desert = "Desert",
+  Water = "Water",
 }
 
 export const HexCellSchema = z.object({
   coordinates: HexCoordinatesSchema,
-  elevation: z.number(),
-  waterLevel: z.number(),
   stateInfo: z
     .object({
       name: z.string(),
       id: z.string(),
     })
     .nullable(),
-  terrainType: z.nativeEnum(TerrainType).optional(),
+  terrainType: z.nativeEnum(TerrainType).optional().nullable(),
 });
 
 export type HexCellData = z.infer<typeof HexCellSchema>;
@@ -31,19 +30,12 @@ export class HexCell {
   [immerable] = true;
 
   coordinates: HexCoordinates;
-  elevation: number = 0;
-  waterLevel: number = 0;
   stateInfo: StateInfo | null = null;
   terrainType: TerrainType = TerrainType.Plains;
 
   constructor(x: number, z: number, stateInfo: StateInfo | null = null) {
     this.coordinates = new HexCoordinates(x, z);
     this.stateInfo = stateInfo;
-
-    if (!stateInfo) {
-      this.elevation = -0.2;
-      this.waterLevel = 0;
-    }
 
     // Randomly assign terrain type
     const terrainTypes = Object.values(TerrainType);
@@ -52,7 +44,7 @@ export class HexCell {
   }
 
   get isUnderwater(): boolean {
-    return this.waterLevel > this.elevation;
+    return this.terrainType === TerrainType.Water;
   }
 
   stateHash(): number {
@@ -79,6 +71,9 @@ export class HexCell {
       case TerrainType.Desert:
         baseColor = new Color(0xe6c229); // Sand yellow
         break;
+      case TerrainType.Water:
+        baseColor = new Color(0x1e88e5); // Blue
+        break;
       default:
         baseColor = new Color(0xc9eba1); // Default light green
     }
@@ -99,10 +94,6 @@ export class HexCell {
 
   centerPoint(): Vertex {
     const vertex = this.coordinates.toWorldPoint();
-    return [vertex[0], this.elevation, vertex[2]];
-  }
-
-  waterCenterPoint(): Vertex {
-    return [this.centerPoint()[0], this.waterLevel, this.centerPoint()[2]];
+    return [vertex[0], 0, vertex[2]];
   }
 }

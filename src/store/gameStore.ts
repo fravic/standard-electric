@@ -89,9 +89,8 @@ const exportHexGridToJSON = (set: Setter) => (): string => {
         x: cell.coordinates.x,
         z: cell.coordinates.z,
       },
-      elevation: cell.elevation,
-      waterLevel: cell.waterLevel,
       stateInfo: cell.stateInfo,
+      terrainType: cell.terrainType,
     })),
   };
   return JSON.stringify(exportData, null, 2);
@@ -110,9 +109,10 @@ const importHexGridFromJSON = (set: Setter) => (jsonString: string) => {
             cellData.coordinates.x,
             cellData.coordinates.z
           );
-          cell.elevation = cellData.elevation;
-          cell.waterLevel = cellData.waterLevel;
           cell.stateInfo = cellData.stateInfo;
+          if (cellData.terrainType) {
+            cell.terrainType = cellData.terrainType;
+          }
           state.hexGrid.addCell(
             cell,
             cellData.coordinates.x,

@@ -56,8 +56,8 @@ function App(): JSX.Element {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + E to export hex map to console
-      if (isDebug && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e") {
+      // E to export hex map to console
+      if (isDebug && e.key.toLowerCase() === "e") {
         e.preventDefault();
         const jsonData = exportHexGridToJSON();
         console.log(jsonData);

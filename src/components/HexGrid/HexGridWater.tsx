@@ -6,7 +6,7 @@ import { useTexture } from "@react-three/drei";
 import waterVertexShader from "../../shaders/water.vert?raw";
 import waterFragmentShader from "../../shaders/water.frag?raw";
 
-import { HexCell } from "../../lib/HexCell";
+import { HexCell, TerrainType } from "../../lib/HexCell";
 import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
 import { HexMesh } from "../../lib/HexMesh";
 import { HexGrid } from "../../lib/HexGrid";
@@ -24,7 +24,7 @@ export const HexGridWater = React.memo(function HexGridWater({
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {
       if (cell.isUnderwater) {
-        const center = cell.waterCenterPoint();
+        const center = cell.centerPoint();
         for (let d = 0; d < 6; d++) {
           hexMesh.addTriangleWithUVs(
             center,
