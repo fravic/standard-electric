@@ -6,14 +6,10 @@ import { FPSCounter } from "./components/FPSCounter";
 import { GameUI } from "./components/UI/GameUI";
 import { HexDetailsUI } from "./components/HexGrid/HexDetailsUI";
 import { useGameStore } from "./store/gameStore";
-import { loadUnitedStatesMapData } from "./lib/unitedStatesGeoUtils";
 
 function App(): JSX.Element {
   const isDebug = useGameStore((state) => state.isDebug);
   const setIsDebug = useGameStore((state) => state.setIsDebug);
-  const makeNewHexGridFromMapData = useGameStore(
-    (state) => state.makeNewHexGridFromMapData
-  );
   const importHexGridFromJSON = useGameStore(
     (state) => state.importHexGridFromJSON
   );
@@ -26,23 +22,12 @@ function App(): JSX.Element {
     const params = new URLSearchParams(window.location.search);
 
     const loadInitialData = async () => {
-      if (params.get("map") === "us") {
-        const mapData = await loadUnitedStatesMapData();
-        if (mapData) {
-          makeNewHexGridFromMapData(mapData);
-        }
+      const response = await fetch("/hexgrid.json");
+      if (response.ok) {
+        const jsonData = await response.text();
+        importHexGridFromJSON(jsonData);
       } else {
-        try {
-          const response = await fetch("/hexgrid.json");
-          if (response.ok) {
-            const jsonData = await response.text();
-            importHexGridFromJSON(jsonData);
-          } else {
-            console.error("Failed to load hexgrid.json");
-          }
-        } catch (error) {
-          console.error("Failed to load hex grid:", error);
-        }
+        console.error("Failed to load hexgrid.json");
       }
       mapDataLoaded.current = true;
     };

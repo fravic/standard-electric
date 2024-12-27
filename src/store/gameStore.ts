@@ -39,7 +39,6 @@ type Setter = (
 // Actions
 
 type Actions = {
-  makeNewHexGridFromMapData: (mapData: MapData) => void;
   setIsDebug: (isDebug: boolean) => void;
   exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
@@ -56,17 +55,6 @@ type Actions = {
     coordinates: HexCoordinates,
     terrainType: TerrainType
   ) => void;
-};
-
-const makeNewHexGridFromMapData = (set: Setter) => (mapData: MapData) => {
-  set(
-    (state) => {
-      state.hexGrid = new HexGrid(100, 60);
-      state.hexGrid.constructFromMapData(mapData);
-    },
-    undefined,
-    "makeNewHexGridFromMapData"
-  );
 };
 
 const setIsDebug = (set: Setter) => (isDebug: boolean) => {
@@ -262,7 +250,6 @@ export const useGameStore = create<GameState & Actions>()(
         },
       },
 
-      makeNewHexGridFromMapData: makeNewHexGridFromMapData(set),
       setIsDebug: setIsDebug(set),
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),

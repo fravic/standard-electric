@@ -5,7 +5,6 @@ import { HexCell, HexCellSchema } from "./HexCell";
 import { HexCoordinates } from "./HexCoordinates";
 import { HexGridChunk } from "./HexGridChunk";
 import { HexMetrics } from "./HexMetrics";
-import { getStateInfoAtCoordinates, type MapData } from "./MapData";
 
 export const HexGridSchema = z.object({
   width: z.number(),
@@ -73,20 +72,6 @@ export class HexGrid {
       localX + localZ * HexMetrics.chunkSizeX,
       cell.coordinates
     );
-  }
-
-  constructFromMapData(mapData: MapData) {
-    for (let x = 0; x < this.width; x++) {
-      for (let z = 0; z < this.height; z++) {
-        const stateInfo = getStateInfoAtCoordinates(
-          mapData,
-          (x / this.width) * 100,
-          (z / this.height) * 100
-        );
-        const cell = new HexCell(x, z, stateInfo);
-        this.addCell(cell, x, z);
-      }
-    }
   }
 
   getCell(coordinates: HexCoordinates): HexCell | null {
