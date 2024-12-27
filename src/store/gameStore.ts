@@ -21,8 +21,14 @@ interface Player {
   selectedHexCoordinates: HexCoordinates | null;
 }
 
+interface MapBuilder {
+  isPaintbrushMode: boolean;
+  selectedTerrainType: TerrainType | null;
+}
+
 interface GameState {
   isDebug: boolean;
+  mapBuilder: MapBuilder;
   hexGrid: HexGrid;
   powerPoles: PowerPole[];
   players: {
@@ -40,6 +46,8 @@ type Setter = (
 
 type Actions = {
   setIsDebug: (isDebug: boolean) => void;
+  setPaintbrushMode: (enabled: boolean) => void;
+  setSelectedTerrainType: (terrainType: TerrainType | null) => void;
   exportHexGridToJSON: () => string;
   importHexGridFromJSON: (jsonString: string) => void;
   addPowerPole: (corner: CornerCoordinates) => void;
@@ -164,6 +172,27 @@ const setBuildMode = (set: Setter) => (playerId: string, enabled: boolean) => {
   );
 };
 
+const setPaintbrushMode = (set: Setter) => (enabled: boolean) => {
+  set(
+    (state) => {
+      state.mapBuilder.isPaintbrushMode = enabled;
+    },
+    undefined,
+    "setPaintbrushMode"
+  );
+};
+
+const setSelectedTerrainType =
+  (set: Setter) => (terrainType: TerrainType | null) => {
+    set(
+      (state) => {
+        state.mapBuilder.selectedTerrainType = terrainType;
+      },
+      undefined,
+      "setSelectedTerrainType"
+    );
+  };
+
 const setHoverLocation =
   (set: Setter) =>
   (playerId: string, worldPoint: [number, number, number] | null) => {
@@ -239,6 +268,10 @@ export const useGameStore = create<GameState & Actions>()(
   devtools(
     immer((set) => ({
       isDebug: false,
+      mapBuilder: {
+        isPaintbrushMode: false,
+        selectedTerrainType: null,
+      },
       hexGrid: new HexGrid(10, 10),
       powerPoles: [],
       players: {
@@ -251,6 +284,8 @@ export const useGameStore = create<GameState & Actions>()(
       },
 
       setIsDebug: setIsDebug(set),
+      setPaintbrushMode: setPaintbrushMode(set),
+      setSelectedTerrainType: setSelectedTerrainType(set),
       exportHexGridToJSON: exportHexGridToJSON(set),
       importHexGridFromJSON: importHexGridFromJSON(set),
       addPowerPole: addPowerPole(set),

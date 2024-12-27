@@ -5,14 +5,19 @@ import { Text } from "@react-three/drei";
 import { debounce } from "lodash";
 
 import { HexCoordinates } from "../../lib/HexCoordinates";
-import { HexCell } from "../../lib/HexCell";
+import { HexCell, TerrainType } from "../../lib/HexCell";
 import { HexMesh } from "../../lib/HexMesh";
 import { HexMetrics } from "../../lib/HexMetrics";
+import { useGameStore } from "../../store/gameStore";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
-  onClick: (event: ThreeEvent<MouseEvent>) => void;
+  onClick: (event: ThreeEvent<MouseEvent | PointerEvent>) => void;
   onHover: (event: ThreeEvent<PointerEvent>) => void;
+  onUpdateTerrain?: (
+    coordinates: HexCoordinates,
+    terrainType: TerrainType
+  ) => void;
   debug?: boolean;
 }
 
@@ -20,10 +25,14 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   cells,
   onClick,
   onHover,
+  onUpdateTerrain,
   debug = false,
 }: HexGridTerrainProps) {
-  const [clickPoint, setClickPoint] = React.useState<THREE.Vector3 | null>(
-    null
+  const isPaintbrushMode = useGameStore(
+    (state) => state.mapBuilder.isPaintbrushMode
+  );
+  const selectedTerrainType = useGameStore(
+    (state) => state.mapBuilder.selectedTerrainType
   );
 
   const debouncedOnHover = useMemo(
@@ -38,6 +47,34 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
       }
     };
   }, [debouncedOnHover]);
+
+  const paintTerrain = useCallback(
+    (event: ThreeEvent<MouseEvent>) => {
+      if (isPaintbrushMode && selectedTerrainType && onUpdateTerrain) {
+        // Get intersection point from the event
+        const point = event.point;
+        const hexCoords = HexCoordinates.fromWorldPoint([
+          point.x,
+          point.y,
+          point.z,
+        ]);
+        onUpdateTerrain(hexCoords, selectedTerrainType);
+        event.stopPropagation();
+      }
+    },
+    [isPaintbrushMode, selectedTerrainType, onUpdateTerrain]
+  );
+
+  const handleClick = useCallback(
+    (event: ThreeEvent<MouseEvent>) => {
+      if (isPaintbrushMode && selectedTerrainType) {
+        paintTerrain(event);
+      } else {
+        onClick(event);
+      }
+    },
+    [onClick, paintTerrain, isPaintbrushMode, selectedTerrainType]
+  );
 
   const { terrainGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
@@ -74,7 +111,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   return (
     <mesh
       geometry={terrainGeometry}
-      onClick={onClick}
+      onClick={handleClick}
       onPointerMove={debouncedOnHover}
     >
       <meshStandardMaterial

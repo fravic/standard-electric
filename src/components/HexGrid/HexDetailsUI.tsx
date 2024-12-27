@@ -21,15 +21,6 @@ const styles = {
   label: {
     fontWeight: "bold" as const,
   },
-  select: {
-    backgroundColor: "#4CAF50",
-    border: "none",
-    color: "white",
-    padding: "8px 16px",
-    fontSize: "14px",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
 };
 
 export function HexDetailsUI() {
@@ -38,8 +29,6 @@ export function HexDetailsUI() {
   const playerId = Object.keys(players)[0];
   const selectedHexCoordinates = players[playerId]?.selectedHexCoordinates;
   const hexGrid = useGameStore((state) => state.hexGrid);
-  const isDebug = useGameStore((state) => state.isDebug);
-  const updateHexTerrain = useGameStore((state) => state.updateHexTerrain);
 
   if (!selectedHexCoordinates) {
     return null;
@@ -62,26 +51,7 @@ export function HexDetailsUI() {
       </div>
       <div>
         <span style={styles.label}>Terrain: </span>
-        {isDebug ? (
-          <select
-            style={styles.select}
-            value={cell.terrainType || TerrainType.Plains}
-            onChange={(e) =>
-              updateHexTerrain(
-                selectedHexCoordinates,
-                e.target.value as TerrainType
-              )
-            }
-          >
-            {Object.values(TerrainType).map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        ) : (
-          cell.terrainType || TerrainType.Plains
-        )}
+        {cell.terrainType || TerrainType.Plains}
       </div>
     </div>
   );

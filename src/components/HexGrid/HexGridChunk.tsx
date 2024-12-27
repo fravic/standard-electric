@@ -2,7 +2,7 @@ import * as THREE from "three";
 import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 
-import { HexCell } from "../../lib/HexCell";
+import { HexCell, TerrainType } from "../../lib/HexCell";
 import { HexCoordinates } from "../../lib/HexCoordinates";
 import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
@@ -42,6 +42,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const isBuildMode = useGameStore(
     (state) => state.players[PLAYER_ID].isBuildMode
   );
+  const updateHexTerrain = useGameStore((state) => state.updateHexTerrain);
 
   const validCoordinates = useMemo(() => {
     return chunk.coordinates.filter((c): c is HexCoordinates => c !== null);
@@ -91,6 +92,13 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     [addPowerPole, validCoordinates, isBuildMode, onCellClick]
   );
 
+  const handleTerrainUpdate = useCallback(
+    (coordinates: HexCoordinates, terrainType: TerrainType) => {
+      updateHexTerrain(coordinates, terrainType);
+    },
+    [updateHexTerrain]
+  );
+
   const cells = useMemo(() => {
     return validCoordinates
       .map((coordinates: HexCoordinates) => grid.getCell(coordinates))
@@ -103,6 +111,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         cells={cells}
         onClick={handleClick}
         onHover={handleHover}
+        onUpdateTerrain={handleTerrainUpdate}
         debug={debug}
       />
       <HexGridWater cells={cells} grid={grid} />
