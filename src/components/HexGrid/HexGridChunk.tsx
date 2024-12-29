@@ -15,7 +15,7 @@ import { useStoreWithEqualityFn } from "zustand/traditional";
 import { HexGridChunk as HexGridChunkType } from "../../lib/HexGridChunk";
 import { Buildable } from "../Buildable";
 import { PowerPole } from "../../lib/PowerSystem";
-import { CoalPlant } from "../../lib/CoalPlant";
+import { CoalPlant } from "../../lib/PowerPlants/CoalPlant";
 
 interface HexGridChunkProps {
   chunk: HexGridChunkType;
@@ -60,7 +60,12 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           validCoordinates
         );
         if (nearestCorner) {
-          const ghostPole = new PowerPole("ghost", nearestCorner, true);
+          const ghostPole = new PowerPole(
+            "ghost",
+            nearestCorner,
+            PLAYER_ID,
+            true
+          );
           // Create connections with existing power poles
           const otherPoles = buildables.filter(
             (b): b is PowerPole => b instanceof PowerPole
@@ -75,7 +80,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           point.z,
         ]);
         if (validCoordinates.some((c) => c.equals(coords))) {
-          return new CoalPlant("ghost", coords, true);
+          return new CoalPlant("ghost", coords, PLAYER_ID, true);
         }
       }
       return null;
@@ -121,12 +126,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           addBuildable({
             type: "power_pole",
             cornerCoordinates: nearestCorner,
+            playerId: PLAYER_ID,
           });
         }
       } else if (buildMode?.type === "coal_plant") {
         addBuildable({
           type: "coal_plant",
           coordinates: coords,
+          playerId: PLAYER_ID,
         });
       } else {
         onCellClick(coords);

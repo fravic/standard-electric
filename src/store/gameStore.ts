@@ -6,11 +6,10 @@ import { z } from "zod";
 import { nanoid } from "nanoid";
 
 import { HexGrid, HexGridSchema, type HexGridData } from "../lib/HexGrid";
-import { MapData } from "../lib/MapData";
 import { HexCell, TerrainType, Population } from "../lib/HexCell";
 import { HexCoordinates } from "../lib/HexCoordinates";
 import { PowerPole } from "../lib/PowerSystem";
-import { CoalPlant } from "../lib/CoalPlant";
+import { CoalPlant } from "../lib/PowerPlants/CoalPlant";
 import { Buildable, BuildableType } from "../lib/Buildable";
 import { CornerCoordinates } from "../lib/CornerCoordinates";
 
@@ -19,6 +18,7 @@ export type BuildMode = null | {
 };
 
 interface Player {
+  name: string;
   money: number;
   buildMode: BuildMode;
   hoverLocation: {
@@ -51,8 +51,9 @@ type Setter = (
 
 // Actions
 
-type BuildableData = {
+export type BuildableData = {
   type: BuildableType;
+  playerId: string;
   coordinates?: HexCoordinates;
   cornerCoordinates?: CornerCoordinates;
   isGhost?: boolean;
@@ -253,8 +254,7 @@ const addBuildable =
     set(
       (state) => {
         // For now, just use the first player
-        const playerId = Object.keys(state.players)[0];
-        const player = state.players[playerId];
+        const player = state.players[buildableData.playerId];
 
         // Check if there's already a buildable at this location
         const existingBuildable = state.buildables.find((b) => {
@@ -280,6 +280,7 @@ const addBuildable =
               const pole = new PowerPole(
                 id,
                 buildableData.cornerCoordinates,
+                buildableData.playerId,
                 buildableData.isGhost
               );
               // Create connections with existing power poles
@@ -295,6 +296,7 @@ const addBuildable =
               buildable = new CoalPlant(
                 id,
                 buildableData.coordinates,
+                buildableData.playerId,
                 buildableData.isGhost
               );
             } else {
@@ -368,6 +370,7 @@ export const useGameStore = create<GameState & Actions>()(
       buildables: [],
       players: {
         player1: {
+          name: "Player 1",
           money: 10,
           buildMode: null,
           hoverLocation: null,

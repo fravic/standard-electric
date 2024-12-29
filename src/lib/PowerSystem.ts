@@ -1,5 +1,5 @@
 import { CornerCoordinates } from "./CornerCoordinates";
-import { Buildable } from "./Buildable";
+import { Buildable, BuildableType } from "./Buildable";
 
 export class PowerPole extends Buildable {
   cornerCoordinates: CornerCoordinates;
@@ -8,9 +8,10 @@ export class PowerPole extends Buildable {
   constructor(
     id: string,
     cornerCoordinates: CornerCoordinates,
+    playerId: string,
     isGhost?: boolean
   ) {
-    super(id, "power_pole", isGhost);
+    super(id, "power_pole", playerId, isGhost);
     this.cornerCoordinates = cornerCoordinates;
   }
 

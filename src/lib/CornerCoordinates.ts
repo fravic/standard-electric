@@ -1,3 +1,4 @@
+import { immerable } from "immer";
 import { HexCoordinates, Vertex } from "./HexCoordinates";
 import { HexDirection, HexMetrics } from "./HexMetrics";
 import { z } from "zod";
@@ -23,6 +24,8 @@ export type CornerCoordinatesData = z.infer<typeof CornerCoordinatesSchema>;
  * or south corner of that hex.
  */
 export class CornerCoordinates {
+  [immerable] = true;
+
   hex: HexCoordinates;
   position: CornerPosition;
 

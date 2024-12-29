@@ -3,6 +3,7 @@ import { HexCell } from "./HexCell";
 import * as THREE from "three";
 import { z } from "zod";
 import { CornerCoordinates } from "./CornerCoordinates";
+import { immerable } from "immer";
 
 export type Vertex = readonly [number, number, number];
 
@@ -21,6 +22,8 @@ export type HexCoordinatesData = z.infer<typeof HexCoordinatesSchema>;
  * A good reference: https://www.redblobgames.com/grids/hexagons/
  */
 export class HexCoordinates {
+  [immerable] = true;
+
   x: number;
   z: number;
 

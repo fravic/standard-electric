@@ -1,11 +1,16 @@
-import { Buildable } from "./Buildable";
-import { HexCoordinates } from "./HexCoordinates";
+import { Buildable } from "../Buildable";
+import { HexCoordinates } from "../HexCoordinates";
 
 export class CoalPlant extends Buildable {
   coordinates: HexCoordinates;
 
-  constructor(id: string, coordinates: HexCoordinates, isGhost?: boolean) {
-    super(id, "coal_plant", isGhost);
+  constructor(
+    id: string,
+    coordinates: HexCoordinates,
+    playerId: string,
+    isGhost?: boolean
+  ) {
+    super(id, "coal_plant", playerId, isGhost);
     this.coordinates = coordinates;
   }
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { useGameStore } from "../../store/gameStore";
 import { TerrainType, Population } from "../../lib/HexCell";
+import { CoalPlant } from "../../lib/PowerPlants/CoalPlant";
 
 const styles = {
   container: {
@@ -21,10 +22,16 @@ const styles = {
   label: {
     fontWeight: "bold" as const,
   },
+  section: {
+    borderTop: "1px solid rgba(255, 255, 255, 0.2)",
+    paddingTop: "8px",
+    marginTop: "8px",
+  },
 };
 
 export function HexDetailsUI() {
   const players = useGameStore((state) => state.players);
+  const buildables = useGameStore((state) => state.buildables);
   // For now, just use the first player
   const playerId = Object.keys(players)[0];
   const selectedHexCoordinates = players[playerId]?.selectedHexCoordinates;
@@ -39,15 +46,17 @@ export function HexDetailsUI() {
     return null;
   }
 
+  // Find any power plants on this hex
+  const powerPlant = buildables.find(
+    (b) => b.coordinates && b.coordinates.equals(selectedHexCoordinates)
+  );
+
   return (
     <div style={styles.container}>
       <div>
-        <span style={styles.label}>Coordinates: </span>
-        {selectedHexCoordinates.toString()}
-      </div>
-      <div>
-        <span style={styles.label}>State: </span>
-        {cell.stateInfo?.name || "None"}
+        <span style={styles.label}>
+          {cell.stateInfo?.name} {selectedHexCoordinates.toString()}
+        </span>
       </div>
       <div>
         <span style={styles.label}>Terrain: </span>
@@ -57,6 +66,18 @@ export function HexDetailsUI() {
         <span style={styles.label}>Population: </span>
         {Population[cell.population] || "Unpopulated"}
       </div>
+      {powerPlant && (
+        <div style={styles.section}>
+          <div>
+            <span style={styles.label}>Power Plant: </span>
+            {powerPlant.type === "coal_plant" ? "Coal Plant" : powerPlant.type}
+          </div>
+          <div>
+            <span style={styles.label}>Owner: </span>
+            {players[powerPlant.playerId]?.name || "Unknown"}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
