@@ -41,6 +41,10 @@ interface GameState {
   players: {
     [playerId: string]: Player;
   };
+  time: {
+    totalTicks: number;
+    isPaused: boolean;
+  };
 }
 
 type Setter = (
@@ -83,6 +87,8 @@ type Actions = {
     coordinates: HexCoordinates,
     population: Population
   ) => void;
+  incrementTime: () => void;
+  togglePause: () => void;
 };
 
 const setIsDebug = (set: Setter) => (isDebug: boolean) => {
@@ -357,6 +363,26 @@ const updateHexPopulation =
     );
   };
 
+const incrementTime = (set: Setter) => () => {
+  set(
+    (state) => {
+      state.time.totalTicks++;
+    },
+    undefined,
+    "incrementTime"
+  );
+};
+
+const togglePause = (set: Setter) => () => {
+  set(
+    (state) => {
+      state.time.isPaused = !state.time.isPaused;
+    },
+    undefined,
+    "togglePause"
+  );
+};
+
 export const useGameStore = create<GameState & Actions>()(
   devtools(
     immer((set) => ({
@@ -377,6 +403,10 @@ export const useGameStore = create<GameState & Actions>()(
           selectedHexCoordinates: null,
         },
       },
+      time: {
+        totalTicks: 0,
+        isPaused: true,
+      },
 
       setIsDebug: setIsDebug(set),
       setPaintbrushMode: setPaintbrushMode(set),
@@ -392,6 +422,8 @@ export const useGameStore = create<GameState & Actions>()(
       selectHex: selectHex(set),
       updateHexTerrain: updateHexTerrain(set),
       updateHexPopulation: updateHexPopulation(set),
+      incrementTime: incrementTime(set),
+      togglePause: togglePause(set),
     }))
   )
 );

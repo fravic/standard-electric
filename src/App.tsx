@@ -6,6 +6,9 @@ import { FPSCounter } from "./components/FPSCounter";
 import { GameUI } from "./components/UI/GameUI";
 import { HexDetailsUI } from "./components/HexGrid/HexDetailsUI";
 import { useGameStore } from "./store/gameStore";
+import { MILLISECONDS_PER_TICK } from "./store/constants";
+
+let globalIntervalId: number | null = null;
 
 function App(): JSX.Element {
   const isDebug = useGameStore((state) => state.isDebug);
@@ -16,8 +19,11 @@ function App(): JSX.Element {
   const exportHexGridToJSON = useGameStore(
     (state) => state.exportHexGridToJSON
   );
+  const { isPaused } = useGameStore((state) => state.time);
+  const incrementTime = useGameStore((state) => state.incrementTime);
   const mapDataLoaded = useRef(false);
 
+  // Game initialization
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
@@ -37,8 +43,9 @@ function App(): JSX.Element {
     }
 
     setIsDebug(params.get("debug") === "true");
-  }, []);
+  }, [importHexGridFromJSON, setIsDebug]);
 
+  // Debug key handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // E to export hex map to console
@@ -52,6 +59,28 @@ function App(): JSX.Element {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [exportHexGridToJSON, isDebug]);
+
+  // Time management
+  useEffect(() => {
+    // Clear any existing interval
+    if (globalIntervalId) {
+      clearInterval(globalIntervalId);
+      globalIntervalId = null;
+    }
+
+    if (!isPaused) {
+      globalIntervalId = window.setInterval(() => {
+        incrementTime();
+      }, MILLISECONDS_PER_TICK);
+    }
+
+    return () => {
+      if (globalIntervalId) {
+        clearInterval(globalIntervalId);
+        globalIntervalId = null;
+      }
+    };
+  }, [isPaused, incrementTime]);
 
   return (
     <div className="game-container">

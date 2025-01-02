@@ -2,6 +2,7 @@ import React from "react";
 import { useGameStore } from "../../store/gameStore";
 import { HexDetailsUI } from "../HexGrid/HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
+import { Clock } from "./Clock";
 import { PLAYER_ID } from "../../store/constants";
 
 const styles = {
@@ -94,6 +95,7 @@ export const GameUI: React.FC = () => {
             : "Build Coal Plant ($5)"}
         </button>
       </div>
+      <Clock />
       <TerrainPaintUI />
       <HexDetailsUI />
     </>
