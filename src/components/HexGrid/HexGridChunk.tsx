@@ -10,7 +10,7 @@ import { HexGrid } from "../../lib/HexGrid";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { useGameStore } from "../../store/gameStore";
 import { CornerCoordinates } from "../../lib/CornerCoordinates";
-import { PLAYER_ID } from "../../store/constants";
+import { PLAYER_ID } from "../../lib/constants";
 import { useStoreWithEqualityFn } from "zustand/traditional";
 import { HexGridChunk as HexGridChunkType } from "../../lib/HexGridChunk";
 import { Buildable } from "../Buildable";

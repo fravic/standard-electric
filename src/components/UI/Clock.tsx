@@ -1,6 +1,6 @@
 import React from "react";
 import { useGameStore } from "../../store/gameStore";
-import { TICKS_PER_CYCLE } from "../../store/constants";
+import { TICKS_PER_CYCLE } from "../../lib/constants";
 
 const CLOCK_SIZE = 80;
 const CENTER = CLOCK_SIZE / 2;

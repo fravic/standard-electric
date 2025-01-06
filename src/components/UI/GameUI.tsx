@@ -3,7 +3,7 @@ import { useGameStore } from "../../store/gameStore";
 import { HexDetailsUI } from "../HexGrid/HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { Clock } from "./Clock";
-import { PLAYER_ID } from "../../store/constants";
+import { PLAYER_ID } from "../../lib/constants";
 
 const styles = {
   buildContainer: {
