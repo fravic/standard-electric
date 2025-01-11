@@ -16,7 +16,7 @@ import {
   GameInputSchema,
   GameServiceEventSchema,
 } from "./game.schemas";
-import { Env } from "./env";
+import { Env } from "../env";
 
 interface Player {
   name: string;

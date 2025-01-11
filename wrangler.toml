@@ -1,6 +1,17 @@
 name = "standard-electric"
-main = "src/server.ts"
+main = "dist/index.js"
 compatibility_date = "2025-01-05"
+compatibility_flags = ["nodejs_compat"]
+
+
+assets = { directory = "./public" }
+
+[vars]
+ACTOR_KIT_HOST = "standard-electric.jonathanrmumm.workers.dev"
+
+[[durable_objects.bindings]]
+name = "REMIX"
+class_name = "Remix"
 
 [[durable_objects.bindings]]
 name = "GAME"
@@ -8,4 +19,4 @@ class_name = "Game"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["Game"]
+new_classes = ["Remix", "Game"]

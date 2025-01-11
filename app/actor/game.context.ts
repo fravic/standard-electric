@@ -1,5 +1,3 @@
-"use client";
-
 import { createActorKitContext } from "actor-kit/react";
 
 import { GameMachine } from "./game.machine";

@@ -3,7 +3,7 @@ import { useGameStore } from "../../store/gameStore";
 import { HexDetailsUI } from "../HexGrid/HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { Clock } from "./Clock";
-import { PLAYER_ID } from "../../lib/constants";
+import { PLAYER_ID } from "@/constants";
 
 const styles = {
   buildContainer: {
@@ -44,7 +44,7 @@ const styles = {
   },
 };
 
-export const GameUI: React.FC = () => {
+const ClientGameUI: React.FC = () => {
   const player = useGameStore((state) => state.players[PLAYER_ID]);
   const setBuildMode = useGameStore((state) => state.setBuildMode);
 
@@ -101,3 +101,5 @@ export const GameUI: React.FC = () => {
     </>
   );
 };
+
+export default ClientGameUI; 
