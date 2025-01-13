@@ -1,7 +1,5 @@
 import React from "react";
-import { useGameStore } from "../../store/gameStore";
 import { TerrainType, Population } from "../../lib/HexCell";
-import { CoalPlant } from "../../lib/PowerPlants/CoalPlant";
 
 const styles = {
   container: {
@@ -30,12 +28,13 @@ const styles = {
 };
 
 export function HexDetailsUI() {
+  /*
   const players = useGameStore((state) => state.players);
   const buildables = useGameStore((state) => state.buildables);
   // For now, just use the first player
   const playerId = Object.keys(players)[0];
   const selectedHexCoordinates = players[playerId]?.selectedHexCoordinates;
-  const hexGrid = useGameStore((state) => state.hexGrid);
+  const hexGrid = useGameStore((state) => state.hexGrid);*/
 
   if (!selectedHexCoordinates) {
     return null;

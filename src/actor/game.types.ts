@@ -6,17 +6,20 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { Buildable } from "../lib/Buildable";
+import { Buildable, BuildableType } from "../lib/buildables/Buildable";
 import { Population, TerrainType } from "../lib/HexCell";
-import { HexCoordinates } from "../lib/HexCoordinates";
+import { HexCoordinates } from "../lib/coordinates/HexCoordinates";
 import { HexGrid } from "../lib/HexGrid";
-import { BuildMode } from "../store/gameStore";
 import {
   GameClientEventSchema,
   GameInputSchema,
   GameServiceEventSchema,
 } from "./game.schemas";
 import { Env } from "./env";
+
+export type BuildMode = null | {
+  type: BuildableType;
+};
 
 interface Player {
   name: string;
@@ -45,6 +48,8 @@ interface GamePublicContext {
     totalTicks: number;
     isPaused: boolean;
   };
+  buildables: Buildable[];
+  hexGrid: HexGrid;
 }
 
 export type GamePrivateContext = {};

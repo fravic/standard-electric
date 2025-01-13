@@ -1,9 +1,9 @@
 import React from "react";
-import { useGameStore } from "../../store/gameStore";
 import { HexDetailsUI } from "../HexGrid/HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { Clock } from "./Clock";
 import { PLAYER_ID } from "../../lib/constants";
+import { GameContext } from "@/actor/game.context";
 
 const styles = {
   buildContainer: {
@@ -45,8 +45,12 @@ const styles = {
 };
 
 export const GameUI: React.FC = () => {
-  const player = useGameStore((state) => state.players[PLAYER_ID]);
-  const setBuildMode = useGameStore((state) => state.setBuildMode);
+  const player = GameContext.useSelector(
+    (state) => state.public.players[PLAYER_ID]
+  );
+  const setBuildMode = GameContext.useAction(
+    (state) => state.public.setBuildMode
+  );
 
   if (!player) return null;
 

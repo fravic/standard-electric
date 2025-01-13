@@ -1,7 +1,8 @@
-import { assign, setup } from "xstate";
+import { assign, setup, fromPromise, DoneActorEvent } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
+import { produce } from "immer";
 
-import { HexGrid } from "../lib/HexGrid";
+import { HexGrid, HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
 
 export const gameMachine = setup({
@@ -10,8 +11,19 @@ export const gameMachine = setup({
     events: {} as GameEvent,
     input: {} as GameInput,
   },
+  actors: {
+    fetchHexGrid: fromPromise(async () => {
+      const hexGridJson = await fetch("/public/hexgrid.json");
+      const hexGrid = HexGridSchema.parse(await hexGridJson.json());
+      return { hexGrid };
+    }),
+  },
   actions: {
-    setDebug: assign({}),
+    setHexGrid: assign(({ context }, { hexGrid }: { hexGrid: HexGrid }) => ({
+      public: produce(context.public, (draft) => {
+        draft.hexGrid = hexGrid;
+      }),
+    })),
   },
 }).createMachine({
   id: "game",
@@ -38,6 +50,15 @@ export const gameMachine = setup({
         totalTicks: 0,
         isPaused: true,
       },
+      buildables: [],
+      hexGrid: {
+        width: 0,
+        height: 0,
+        chunks: [],
+        cellsByHexCoordinates: {},
+        chunkCountX: 0,
+        chunkCountZ: 0,
+      },
     },
     private: {},
   }),
@@ -48,6 +69,32 @@ export const gameMachine = setup({
       },
     },
     game: {
+      initial: "loading",
+      states: {
+        loading: {
+          invoke: {
+            src: "fetchHexGrid",
+            onDone: {
+              target: "ready",
+              actions: {
+                type: "setHexGrid",
+                params: ({
+                  event,
+                }: {
+                  event: DoneActorEvent<{ hexGrid: HexGrid }>;
+                }) => ({
+                  hexGrid: event.output.hexGrid,
+                }),
+              },
+            },
+            onError: {
+              target: "error",
+            },
+          },
+        },
+        ready: {},
+        error: {},
+      },
       on: {
         LEAVE_GAME: "lobby",
       },

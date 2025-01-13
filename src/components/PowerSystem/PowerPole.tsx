@@ -1,12 +1,10 @@
-import React, { useRef, useMemo } from "react";
+import React, { useMemo } from "react";
 import * as THREE from "three";
 import { useGLTF, QuadraticBezierLine } from "@react-three/drei";
-import { PowerPole as PowerPoleModel } from "../../lib/PowerSystem";
-import { useGameStore } from "../../store/gameStore";
+import { PowerPole as PowerPoleModel } from "../../lib/buildables/PowerPole";
 import { cloneAndPrepareMesh } from "../../lib/gltfUtils";
-import { shallow } from "zustand/shallow";
-import { useStoreWithEqualityFn } from "zustand/traditional";
-
+import { GameContext } from "@/actor/game.context";
+import { getBuildableWorldPoint } from "@/lib/buildables/Buildable";
 interface PowerPoleProps {
   pole: PowerPoleModel;
   isGhost?: boolean;
@@ -16,16 +14,13 @@ const POLE_HEIGHT_Y = 0.3;
 const POWER_LINE_DROOP_Y = 0.2; // How much the power line droops
 
 export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
-  const powerPoles = useStoreWithEqualityFn(
-    useGameStore,
-    (state) =>
-      state.buildables.filter(
-        (b): b is PowerPoleModel => b.type === "power_pole"
-      ),
-    shallow
+  const powerPoles = GameContext.useSelector((state) =>
+    state.public.buildables.filter(
+      (b): b is PowerPoleModel => b.type === "power_pole"
+    )
   );
 
-  const position = pole.getWorldPoint();
+  const position = getBuildableWorldPoint(pole);
   const { nodes } = useGLTF("/models/Logistico.glb");
 
   const clonedPole = useMemo(() => {
@@ -53,9 +48,9 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
           position[2]
         );
         const end = new THREE.Vector3(
-          connectedPole.getWorldPoint()[0],
-          connectedPole.getWorldPoint()[1] + POLE_HEIGHT_Y,
-          connectedPole.getWorldPoint()[2]
+          getBuildableWorldPoint(connectedPole)[0],
+          getBuildableWorldPoint(connectedPole)[1] + POLE_HEIGHT_Y,
+          getBuildableWorldPoint(connectedPole)[2]
         );
 
         // Calculate middle control point for the curve

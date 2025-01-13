@@ -8,14 +8,10 @@ import { nanoid } from "nanoid";
 import { HexGrid, HexGridSchema, type HexGridData } from "../lib/HexGrid";
 import { HexCell, TerrainType, Population } from "../lib/HexCell";
 import { HexCoordinates } from "../lib/HexCoordinates";
-import { PowerPole } from "../lib/PowerSystem";
-import { CoalPlant } from "../lib/PowerPlants/CoalPlant";
-import { Buildable, BuildableType } from "../lib/Buildable";
+import { PowerPole } from "../lib/buildables/PowerPole";
+import { CoalPlant } from "../lib/buildables/CoalPlant";
+import { Buildable, BuildableType } from "../lib/buildables/Buildable";
 import { CornerCoordinates } from "../lib/CornerCoordinates";
-
-export type BuildMode = null | {
-  type: BuildableType;
-};
 
 interface Player {
   name: string;

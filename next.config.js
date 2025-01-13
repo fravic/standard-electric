@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["actor-kit"],
+  transpilePackages: ["actor-kit", "three"],
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(frag|vert|glsl)$/,

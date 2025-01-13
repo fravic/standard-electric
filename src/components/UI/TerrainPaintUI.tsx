@@ -1,6 +1,6 @@
 import React from "react";
 import { TerrainType, Population } from "../../lib/HexCell";
-import { useGameStore } from "../../store/gameStore";
+import { GameContext } from "@/actor/game.context";
 
 const styles = {
   container: {
@@ -47,22 +47,24 @@ const styles = {
 };
 
 export const TerrainPaintUI: React.FC = () => {
-  const isDebug = useGameStore((state) => state.isDebug);
-  const isPaintbrushMode = useGameStore(
-    (state) => state.mapBuilder.isPaintbrushMode
+  const isDebug = GameContext.useSelector((state) => state.public.isDebug);
+  const isPaintbrushMode = GameContext.useSelector(
+    (state) => state.public.mapBuilder.isPaintbrushMode
   );
-  const selectedTerrainType = useGameStore(
-    (state) => state.mapBuilder.selectedTerrainType
+  const selectedTerrainType = GameContext.useSelector(
+    (state) => state.public.mapBuilder.selectedTerrainType
   );
-  const selectedPopulation = useGameStore(
-    (state) => state.mapBuilder.selectedPopulation
+  const selectedPopulation = GameContext.useSelector(
+    (state) => state.public.mapBuilder.selectedPopulation
   );
-  const setPaintbrushMode = useGameStore((state) => state.setPaintbrushMode);
-  const setSelectedTerrainType = useGameStore(
-    (state) => state.setSelectedTerrainType
+  const setPaintbrushMode = GameContext.useAction(
+    (state) => state.public.setPaintbrushMode
   );
-  const setSelectedPopulation = useGameStore(
-    (state) => state.setSelectedPopulation
+  const setSelectedTerrainType = GameContext.useAction(
+    (state) => state.public.setSelectedTerrainType
+  );
+  const setSelectedPopulation = GameContext.useAction(
+    (state) => state.public.setSelectedPopulation
   );
 
   if (!isDebug) return null;

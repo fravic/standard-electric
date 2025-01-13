@@ -6,10 +6,16 @@ import { useTexture } from "@react-three/drei";
 import waterVertexShader from "../../shaders/water.vert?raw";
 import waterFragmentShader from "../../shaders/water.frag?raw";
 
-import { HexCell, TerrainType } from "../../lib/HexCell";
+import {
+  getCenterPoint,
+  HexCell,
+  isUnderwater,
+  TerrainType,
+} from "../../lib/HexCell";
 import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
 import { HexMesh } from "../../lib/HexMesh";
-import { HexGrid } from "../../lib/HexGrid";
+import { getCell, HexGrid } from "../../lib/HexGrid";
+import { getNeighbor } from "@/lib/coordinates/HexCoordinates";
 
 interface HexGridWaterProps {
   cells: HexCell[];
@@ -23,8 +29,8 @@ export const HexGridWater = React.memo(function HexGridWater({
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {
-      if (cell.isUnderwater) {
-        const center = cell.centerPoint();
+      if (isUnderwater(cell)) {
+        const center = getCenterPoint(cell);
         for (let d = 0; d < 6; d++) {
           hexMesh.addTriangleWithUVs(
             center,
@@ -99,9 +105,11 @@ function cornerIsShoreline(
   dPrev: HexDirection,
   dNext: HexDirection
 ): boolean {
-  const neighborPrev = grid.getCell(cell.coordinates.getNeighbor(dPrev));
-  const neighborNext = grid.getCell(cell.coordinates.getNeighbor(dNext));
+  const neighborPrev = getCell(grid, getNeighbor(cell.coordinates, dPrev));
+  const neighborNext = getCell(grid, getNeighbor(cell.coordinates, dNext));
   return (
-    neighborPrev?.isUnderwater === false || neighborNext?.isUnderwater === false
+    ((neighborPrev && !isUnderwater(neighborPrev)) ||
+      (neighborNext && !isUnderwater(neighborNext))) ??
+    false
   );
 }

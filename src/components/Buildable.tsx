@@ -1,8 +1,8 @@
 import React from "react";
 import { Box } from "@react-three/drei";
 import { PowerPole } from "./PowerSystem/PowerPole";
-import { PowerPole as PowerPoleModel } from "../lib/PowerSystem";
-import { Buildable as BuildableType } from "../lib/Buildable";
+import { PowerPole as PowerPoleModel } from "../lib/buildables/PowerPole";
+import { Buildable as BuildableType } from "../lib/buildables/Buildable";
 
 interface BuildableProps {
   buildable: BuildableType;
