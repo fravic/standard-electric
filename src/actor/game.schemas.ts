@@ -10,14 +10,16 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     value: z.boolean(),
   }),
   z.object({
-    type: z.literal("JOIN_GAME"),
-  }),
-  z.object({
-    type: z.literal("LEAVE_GAME"),
+    type: z.literal("SELECT_HEX"),
+    coordinates: HexCoordinatesSchema,
   }),
   z.object({
     type: z.literal("ADD_BUILDABLE"),
-    buildable: BuildableSchema,
+    buildable: BuildableSchema.pick({
+      type: true,
+      coordinates: true,
+      cornerCoordinates: true,
+    }),
   }),
   z.object({
     type: z.literal("UPDATE_HEX_TERRAIN"),
@@ -28,6 +30,29 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     type: z.literal("UPDATE_HEX_POPULATION"),
     coordinates: HexCoordinatesSchema,
     population: z.nativeEnum(Population),
+  }),
+  z.object({
+    type: z.literal("SET_BUILD_MODE"),
+    buildMode: BuildableSchema.pick({
+      type: true,
+    }).nullable(),
+  }),
+  z.object({
+    type: z.literal("SET_PAINTBRUSH_MODE"),
+    paintbrushMode: z
+      .object({
+        terrainType: z.nativeEnum(TerrainType).nullable(),
+        population: z.nativeEnum(Population).nullable(),
+      })
+      .nullable(),
+  }),
+
+  // TODO
+  z.object({
+    type: z.literal("JOIN_GAME"),
+  }),
+  z.object({
+    type: z.literal("LEAVE_GAME"),
   }),
   z.object({
     type: z.literal("SET_HOVER_LOCATION"),

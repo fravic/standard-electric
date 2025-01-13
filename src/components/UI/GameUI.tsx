@@ -48,9 +48,7 @@ export const GameUI: React.FC = () => {
   const player = GameContext.useSelector(
     (state) => state.public.players[PLAYER_ID]
   );
-  const setBuildMode = GameContext.useAction(
-    (state) => state.public.setBuildMode
-  );
+  const sendGameEvent = GameContext.useSend();
 
   if (!player) return null;
 
@@ -66,12 +64,13 @@ export const GameUI: React.FC = () => {
               : {}),
           }}
           onClick={() =>
-            setBuildMode(
-              PLAYER_ID,
-              player.buildMode?.type === "power_pole"
-                ? null
-                : { type: "power_pole" }
-            )
+            sendGameEvent({
+              type: "SET_BUILD_MODE",
+              buildMode:
+                player.buildMode?.type === "power_pole"
+                  ? null
+                  : { type: "power_pole" },
+            })
           }
         >
           {player.buildMode?.type === "power_pole"
@@ -86,12 +85,13 @@ export const GameUI: React.FC = () => {
               : {}),
           }}
           onClick={() =>
-            setBuildMode(
-              PLAYER_ID,
-              player.buildMode?.type === "coal_plant"
-                ? null
-                : { type: "coal_plant" }
-            )
+            sendGameEvent({
+              type: "SET_BUILD_MODE",
+              buildMode:
+                player.buildMode?.type === "coal_plant"
+                  ? null
+                  : { type: "coal_plant" },
+            })
           }
         >
           {player.buildMode?.type === "coal_plant"

@@ -1,5 +1,9 @@
 import React from "react";
 import { TerrainType, Population } from "../../lib/HexCell";
+import { GameContext } from "@/actor/game.context";
+import { PLAYER_ID } from "@/lib/constants";
+import * as HexGridService from "@/lib/HexGrid";
+import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
 
 const styles = {
   container: {
@@ -28,26 +32,29 @@ const styles = {
 };
 
 export function HexDetailsUI() {
-  /*
-  const players = useGameStore((state) => state.players);
-  const buildables = useGameStore((state) => state.buildables);
-  // For now, just use the first player
-  const playerId = Object.keys(players)[0];
-  const selectedHexCoordinates = players[playerId]?.selectedHexCoordinates;
-  const hexGrid = useGameStore((state) => state.hexGrid);*/
+  const selectedHexCoordinates = GameContext.useSelector(
+    (state) => state.public.players[PLAYER_ID].selectedHexCoordinates
+  );
+  const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
+  const buildables = GameContext.useSelector(
+    (state) => state.public.buildables
+  );
+  const players = GameContext.useSelector((state) => state.public.players);
 
   if (!selectedHexCoordinates) {
     return null;
   }
 
-  const cell = hexGrid.getCell(selectedHexCoordinates);
+  const cell = HexGridService.getCell(hexGrid, selectedHexCoordinates);
   if (!cell) {
     return null;
   }
 
   // Find any power plants on this hex
   const powerPlant = buildables.find(
-    (b) => b.coordinates && b.coordinates.equals(selectedHexCoordinates)
+    (b) =>
+      b.coordinates &&
+      HexCoordinatesService.equals(b.coordinates, selectedHexCoordinates)
   );
 
   return (

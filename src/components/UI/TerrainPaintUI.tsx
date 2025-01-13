@@ -57,15 +57,7 @@ export const TerrainPaintUI: React.FC = () => {
   const selectedPopulation = GameContext.useSelector(
     (state) => state.public.mapBuilder.selectedPopulation
   );
-  const setPaintbrushMode = GameContext.useAction(
-    (state) => state.public.setPaintbrushMode
-  );
-  const setSelectedTerrainType = GameContext.useAction(
-    (state) => state.public.setSelectedTerrainType
-  );
-  const setSelectedPopulation = GameContext.useAction(
-    (state) => state.public.setSelectedPopulation
-  );
+  const sendGameEvent = GameContext.useSend();
 
   if (!isDebug) return null;
 
@@ -76,7 +68,20 @@ export const TerrainPaintUI: React.FC = () => {
           <input
             type="checkbox"
             checked={isPaintbrushMode}
-            onChange={(e) => setPaintbrushMode(e.target.checked)}
+            onChange={(e) =>
+              e.target.checked
+                ? sendGameEvent({
+                    type: "SET_PAINTBRUSH_MODE",
+                    paintbrushMode: {
+                      terrainType: selectedTerrainType,
+                      population: selectedPopulation,
+                    },
+                  })
+                : sendGameEvent({
+                    type: "SET_PAINTBRUSH_MODE",
+                    paintbrushMode: null,
+                  })
+            }
           />
           <span style={styles.label}>Paintbrush Mode</span>
         </label>
@@ -96,10 +101,13 @@ export const TerrainPaintUI: React.FC = () => {
                       : {}),
                   }}
                   onClick={() => {
-                    setSelectedTerrainType(
-                      selectedTerrainType === type ? null : type
-                    );
-                    setSelectedPopulation(null);
+                    sendGameEvent({
+                      type: "SET_PAINTBRUSH_MODE",
+                      paintbrushMode: {
+                        terrainType: type,
+                        population: selectedPopulation,
+                      },
+                    });
                   }}
                 >
                   {type}
@@ -122,10 +130,13 @@ export const TerrainPaintUI: React.FC = () => {
                           : {}),
                       }}
                       onClick={() => {
-                        setSelectedPopulation(
-                          selectedPopulation === value ? null : value
-                        );
-                        setSelectedTerrainType(null);
+                        sendGameEvent({
+                          type: "SET_PAINTBRUSH_MODE",
+                          paintbrushMode: {
+                            terrainType: selectedTerrainType,
+                            population: value,
+                          },
+                        });
                       }}
                     >
                       {name}

@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 
 import { HexCell, TerrainType, Population } from "@/lib/HexCell";
-import { HexCoordinates } from "@/lib/coordinates/types";
+import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
 import { createCornerCoordinates } from "@/lib/coordinates/CornerCoordinates";
 import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
@@ -34,7 +34,10 @@ interface HexGridChunkProps {
     zStart: number;
   };
   grid: HexGrid;
-  onCellClick: (coordinates: HexCoordinates) => void;
+  onCellClick: (
+    coordinates: HexCoordinates,
+    nearestCorner: CornerCoordinates | null
+  ) => void;
   debug?: boolean;
 }
 
@@ -50,6 +53,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const buildables = GameContext.useSelector(
     (state) => state.public.buildables ?? []
   );
+  const sendGameEvent = GameContext.useSend();
 
   const validCoordinates = useMemo(() => {
     const coordinates: HexCoordinates[] = [];
@@ -65,8 +69,6 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return coordinates;
   }, [chunk]);
 
-  /*
-
   const ghostBuildable = useMemo(() => {
     const hoverLocation = GameContext.useSelector(
       (state) => state.public.players[PLAYER_ID].hoverLocation
@@ -80,11 +82,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     );
 
     if (buildMode.type === "power_pole") {
-      const nearestCorner = getNearestCornerInChunk(
-        point,
-        validCoordinates,
-        createCornerCoordinates
-      );
+      const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
       if (nearestCorner) {
         const ghostPole = createPowerPole(
           "ghost",
@@ -110,7 +108,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
   const handleHover = useCallback((event: ThreeEvent<PointerEvent>) => {
     const point = event.point;
-    GameContext.send<GameEvent>({
+    sendGameEvent({
       type: "SET_HOVER_LOCATION",
       playerId: PLAYER_ID,
       worldPoint: [point.x, point.y, point.z],
@@ -125,34 +123,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
       if (!isValidCoord) return;
 
-      if (buildMode?.type === "power_pole") {
-        const nearestCorner = getNearestCornerInChunk(
-          point,
-          validCoordinates,
-          createCornerCoordinates
-        );
-        if (nearestCorner) {
-          GameContext.send<GameEvent>({
-            type: "ADD_BUILDABLE",
-            buildable: {
-              type: "power_pole",
-              cornerCoordinates: nearestCorner,
-              playerId: PLAYER_ID,
-            },
-          });
-        }
-      } else if (buildMode?.type === "coal_plant") {
-        GameContext.send<GameEvent>({
-          type: "ADD_BUILDABLE",
-          buildable: {
-            type: "coal_plant",
-            coordinates: coords,
-            playerId: PLAYER_ID,
-          },
-        });
-      } else {
-        onCellClick(coords);
-      }
+      const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
+
+      onCellClick(coords, nearestCorner);
     },
     [buildMode, validCoordinates, onCellClick]
   );
@@ -160,14 +133,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const handleCellUpdate = useCallback(
     (coordinates: HexCoordinates, updates: Partial<HexCell>) => {
       if (updates.terrainType !== undefined) {
-        GameContext.send<GameEvent>({
+        sendGameEvent({
           type: "UPDATE_HEX_TERRAIN",
           coordinates,
           terrainType: updates.terrainType,
         });
       }
       if (updates.population !== undefined) {
-        GameContext.send<GameEvent>({
+        sendGameEvent({
           type: "UPDATE_HEX_POPULATION",
           coordinates,
           population: updates.population,
@@ -176,7 +149,6 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     },
     []
   );
-  */
 
   const cells = useMemo(() => {
     return validCoordinates
@@ -205,12 +177,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     <group>
       <HexGridTerrain
         cells={cells}
-        // onClick={handleClick}
-        // onHover={handleHover}
-        // onUpdateCell={handleCellUpdate}
-        onClick={() => {}}
-        onHover={() => {}}
-        onUpdateCell={() => {}}
+        onClick={handleClick}
+        onUpdateCell={handleCellUpdate}
+        onHover={handleHover}
         debug={debug}
       />
       <HexGridWater cells={cells} grid={grid} />
@@ -218,7 +187,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       {chunkBuildables.map((buildable) => (
         <Buildable key={buildable.id} buildable={buildable} />
       ))}
-      {/* ghostBuildable && <Buildable buildable={ghostBuildable} /> */}
+      {ghostBuildable && <Buildable buildable={ghostBuildable} />}
     </group>
   );
 });

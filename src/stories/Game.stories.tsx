@@ -2,6 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { withActorKit } from "actor-kit/storybook";
 import { createActorKitMockClient } from "actor-kit/test";
+import { action } from "@storybook/addon-actions";
 
 import { Game } from "../components/Game";
 import { GameContext } from "@/actor/game.context";
@@ -50,7 +51,7 @@ export const Interactive: Story = {
           },
           time: {
             totalTicks: 0,
-            isPaused: true,
+            isPaused: false,
           },
           buildables: [],
           hexGrid: hexGrid as HexGrid,
@@ -58,6 +59,10 @@ export const Interactive: Story = {
         private: {},
         value: { game: "ready" },
       },
+    });
+
+    client.subscribe((snapshot) => {
+      action("game-state-change")(snapshot);
     });
 
     await mount(

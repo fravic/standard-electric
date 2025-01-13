@@ -4,6 +4,9 @@ import { produce } from "immer";
 
 import { HexGrid, HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
+import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
+import { Buildable } from "@/lib/buildables/Buildable";
+import { PLAYER_ID } from "@/lib/constants";
 
 export const gameMachine = setup({
   types: {
@@ -24,6 +27,20 @@ export const gameMachine = setup({
         draft.hexGrid = hexGrid;
       }),
     })),
+    selectHex: assign(
+      ({ context }, { coordinates }: { coordinates: HexCoordinates }) => ({
+        public: produce(context.public, (draft) => {
+          draft.players[PLAYER_ID].selectedHexCoordinates = coordinates;
+        }),
+      })
+    ),
+    addBuildable: assign(
+      ({ context }, { buildable }: { buildable: Buildable }) => ({
+        public: produce(context.public, (draft) => {
+          draft.buildables.push(buildable);
+        }),
+      })
+    ),
   },
 }).createMachine({
   id: "game",
@@ -92,7 +109,22 @@ export const gameMachine = setup({
             },
           },
         },
-        ready: {},
+        ready: {
+          on: {
+            SELECT_HEX: {
+              actions: {
+                type: "selectHex",
+                params: ({
+                  event,
+                }: {
+                  event: Extract<GameEvent, { type: "SELECT_HEX" }>;
+                }) => ({
+                  coordinates: event.coordinates,
+                }),
+              },
+            },
+          },
+        },
         error: {},
       },
       on: {

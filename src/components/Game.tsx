@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 import { HexDetailsUI } from "./HexGrid/HexDetailsUI";
@@ -11,9 +13,9 @@ export function Game(): JSX.Element {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <GameCanvas />
+      <GameUI />
+      <HexDetailsUI />
       {isDebug && <FPSCounter />}
-      {/* <GameUI /> */}
-      {/* <HexDetailsUI /> */}
     </div>
   );
 }

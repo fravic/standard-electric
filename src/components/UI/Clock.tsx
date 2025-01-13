@@ -88,9 +88,6 @@ export function Clock() {
   const { totalTicks, isPaused } = GameContext.useSelector(
     (state) => state.public.time
   );
-  const togglePause = GameContext.useAction(
-    (state) => state.public.togglePause
-  );
 
   // Calculate current cycle and tick
   const currentCycle = Math.floor(totalTicks / TICKS_PER_CYCLE) + 1;
@@ -129,9 +126,6 @@ export function Clock() {
         />
       </div>
       <div style={styles.controls}>
-        <button style={styles.button} onClick={togglePause}>
-          {isPaused ? "▶" : "⏸"}
-        </button>
         <div>
           Cycle {currentCycle}, Hour {currentTick + 1}
           {isNight ? " 🌙" : " ☀️"}

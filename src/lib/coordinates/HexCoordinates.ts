@@ -4,8 +4,8 @@ import {
   HexCoordinates,
   HexCoordinatesSchema,
   CornerCoordinates,
-  CornerPosition,
 } from "./types";
+import * as CornerCoordinatesService from "./CornerCoordinates";
 
 export { HexCoordinatesSchema };
 export type { HexCoordinates };
@@ -120,11 +120,7 @@ export function equals(a: HexCoordinates, b: HexCoordinates): boolean {
 
 export function getNearestCornerInChunk(
   point: THREE.Vector3,
-  chunkCoordinates: HexCoordinates[],
-  createCorner: (
-    hex: HexCoordinates,
-    position: CornerPosition
-  ) => CornerCoordinates
+  chunkCoordinates: HexCoordinates[]
 ): CornerCoordinates | null {
   const cell = fromWorldPoint([point.x, point.y, point.z]);
   const matchingCoordinates = chunkCoordinates.find(
@@ -150,21 +146,11 @@ export function getNearestCornerInChunk(
     }
 
     if (nearestDirection !== null) {
-      return createCorner(cell, directionToCornerPosition(nearestDirection));
+      return CornerCoordinatesService.fromHexAndDirection(
+        cell,
+        nearestDirection
+      );
     }
   }
   return null;
-}
-
-function directionToCornerPosition(direction: HexDirection): CornerPosition {
-  switch (direction) {
-    case HexDirection.NW:
-    case HexDirection.NE:
-      return CornerPosition.North;
-    case HexDirection.SE:
-    case HexDirection.SW:
-      return CornerPosition.South;
-    default:
-      throw new Error(`Invalid direction for corner position: ${direction}`);
-  }
 }
