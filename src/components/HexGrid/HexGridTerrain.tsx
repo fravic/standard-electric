@@ -18,7 +18,7 @@ import {
 } from "@/lib/HexCell";
 import { HexMesh } from "@/lib/HexMesh";
 import { HexMetrics } from "@/lib/HexMetrics";
-import { GameContext } from "@/actor/game.context";
+import { useClientStore } from "@/lib/clientState";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -38,14 +38,14 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   onUpdateCell,
   debug = false,
 }: HexGridTerrainProps) {
-  const isPaintbrushMode = GameContext.useSelector(
-    (state) => state.public.mapBuilder.isPaintbrushMode
+  const isPaintbrushMode = useClientStore(
+    (state) => state.mapBuilder.isPaintbrushMode
   );
-  const selectedTerrainType = GameContext.useSelector(
-    (state) => state.public.mapBuilder.selectedTerrainType
+  const selectedTerrainType = useClientStore(
+    (state) => state.mapBuilder.selectedTerrainType
   );
-  const selectedPopulation = GameContext.useSelector(
-    (state) => state.public.mapBuilder.selectedPopulation
+  const selectedPopulation = useClientStore(
+    (state) => state.mapBuilder.selectedPopulation
   );
 
   const debouncedOnHover = useMemo(

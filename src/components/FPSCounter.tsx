@@ -13,7 +13,7 @@ interface FPSCounterStyles {
   zIndex: number;
 }
 
-export function FPSCounter(): JSX.Element {
+export function FPSCounter(): React.ReactNode {
   const [fps, setFps] = useState<number>(0);
 
   useEffect(() => {

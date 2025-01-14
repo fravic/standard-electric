@@ -2,14 +2,14 @@
 
 import React from "react";
 
-import { HexDetailsUI } from "./HexGrid/HexDetailsUI";
+import { HexDetailsUI } from "./UI/HexDetailsUI";
 import { FPSCounter } from "./FPSCounter";
 import { GameUI } from "./UI/GameUI";
-import { GameContext } from "@/actor/game.context";
 import { GameCanvas } from "./GameCanvas";
+import { useClientStore } from "@/lib/clientState";
 
-export function Game(): JSX.Element {
-  const isDebug = GameContext.useSelector((state) => state.public.isDebug);
+export function Game(): React.ReactNode {
+  const isDebug = useClientStore((state) => state.isDebug);
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <GameCanvas />

@@ -1,9 +1,9 @@
 import React from "react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { GameContext } from "@/actor/game.context";
-import { PLAYER_ID } from "@/lib/constants";
 import * as HexGridService from "@/lib/HexGrid";
 import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
+import { useClientStore } from "@/lib/clientState";
 
 const styles = {
   container: {
@@ -32,8 +32,8 @@ const styles = {
 };
 
 export function HexDetailsUI() {
-  const selectedHexCoordinates = GameContext.useSelector(
-    (state) => state.public.players[PLAYER_ID].selectedHexCoordinates
+  const selectedHexCoordinates = useClientStore(
+    (state) => state.selectedHexCoordinates
   );
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const buildables = GameContext.useSelector(
@@ -61,7 +61,8 @@ export function HexDetailsUI() {
     <div style={styles.container}>
       <div>
         <span style={styles.label}>
-          {cell.stateInfo?.name} {selectedHexCoordinates.toString()}
+          {cell.stateInfo?.name}{" "}
+          {HexCoordinatesService.coordinatesToString(selectedHexCoordinates)}
         </span>
       </div>
       <div>

@@ -1,26 +1,18 @@
-import React, { useMemo } from "react";
-import {
-  getNearestCornerInChunk,
-  HexCoordinates,
-} from "@/lib/coordinates/HexCoordinates";
+import React from "react";
+import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { HexGridChunk } from "./HexGridChunk";
 import { GameContext } from "@/actor/game.context";
 import { HexMetrics } from "@/lib/HexMetrics";
-import { PLAYER_ID } from "@/lib/constants";
-import { GameEvent } from "@/actor/game.types";
-import {
-  CornerCoordinates,
-  createCornerCoordinates,
-} from "@/lib/coordinates/CornerCoordinates";
+import { CornerCoordinates } from "@/lib/coordinates/CornerCoordinates";
+import { useClientStore } from "@/lib/clientState";
 
 interface HexGridProps {}
 
 export function HexGrid({}: HexGridProps) {
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
-  const isDebug = GameContext.useSelector((state) => state.public.isDebug);
-  const buildMode = GameContext.useSelector(
-    (state) => state.public.players[PLAYER_ID].buildMode
-  );
+  const isDebug = useClientStore((state) => state.isDebug);
+  const buildMode = useClientStore((state) => state.buildMode);
+  const selectHex = useClientStore((state) => state.selectHex);
   const sendGameEvent = GameContext.useSend();
 
   const chunkCountX = Math.ceil(hexGrid.width / HexMetrics.chunkSizeX);
@@ -49,10 +41,7 @@ export function HexGrid({}: HexGridProps) {
         },
       });
     } else {
-      sendGameEvent({
-        type: "SELECT_HEX",
-        coordinates,
-      });
+      selectHex(coordinates);
     }
   };
 

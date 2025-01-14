@@ -28,25 +28,16 @@ const meta: Meta<typeof Game> = {
 export default meta;
 type Story = StoryObj<typeof Game>;
 
-export const Interactive: Story = {
+export const Entry: Story = {
   play: async ({ canvasElement, mount }) => {
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
-          isDebug: true,
-          mapBuilder: {
-            isPaintbrushMode: false,
-            selectedTerrainType: null,
-            selectedPopulation: null,
-          },
           players: {
             [PLAYER_ID]: {
               name: "Player 1",
               money: 10,
-              buildMode: null,
-              hoverLocation: null,
-              selectedHexCoordinates: null,
             },
           },
           time: {

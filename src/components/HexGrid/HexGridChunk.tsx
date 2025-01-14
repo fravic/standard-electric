@@ -27,6 +27,7 @@ import { GameEvent } from "@/actor/game.types";
 import { Buildable } from "../Buildable";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { HexMetrics } from "@/lib/HexMetrics";
+import { useClientStore } from "@/lib/clientState";
 
 interface HexGridChunkProps {
   chunk: {
@@ -47,9 +48,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   onCellClick,
   debug = false,
 }: HexGridChunkProps) {
-  const buildMode = GameContext.useSelector(
-    (state) => state.public.players[PLAYER_ID].buildMode
-  );
+  const buildMode = useClientStore((state) => state.buildMode);
+  const hoverLocation = useClientStore((state) => state.hoverLocation);
+  const setHoverLocation = useClientStore((state) => state.setHoverLocation);
   const buildables = GameContext.useSelector(
     (state) => state.public.buildables ?? []
   );
@@ -70,9 +71,6 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   }, [chunk]);
 
   const ghostBuildable = useMemo(() => {
-    const hoverLocation = GameContext.useSelector(
-      (state) => state.public.players[PLAYER_ID].hoverLocation
-    );
     if (!hoverLocation || !buildMode) return null;
 
     const point = new THREE.Vector3(
@@ -104,15 +102,11 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       }
     }
     return null;
-  }, [buildMode, validCoordinates, buildables]);
+  }, [buildMode, validCoordinates, buildables, hoverLocation]);
 
   const handleHover = useCallback((event: ThreeEvent<PointerEvent>) => {
     const point = event.point;
-    sendGameEvent({
-      type: "SET_HOVER_LOCATION",
-      playerId: PLAYER_ID,
-      worldPoint: [point.x, point.y, point.z],
-    });
+    setHoverLocation([point.x, point.y, point.z]);
   }, []);
 
   const handleClick = useCallback(

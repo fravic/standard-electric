@@ -5,6 +5,7 @@ import { PowerPole as PowerPoleModel } from "../../lib/buildables/PowerPole";
 import { cloneAndPrepareMesh } from "../../lib/gltfUtils";
 import { GameContext } from "@/actor/game.context";
 import { getBuildableWorldPoint } from "@/lib/buildables/Buildable";
+
 interface PowerPoleProps {
   pole: PowerPoleModel;
   isGhost?: boolean;
