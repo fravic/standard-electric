@@ -1,23 +1,20 @@
-import { BuildableSchema } from "./Buildable";
-import {
-  HexCoordinates,
-  HexCoordinatesSchema,
-} from "../coordinates/HexCoordinates";
+import { HexCoordinates } from "../coordinates/HexCoordinates";
 import { z } from "zod";
-
-export const CoalPlantSchema = BuildableSchema.extend({
-  type: z.literal("coal_plant"),
-  coordinates: HexCoordinatesSchema,
-});
+import { CoalPlantSchema } from "./schemas";
 
 export type CoalPlant = z.infer<typeof CoalPlantSchema>;
 
-export function createCoalPlant(
-  id: string,
-  coordinates: HexCoordinates,
-  playerId: string,
-  isGhost?: boolean
-): CoalPlant {
+export function createCoalPlant({
+  id,
+  coordinates,
+  playerId,
+  isGhost,
+}: {
+  id: string;
+  coordinates: HexCoordinates;
+  playerId: string;
+  isGhost?: boolean;
+}): CoalPlant {
   return {
     id,
     type: "coal_plant",

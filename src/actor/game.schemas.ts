@@ -22,14 +22,6 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     coordinates: HexCoordinatesSchema,
     population: z.nativeEnum(Population),
   }),
-
-  // TODO
-  z.object({
-    type: z.literal("JOIN_GAME"),
-  }),
-  z.object({
-    type: z.literal("LEAVE_GAME"),
-  }),
 ]);
 
 export const GameServiceEventSchema = z.discriminatedUnion("type", [

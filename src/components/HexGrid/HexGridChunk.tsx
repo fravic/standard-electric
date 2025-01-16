@@ -13,7 +13,7 @@ import { PLAYER_ID } from "@/lib/constants";
 import {
   PowerPole,
   createPowerPole,
-  createPowerPoleConnections,
+  findPossibleConnectionsForCoordinates,
 } from "@/lib/buildables/PowerPole";
 import { createCoalPlant } from "@/lib/buildables/CoalPlant";
 import {
@@ -22,7 +22,6 @@ import {
   fromWorldPoint,
   getNearestCornerInChunk,
 } from "@/lib/coordinates/HexCoordinates";
-import { GameEvent } from "@/actor/game.types";
 
 import { Buildable } from "../Buildable";
 import { PowerLines } from "../PowerSystem/PowerLines";
@@ -82,23 +81,30 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     if (buildMode.type === "power_pole") {
       const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
       if (nearestCorner) {
-        const ghostPole = createPowerPole(
-          "ghost",
-          nearestCorner,
-          PLAYER_ID,
-          true
-        );
-        // Create connections with existing power poles
         const otherPoles = buildables.filter(
           (b): b is PowerPole => b.type === "power_pole"
         );
-        createPowerPoleConnections(ghostPole, otherPoles);
+        const ghostPole = createPowerPole({
+          id: "ghost",
+          cornerCoordinates: nearestCorner,
+          playerId: PLAYER_ID,
+          connectedToIds: findPossibleConnectionsForCoordinates(
+            nearestCorner,
+            otherPoles
+          ),
+          isGhost: true,
+        });
         return ghostPole;
       }
     } else if (buildMode.type === "coal_plant") {
       const coords = fromWorldPoint([point.x, point.y, point.z]);
       if (validCoordinates.some((c) => equals(c, coords))) {
-        return createCoalPlant("ghost", coords, PLAYER_ID, true);
+        return createCoalPlant({
+          id: "ghost",
+          coordinates: coords,
+          playerId: PLAYER_ID,
+          isGhost: true,
+        });
       }
     }
     return null;
