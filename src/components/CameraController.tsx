@@ -36,7 +36,7 @@ interface KeyMap {
   [key: string]: boolean;
 }
 
-export function CameraController(): JSX.Element | null {
+export function CameraController(): React.ReactNode {
   const { camera, controls } = useThree();
   const keys = useRef<KeyMap>({});
   const lastTime = useRef<number>(performance.now());

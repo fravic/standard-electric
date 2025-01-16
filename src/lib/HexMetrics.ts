@@ -1,4 +1,4 @@
-import { Vertex } from "./HexCoordinates";
+import { Vertex } from "./types";
 
 export class HexMetrics {
   static readonly outerRadius = 1;

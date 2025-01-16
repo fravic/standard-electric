@@ -1,6 +1,6 @@
 import React from "react";
-import { useGameStore } from "../../store/gameStore";
-import { TICKS_PER_CYCLE } from "../../store/constants";
+import { TICKS_PER_CYCLE } from "@/lib/constants";
+import { GameContext } from "@/actor/game.context";
 
 const CLOCK_SIZE = 80;
 const CENTER = CLOCK_SIZE / 2;
@@ -85,8 +85,9 @@ function getTickStyle(hour: number) {
 }
 
 export function Clock() {
-  const { totalTicks, isPaused } = useGameStore((state) => state.time);
-  const togglePause = useGameStore((state) => state.togglePause);
+  const { totalTicks, isPaused } = GameContext.useSelector(
+    (state) => state.public.time
+  );
 
   // Calculate current cycle and tick
   const currentCycle = Math.floor(totalTicks / TICKS_PER_CYCLE) + 1;
@@ -125,9 +126,6 @@ export function Clock() {
         />
       </div>
       <div style={styles.controls}>
-        <button style={styles.button} onClick={togglePause}>
-          {isPaused ? "▶" : "⏸"}
-        </button>
         <div>
           Cycle {currentCycle}, Hour {currentTick + 1}
           {isNight ? " 🌙" : " ☀️"}

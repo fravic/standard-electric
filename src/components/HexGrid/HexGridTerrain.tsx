@@ -4,11 +4,21 @@ import * as THREE from "three";
 import { Text } from "@react-three/drei";
 import { debounce } from "lodash";
 
-import { HexCoordinates } from "../../lib/HexCoordinates";
-import { HexCell, TerrainType, Population } from "../../lib/HexCell";
-import { HexMesh } from "../../lib/HexMesh";
-import { HexMetrics } from "../../lib/HexMetrics";
-import { useGameStore } from "../../store/gameStore";
+import {
+  coordinatesToString,
+  fromWorldPoint,
+  HexCoordinates,
+} from "@/lib/coordinates/HexCoordinates";
+import {
+  HexCell,
+  Population,
+  getColor,
+  getCenterPoint,
+  isUnderwater,
+} from "@/lib/HexCell";
+import { HexMesh } from "@/lib/HexMesh";
+import { HexMetrics } from "@/lib/HexMetrics";
+import { useClientStore } from "@/lib/clientState";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -28,13 +38,13 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   onUpdateCell,
   debug = false,
 }: HexGridTerrainProps) {
-  const isPaintbrushMode = useGameStore(
+  const isPaintbrushMode = useClientStore(
     (state) => state.mapBuilder.isPaintbrushMode
   );
-  const selectedTerrainType = useGameStore(
+  const selectedTerrainType = useClientStore(
     (state) => state.mapBuilder.selectedTerrainType
   );
-  const selectedPopulation = useGameStore(
+  const selectedPopulation = useClientStore(
     (state) => state.mapBuilder.selectedPopulation
   );
 
@@ -60,11 +70,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
       ) {
         // Get intersection point from the event
         const point = event.point;
-        const hexCoords = HexCoordinates.fromWorldPoint([
-          point.x,
-          point.y,
-          point.z,
-        ]);
+        const hexCoords = fromWorldPoint([point.x, point.y, point.z]);
 
         const updates: Partial<HexCell> = {};
         if (selectedTerrainType) {
@@ -104,10 +110,10 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   const { terrainGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {
-      const center = cell.centerPoint();
-      const color = cell.color();
+      const center = getCenterPoint(cell);
+      const color = getColor(cell);
       for (let d = 0; d < 6; d++) {
-        if (!cell.isUnderwater) {
+        if (!isUnderwater(cell)) {
           hexMesh.addTriangle(
             center,
             HexMetrics.getFirstCorner(center, d),
@@ -147,16 +153,16 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
       />
       {debug &&
         cells.map((cell) => {
-          const [x, y, z] = cell.centerPoint();
+          const [x, y, z] = getCenterPoint(cell);
           return (
             <Text
-              key={cell.coordinates.toString()}
+              key={coordinatesToString(cell.coordinates)}
               position={[x, y + 0.1, z]}
               rotation={[-Math.PI / 2, 0, 0]}
               fontSize={0.2}
               color="black"
             >
-              {`${cell.coordinates.toString()}${
+              {`${coordinatesToString(cell.coordinates)}${
                 cell.population !== Population.Unpopulated
                   ? `\n${Population[cell.population]}`
                   : ""

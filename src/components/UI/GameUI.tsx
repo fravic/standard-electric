@@ -1,9 +1,10 @@
 import React from "react";
-import { useGameStore } from "../../store/gameStore";
-import { HexDetailsUI } from "../HexGrid/HexDetailsUI";
+import { HexDetailsUI } from "./HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { Clock } from "./Clock";
-import { PLAYER_ID } from "../../store/constants";
+import { PLAYER_ID } from "../../lib/constants";
+import { GameContext } from "@/actor/game.context";
+import { useClientStore } from "@/lib/clientState";
 
 const styles = {
   buildContainer: {
@@ -45,10 +46,11 @@ const styles = {
 };
 
 export const GameUI: React.FC = () => {
-  const player = useGameStore((state) => state.players[PLAYER_ID]);
-  const setBuildMode = useGameStore((state) => state.setBuildMode);
-
-  if (!player) return null;
+  const player = GameContext.useSelector(
+    (state) => state.public.players[PLAYER_ID]
+  );
+  const setBuildMode = useClientStore((state) => state.setBuildMode);
+  const buildMode = useClientStore((state) => state.buildMode);
 
   return (
     <>
@@ -57,40 +59,30 @@ export const GameUI: React.FC = () => {
         <button
           style={{
             ...styles.button,
-            ...(player.buildMode?.type === "power_pole"
-              ? styles.activeButton
-              : {}),
+            ...(buildMode?.type === "power_pole" ? styles.activeButton : {}),
           }}
           onClick={() =>
-            setBuildMode(
-              PLAYER_ID,
-              player.buildMode?.type === "power_pole"
-                ? null
-                : { type: "power_pole" }
-            )
+            buildMode?.type === "power_pole"
+              ? setBuildMode(null)
+              : setBuildMode({ type: "power_pole" })
           }
         >
-          {player.buildMode?.type === "power_pole"
+          {buildMode?.type === "power_pole"
             ? "Exit Build Mode"
             : "Build Power Pole ($1)"}
         </button>
         <button
           style={{
             ...styles.button,
-            ...(player.buildMode?.type === "coal_plant"
-              ? styles.activeButton
-              : {}),
+            ...(buildMode?.type === "coal_plant" ? styles.activeButton : {}),
           }}
           onClick={() =>
-            setBuildMode(
-              PLAYER_ID,
-              player.buildMode?.type === "coal_plant"
-                ? null
-                : { type: "coal_plant" }
-            )
+            buildMode?.type === "coal_plant"
+              ? setBuildMode(null)
+              : setBuildMode({ type: "coal_plant" })
           }
         >
-          {player.buildMode?.type === "coal_plant"
+          {buildMode?.type === "coal_plant"
             ? "Exit Build Mode"
             : "Build Coal Plant ($5)"}
         </button>
