@@ -1,7 +1,9 @@
 import React from "react";
-import { useGameStore } from "../../store/gameStore";
 import { TerrainType, Population } from "../../lib/HexCell";
-import { CoalPlant } from "../../lib/PowerPlants/CoalPlant";
+import { GameContext } from "@/actor/game.context";
+import * as HexGridService from "@/lib/HexGrid";
+import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
+import { useClientStore } from "@/lib/clientState";
 
 const styles = {
   container: {
@@ -30,32 +32,37 @@ const styles = {
 };
 
 export function HexDetailsUI() {
-  const players = useGameStore((state) => state.players);
-  const buildables = useGameStore((state) => state.buildables);
-  // For now, just use the first player
-  const playerId = Object.keys(players)[0];
-  const selectedHexCoordinates = players[playerId]?.selectedHexCoordinates;
-  const hexGrid = useGameStore((state) => state.hexGrid);
+  const selectedHexCoordinates = useClientStore(
+    (state) => state.selectedHexCoordinates
+  );
+  const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
+  const buildables = GameContext.useSelector(
+    (state) => state.public.buildables
+  );
+  const players = GameContext.useSelector((state) => state.public.players);
 
   if (!selectedHexCoordinates) {
     return null;
   }
 
-  const cell = hexGrid.getCell(selectedHexCoordinates);
+  const cell = HexGridService.getCell(hexGrid, selectedHexCoordinates);
   if (!cell) {
     return null;
   }
 
   // Find any power plants on this hex
   const powerPlant = buildables.find(
-    (b) => b.coordinates && b.coordinates.equals(selectedHexCoordinates)
+    (b) =>
+      b.coordinates &&
+      HexCoordinatesService.equals(b.coordinates, selectedHexCoordinates)
   );
 
   return (
     <div style={styles.container}>
       <div>
         <span style={styles.label}>
-          {cell.stateInfo?.name} {selectedHexCoordinates.toString()}
+          {cell.stateInfo?.name}{" "}
+          {HexCoordinatesService.coordinatesToString(selectedHexCoordinates)}
         </span>
       </div>
       <div>

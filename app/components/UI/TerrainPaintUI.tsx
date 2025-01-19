@@ -1,6 +1,6 @@
 import React from "react";
 import { TerrainType, Population } from "../../lib/HexCell";
-import { useGameStore } from "../../store/gameStore";
+import { useClientStore } from "@/lib/clientState";
 
 const styles = {
   container: {
@@ -47,21 +47,21 @@ const styles = {
 };
 
 export const TerrainPaintUI: React.FC = () => {
-  const isDebug = useGameStore((state) => state.isDebug);
-  const isPaintbrushMode = useGameStore(
+  const isDebug = useClientStore((state) => state.isDebug);
+  const isPaintbrushMode = useClientStore(
     (state) => state.mapBuilder.isPaintbrushMode
   );
-  const selectedTerrainType = useGameStore(
+  const selectedTerrainType = useClientStore(
     (state) => state.mapBuilder.selectedTerrainType
   );
-  const selectedPopulation = useGameStore(
+  const selectedPopulation = useClientStore(
     (state) => state.mapBuilder.selectedPopulation
   );
-  const setPaintbrushMode = useGameStore((state) => state.setPaintbrushMode);
-  const setSelectedTerrainType = useGameStore(
+  const setPaintbrushMode = useClientStore((state) => state.setPaintbrushMode);
+  const setSelectedTerrainType = useClientStore(
     (state) => state.setSelectedTerrainType
   );
-  const setSelectedPopulation = useGameStore(
+  const setSelectedPopulation = useClientStore(
     (state) => state.setSelectedPopulation
   );
 
@@ -74,7 +74,11 @@ export const TerrainPaintUI: React.FC = () => {
           <input
             type="checkbox"
             checked={isPaintbrushMode}
-            onChange={(e) => setPaintbrushMode(e.target.checked)}
+            onChange={(e) =>
+              e.target.checked
+                ? setPaintbrushMode(true)
+                : setPaintbrushMode(false)
+            }
           />
           <span style={styles.label}>Paintbrush Mode</span>
         </label>
@@ -94,10 +98,7 @@ export const TerrainPaintUI: React.FC = () => {
                       : {}),
                   }}
                   onClick={() => {
-                    setSelectedTerrainType(
-                      selectedTerrainType === type ? null : type
-                    );
-                    setSelectedPopulation(null);
+                    setSelectedTerrainType(type);
                   }}
                 >
                   {type}
@@ -120,10 +121,7 @@ export const TerrainPaintUI: React.FC = () => {
                           : {}),
                       }}
                       onClick={() => {
-                        setSelectedPopulation(
-                          selectedPopulation === value ? null : value
-                        );
-                        setSelectedTerrainType(null);
+                        setSelectedPopulation(value);
                       }}
                     >
                       {name}

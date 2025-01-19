@@ -28,4 +28,5 @@ yarn-error.log*
 *.swp
 *.swo
 .DS_Store 
+*storybook.log
 .cache

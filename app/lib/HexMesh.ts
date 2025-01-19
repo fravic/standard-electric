@@ -1,5 +1,5 @@
-import { Color, HSL } from "three";
-import { Vertex } from "./HexCoordinates";
+import { Color } from "three";
+import { Vertex } from "./types";
 
 export class HexMesh {
   vertices: number[] = [];

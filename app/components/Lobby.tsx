@@ -1,3 +1,3 @@
-export function Lobby(): JSX.Element {
+export function Lobby(): React.ReactNode {
   return <div>Lobby</div>;
 }

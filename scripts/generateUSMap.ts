@@ -2,8 +2,8 @@ import { TerrainType } from "../src/lib/HexCell";
 import { getStateInfoAtCoordinates } from "../src/lib/MapData";
 import fs from "fs";
 import path from "path";
-import { HexGrid, HexGridData } from "../src/lib/HexGrid";
-import { HexCell } from "../src/lib/HexCell";
+import { createHexGrid, HexGrid } from "../src/lib/HexGrid";
+import { createHexCell } from "../src/lib/HexCell";
 import { loadUnitedStatesMapData } from "../src/lib/unitedStatesGeoUtils";
 
 async function generateMap() {
@@ -15,7 +15,7 @@ async function generateMap() {
   }
 
   // Create hex grid
-  const hexGrid = new HexGrid(100, 60);
+  const hexGrid = createHexGrid(60, 40);
 
   // Generate cells
   for (let x = 0; x < hexGrid.width; x++) {
@@ -30,34 +30,25 @@ async function generateMap() {
         normalizedX,
         normalizedZ
       );
-      const cell = new HexCell(x, z, stateInfo);
+      const cell = createHexCell(x, z, stateInfo);
 
       if (!stateInfo) {
         // This is a water tile
         cell.terrainType = TerrainType.Water;
       } else {
-        // Convert hex coordinates to approximate lat/lon using the projection
-        const point = mapData.projection.invert?.([normalizedX, normalizedZ]);
         cell.terrainType = TerrainType.Plains;
       }
 
-      hexGrid.addCell(cell, x, z);
+      hexGrid.cellsByHexCoordinates[`${x},${z}`] = cell;
     }
   }
 
   // Write the updated hexgrid.json file
   const hexgridPath = path.join(process.cwd(), "public", "hexgrid.json");
-  const hexGridData: HexGridData = {
+  const hexGridData: HexGrid = {
     width: hexGrid.width,
     height: hexGrid.height,
-    cells: hexGrid.cells.map((cell) => ({
-      coordinates: {
-        x: cell.coordinates.x,
-        z: cell.coordinates.z,
-      },
-      stateInfo: cell.stateInfo,
-      terrainType: cell.terrainType,
-    })),
+    cellsByHexCoordinates: hexGrid.cellsByHexCoordinates,
   };
   fs.writeFileSync(hexgridPath, JSON.stringify(hexGridData, null, 2));
   console.log("Generated US map with terrain data in hexgrid.json");

@@ -1,23 +1,27 @@
-import { useGameStore } from "@/store/gameStore";
-import { useParams } from "@remix-run/react";
-import { FPSCounter } from "./FPSCounter";
-import GameCanvas from "./GameCanvas";
-import { HexDetailsUI } from "./HexGrid/HexDetailsUI";
-import { GameUI } from "./UI/GameUI";
+import React, { useEffect } from "react";
 
-export function Game(): JSX.Element {
-  const isDebug = useGameStore((state) => state.isDebug);
-  const gameId = useParams().gameId!;
+import { HexDetailsUI } from "./UI/HexDetailsUI";
+import { FPSCounter } from "./FPSCounter";
+import { GameUI } from "./UI/GameUI";
+// import { GameCanvas } from "./GameCanvas";
+import { useClientStore } from "@/lib/clientState";
+import { GameContext } from "@/actor/game.context";
+
+export function Game(): React.ReactNode {
+  const isDebug = useClientStore((state) => state.isDebug);
+  const state = GameContext.useSelector((state) => state);
+
+  // Log state changes
+  useEffect(() => {
+    console.log("State updated:", state);
+  }, [state]);
 
   return (
-    <div className="game-container">
-      Game {gameId}
-      {isDebug && <FPSCounter />}
+    <div style={{ width: "100vw", height: "100vh" }}>
+      {/* <GameCanvas /> */}
       <GameUI />
       <HexDetailsUI />
-      {/* <GameCanvas /> */}
-      {/* {/* <GameCanvas /> */}
-      {/* {isDebug && <FPSCounter />} */}
+      {isDebug && <FPSCounter />}
     </div>
   );
 }

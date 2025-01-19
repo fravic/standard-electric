@@ -6,11 +6,8 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { Buildable } from "../lib/Buildable";
-import { Population, TerrainType } from "../lib/HexCell";
-import { HexCoordinates } from "../lib/HexCoordinates";
+import { Buildable } from "../lib/buildables/Buildable";
 import { HexGrid } from "../lib/HexGrid";
-import { BuildMode } from "../store/gameStore";
 import {
   GameClientEventSchema,
   GameInputSchema,
@@ -21,23 +18,10 @@ import { Env } from "../env";
 interface Player {
   name: string;
   money: number;
-  buildMode: BuildMode;
-  hoverLocation: {
-    worldPoint: [number, number, number];
-  } | null;
-  selectedHexCoordinates: HexCoordinates | null;
-}
-
-interface MapBuilder {
-  isPaintbrushMode: boolean;
-  selectedTerrainType: TerrainType | null;
-  selectedPopulation: Population | null;
 }
 
 interface GamePublicContext {
   id: string;
-  isDebug: boolean;
-  mapBuilder: MapBuilder;
   players: {
     [playerId: string]: Player;
   };
@@ -45,6 +29,8 @@ interface GamePublicContext {
     totalTicks: number;
     isPaused: boolean;
   };
+  buildables: Buildable[];
+  hexGrid: HexGrid;
 }
 
 export type GamePrivateContext = {};

@@ -1,8 +1,13 @@
 import { assign, setup } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
+import { produce } from "immer";
+import { nanoid } from "nanoid";
 
-import { HexGrid } from "../lib/HexGrid";
+import { HexGrid, HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
+import { createBuildable } from "@/lib/buildables/Buildable";
+import hexGridData from "../../public/hexgrid.json";
+import { PLAYER_ID } from "@/constants";
 
 export const gameMachine = setup({
   types: {
@@ -11,11 +16,26 @@ export const gameMachine = setup({
     input: {} as GameInput,
   },
   actions: {
-    setDebug: assign({}),
+    addBuildable: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
+        public: produce(context.public, (draft) => {
+          if (event.type === "ADD_BUILDABLE") {
+            const buildable = createBuildable({
+              id: nanoid(),
+              buildable: event.buildable,
+              playerId: PLAYER_ID,
+              isGhost: false,
+              context: context,
+            });
+            draft.buildables.push(buildable);
+          }
+        }),
+      })
+    ),
   },
 }).createMachine({
   id: "game",
-  initial: "lobby",
+  initial: "game",
   context: ({ input }: { input: GameInput }) => ({
     public: {
       id: input.id,
@@ -26,7 +46,7 @@ export const gameMachine = setup({
         selectedPopulation: null,
       },
       players: {
-        player1: {
+        [PLAYER_ID]: {
           name: "Player 1",
           money: 10,
           buildMode: null,
@@ -38,18 +58,17 @@ export const gameMachine = setup({
         totalTicks: 0,
         isPaused: true,
       },
+      buildables: [],
+      hexGrid: HexGrid.fromData(HexGridSchema.parse(hexGridData)),
     },
     private: {},
   }),
   states: {
-    lobby: {
-      on: {
-        JOIN_GAME: "game",
-      },
-    },
     game: {
       on: {
-        LEAVE_GAME: "lobby",
+        ADD_BUILDABLE: {
+          actions: "addBuildable",
+        },
       },
     },
   },

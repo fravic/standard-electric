@@ -1,22 +1,27 @@
-import { useGameStore } from "../../store/gameStore";
-import { PowerPole as PowerPoleModel } from "../../lib/PowerSystem";
-import { HexCoordinates } from "../../lib/HexCoordinates";
+import React from "react";
+import { createPowerPole, isPowerPole } from "@/lib/buildables/PowerPole";
+import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { PowerPole } from "./PowerPole";
-
+import { GameContext } from "@/actor/game.context";
+import * as HexCoordinatesLib from "@/lib/coordinates/HexCoordinates";
+import * as CornerCoordinatesLib from "@/lib/coordinates/CornerCoordinates";
 interface PowerLinesProps {
   chunkCells: HexCoordinates[];
 }
 
 export function PowerLines({ chunkCells }: PowerLinesProps) {
-  const buildables = useGameStore((state) => state.buildables);
+  const powerPoles = GameContext.useSelector((state) =>
+    state.public.buildables.filter(isPowerPole)
+  );
 
   // Filter power poles that belong to this chunk
-  const chunkPowerPoles = buildables
-    .filter((b) => b.type === "power_pole" && !b.isGhost && b.cornerCoordinates)
-    .map((b) => new PowerPoleModel(b.id, b.cornerCoordinates!, false))
+  const chunkPowerPoles = powerPoles
+    .filter((b) => !b.isGhost && b.cornerCoordinates && b.playerId)
     .filter((pole) =>
       chunkCells.some(
-        (cell) => cell.toString() === pole.cornerCoordinates.hex.toString()
+        (cell) =>
+          HexCoordinatesLib.coordinatesToString(cell) ===
+          HexCoordinatesLib.coordinatesToString(pole.cornerCoordinates.hex)
       )
     );
 
@@ -24,7 +29,9 @@ export function PowerLines({ chunkCells }: PowerLinesProps) {
     <group>
       {chunkPowerPoles.map((pole) => (
         <PowerPole
-          key={`pole-${pole.cornerCoordinates.toString()}`}
+          key={`pole-${CornerCoordinatesLib.cornerToString(
+            pole.cornerCoordinates
+          )}`}
           pole={pole}
         />
       ))}
