@@ -85,9 +85,9 @@ function getTickStyle(hour: number) {
 }
 
 export function Clock() {
-  const { totalTicks, isPaused } = GameContext.useSelector(
-    (state) => state.public.time
-  );
+  const { totalTicks } = GameContext.useSelector((state) => state.public.time);
+  const isPaused = GameContext.useSelector((state) => state.value === "paused");
+  const sendGameEvent = GameContext.useSend();
 
   // Calculate current cycle and tick
   const currentCycle = Math.floor(totalTicks / TICKS_PER_CYCLE) + 1;
@@ -99,7 +99,10 @@ export function Clock() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.clockFace}>
+      <div
+        style={styles.clockFace}
+        onClick={() => sendGameEvent({ type: isPaused ? "RESUME" : "PAUSE" })}
+      >
         <div
           style={{
             ...styles.dayNight,
@@ -126,10 +129,14 @@ export function Clock() {
         />
       </div>
       <div style={styles.controls}>
-        <div>
-          Cycle {currentCycle}, Hour {currentTick + 1}
-          {isNight ? " 🌙" : " ☀️"}
-        </div>
+        {isPaused ? (
+          <div>Paused</div>
+        ) : (
+          <div>
+            Cycle {currentCycle}, Hour {currentTick + 1}
+            {isNight ? " 🌙" : " ☀️"}
+          </div>
+        )}
       </div>
     </div>
   );

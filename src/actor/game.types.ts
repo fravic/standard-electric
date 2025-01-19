@@ -5,6 +5,7 @@ import {
   WithActorKitEvent,
   WithActorKitInput,
 } from "actor-kit";
+import { ActorRefFromLogic } from "xstate";
 
 import { Buildable } from "../lib/buildables/Buildable";
 import { HexGrid } from "../lib/HexGrid";
@@ -14,6 +15,7 @@ import {
   GameServiceEventSchema,
 } from "./game.schemas";
 import { Env } from "./env";
+import { gameTimerActor } from "./gameTimerActor";
 
 interface Player {
   name: string;

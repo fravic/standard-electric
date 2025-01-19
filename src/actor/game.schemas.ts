@@ -22,6 +22,15 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     coordinates: HexCoordinatesSchema,
     population: z.nativeEnum(Population),
   }),
+  z.object({
+    type: z.literal("TICK"),
+  }),
+  z.object({
+    type: z.literal("PAUSE"),
+  }),
+  z.object({
+    type: z.literal("RESUME"),
+  }),
 ]);
 
 export const GameServiceEventSchema = z.discriminatedUnion("type", [

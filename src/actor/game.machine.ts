@@ -1,4 +1,4 @@
-import { assign, setup } from "xstate";
+import { assign, fromCallback, setup } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
 import { produce } from "immer";
 import { nanoid } from "nanoid";
@@ -8,6 +8,7 @@ import { GameContext, GameEvent, GameInput } from "./game.types";
 import { createBuildable } from "@/lib/buildables/Buildable";
 import hexGridData from "../../public/hexgrid.json";
 import { PLAYER_ID } from "@/lib/constants";
+import { gameTimerActor } from "./gameTimerActor";
 
 export const gameMachine = setup({
   types: {
@@ -15,7 +16,15 @@ export const gameMachine = setup({
     events: {} as GameEvent,
     input: {} as GameInput,
   },
+  actors: {
+    gameTimer: gameTimerActor,
+  },
   actions: {
+    gameTick: assign(({ context }) => ({
+      public: produce(context.public, (draft) => {
+        draft.time.totalTicks += 1;
+      }),
+    })),
     addBuildable: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
@@ -35,7 +44,11 @@ export const gameMachine = setup({
   },
 }).createMachine({
   id: "game",
-  initial: "game",
+  initial: "active",
+  invoke: {
+    id: "gameTimer",
+    src: "gameTimer",
+  },
   context: ({ input }: { input: GameInput }) => ({
     public: {
       id: input.id,
@@ -64,10 +77,23 @@ export const gameMachine = setup({
     private: {},
   }),
   states: {
-    game: {
+    active: {
       on: {
         ADD_BUILDABLE: {
           actions: "addBuildable",
+        },
+        TICK: {
+          actions: "gameTick",
+        },
+        PAUSE: {
+          target: "paused",
+        },
+      },
+    },
+    paused: {
+      on: {
+        RESUME: {
+          target: "active",
         },
       },
     },
