@@ -14,7 +14,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -23,19 +23,19 @@
     ],
     "paths": {
       "@/*": [
-        "./src/*"
+        "./app/*"
       ]
     },
     "types": [
+      "@remix-run/cloudflare",
+      "@types/node",
       "@cloudflare/workers-types"
     ],
-    "target": "ES2017"
+    "target": "ESNEXT"
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
