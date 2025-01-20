@@ -2,7 +2,7 @@ import { createActorKitRouter } from "actor-kit/worker";
 import { ExecutionContext } from "@cloudflare/workers-types";
 
 import { GameServer } from "./actor/game.server";
-import { Env } from "./actor/env";
+import { Env } from "./env";
 export { GameServer as Game };
 
 const router = createActorKitRouter(["game"]);

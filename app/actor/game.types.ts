@@ -14,7 +14,7 @@ import {
   GameInputSchema,
   GameServiceEventSchema,
 } from "./game.schemas";
-import { Env } from "./env";
+import { Env } from "../env";
 import { gameTimerActor } from "./gameTimerActor";
 
 interface Player {

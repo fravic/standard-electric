@@ -4,7 +4,7 @@ node_modules/
 .pnp.js
 
 # Build outputs
-/dist
+/public/dist
 /build
 .next
 .wrangler
@@ -29,3 +29,4 @@ yarn-error.log*
 *.swo
 .DS_Store 
 *storybook.log
+.cache

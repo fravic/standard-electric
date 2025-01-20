@@ -5,10 +5,10 @@ import { WritableDraft } from "immer";
 
 import { HexCoordinates } from "../coordinates/HexCoordinates";
 import { Population, TerrainType } from "../HexCell";
-import { BuildableType } from "../buildables/Buildable";
+// import { BuildableType } from "../buildables/Buildable";
 
 export type BuildMode = null | {
-  type: BuildableType;
+  type: string;
 };
 
 interface MapBuilder {

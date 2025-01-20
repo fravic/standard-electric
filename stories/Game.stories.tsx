@@ -1,12 +1,11 @@
-import React from "react";
+import { action } from "@storybook/addon-actions";
 import type { Meta, StoryObj } from "@storybook/react";
 import { withActorKit } from "actor-kit/storybook";
 import { createActorKitMockClient } from "actor-kit/test";
-import { action } from "@storybook/addon-actions";
 
-import { Game } from "../components/Game";
 import { GameContext } from "@/actor/game.context";
 import { GameMachine } from "@/actor/game.machine";
+import { Game } from "@/components/Game";
 import { HexGrid } from "@/lib/HexGrid";
 import { PLAYER_ID } from "@/lib/constants";
 

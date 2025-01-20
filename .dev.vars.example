@@ -1,0 +1,4 @@
+ACTOR_KIT_HOST=localhost:8787
+ACTOR_KIT_SECRET=foobarbaz
+SESSION_JWT_SECRET=foobarbaz2
+NODE_ENV=development

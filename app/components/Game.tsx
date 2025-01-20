@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { HexDetailsUI } from "./UI/HexDetailsUI";
 import { FPSCounter } from "./FPSCounter";
 import { GameUI } from "./UI/GameUI";
-import { GameCanvas } from "./GameCanvas";
+// import { GameCanvas } from "./GameCanvas";
 import { useClientStore } from "@/lib/clientState";
 import { GameContext } from "@/actor/game.context";
 
@@ -20,10 +20,10 @@ export function Game(): React.ReactNode {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
-      <GameCanvas />
-      <GameUI />
-      <HexDetailsUI />
-      {isDebug && <FPSCounter />}
+      {/* <GameCanvas /> */}
+      {/* <GameUI />
+      <HexDetailsUI /> */}
+      {/* {isDebug && <FPSCounter />} */}
     </div>
   );
 }
