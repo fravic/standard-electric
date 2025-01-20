@@ -29,7 +29,7 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     type: z.literal("PAUSE"),
   }),
   z.object({
-    type: z.literal("RESUME"),
+    type: z.literal("UNPAUSE"),
   }),
 ]);
 

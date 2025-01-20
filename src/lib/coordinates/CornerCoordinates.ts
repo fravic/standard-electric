@@ -89,6 +89,9 @@ export function cornersEqual(
   );
 }
 
+/**
+ * Returns true if the two corners are adjacent, false otherwise.
+ */
 export function cornersAdjacent(
   a: CornerCoordinates,
   b: CornerCoordinates
@@ -131,5 +134,25 @@ export function cornersAdjacent(
       ),
     ];
     return adjacentCorners.some((corner) => cornersEqual(corner, b));
+  }
+}
+
+/**
+ * Returns all hex coordinates that share this corner.
+ * For any corner, there are always three hexes that share it.
+ */
+export function getAdjacentHexes(corner: CornerCoordinates): HexCoordinates[] {
+  if (corner.position === CornerPosition.North) {
+    return [
+      corner.hex,
+      getNeighbor(corner.hex, HexDirection.NW),
+      getNeighbor(corner.hex, HexDirection.NE),
+    ];
+  } else {
+    return [
+      corner.hex,
+      getNeighbor(corner.hex, HexDirection.SW),
+      getNeighbor(corner.hex, HexDirection.SE),
+    ];
   }
 }

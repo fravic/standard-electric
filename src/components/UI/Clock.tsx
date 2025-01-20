@@ -101,7 +101,7 @@ export function Clock() {
     <div style={styles.container}>
       <div
         style={styles.clockFace}
-        onClick={() => sendGameEvent({ type: isPaused ? "RESUME" : "PAUSE" })}
+        onClick={() => sendGameEvent({ type: isPaused ? "UNPAUSE" : "PAUSE" })}
       >
         <div
           style={{

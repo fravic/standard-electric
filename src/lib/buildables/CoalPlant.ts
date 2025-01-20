@@ -21,5 +21,6 @@ export function createCoalPlant({
     playerId,
     isGhost,
     coordinates,
+    powerGenerationKW: 100,
   };
 }

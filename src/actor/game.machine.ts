@@ -1,6 +1,6 @@
-import { assign, fromCallback, setup } from "xstate";
+import { assign, setup, spawnChild, stopChild } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
-import { produce } from "immer";
+import { produce, current } from "immer";
 import { nanoid } from "nanoid";
 
 import { HexGrid, HexGridSchema } from "../lib/HexGrid";
@@ -9,6 +9,7 @@ import { createBuildable } from "@/lib/buildables/Buildable";
 import hexGridData from "../../public/hexgrid.json";
 import { PLAYER_ID } from "@/lib/constants";
 import { gameTimerActor } from "./gameTimerActor";
+import { PowerSystem } from "@/lib/power/PowerSystem";
 
 export const gameMachine = setup({
   types: {
@@ -20,9 +21,23 @@ export const gameMachine = setup({
     gameTimer: gameTimerActor,
   },
   actions: {
+    startGameTimer: spawnChild(gameTimerActor, { id: "gameTimer" } as any),
+    stopGameTimer: stopChild("gameTimer"),
     gameTick: assign(({ context }) => ({
       public: produce(context.public, (draft) => {
         draft.time.totalTicks += 1;
+
+        // Calculate and distribute income for each player
+        const powerSystem = new PowerSystem(
+          current(draft.hexGrid),
+          current(draft.buildables)
+        );
+        const powerSystemResult = powerSystem.resolveOneHourOfPowerProduction();
+        Object.keys(powerSystemResult.incomePerPlayer).forEach((playerId) => {
+          const income = powerSystemResult.incomePerPlayer[playerId] ?? 0;
+          console.log(`Player ${playerId} income: ${income}`);
+          draft.players[playerId].money += income;
+        });
       }),
     })),
     addBuildable: assign(
@@ -45,10 +60,6 @@ export const gameMachine = setup({
 }).createMachine({
   id: "game",
   initial: "active",
-  invoke: {
-    id: "gameTimer",
-    src: "gameTimer",
-  },
   context: ({ input }: { input: GameInput }) => ({
     public: {
       id: input.id,
@@ -78,6 +89,8 @@ export const gameMachine = setup({
   }),
   states: {
     active: {
+      entry: ["stopGameTimer", "startGameTimer"],
+      exit: ["stopGameTimer"],
       on: {
         ADD_BUILDABLE: {
           actions: "addBuildable",
@@ -92,7 +105,7 @@ export const gameMachine = setup({
     },
     paused: {
       on: {
-        RESUME: {
+        UNPAUSE: {
           target: "active",
         },
       },

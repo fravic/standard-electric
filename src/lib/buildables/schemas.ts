@@ -6,9 +6,10 @@ import {
 
 export const BuildableSchema = z.object({
   id: z.string(),
-  type: z.enum(["power_pole", "coal_plant"]),
-  isGhost: z.boolean().optional(),
+  type: z.union([z.literal("power_pole"), z.literal("coal_plant")]),
   playerId: z.string(),
+  isGhost: z.boolean().optional(),
+  powerGenerationKW: z.number().optional(),
   coordinates: HexCoordinatesSchema.optional(),
   cornerCoordinates: CornerCoordinatesSchema.optional(),
 });
