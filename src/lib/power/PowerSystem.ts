@@ -7,7 +7,7 @@ import { HexGrid } from "../HexGrid";
 import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
 
 // Power consumption rates (kW) for different population levels
-export const POWER_CONSUMPTION_RATES: Record<Population, number> = {
+export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
   [Population.Unpopulated]: 0,
   [Population.Village]: 10,
   [Population.Town]: 25,

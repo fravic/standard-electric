@@ -101,6 +101,9 @@ export const gameMachine = setup({
         PAUSE: {
           target: "paused",
         },
+        RESUME: {
+          actions: ["stopGameTimer", "startGameTimer"],
+        },
       },
     },
     paused: {
