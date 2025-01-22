@@ -10,7 +10,7 @@ import { useClientStore } from "@/lib/clientState";
 import { FPSCounter } from "./FPSCounter";
 import { GameCanvas } from "./GameCanvas";
 
-export function Game(): JSX.Element {
+export function Game() {
   const isDebug = useClientStore((state) => state.isDebug);
   const state = GameContext.useSelector((state) => state);
 
