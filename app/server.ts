@@ -1,22 +1,30 @@
+import { logDevReady } from "@remix-run/cloudflare";
+import * as build from "@remix-run/dev/server-build";
 import { createActorKitRouter } from "actor-kit/worker";
-import { ExecutionContext } from "@cloudflare/workers-types";
-
-import { GameServer } from "./actor/game.server";
+import { WorkerEntrypoint } from "cloudflare:workers";
 import { Env } from "./env";
-export { GameServer as Game };
+export { GameServer as Game } from "./actor/game.server";
+export { Remix } from "./remix.server";
+
+declare module "@remix-run/cloudflare" {
+  interface AppLoadContext {
+    env: Env;
+  }
+}
 
 const router = createActorKitRouter(["game"]);
 
-export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext
-  ): Promise<Response> {
+if (process.env.NODE_ENV === "development") {
+  logDevReady(build);
+}
+
+export default class Worker extends WorkerEntrypoint<Env> {
+  fetch(request: Request): Promise<Response> | Response {
     if (request.url.includes("/api/")) {
-      return router(request, env, ctx);
+      return router(request, this.env, this.ctx);
     }
 
-    return new Response("Hello World!");
-  },
-};
+    const id = this.env.REMIX.idFromName("default");
+    return this.env.REMIX.get(id).fetch(request);
+  }
+}

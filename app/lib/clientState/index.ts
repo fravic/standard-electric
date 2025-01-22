@@ -1,8 +1,5 @@
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { devtools } from "zustand/middleware";
-import { WritableDraft } from "immer";
-
+import { createStore } from '@xstate/store';
+import { useEffect, useState } from 'react';
 import { HexCoordinates } from "../coordinates/HexCoordinates";
 import { Population, TerrainType } from "../HexCell";
 // import { BuildableType } from "../buildables/Buildable";
@@ -27,14 +24,6 @@ interface ClientState {
   selectedHexCoordinates: HexCoordinates | null;
 }
 
-type Setter = (
-  state: (state: WritableDraft<ClientState>) => void,
-  shouldReplace?: false,
-  name?: string
-) => void;
-
-// Actions
-
 type Actions = {
   setIsDebug: (isDebug: boolean) => void;
   setPaintbrushMode: (enabled: boolean) => void;
@@ -45,98 +34,92 @@ type Actions = {
   selectHex: (coordinates: HexCoordinates | null) => void;
 };
 
-const setIsDebug = (set: Setter) => (isDebug: boolean) => {
-  set(
-    (state) => {
-      state.isDebug = isDebug;
+const store = createStore({
+  context: {
+    isDebug: false,
+    mapBuilder: {
+      isPaintbrushMode: false,
+      selectedTerrainType: null,
+      selectedPopulation: null,
     },
-    undefined,
-    "setIsDebug"
-  );
-};
-
-const setBuildMode = (set: Setter) => (mode: BuildMode) => {
-  set(
-    (state) => {
-      state.buildMode = mode;
-    },
-    undefined,
-    "setBuildMode"
-  );
-};
-
-const setPaintbrushMode = (set: Setter) => (enabled: boolean) => {
-  set(
-    (state) => {
-      state.mapBuilder.isPaintbrushMode = enabled;
-    },
-    undefined,
-    "setPaintbrushMode"
-  );
-};
-
-const setSelectedTerrainType =
-  (set: Setter) => (terrainType: TerrainType | null) => {
-    set(
-      (state) => {
-        state.mapBuilder.selectedTerrainType = terrainType;
-      },
-      undefined,
-      "setSelectedTerrainType"
-    );
-  };
-
-const setSelectedPopulation =
-  (set: Setter) => (population: Population | null) => {
-    set(
-      (state) => {
-        state.mapBuilder.selectedPopulation = population;
-      },
-      undefined,
-      "setSelectedPopulation"
-    );
-  };
-
-const setHoverLocation =
-  (set: Setter) => (worldPoint: [number, number, number] | null) => {
-    set(
-      (state) => {
-        state.hoverLocation = worldPoint ? { worldPoint } : null;
-      },
-      undefined,
-      "setHoverLocation"
-    );
-  };
-
-const selectHex = (set: Setter) => (coordinates: HexCoordinates | null) => {
-  set(
-    (state) => {
-      state.selectedHexCoordinates = coordinates;
-    },
-    undefined,
-    "selectHex"
-  );
-};
-
-export const useClientStore = create<ClientState & Actions>()(
-  devtools(
-    immer((set) => ({
-      isDebug: false,
+    buildMode: null,
+    hoverLocation: null,
+    selectedHexCoordinates: null,
+  } as ClientState,
+  on: {
+    setIsDebug: (context, event: { isDebug: boolean }) => ({
+      isDebug: event.isDebug,
+    }),
+    setPaintbrushMode: (context, event: { enabled: boolean }) => ({
       mapBuilder: {
-        isPaintbrushMode: false,
-        selectedTerrainType: null,
-        selectedPopulation: null,
+        ...context.mapBuilder,
+        isPaintbrushMode: event.enabled,
       },
-      buildMode: null,
-      hoverLocation: null,
-      selectedHexCoordinates: null,
-      setIsDebug: setIsDebug(set),
-      setPaintbrushMode: setPaintbrushMode(set),
-      setSelectedTerrainType: setSelectedTerrainType(set),
-      setSelectedPopulation: setSelectedPopulation(set),
-      setBuildMode: setBuildMode(set),
-      setHoverLocation: setHoverLocation(set),
-      selectHex: selectHex(set),
-    }))
-  )
-);
+    }),
+    setSelectedTerrainType: (context, event: { terrainType: TerrainType | null }) => ({
+      mapBuilder: {
+        ...context.mapBuilder,
+        selectedTerrainType: event.terrainType,
+      },
+    }),
+    setSelectedPopulation: (context, event: { population: Population | null }) => ({
+      mapBuilder: {
+        ...context.mapBuilder,
+        selectedPopulation: event.population,
+      },
+    }),
+    setBuildMode: (context, event: { mode: BuildMode }) => ({
+      buildMode: event.mode,
+    }),
+    setHoverLocation: (context, event: { worldPoint: [number, number, number] | null }) => ({
+      hoverLocation: event.worldPoint ? { worldPoint: event.worldPoint } : null,
+    }),
+    selectHex: (context, event: { coordinates: HexCoordinates | null }) => ({
+      selectedHexCoordinates: event.coordinates,
+    }),
+  },
+});
+
+// Export a hook-like interface that matches the previous Zustand API
+export const useClientStore = <T>(selector: (state: ClientState & Actions) => T): T => {
+  // Use state to force re-render on store updates
+  const [value, setValue] = useState(() => {
+    const state = store.getSnapshot().context;
+    const actions: Actions = {
+      setIsDebug: (isDebug) => store.send({ type: 'setIsDebug', isDebug }),
+      setPaintbrushMode: (enabled) => store.send({ type: 'setPaintbrushMode', enabled }),
+      setSelectedTerrainType: (terrainType) => store.send({ type: 'setSelectedTerrainType', terrainType }),
+      setSelectedPopulation: (population) => store.send({ type: 'setSelectedPopulation', population }),
+      setBuildMode: (mode) => store.send({ type: 'setBuildMode', mode }),
+      setHoverLocation: (worldPoint) => store.send({ type: 'setHoverLocation', worldPoint }),
+      selectHex: (coordinates) => store.send({ type: 'selectHex', coordinates }),
+    };
+    return selector({ ...state, ...actions });
+  });
+
+  useEffect(() => {
+    // Subscribe to store changes
+    const unsubscribe = store.subscribe((snapshot) => {
+      const state = snapshot.context;
+      const actions: Actions = {
+        setIsDebug: (isDebug) => store.send({ type: 'setIsDebug', isDebug }),
+        setPaintbrushMode: (enabled) => store.send({ type: 'setPaintbrushMode', enabled }),
+        setSelectedTerrainType: (terrainType) => store.send({ type: 'setSelectedTerrainType', terrainType }),
+        setSelectedPopulation: (population) => store.send({ type: 'setSelectedPopulation', population }),
+        setBuildMode: (mode) => store.send({ type: 'setBuildMode', mode }),
+        setHoverLocation: (worldPoint) => store.send({ type: 'setHoverLocation', worldPoint }),
+        selectHex: (coordinates) => store.send({ type: 'selectHex', coordinates }),
+      };
+      const newValue = selector({ ...state, ...actions });
+      if (newValue !== value) {
+        setValue(newValue);
+      }
+    });
+
+    return () => {
+      unsubscribe.unsubscribe();
+    };
+  }, [selector, value]);
+
+  return value;
+};

@@ -1,13 +1,15 @@
-name = "standard-electric"
-main = "dist/index.js"
+#:schema node_modules/wrangler/config-schema.json
+name = "remix-workers-app"
 compatibility_date = "2025-01-05"
 compatibility_flags = ["nodejs_compat"]
 
-
+main = "./dist/index.js"
 assets = { directory = "./public" }
 
-[vars]
-ACTOR_KIT_HOST = "standard-electric.jonathanrmumm.workers.dev"
+
+[observability]
+enabled = true
+
 
 [[durable_objects.bindings]]
 name = "REMIX"
