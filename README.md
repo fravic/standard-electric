@@ -82,18 +82,6 @@ Deploy your app to Cloudflare Pages:
 bun run deploy
 ```
 
-## Technical Stack
-
-- [Remix](https://remix.run/docs)
-- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- TypeScript
-- React
-- XState (for state management)
-- Three.js (for 3D rendering)
-
-**Note:** This project uses the "Classic" Remix compiler since the Vite setup does not currently support all Workers resources (Durable Objects, Hyperdrive, etc).
-
 ## Project Structure
 
 ```
