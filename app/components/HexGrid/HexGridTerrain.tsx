@@ -3,6 +3,7 @@ import { ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { Text } from "@react-three/drei";
 import { debounce } from "lodash";
+import { useSelector } from "@xstate/store/react";
 
 import {
   coordinatesToString,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/HexCell";
 import { HexMesh } from "@/lib/HexMesh";
 import { HexMetrics } from "@/lib/HexMetrics";
-import { useClientStore } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -38,14 +39,17 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   onUpdateCell,
   debug = false,
 }: HexGridTerrainProps) {
-  const isPaintbrushMode = useClientStore(
-    (state) => state.mapBuilder.isPaintbrushMode
+  const isPaintbrushMode = useSelector(
+    clientStore,
+    (state) => state.context.mapBuilder.isPaintbrushMode
   );
-  const selectedTerrainType = useClientStore(
-    (state) => state.mapBuilder.selectedTerrainType
+  const selectedTerrainType = useSelector(
+    clientStore,
+    (state) => state.context.mapBuilder.selectedTerrainType
   );
-  const selectedPopulation = useClientStore(
-    (state) => state.mapBuilder.selectedPopulation
+  const selectedPopulation = useSelector(
+    clientStore,
+    (state) => state.context.mapBuilder.selectedPopulation
   );
 
   const debouncedOnHover = useMemo(

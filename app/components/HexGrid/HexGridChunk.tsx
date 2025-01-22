@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
+import { useSelector } from "@xstate/store/react";
 
 import { HexCell, TerrainType, Population } from "@/lib/HexCell";
 import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
@@ -26,7 +27,7 @@ import {
 import { Buildable } from "../Buildable";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { HexMetrics } from "@/lib/HexMetrics";
-import { useClientStore } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 
 interface HexGridChunkProps {
   chunk: {
@@ -47,9 +48,8 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   onCellClick,
   debug = false,
 }: HexGridChunkProps) {
-  const buildMode = useClientStore((state) => state.buildMode);
-  const hoverLocation = useClientStore((state) => state.hoverLocation);
-  const setHoverLocation = useClientStore((state) => state.setHoverLocation);
+  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
+  const hoverLocation = useSelector(clientStore, (state) => state.context.hoverLocation);
   const buildables = GameContext.useSelector(
     (state) => state.public.buildables ?? []
   );
@@ -112,7 +112,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
   const handleHover = useCallback((event: ThreeEvent<PointerEvent>) => {
     const point = event.point;
-    setHoverLocation([point.x, point.y, point.z]);
+    clientStore.send({ type: "setHoverLocation", worldPoint: [point.x, point.y, point.z] });
   }, []);
 
   const handleClick = useCallback(

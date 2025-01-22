@@ -1,6 +1,7 @@
 import React from "react";
+import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
-import { useClientStore } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 
 const styles = {
   container: {
@@ -47,22 +48,18 @@ const styles = {
 };
 
 export const TerrainPaintUI: React.FC = () => {
-  const isDebug = useClientStore((state) => state.isDebug);
-  const isPaintbrushMode = useClientStore(
-    (state) => state.mapBuilder.isPaintbrushMode
+  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
+  const isPaintbrushMode = useSelector(
+    clientStore,
+    (state) => state.context.mapBuilder.isPaintbrushMode
   );
-  const selectedTerrainType = useClientStore(
-    (state) => state.mapBuilder.selectedTerrainType
+  const selectedTerrainType = useSelector(
+    clientStore,
+    (state) => state.context.mapBuilder.selectedTerrainType
   );
-  const selectedPopulation = useClientStore(
-    (state) => state.mapBuilder.selectedPopulation
-  );
-  const setPaintbrushMode = useClientStore((state) => state.setPaintbrushMode);
-  const setSelectedTerrainType = useClientStore(
-    (state) => state.setSelectedTerrainType
-  );
-  const setSelectedPopulation = useClientStore(
-    (state) => state.setSelectedPopulation
+  const selectedPopulation = useSelector(
+    clientStore,
+    (state) => state.context.mapBuilder.selectedPopulation
   );
 
   if (!isDebug) return null;
@@ -75,9 +72,7 @@ export const TerrainPaintUI: React.FC = () => {
             type="checkbox"
             checked={isPaintbrushMode}
             onChange={(e) =>
-              e.target.checked
-                ? setPaintbrushMode(true)
-                : setPaintbrushMode(false)
+              clientStore.send({ type: "setPaintbrushMode", enabled: e.target.checked })
             }
           />
           <span style={styles.label}>Paintbrush Mode</span>
@@ -98,7 +93,7 @@ export const TerrainPaintUI: React.FC = () => {
                       : {}),
                   }}
                   onClick={() => {
-                    setSelectedTerrainType(type);
+                    clientStore.send({ type: "setSelectedTerrainType", terrainType: type });
                   }}
                 >
                   {type}
@@ -121,7 +116,7 @@ export const TerrainPaintUI: React.FC = () => {
                           : {}),
                       }}
                       onClick={() => {
-                        setSelectedPopulation(value);
+                        clientStore.send({ type: "setSelectedPopulation", population: value });
                       }}
                     >
                       {name}

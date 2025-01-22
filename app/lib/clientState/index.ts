@@ -1,10 +1,8 @@
-import { createStore } from '@xstate/store';
-import { useEffect, useState } from 'react';
+import { createStore } from "@xstate/store";
 import { HexCoordinates } from "../coordinates/HexCoordinates";
 import { Population, TerrainType } from "../HexCell";
-// import { BuildableType } from "../buildables/Buildable";
 
-export type BuildMode = null | {
+type BuildMode = null | {
   type: string;
 };
 
@@ -24,17 +22,7 @@ interface ClientState {
   selectedHexCoordinates: HexCoordinates | null;
 }
 
-type Actions = {
-  setIsDebug: (isDebug: boolean) => void;
-  setPaintbrushMode: (enabled: boolean) => void;
-  setSelectedTerrainType: (terrainType: TerrainType | null) => void;
-  setSelectedPopulation: (population: Population | null) => void;
-  setBuildMode: (mode: BuildMode) => void;
-  setHoverLocation: (worldPoint: [number, number, number] | null) => void;
-  selectHex: (coordinates: HexCoordinates | null) => void;
-};
-
-const store = createStore({
+export const clientStore = createStore({
   context: {
     isDebug: false,
     mapBuilder: {
@@ -79,47 +67,3 @@ const store = createStore({
     }),
   },
 });
-
-// Export a hook-like interface that matches the previous Zustand API
-export const useClientStore = <T>(selector: (state: ClientState & Actions) => T): T => {
-  // Use state to force re-render on store updates
-  const [value, setValue] = useState(() => {
-    const state = store.getSnapshot().context;
-    const actions: Actions = {
-      setIsDebug: (isDebug) => store.send({ type: 'setIsDebug', isDebug }),
-      setPaintbrushMode: (enabled) => store.send({ type: 'setPaintbrushMode', enabled }),
-      setSelectedTerrainType: (terrainType) => store.send({ type: 'setSelectedTerrainType', terrainType }),
-      setSelectedPopulation: (population) => store.send({ type: 'setSelectedPopulation', population }),
-      setBuildMode: (mode) => store.send({ type: 'setBuildMode', mode }),
-      setHoverLocation: (worldPoint) => store.send({ type: 'setHoverLocation', worldPoint }),
-      selectHex: (coordinates) => store.send({ type: 'selectHex', coordinates }),
-    };
-    return selector({ ...state, ...actions });
-  });
-
-  useEffect(() => {
-    // Subscribe to store changes
-    const unsubscribe = store.subscribe((snapshot) => {
-      const state = snapshot.context;
-      const actions: Actions = {
-        setIsDebug: (isDebug) => store.send({ type: 'setIsDebug', isDebug }),
-        setPaintbrushMode: (enabled) => store.send({ type: 'setPaintbrushMode', enabled }),
-        setSelectedTerrainType: (terrainType) => store.send({ type: 'setSelectedTerrainType', terrainType }),
-        setSelectedPopulation: (population) => store.send({ type: 'setSelectedPopulation', population }),
-        setBuildMode: (mode) => store.send({ type: 'setBuildMode', mode }),
-        setHoverLocation: (worldPoint) => store.send({ type: 'setHoverLocation', worldPoint }),
-        selectHex: (coordinates) => store.send({ type: 'selectHex', coordinates }),
-      };
-      const newValue = selector({ ...state, ...actions });
-      if (newValue !== value) {
-        setValue(newValue);
-      }
-    });
-
-    return () => {
-      unsubscribe.unsubscribe();
-    };
-  }, [selector, value]);
-
-  return value;
-};

@@ -1,9 +1,10 @@
 import React from "react";
+import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { GameContext } from "@/actor/game.context";
 import * as HexGridService from "@/lib/HexGrid";
 import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
-import { useClientStore } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 
 const styles = {
   container: {
@@ -32,8 +33,9 @@ const styles = {
 };
 
 export function HexDetailsUI() {
-  const selectedHexCoordinates = useClientStore(
-    (state) => state.selectedHexCoordinates
+  const selectedHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.selectedHexCoordinates
   );
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const buildables = GameContext.useSelector(
