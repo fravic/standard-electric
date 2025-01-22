@@ -1,11 +1,13 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "remix-workers-app"
+name = "standard-electric"
 compatibility_date = "2025-01-05"
 compatibility_flags = ["nodejs_compat"]
 
 main = "./dist/index.js"
 assets = { directory = "./public" }
 
+[vars]
+ACTOR_KIT_HOST = "standard-electric.jonathanrmumm.workers.dev"
 
 [observability]
 enabled = true
