@@ -79,7 +79,7 @@ cp .dev.vars.example .dev.vars
 Deploy your app to Cloudflare Pages:
 
 ```sh
-npm run deploy
+bun run deploy
 ```
 
 ## Technical Stack
