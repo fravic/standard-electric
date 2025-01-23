@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { useSelector } from "@xstate/store/react";
 
-import { HexDetailsUI } from "./UI/HexDetailsUI";
-import { FPSCounter } from "./FPSCounter";
 import { GameUI } from "./UI/GameUI";
-import { GameCanvas } from "./GameCanvas";
-import { useClientStore } from "@/lib/clientState";
+import { HexDetailsUI } from "./UI/HexDetailsUI";
+// import { GameCanvas } from "./GameCanvas";
 import { GameContext } from "@/actor/game.context";
+import { clientStore } from "@/lib/clientState";
+import { FPSCounter } from "./FPSCounter";
+import { GameCanvas } from "./GameCanvas";
 
-export function Game(): React.ReactNode {
-  const isDebug = useClientStore((state) => state.isDebug);
+export function Game() {
+  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
   const state = GameContext.useSelector((state) => state);
 
   // Log state changes

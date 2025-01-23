@@ -54,18 +54,13 @@ Standard Electric is a strategic bidding game where players manage and expand an
 
 ## Development
 
-### Project Structure
+Run the development server (Remix + Cloudflare):
 
-```
-src/
-├── actor/          # Game state and server logic
-├── components/     # React components
-├── lib/           # Core game systems
-│   ├── buildables/  # Building types and logic
-│   └── coordinates/ # Grid coordinate system
+```sh
+bun run dev
 ```
 
-### Getting Started
+### Setup
 
 1. Install dependencies:
 
@@ -76,15 +71,26 @@ bun install
 2. Set up environment variables:
 
 ```bash
-cp .env.example .env.local
-cp .env.example .dev.vars
+cp .dev.vars.example .dev.vars
 ```
 
-3. Start the development servers:
+## Deployment
 
-```bash
-bun run next:dev
-bun run wrangler:dev
+Deploy your app to Cloudflare Pages:
+
+```sh
+bun run deploy
+```
+
+## Project Structure
+
+```
+src/
+├── actor/          # Game state and server logic
+├── components/     # React components
+├── lib/           # Core game systems
+│   ├── buildables/  # Building types and logic
+│   └── coordinates/ # Grid coordinate system
 ```
 
 ## Contributing

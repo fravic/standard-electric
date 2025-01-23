@@ -1,0 +1,69 @@
+import { createStore } from "@xstate/store";
+import { HexCoordinates } from "../coordinates/HexCoordinates";
+import { Population, TerrainType } from "../HexCell";
+
+type BuildMode = null | {
+  type: string;
+};
+
+interface MapBuilder {
+  isPaintbrushMode: boolean;
+  selectedTerrainType: TerrainType | null;
+  selectedPopulation: Population | null;
+}
+
+interface ClientState {
+  isDebug: boolean;
+  mapBuilder: MapBuilder;
+  buildMode: BuildMode;
+  hoverLocation: {
+    worldPoint: [number, number, number];
+  } | null;
+  selectedHexCoordinates: HexCoordinates | null;
+}
+
+export const clientStore = createStore({
+  context: {
+    isDebug: false,
+    mapBuilder: {
+      isPaintbrushMode: false,
+      selectedTerrainType: null,
+      selectedPopulation: null,
+    },
+    buildMode: null,
+    hoverLocation: null,
+    selectedHexCoordinates: null,
+  } as ClientState,
+  on: {
+    setIsDebug: (context, event: { isDebug: boolean }) => ({
+      isDebug: event.isDebug,
+    }),
+    setPaintbrushMode: (context, event: { enabled: boolean }) => ({
+      mapBuilder: {
+        ...context.mapBuilder,
+        isPaintbrushMode: event.enabled,
+      },
+    }),
+    setSelectedTerrainType: (context, event: { terrainType: TerrainType | null }) => ({
+      mapBuilder: {
+        ...context.mapBuilder,
+        selectedTerrainType: event.terrainType,
+      },
+    }),
+    setSelectedPopulation: (context, event: { population: Population | null }) => ({
+      mapBuilder: {
+        ...context.mapBuilder,
+        selectedPopulation: event.population,
+      },
+    }),
+    setBuildMode: (context, event: { mode: BuildMode }) => ({
+      buildMode: event.mode,
+    }),
+    setHoverLocation: (context, event: { worldPoint: [number, number, number] | null }) => ({
+      hoverLocation: event.worldPoint ? { worldPoint: event.worldPoint } : null,
+    }),
+    selectHex: (context, event: { coordinates: HexCoordinates | null }) => ({
+      selectedHexCoordinates: event.coordinates,
+    }),
+  },
+});

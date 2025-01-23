@@ -1,10 +1,11 @@
 import React from "react";
+import { useSelector } from "@xstate/store/react";
 import { HexDetailsUI } from "./HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { Clock } from "./Clock";
 import { PLAYER_ID } from "../../lib/constants";
 import { GameContext } from "@/actor/game.context";
-import { useClientStore } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 
 const styles = {
   buildContainer: {
@@ -49,8 +50,7 @@ export const GameUI: React.FC = () => {
   const player = GameContext.useSelector(
     (state) => state.public.players[PLAYER_ID]
   );
-  const setBuildMode = useClientStore((state) => state.setBuildMode);
-  const buildMode = useClientStore((state) => state.buildMode);
+  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
 
   return (
     <>
@@ -63,8 +63,8 @@ export const GameUI: React.FC = () => {
           }}
           onClick={() =>
             buildMode?.type === "power_pole"
-              ? setBuildMode(null)
-              : setBuildMode({ type: "power_pole" })
+              ? clientStore.send({ type: "setBuildMode", mode: null })
+              : clientStore.send({ type: "setBuildMode", mode: { type: "power_pole" } })
           }
         >
           {buildMode?.type === "power_pole"
@@ -78,8 +78,8 @@ export const GameUI: React.FC = () => {
           }}
           onClick={() =>
             buildMode?.type === "coal_plant"
-              ? setBuildMode(null)
-              : setBuildMode({ type: "coal_plant" })
+              ? clientStore.send({ type: "setBuildMode", mode: null })
+              : clientStore.send({ type: "setBuildMode", mode: { type: "coal_plant" } })
           }
         >
           {buildMode?.type === "coal_plant"
