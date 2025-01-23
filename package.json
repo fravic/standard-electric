@@ -46,6 +46,7 @@
     "@react-three/fiber": "^8.17.12",
     "@remix-run/cloudflare": "^2.12.1",
     "@remix-run/react": "^2.12.1",
+    "@storybook/react-vite": "^8.5.1",
     "@xstate/store": "^2.6.2",
     "actor-kit": "^0.47.0",
     "isbot": "^4.1.0",

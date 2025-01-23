@@ -47,7 +47,7 @@ export const Entry: Story = {
           hexGrid: hexGrid as HexGrid,
         },
         private: {},
-        value: { game: "ready" },
+        value: "active",
       },
     });
 
