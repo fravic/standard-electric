@@ -1,10 +1,17 @@
-import { HexCoordinates } from "../coordinates/HexCoordinates";
+import {
+  coordinatesToString,
+  equals,
+  HexCoordinates,
+} from "../coordinates/HexCoordinates";
 import { HexCell, Population } from "../HexCell";
 import { Buildable } from "../buildables/schemas";
-import { PowerPole } from "../buildables/PowerPole";
+import { isPowerPole, PowerPole } from "../buildables/PowerPole";
 import { CoalPlant } from "../buildables/CoalPlant";
 import { HexGrid } from "../HexGrid";
-import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
+import {
+  cornerToString,
+  getAdjacentHexes,
+} from "../coordinates/CornerCoordinates";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -27,6 +34,7 @@ type PowerPlant = {
   maxCapacity: number;
   remainingCapacity: number;
   gridId: string;
+  coordinates: HexCoordinates;
 };
 
 type Consumer = {
@@ -61,8 +69,10 @@ export class PowerSystem {
       .filter(
         (
           b
-        ): b is Buildable & { type: "coal_plant"; powerGenerationKW: number } =>
-          b.type === "coal_plant" && typeof b.powerGenerationKW === "number"
+        ): b is Buildable & {
+          powerGenerationKW: number;
+          coordinates: HexCoordinates;
+        } => b.powerGenerationKW !== undefined && b.coordinates !== undefined
       )
       .map((plant) => ({
         id: plant.id,
@@ -71,6 +81,7 @@ export class PowerSystem {
         maxCapacity: plant.powerGenerationKW,
         remainingCapacity: plant.powerGenerationKW,
         gridId: plant.id, // Each plant starts in its own grid
+        coordinates: plant.coordinates,
       }));
 
     // Create grid status entries for each plant
@@ -94,52 +105,42 @@ export class PowerSystem {
       }));
   }
 
+  // Find power plants connected to this hex
   private findConnectedPowerPlants(coordinates: HexCoordinates): string[] {
-    // Find power poles connected to this hex
     const connectedPlantIds = new Set<string>();
-    const visited = new Set<string>();
+    const visitedHexes = new Set<string>();
+    const visitedPoles = new Set<string>();
     const toVisit = [coordinates];
 
     while (toVisit.length > 0) {
       const current = toVisit.pop()!;
-      const key = `${current.x},${current.z}`;
+      const key = coordinatesToString(current);
 
-      if (visited.has(key)) continue;
-      visited.add(key);
+      if (visitedHexes.has(key)) continue;
+      visitedHexes.add(key);
 
       // Check for power plants at this location
       const plantsHere = this.powerPlants.filter((plant) =>
-        this.buildables.find(
-          (b) =>
-            b.id === plant.id &&
-            b.coordinates &&
-            b.coordinates.x === current.x &&
-            b.coordinates.z === current.z
-        )
+        equals(plant.coordinates, current)
       );
       plantsHere.forEach((plant) => connectedPlantIds.add(plant.id));
 
-      // Find connected power poles
-      const poles = this.buildables.filter(
-        (b): b is PowerPole =>
-          b.type === "power_pole" &&
-          b.cornerCoordinates !== undefined &&
-          b.cornerCoordinates.hex.x === current.x &&
-          b.cornerCoordinates.hex.z === current.z &&
-          (b.isGhost === undefined || b.isGhost === false)
-      );
+      // For each adjacent pole to the current hex...
+      const poles = this.buildables.filter(isPowerPole);
+      const adjacentPoles = poles.filter((pole) => {
+        if (visitedPoles.has(pole.id)) return false;
+        const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
+        const isAdjacent = adjacentHexes.some((hex) => equals(hex, current));
+        return isAdjacent;
+      });
 
-      // Add adjacent hexes through power poles to visit
-      poles.forEach((pole) => {
-        const connectedPoles = this.buildables.filter(
-          (b): b is PowerPole =>
-            b.type === "power_pole" && pole.connectedToIds.includes(b.id)
-        );
-
-        connectedPoles.forEach((connectedPole) => {
-          if (connectedPole.cornerCoordinates) {
-            toVisit.push(connectedPole.cornerCoordinates.hex);
-          }
+      // ...add all the other hexes that they're adjacent to toVisit
+      adjacentPoles.forEach((pole) => {
+        visitedPoles.add(pole.id);
+        const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
+        adjacentHexes.forEach((hex) => {
+          if (visitedHexes.has(coordinatesToString(hex))) return;
+          toVisit.push(hex);
         });
       });
     }
@@ -147,6 +148,7 @@ export class PowerSystem {
     return Array.from(connectedPlantIds);
   }
 
+  // TODO: Review/test this function
   resolveOneHourOfPowerProduction(): PowerSystemResult {
     // Reset capacities and statuses
     this.powerPlants.forEach((plant) => {
