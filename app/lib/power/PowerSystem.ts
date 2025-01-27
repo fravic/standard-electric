@@ -37,11 +37,16 @@ type PowerPlant = {
   coordinates: HexCoordinates;
 };
 
+type PowerPlantConnection = {
+  plantId: string;
+  path: string[]; // Array of power pole IDs forming the path from consumer to plant
+};
+
 type Consumer = {
   coordinates: HexCoordinates;
   demandKwh: number;
   remainingDemand: number;
-  connectedPlantIds: string[];
+  connectedPlants: PowerPlantConnection[];
 };
 
 type GridStatus = {
@@ -101,51 +106,97 @@ export class PowerSystem {
         coordinates: cell.coordinates,
         demandKwh: POWER_CONSUMPTION_RATES_KW[cell.population],
         remainingDemand: POWER_CONSUMPTION_RATES_KW[cell.population],
-        connectedPlantIds: this.findConnectedPowerPlants(cell.coordinates),
+        connectedPlants: this.findConnectedPowerPlants(cell.coordinates),
       }));
   }
 
   // Find power plants connected to this hex
-  private findConnectedPowerPlants(coordinates: HexCoordinates): string[] {
-    const connectedPlantIds = new Set<string>();
+  private findConnectedPowerPlants(
+    coordinates: HexCoordinates
+  ): { plantId: string; path: string[] }[] {
+    const connectedPlants: { plantId: string; path: string[] }[] = [];
     const visitedHexes = new Set<string>();
     const visitedPoles = new Set<string>();
-    const toVisit = [coordinates];
+    const foundPlantIds = new Set<string>(); // Track found plants to keep shortest path
+
+    // Queue of hexes to visit, along with the path taken to reach them
+    const toVisit: { hex: HexCoordinates; path: string[] }[] = [
+      { hex: coordinates, path: [] },
+    ];
 
     while (toVisit.length > 0) {
-      const current = toVisit.pop()!;
-      const key = coordinatesToString(current);
+      // Use shift() instead of pop() for BFS (shortest paths)
+      const current = toVisit.shift()!;
+      const key = coordinatesToString(current.hex);
 
       if (visitedHexes.has(key)) continue;
       visitedHexes.add(key);
 
       // Check for power plants at this location
       const plantsHere = this.powerPlants.filter((plant) =>
-        equals(plant.coordinates, current)
+        equals(plant.coordinates, current.hex)
       );
-      plantsHere.forEach((plant) => connectedPlantIds.add(plant.id));
+      plantsHere.forEach((plant) => {
+        // Only add a plant if we haven't found it yet (keeping shortest path)
+        if (!foundPlantIds.has(plant.id)) {
+          foundPlantIds.add(plant.id);
+          connectedPlants.push({ plantId: plant.id, path: current.path });
+        }
+      });
 
       // For each adjacent pole to the current hex...
       const poles = this.buildables.filter(isPowerPole);
       const adjacentPoles = poles.filter((pole) => {
         if (visitedPoles.has(pole.id)) return false;
         const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
-        const isAdjacent = adjacentHexes.some((hex) => equals(hex, current));
+        const isAdjacent = adjacentHexes.some((hex) =>
+          equals(hex, current.hex)
+        );
         return isAdjacent;
       });
 
       // ...add all the other hexes that they're adjacent to toVisit
       adjacentPoles.forEach((pole) => {
         visitedPoles.add(pole.id);
+
+        // Get all hexes adjacent to this pole
         const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
         adjacentHexes.forEach((hex) => {
           if (visitedHexes.has(coordinatesToString(hex))) return;
-          toVisit.push(hex);
+          // Add this hex to visit with the current path plus this pole
+          toVisit.push({
+            hex,
+            path: [...current.path, pole.id],
+          });
+        });
+
+        // Find all connected poles (including poles that connect to this one)
+        const connectedPoles = poles.filter(
+          (otherPole) =>
+            !visitedPoles.has(otherPole.id) &&
+            (pole.connectedToIds.includes(otherPole.id) ||
+              otherPole.connectedToIds.includes(pole.id))
+        );
+
+        // Add hexes adjacent to connected poles
+        connectedPoles.forEach((connectedPole) => {
+          visitedPoles.add(connectedPole.id);
+          const adjacentHexes = getAdjacentHexes(
+            connectedPole.cornerCoordinates
+          );
+          adjacentHexes.forEach((hex) => {
+            if (visitedHexes.has(coordinatesToString(hex))) return;
+            // Add this hex to visit with the current path plus both poles
+            toVisit.push({
+              hex,
+              path: [...current.path, pole.id, connectedPole.id],
+            });
+          });
         });
       });
     }
 
-    return Array.from(connectedPlantIds);
+    return connectedPlants;
   }
 
   // TODO: Review/test this function
@@ -168,8 +219,10 @@ export class PowerSystem {
     // Process each consumer
     for (const consumer of this.consumers) {
       // Step 1: Assess combined capacity from all connected, non-blackout plants
-      const availablePlants = consumer.connectedPlantIds
-        .map((pid) => this.powerPlants.find((p) => p.id === pid))
+      const availablePlants = consumer.connectedPlants
+        .map((connection) =>
+          this.powerPlants.find((p) => p.id === connection.plantId)
+        )
         .filter(
           (plant): plant is PowerPlant =>
             plant !== undefined &&
@@ -192,8 +245,10 @@ export class PowerSystem {
 
       // Step 2: Allocate power since combined capacity can meet demand
       while (consumer.remainingDemand > 0) {
-        const allocatablePlants = consumer.connectedPlantIds
-          .map((pid) => this.powerPlants.find((p) => p.id === pid))
+        const allocatablePlants = consumer.connectedPlants
+          .map((connection) =>
+            this.powerPlants.find((p) => p.id === connection.plantId)
+          )
           .filter(
             (plant): plant is PowerPlant =>
               plant !== undefined &&
