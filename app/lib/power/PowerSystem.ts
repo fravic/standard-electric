@@ -58,6 +58,7 @@ type GridStatus = {
 export class PowerSystem {
   private hexGrid: HexGrid;
   private buildables: Buildable[];
+  private powerPolesById: Record<string, PowerPole> = {};
   private powerPlants: PowerPlant[] = [];
   private consumers: Consumer[] = [];
   private gridStatusMap: Record<string, GridStatus> = {};
@@ -108,6 +109,13 @@ export class PowerSystem {
         remainingDemand: POWER_CONSUMPTION_RATES_KW[cell.population],
         connectedPlants: this.findConnectedPowerPlants(cell.coordinates),
       }));
+
+    this.powerPolesById = this.buildables
+      .filter(isPowerPole)
+      .reduce((acc, pole) => {
+        acc[pole.id] = pole;
+        return acc;
+      }, {} as Record<string, PowerPole>);
   }
 
   // Find power plants connected to this hex
@@ -115,83 +123,56 @@ export class PowerSystem {
     coordinates: HexCoordinates
   ): { plantId: string; path: string[] }[] {
     const connectedPlants: { plantId: string; path: string[] }[] = [];
-    const visitedHexes = new Set<string>();
-    const visitedPoles = new Set<string>();
-    const foundPlantIds = new Set<string>(); // Track found plants to keep shortest path
+    const visitedPowerPoleIds = new Set<string>();
 
-    // Queue of hexes to visit, along with the path taken to reach them
-    const toVisit: { hex: HexCoordinates; path: string[] }[] = [
-      { hex: coordinates, path: [] },
-    ];
+    // Start with the power poles at the starting hex
+    const startingPoles = this.buildables.filter(isPowerPole).filter((pole) => {
+      const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
+      return adjacentHexes.some((hex) => equals(hex, coordinates));
+    });
 
+    // Queue of power poles to visit, along with the path taken to reach them
+    const toVisit: { powerPoleId: string; path: string[] }[] =
+      startingPoles.map((pole) => ({ powerPoleId: pole.id, path: [] }));
+
+    // Perform a BFS along connected power poles to find the shortest paths to
+    // all connected power plants
     while (toVisit.length > 0) {
-      // Use shift() instead of pop() for BFS (shortest paths)
-      const current = toVisit.shift()!;
-      const key = coordinatesToString(current.hex);
+      const currentVisit = toVisit.shift()!;
 
-      if (visitedHexes.has(key)) continue;
-      visitedHexes.add(key);
+      if (visitedPowerPoleIds.has(currentVisit.powerPoleId)) continue;
+      visitedPowerPoleIds.add(currentVisit.powerPoleId);
 
-      // Check for power plants at this location
+      const currentPole = this.powerPolesById[currentVisit.powerPoleId];
+      const adjacentHexes = getAdjacentHexes(currentPole.cornerCoordinates);
+      const newPath = [...currentVisit.path, currentVisit.powerPoleId];
+
+      // Check for power plants at adjacent hexes
       const plantsHere = this.powerPlants.filter((plant) =>
-        equals(plant.coordinates, current.hex)
+        adjacentHexes.some((hex) => equals(hex, plant.coordinates))
       );
       plantsHere.forEach((plant) => {
         // Only add a plant if we haven't found it yet (keeping shortest path)
-        if (!foundPlantIds.has(plant.id)) {
-          foundPlantIds.add(plant.id);
-          connectedPlants.push({ plantId: plant.id, path: current.path });
+        if (!connectedPlants.some((c) => c.plantId === plant.id)) {
+          connectedPlants.push({ plantId: plant.id, path: newPath });
         }
       });
 
-      // For each adjacent pole to the current hex...
-      const poles = this.buildables.filter(isPowerPole);
-      const adjacentPoles = poles.filter((pole) => {
-        if (visitedPoles.has(pole.id)) return false;
-        const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
-        const isAdjacent = adjacentHexes.some((hex) =>
-          equals(hex, current.hex)
-        );
-        return isAdjacent;
-      });
-
-      // ...add all the other hexes that they're adjacent to toVisit
-      adjacentPoles.forEach((pole) => {
-        visitedPoles.add(pole.id);
-
-        // Get all hexes adjacent to this pole
-        const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
-        adjacentHexes.forEach((hex) => {
-          if (visitedHexes.has(coordinatesToString(hex))) return;
-          // Add this hex to visit with the current path plus this pole
-          toVisit.push({
-            hex,
-            path: [...current.path, pole.id],
-          });
-        });
-
-        // Find all connected poles (including poles that connect to this one)
-        const connectedPoles = poles.filter(
-          (otherPole) =>
-            !visitedPoles.has(otherPole.id) &&
-            (pole.connectedToIds.includes(otherPole.id) ||
-              otherPole.connectedToIds.includes(pole.id))
-        );
-
-        // Add hexes adjacent to connected poles
-        connectedPoles.forEach((connectedPole) => {
-          visitedPoles.add(connectedPole.id);
-          const adjacentHexes = getAdjacentHexes(
-            connectedPole.cornerCoordinates
-          );
-          adjacentHexes.forEach((hex) => {
-            if (visitedHexes.has(coordinatesToString(hex))) return;
-            // Add this hex to visit with the current path plus both poles
-            toVisit.push({
-              hex,
-              path: [...current.path, pole.id, connectedPole.id],
-            });
-          });
+      // Add connected poles to the queue
+      const connectedPoles = currentPole.connectedToIds;
+      // TODO: Currently, we don't create bi-directional connections, but the
+      // connections should be bi-directional. So we need to find all power
+      // poles that point at this one too.
+      const allConnectedPoles = connectedPoles.concat(
+        Object.values(this.powerPolesById)
+          .filter((pole) => pole.connectedToIds.includes(currentPole.id))
+          .map((pole) => pole.id)
+      );
+      allConnectedPoles.forEach((poleId) => {
+        if (visitedPowerPoleIds.has(poleId)) return;
+        toVisit.push({
+          powerPoleId: poleId,
+          path: newPath,
         });
       });
     }

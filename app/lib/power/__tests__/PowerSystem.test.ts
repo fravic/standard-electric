@@ -25,13 +25,13 @@ describe("PowerSystem", () => {
     const createPowerPoleAtCorner = (
       hex: HexCoordinates,
       position: CornerPosition,
-      playerId: string = "player1"
+      connectedToIds: string[] = []
     ) => {
       return createPowerPole({
         id: `pole-${hex.x}-${hex.z}-${position}`,
         cornerCoordinates: { hex, position },
-        playerId,
-        connectedToIds: [],
+        playerId: "player1",
+        connectedToIds,
       });
     };
 
@@ -70,20 +70,11 @@ describe("PowerSystem", () => {
       });
     };
 
-    it("should find a power plant in the same hex with empty path", () => {
-      const hex: HexCoordinates = { x: 0, z: 0 };
-      const plant = createPowerPlantAtHex(hex);
-      const powerSystem = new PowerSystem(hexGrid, [plant]);
-
-      const connectedPlants = powerSystem["findConnectedPowerPlants"](hex);
-      expect(connectedPlants).toEqual([{ plantId: plant.id, path: [] }]);
-    });
-
     it("should find a power plant connected through a single power pole with correct path", () => {
       const hex1: HexCoordinates = { x: 0, z: 0 };
       const hex2: HexCoordinates = { x: 0, z: -1 }; // NE neighbor
       const plant = createPowerPlantAtHex(hex2);
-      const pole = createPowerPoleAtCorner(hex1, CornerPosition.North);
+      const pole = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
 
       const powerSystem = new PowerSystem(hexGrid, [plant, pole]);
       const connectedPlants = powerSystem["findConnectedPowerPlants"](hex1);
@@ -97,8 +88,10 @@ describe("PowerSystem", () => {
 
       const plant1 = createPowerPlantAtHex(hex2);
       const plant2 = createPowerPlantAtHex(hex3);
-      const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.South);
+      const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
+      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.South, [
+        pole1.id,
+      ]);
 
       const powerSystem = new PowerSystem(hexGrid, [
         plant1,
@@ -123,8 +116,10 @@ describe("PowerSystem", () => {
       const hex3: HexCoordinates = { x: 0, z: -2 }; // NE neighbor of hex2
 
       const plant = createPowerPlantAtHex(hex3);
-      const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North);
+      const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
+      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [
+        pole1.id,
+      ]);
 
       const powerSystem = new PowerSystem(hexGrid, [plant, pole1, pole2]);
       const connectedPlants = powerSystem["findConnectedPowerPlants"](hex1);
@@ -192,23 +187,33 @@ describe("PowerSystem", () => {
     it("should find a power plant connected through a long sequence of power poles", () => {
       // Create a long zigzag path from (0,0) to (3,-6)
       const startHex: HexCoordinates = { x: 0, z: 0 };
-      const hex1: HexCoordinates = { x: 0, z: -1 }; // North
-      const hex2: HexCoordinates = { x: 1, z: -2 }; // NE
-      const hex3: HexCoordinates = { x: 1, z: -3 }; // North
-      const hex4: HexCoordinates = { x: 2, z: -4 }; // NE
-      const hex5: HexCoordinates = { x: 2, z: -5 }; // North
-      const hex6: HexCoordinates = { x: 3, z: -6 }; // NE - Plant location
+      const hex1: HexCoordinates = { x: 0, z: -1 };
+      const hex2: HexCoordinates = { x: 1, z: -2 };
+      const hex3: HexCoordinates = { x: 1, z: -3 };
+      const hex4: HexCoordinates = { x: 2, z: -4 };
+      const hex5: HexCoordinates = { x: 2, z: -5 };
+      const hex6: HexCoordinates = { x: 3, z: -6 }; // Plant location
 
       // Place the plant at the end
       const plant = createPowerPlantAtHex(hex6);
 
       // Create a chain of poles connecting to the plant
-      const pole1 = createPowerPoleAtCorner(startHex, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.North);
-      const pole3 = createPowerPoleAtCorner(hex2, CornerPosition.North);
-      const pole4 = createPowerPoleAtCorner(hex3, CornerPosition.North);
-      const pole5 = createPowerPoleAtCorner(hex4, CornerPosition.North);
-      const pole6 = createPowerPoleAtCorner(hex5, CornerPosition.North);
+      const pole1 = createPowerPoleAtCorner(startHex, CornerPosition.North, []);
+      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.North, [
+        pole1.id,
+      ]);
+      const pole3 = createPowerPoleAtCorner(hex2, CornerPosition.North, [
+        pole2.id,
+      ]);
+      const pole4 = createPowerPoleAtCorner(hex3, CornerPosition.North, [
+        pole3.id,
+      ]);
+      const pole5 = createPowerPoleAtCorner(hex4, CornerPosition.North, [
+        pole4.id,
+      ]);
+      const pole6 = createPowerPoleAtCorner(hex5, CornerPosition.North, [
+        pole5.id,
+      ]);
 
       const powerSystem = new PowerSystem(hexGrid, [
         plant,
@@ -246,47 +251,41 @@ describe("PowerSystem", () => {
       const rightHex2: HexCoordinates = { x: 2, z: -3 };
       const rightPlant = createPowerPlantAtHex(rightHex2);
 
-      // Create the shared starting pole
-      const startPole = createPowerPole({
-        id: `pole-0-0-0`,
-        cornerCoordinates: { hex: startHex, position: CornerPosition.North },
-        playerId: "player1",
-        connectedToIds: [],
-      });
-      const northPole = createPowerPole({
-        id: `pole-0--1-0`,
-        cornerCoordinates: { hex: northHex, position: CornerPosition.North },
-        playerId: "player1",
-        connectedToIds: [],
-      });
+      // Create the shared starting poles
+      const startPole = createPowerPoleAtCorner(
+        startHex,
+        CornerPosition.North,
+        []
+      );
+      const northPole = createPowerPoleAtCorner(
+        northHex,
+        CornerPosition.North,
+        [startPole.id]
+      );
 
       // Left branch poles
-      const leftPole1 = createPowerPole({
-        id: `pole--1--2-0`,
-        cornerCoordinates: { hex: leftHex1, position: CornerPosition.North },
-        playerId: "player1",
-        connectedToIds: [],
-      });
-      const leftPole2 = createPowerPole({
-        id: `pole--2--3-1`,
-        cornerCoordinates: { hex: leftHex2, position: CornerPosition.South },
-        playerId: "player1",
-        connectedToIds: [],
-      });
+      const leftPole1 = createPowerPoleAtCorner(
+        leftHex1,
+        CornerPosition.North,
+        [northPole.id]
+      );
+      const leftPole2 = createPowerPoleAtCorner(
+        leftHex2,
+        CornerPosition.South,
+        [leftPole1.id]
+      );
 
       // Right branch poles
-      const rightPole1 = createPowerPole({
-        id: `pole-1--2-0`,
-        cornerCoordinates: { hex: rightHex1, position: CornerPosition.North },
-        playerId: "player1",
-        connectedToIds: [],
-      });
-      const rightPole2 = createPowerPole({
-        id: `pole-2--3-1`,
-        cornerCoordinates: { hex: rightHex2, position: CornerPosition.South },
-        playerId: "player1",
-        connectedToIds: [],
-      });
+      const rightPole1 = createPowerPoleAtCorner(
+        rightHex1,
+        CornerPosition.North,
+        [northPole.id]
+      );
+      const rightPole2 = createPowerPoleAtCorner(
+        rightHex2,
+        CornerPosition.South,
+        [rightPole1.id]
+      );
 
       const powerSystem = new PowerSystem(hexGrid, [
         leftPlant,
@@ -298,14 +297,6 @@ describe("PowerSystem", () => {
         rightPole1,
         rightPole2,
       ]);
-
-      // Connect the poles to form the Y-shaped network
-      startPole.connectedToIds = [northPole.id];
-      northPole.connectedToIds = [startPole.id, leftPole1.id, rightPole1.id];
-      leftPole1.connectedToIds = [northPole.id, leftPole2.id];
-      leftPole2.connectedToIds = [leftPole1.id];
-      rightPole1.connectedToIds = [northPole.id, rightPole2.id];
-      rightPole2.connectedToIds = [rightPole1.id];
 
       const connectedPlants = powerSystem["findConnectedPowerPlants"](startHex);
 
