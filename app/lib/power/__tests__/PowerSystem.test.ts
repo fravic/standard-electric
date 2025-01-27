@@ -239,11 +239,11 @@ describe("PowerSystem", () => {
       const startHex: HexCoordinates = { x: 0, z: 0 };
 
       // First go North (shared path)
-      const northHex: HexCoordinates = { x: 0, z: -1 };
+      const northHex: HexCoordinates = { x: 0, z: -2 };
 
       // Left branch - goes Northwest
-      const leftHex1: HexCoordinates = { x: -1, z: -2 };
-      const leftHex2: HexCoordinates = { x: -2, z: -3 };
+      const leftHex1: HexCoordinates = { x: -1, z: -1 };
+      const leftHex2: HexCoordinates = { x: -1, z: -7 };
       const leftPlant = createPowerPlantAtHex(leftHex2);
 
       // Right branch - goes Northeast
@@ -259,7 +259,7 @@ describe("PowerSystem", () => {
       );
       const northPole = createPowerPoleAtCorner(
         northHex,
-        CornerPosition.North,
+        CornerPosition.South,
         [startPole.id]
       );
 
