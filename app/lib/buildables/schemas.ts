@@ -10,6 +10,7 @@ export const BuildableSchema = z.object({
   playerId: z.string(),
   isGhost: z.boolean().optional(),
   powerGenerationKW: z.number().optional(),
+  pricePerKwh: z.number().optional(),
   coordinates: HexCoordinatesSchema.optional(),
   cornerCoordinates: CornerCoordinatesSchema.optional(),
 });
@@ -26,4 +27,6 @@ export const PowerPoleSchema = BuildableSchema.extend({
 export const CoalPlantSchema = BuildableSchema.extend({
   type: z.literal("coal_plant"),
   coordinates: HexCoordinatesSchema,
+  powerGenerationKW: z.number(),
+  pricePerKwh: z.number(),
 });

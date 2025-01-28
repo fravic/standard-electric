@@ -6,7 +6,7 @@ import {
 import { HexCell, Population } from "../HexCell";
 import { Buildable } from "../buildables/schemas";
 import { isPowerPole, PowerPole } from "../buildables/PowerPole";
-import { CoalPlant } from "../buildables/CoalPlant";
+import { CoalPlant, isCoalPlant } from "../buildables/CoalPlant";
 import { HexGrid } from "../HexGrid";
 import {
   cornerToString,
@@ -25,6 +25,7 @@ export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
 
 type PowerSystemResult = {
   incomePerPlayer: Record<string, number>;
+  grids: Grid[];
 };
 
 type PowerPlant = {
@@ -42,17 +43,20 @@ type PowerPlantConnection = {
   path: string[]; // Array of power pole IDs forming the path from consumer to plant
 };
 
+type Grid = {
+  id: string;
+  powerPlantIds: string[];
+  powerPoleIds: string[];
+  totalCapacity: number;
+  usedCapacity: number;
+  blackout: boolean;
+};
+
 type Consumer = {
   coordinates: HexCoordinates;
   demandKwh: number;
   remainingDemand: number;
   connectedPlants: PowerPlantConnection[];
-};
-
-type GridStatus = {
-  totalCapacity: number;
-  usedCapacity: number;
-  blackout: boolean;
 };
 
 export class PowerSystem {
@@ -61,7 +65,7 @@ export class PowerSystem {
   private powerPolesById: Record<string, PowerPole> = {};
   private powerPlants: PowerPlant[] = [];
   private consumers: Consumer[] = [];
-  private gridStatusMap: Record<string, GridStatus> = {};
+  private grids: Grid[] = [];
 
   constructor(hexGrid: HexGrid, buildables: Buildable[]) {
     this.hexGrid = hexGrid;
@@ -71,33 +75,26 @@ export class PowerSystem {
 
   private initializePowerSystem() {
     // Initialize power plants from coal plants
-    this.powerPlants = this.buildables
-      .filter(
-        (
-          b
-        ): b is Buildable & {
-          powerGenerationKW: number;
-          coordinates: HexCoordinates;
-        } => b.powerGenerationKW !== undefined && b.coordinates !== undefined
-      )
-      .map((plant) => ({
-        id: plant.id,
-        playerId: plant.playerId,
-        pricePerKwh: 0.1, // Default price per kWh
-        maxCapacity: plant.powerGenerationKW,
-        remainingCapacity: plant.powerGenerationKW,
-        gridId: plant.id, // Each plant starts in its own grid
-        coordinates: plant.coordinates,
-      }));
+    this.powerPlants = this.buildables.filter(isCoalPlant).map((plant) => ({
+      id: plant.id,
+      playerId: plant.playerId,
+      pricePerKwh: plant.pricePerKwh,
+      maxCapacity: plant.powerGenerationKW,
+      remainingCapacity: plant.powerGenerationKW,
+      gridId: plant.id, // Each plant starts in its own grid
+      coordinates: plant.coordinates,
+    }));
 
-    // Create grid status entries for each plant
-    this.powerPlants.forEach((plant) => {
-      this.gridStatusMap[plant.gridId] = {
-        totalCapacity: plant.maxCapacity,
-        usedCapacity: 0,
-        blackout: false,
-      };
-    });
+    // Initialize power poles
+    this.powerPolesById = this.buildables
+      .filter(isPowerPole)
+      .reduce((acc, pole) => {
+        acc[pole.id] = pole;
+        return acc;
+      }, {} as Record<string, PowerPole>);
+
+    // Compile grids from connected power plants and poles
+    this.grids = this.compileGrids();
 
     // Find all populated cells that need power
     const cells = Object.values(this.hexGrid.cellsByHexCoordinates);
@@ -107,22 +104,17 @@ export class PowerSystem {
         coordinates: cell.coordinates,
         demandKwh: POWER_CONSUMPTION_RATES_KW[cell.population],
         remainingDemand: POWER_CONSUMPTION_RATES_KW[cell.population],
-        connectedPlants: this.findConnectedPowerPlants(cell.coordinates),
+        connectedPlants: this.findConnectedPowerPlants(cell.coordinates)
+          .connectedPlants,
       }));
-
-    this.powerPolesById = this.buildables
-      .filter(isPowerPole)
-      .reduce((acc, pole) => {
-        acc[pole.id] = pole;
-        return acc;
-      }, {} as Record<string, PowerPole>);
   }
 
   // Find power plants connected to this hex
-  private findConnectedPowerPlants(
-    coordinates: HexCoordinates
-  ): { plantId: string; path: string[] }[] {
-    const connectedPlants: { plantId: string; path: string[] }[] = [];
+  private findConnectedPowerPlants(coordinates: HexCoordinates): {
+    connectedPlants: PowerPlantConnection[];
+    connectedPoleIds: string[];
+  } {
+    const connectedPlants: PowerPlantConnection[] = [];
     const visitedPowerPoleIds = new Set<string>();
 
     // Start with the power poles at the starting hex
@@ -177,10 +169,56 @@ export class PowerSystem {
       });
     }
 
-    return connectedPlants;
+    return {
+      connectedPlants,
+      connectedPoleIds: Array.from(visitedPowerPoleIds),
+    };
   }
 
-  // TODO: Review/test this function
+  private compileGrids(): Grid[] {
+    const grids: Grid[] = [];
+    const processedPlantIds = new Set<string>();
+
+    // For each unprocessed power plant, find all connected power plants and poles
+    for (const plant of this.powerPlants) {
+      if (processedPlantIds.has(plant.id)) continue;
+
+      // Start a new grid
+      const grid: Grid = {
+        id: plant.id, // Use first plant's ID as grid ID
+        powerPlantIds: [plant.id],
+        powerPoleIds: [],
+        totalCapacity: plant.maxCapacity,
+        usedCapacity: 0,
+        blackout: false,
+      };
+      processedPlantIds.add(plant.id);
+
+      // Find all power plants and poles connected to this one
+      const { connectedPlants, connectedPoleIds } =
+        this.findConnectedPowerPlants(plant.coordinates);
+
+      // Add connected plants to the grid
+      for (const { plantId } of connectedPlants) {
+        if (!processedPlantIds.has(plantId)) {
+          const connectedPlant = this.powerPlants.find(
+            (p) => p.id === plantId
+          )!;
+          grid.powerPlantIds.push(plantId);
+          grid.totalCapacity += connectedPlant.maxCapacity;
+          processedPlantIds.add(plantId);
+        }
+      }
+
+      // Add all connected poles to the grid
+      grid.powerPoleIds = connectedPoleIds;
+
+      grids.push(grid);
+    }
+
+    return grids;
+  }
+
   resolveOneHourOfPowerProduction(): PowerSystemResult {
     // Reset capacities and statuses
     this.powerPlants.forEach((plant) => {
@@ -189,72 +227,124 @@ export class PowerSystem {
     this.consumers.forEach((consumer) => {
       consumer.remainingDemand = consumer.demandKwh;
     });
-    Object.values(this.gridStatusMap).forEach((grid) => {
+    this.grids.forEach((grid) => {
       grid.usedCapacity = 0;
       grid.blackout = false;
     });
 
-    // Track income per player
-    const incomePerPlayer: Record<string, number> = {};
+    // First pass: Check for blackouts
+    // Calculate total demand per grid and available capacity per consumer
+    const demandPerGrid = new Map<Grid, number>();
+    const consumersByGrid = new Map<Grid, Consumer[]>();
+    const totalAvailablePerConsumer = new Map<Consumer, number>();
 
-    // Process each consumer
+    // First, calculate total available capacity for each consumer
     for (const consumer of this.consumers) {
-      // Step 1: Assess combined capacity from all connected, non-blackout plants
-      const availablePlants = consumer.connectedPlants
-        .map((connection) =>
-          this.powerPlants.find((p) => p.id === connection.plantId)
-        )
-        .filter(
-          (plant): plant is PowerPlant =>
-            plant !== undefined &&
-            plant.remainingCapacity > 0 &&
-            !this.gridStatusMap[plant.gridId].blackout
-        );
-
-      const totalAvailable = availablePlants.reduce(
-        (sum, plant) => sum + plant.remainingCapacity,
-        0
-      );
-
-      // If total available capacity is less than demand, blackout all connected grids
-      if (totalAvailable < consumer.remainingDemand) {
-        availablePlants.forEach((plant) => {
-          this.gridStatusMap[plant.gridId].blackout = true;
-        });
-        continue;
-      }
-
-      // Step 2: Allocate power since combined capacity can meet demand
-      while (consumer.remainingDemand > 0) {
-        const allocatablePlants = consumer.connectedPlants
+      const connectedGrids = new Set(
+        consumer.connectedPlants
           .map((connection) =>
             this.powerPlants.find((p) => p.id === connection.plantId)
           )
-          .filter(
-            (plant): plant is PowerPlant =>
-              plant !== undefined &&
-              plant.remainingCapacity > 0 &&
-              !this.gridStatusMap[plant.gridId].blackout
+          .filter((plant): plant is PowerPlant => plant !== undefined)
+          .map(
+            (plant) =>
+              this.grids.find((g) => g.powerPlantIds.includes(plant.id))!
+          )
+      );
+
+      // Calculate total available capacity across all connected grids
+      const totalAvailable = Array.from(connectedGrids).reduce(
+        (sum, grid) => sum + grid.totalCapacity,
+        0
+      );
+      totalAvailablePerConsumer.set(consumer, totalAvailable);
+
+      // Add this consumer's demand to each connected grid
+      for (const grid of connectedGrids) {
+        const currentDemand = demandPerGrid.get(grid) || 0;
+        demandPerGrid.set(grid, currentDemand + consumer.demandKwh);
+
+        const consumers = consumersByGrid.get(grid) || [];
+        consumers.push(consumer);
+        consumersByGrid.set(grid, consumers);
+      }
+    }
+
+    // Check each grid for blackout
+    for (const grid of this.grids) {
+      const consumers = consumersByGrid.get(grid) || [];
+      // A grid goes into blackout if any of its consumers can't meet their demand
+      // from their total available capacity across all connected grids
+      const causesBlackout = consumers.some(
+        (consumer) =>
+          (totalAvailablePerConsumer.get(consumer) || 0) < consumer.demandKwh
+      );
+      if (causesBlackout) {
+        grid.blackout = true;
+        // When a grid is in blackout, all connected grids for its consumers
+        // should also be in blackout
+        for (const consumer of consumers) {
+          const connectedGrids = new Set(
+            consumer.connectedPlants
+              .map((connection) =>
+                this.powerPlants.find((p) => p.id === connection.plantId)
+              )
+              .filter((plant): plant is PowerPlant => plant !== undefined)
+              .map(
+                (plant) =>
+                  this.grids.find((g) => g.powerPlantIds.includes(plant.id))!
+              )
           );
+          for (const connectedGrid of connectedGrids) {
+            connectedGrid.blackout = true;
+          }
+        }
+      }
+    }
 
-        if (allocatablePlants.length === 0) break;
+    // Track income per player
+    const incomePerPlayer: Record<string, number> = {};
 
-        // Sort plants by price ascending
-        allocatablePlants.sort((a, b) => a.pricePerKwh - b.pricePerKwh);
+    // Second pass: Process consumption for non-blacked-out grids
+    for (const consumer of this.consumers) {
+      // Get available plants from non-blacked-out grids
+      const availablePlants = consumer.connectedPlants
+        .map((connection) => ({
+          plant: this.powerPlants.find((p) => p.id === connection.plantId),
+          path: connection.path,
+        }))
+        .filter(
+          (connection): connection is { plant: PowerPlant; path: string[] } =>
+            connection.plant !== undefined
+        )
+        .filter(({ plant }) => {
+          if (plant.remainingCapacity <= 0) return false;
+          const grid = this.grids.find((g) =>
+            g.powerPlantIds.includes(plant.id)
+          );
+          return !grid?.blackout;
+        })
+        .map(({ plant }) => plant);
 
-        // Select the cheapest plant
-        const plant = allocatablePlants[0];
-        const grid = this.gridStatusMap[plant.gridId];
+      // Sort plants by price ascending
+      availablePlants.sort((a, b) => a.pricePerKwh - b.pricePerKwh);
+
+      // Allocate power from each available plant until demand is met
+      let remainingDemand = consumer.demandKwh;
+      for (const plant of availablePlants) {
+        if (remainingDemand <= 0) break;
+
+        const grid = this.grids.find((g) =>
+          g.powerPlantIds.includes(plant.id)
+        )!;
+        if (grid.blackout) continue;
 
         // Determine how much power to allocate from this plant
-        const supply = Math.min(
-          consumer.remainingDemand,
-          plant.remainingCapacity
-        );
+        const supply = Math.min(remainingDemand, plant.remainingCapacity);
 
         // Allocate power and update capacities/demand
         plant.remainingCapacity -= supply;
-        consumer.remainingDemand -= supply;
+        remainingDemand -= supply;
         grid.usedCapacity += supply;
 
         // Calculate and add revenue
@@ -264,6 +354,9 @@ export class PowerSystem {
       }
     }
 
-    return { incomePerPlayer };
+    return {
+      incomePerPlayer,
+      grids: this.grids,
+    };
   }
 }

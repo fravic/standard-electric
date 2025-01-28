@@ -48,8 +48,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   onCellClick,
   debug = false,
 }: HexGridChunkProps) {
-  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
-  const hoverLocation = useSelector(clientStore, (state) => state.context.hoverLocation);
+  const buildMode = useSelector(
+    clientStore,
+    (state) => state.context.buildMode
+  );
+  const hoverLocation = useSelector(
+    clientStore,
+    (state) => state.context.hoverLocation
+  );
   const buildables = GameContext.useSelector(
     (state) => state.public.buildables ?? []
   );
@@ -104,6 +110,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           coordinates: coords,
           playerId: PLAYER_ID,
           isGhost: true,
+          pricePerKwh: 0.1,
         });
       }
     }
@@ -112,7 +119,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
   const handleHover = useCallback((event: ThreeEvent<PointerEvent>) => {
     const point = event.point;
-    clientStore.send({ type: "setHoverLocation", worldPoint: [point.x, point.y, point.z] });
+    clientStore.send({
+      type: "setHoverLocation",
+      worldPoint: [point.x, point.y, point.z],
+    });
   }, []);
 
   const handleClick = useCallback(
