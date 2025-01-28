@@ -74,6 +74,12 @@ bun install
 cp .dev.vars.example .dev.vars
 ```
 
+## Tests
+
+```sh
+bun test
+```
+
 ## Deployment
 
 Deploy your app to Cloudflare Pages:

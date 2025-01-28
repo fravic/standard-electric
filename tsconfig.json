@@ -4,6 +4,8 @@
     "types": [
       "@remix-run/cloudflare",
       "@types/node",
+      "@types/bun",
+      "@types/jest",
       "@cloudflare/workers-types"
     ],
     "isolatedModules": true,

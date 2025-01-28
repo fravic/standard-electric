@@ -42,6 +42,7 @@ export function createBuildable({
       coordinates: buildable.coordinates,
       playerId,
       isGhost,
+      pricePerKwh: 0.1,
     });
   }
   throw new Error(
