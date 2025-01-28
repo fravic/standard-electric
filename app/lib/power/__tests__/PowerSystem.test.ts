@@ -2,34 +2,14 @@
 
 import { HexGrid } from "../../HexGrid";
 import { PowerSystem } from "../PowerSystem";
-import { createBuildable } from "../../buildables/Buildable";
 import {
   HexCoordinates,
   coordinatesToString,
 } from "../../coordinates/HexCoordinates";
-import { CornerCoordinates, CornerPosition } from "../../coordinates/types";
-import { GameContext } from "@/actor/game.types";
+import { CornerPosition } from "../../coordinates/types";
 import { Population, TerrainType, HexCell } from "../../HexCell";
 import { createPowerPole } from "../../buildables/PowerPole";
 import { createCoalPlant } from "../../buildables/CoalPlant";
-
-// Internal PowerPlant type from PowerSystem
-type InternalPowerPlant = {
-  id: string;
-  playerId: string;
-  pricePerKwh: number;
-  maxCapacity: number;
-  remainingCapacity: number;
-  gridId: string;
-  coordinates: HexCoordinates;
-};
-
-// Mock HexGrid implementation for testing
-class TestHexGrid implements HexGrid {
-  cellsByHexCoordinates = {};
-  width = 20; // Increased grid size
-  height = 20; // Increased grid size
-}
 
 // Helper function to create a power pole at a corner
 const createPowerPoleAtCorner = (
