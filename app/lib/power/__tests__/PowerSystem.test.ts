@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-
 import { HexGrid } from "../../HexGrid";
 import { PowerSystem } from "../PowerSystem";
 import {
