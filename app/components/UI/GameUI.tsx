@@ -50,7 +50,10 @@ export const GameUI: React.FC = () => {
   const player = GameContext.useSelector(
     (state) => state.public.players[PLAYER_ID]
   );
-  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
+  const buildMode = useSelector(
+    clientStore,
+    (state) => state.context.buildMode
+  );
 
   return (
     <>
@@ -64,7 +67,10 @@ export const GameUI: React.FC = () => {
           onClick={() =>
             buildMode?.type === "power_pole"
               ? clientStore.send({ type: "setBuildMode", mode: null })
-              : clientStore.send({ type: "setBuildMode", mode: { type: "power_pole" } })
+              : clientStore.send({
+                  type: "setBuildMode",
+                  mode: { type: "power_pole" },
+                })
           }
         >
           {buildMode?.type === "power_pole"
@@ -79,7 +85,10 @@ export const GameUI: React.FC = () => {
           onClick={() =>
             buildMode?.type === "coal_plant"
               ? clientStore.send({ type: "setBuildMode", mode: null })
-              : clientStore.send({ type: "setBuildMode", mode: { type: "coal_plant" } })
+              : clientStore.send({
+                  type: "setBuildMode",
+                  mode: { type: "coal_plant" },
+                })
           }
         >
           {buildMode?.type === "coal_plant"

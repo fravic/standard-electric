@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { clientStore } from "@/lib/clientState";
+import { GameContext } from "@/actor/game.context";
 
 const styles = {
   container: {
@@ -45,6 +46,13 @@ const styles = {
     flexDirection: "column" as const,
     gap: "8px",
   },
+  exportButton: {
+    backgroundColor: "#2196F3",
+    marginTop: "10px",
+    padding: "8px 16px",
+    fontSize: "14px",
+    width: "100%",
+  },
 };
 
 export const TerrainPaintUI: React.FC = () => {
@@ -61,6 +69,16 @@ export const TerrainPaintUI: React.FC = () => {
     clientStore,
     (state) => state.context.mapBuilder.selectedPopulation
   );
+  const client = GameContext.useClient();
+
+  const handleExport = () => {
+    const hexGrid = client.getState().public.hexGrid;
+    console.log("hexGrid", hexGrid);
+    const jsonString = JSON.stringify(hexGrid, null, 2);
+    navigator.clipboard.writeText(jsonString).then(() => {
+      alert("Hex grid copied to clipboard!");
+    });
+  };
 
   if (!isDebug) return null;
 
@@ -72,7 +90,10 @@ export const TerrainPaintUI: React.FC = () => {
             type="checkbox"
             checked={isPaintbrushMode}
             onChange={(e) =>
-              clientStore.send({ type: "setPaintbrushMode", enabled: e.target.checked })
+              clientStore.send({
+                type: "setPaintbrushMode",
+                enabled: e.target.checked,
+              })
             }
           />
           <span style={styles.label}>Paintbrush Mode</span>
@@ -93,7 +114,10 @@ export const TerrainPaintUI: React.FC = () => {
                       : {}),
                   }}
                   onClick={() => {
-                    clientStore.send({ type: "setSelectedTerrainType", terrainType: type });
+                    clientStore.send({
+                      type: "setSelectedTerrainType",
+                      terrainType: type,
+                    });
                   }}
                 >
                   {type}
@@ -116,7 +140,10 @@ export const TerrainPaintUI: React.FC = () => {
                           : {}),
                       }}
                       onClick={() => {
-                        clientStore.send({ type: "setSelectedPopulation", population: value });
+                        clientStore.send({
+                          type: "setSelectedPopulation",
+                          population: value,
+                        });
                       }}
                     >
                       {name}
@@ -125,6 +152,15 @@ export const TerrainPaintUI: React.FC = () => {
               )}
             </div>
           </div>
+          <button
+            style={{
+              ...styles.button,
+              ...styles.exportButton,
+            }}
+            onClick={handleExport}
+          >
+            Export Hex Grid
+          </button>
         </>
       )}
     </div>

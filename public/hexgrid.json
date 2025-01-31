@@ -2645,7 +2645,7 @@
         "name": "Washington",
         "id": "53"
       },
-      "terrainType": "Plains",
+      "terrainType": "Forest",
       "population": 0
     },
     "7,7": {
@@ -2669,7 +2669,7 @@
         "name": "Oregon",
         "id": "41"
       },
-      "terrainType": "Plains",
+      "terrainType": "Forest",
       "population": 0
     },
     "7,9": {
@@ -2681,7 +2681,7 @@
         "name": "Oregon",
         "id": "41"
       },
-      "terrainType": "Plains",
+      "terrainType": "Forest",
       "population": 0
     },
     "7,10": {
@@ -3080,7 +3080,7 @@
         "name": "Washington",
         "id": "53"
       },
-      "terrainType": "Plains",
+      "terrainType": "Forest",
       "population": 0
     },
     "8,9": {
