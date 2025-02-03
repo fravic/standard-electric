@@ -21,6 +21,7 @@ import { HexMesh } from "@/lib/HexMesh";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore } from "@/lib/clientState";
 import { CityLabel } from "./CityLabel";
+import { HexGridDecorations } from "./HexGridDecorations";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -145,44 +146,47 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   }, [cells]);
 
   return (
-    <mesh
-      geometry={terrainGeometry}
-      onClick={handleClick}
-      onPointerMove={debouncedOnHover}
-    >
-      <meshStandardMaterial
-        vertexColors
-        side={THREE.DoubleSide}
-        metalness={0.0}
-        roughness={0.8}
-      />
-      {/* Debug Labels */}
-      {debug &&
-        cells.map((cell) => {
-          const [x, y, z] = getCenterPoint(cell);
-          return (
-            <Text
-              key={`debug-${coordinatesToString(cell.coordinates)}`}
-              position={[x, y + 0.1, z]}
-              rotation={[-Math.PI / 2, 0, 0]}
-              fontSize={0.2}
-              color="black"
-            >
-              {`${coordinatesToString(cell.coordinates)}${
-                cell.population !== Population.Unpopulated
-                  ? `\n${Population[cell.population]}`
-                  : ""
-              }`}
-            </Text>
-          );
-        })}
-      {/* City Labels */}
-      {cells.map((cell) => (
-        <CityLabel
-          key={`city-${coordinatesToString(cell.coordinates)}`}
-          cell={cell}
+    <>
+      <mesh
+        geometry={terrainGeometry}
+        onClick={handleClick}
+        onPointerMove={debouncedOnHover}
+      >
+        <meshStandardMaterial
+          vertexColors
+          side={THREE.DoubleSide}
+          metalness={0.0}
+          roughness={0.8}
         />
-      ))}
-    </mesh>
+        {/* Debug Labels */}
+        {debug &&
+          cells.map((cell) => {
+            const [x, y, z] = getCenterPoint(cell);
+            return (
+              <Text
+                key={`debug-${coordinatesToString(cell.coordinates)}`}
+                position={[x, y + 0.1, z]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                fontSize={0.2}
+                color="black"
+              >
+                {`${coordinatesToString(cell.coordinates)}${
+                  cell.population !== Population.Unpopulated
+                    ? `\n${Population[cell.population]}`
+                    : ""
+                }`}
+              </Text>
+            );
+          })}
+        {/* City Labels */}
+        {cells.map((cell) => (
+          <CityLabel
+            key={`city-${coordinatesToString(cell.coordinates)}`}
+            cell={cell}
+          />
+        ))}
+      </mesh>
+      <HexGridDecorations cells={cells} />
+    </>
   );
 });
