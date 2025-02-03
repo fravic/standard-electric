@@ -18,9 +18,10 @@ import { Env } from "../env";
 import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { TerrainType, Population } from "@/lib/HexCell";
 
-interface Player {
+export interface Player {
   name: string;
   money: number;
+  powerSoldKWh: number;
 }
 
 interface GamePublicContext {

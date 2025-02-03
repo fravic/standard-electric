@@ -69,6 +69,7 @@ export const TerrainPaintUI: React.FC = () => {
     clientStore,
     (state) => state.context.mapBuilder.isPaintbrushMode
   );
+  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
   const selectedTerrainType = useSelector(
     clientStore,
     (state) => state.context.mapBuilder.selectedTerrainType
@@ -83,6 +84,9 @@ export const TerrainPaintUI: React.FC = () => {
   );
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const sendGameEvent = GameContext.useSend();
+
+  // Don't render if not in debug mode
+  if (!isDebug) return null;
 
   // Get the current cell's city name
   const currentCityName = selectedHexCoordinates

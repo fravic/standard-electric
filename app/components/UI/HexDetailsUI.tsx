@@ -9,7 +9,7 @@ import { clientStore } from "@/lib/clientState";
 const styles = {
   container: {
     position: "fixed" as const,
-    top: "10px",
+    top: "50px",
     right: "10px",
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     color: "white",

@@ -23,6 +23,7 @@ export default function MapEditor() {
           [PLAYER_ID]: {
             name: "Map Editor",
             money: 1000,
+            powerSoldKWh: 0,
           },
         },
         time: {

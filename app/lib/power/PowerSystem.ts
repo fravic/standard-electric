@@ -25,6 +25,7 @@ export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
 
 type PowerSystemResult = {
   incomePerPlayer: Record<string, number>;
+  powerSoldPerPlayerKWh: Record<string, number>;
   grids: Grid[];
 };
 
@@ -232,6 +233,10 @@ export class PowerSystem {
       grid.blackout = false;
     });
 
+    // Track power sold per player
+    const powerSoldPerPlayer: Record<string, number> = {};
+    const incomePerPlayer: Record<string, number> = {};
+
     // First pass: Check for blackouts
     // Calculate total demand per grid and available capacity per consumer
     const demandPerGrid = new Map<Grid, number>();
@@ -302,9 +307,6 @@ export class PowerSystem {
       }
     }
 
-    // Track income per player
-    const incomePerPlayer: Record<string, number> = {};
-
     // Second pass: Process consumption for non-blacked-out grids
     for (const consumer of this.consumers) {
       // Get available plants from non-blacked-out grids
@@ -347,15 +349,17 @@ export class PowerSystem {
         remainingDemand -= supply;
         grid.usedCapacity += supply;
 
-        // Calculate and add revenue
-        const revenue = supply * plant.pricePerKwh;
+        // Track power sold and income
+        powerSoldPerPlayer[plant.playerId] =
+          (powerSoldPerPlayer[plant.playerId] || 0) + supply;
         incomePerPlayer[plant.playerId] =
-          (incomePerPlayer[plant.playerId] || 0) + revenue;
+          (incomePerPlayer[plant.playerId] || 0) + supply * plant.pricePerKwh;
       }
     }
 
     return {
       incomePerPlayer,
+      powerSoldPerPlayerKWh: powerSoldPerPlayer,
       grids: this.grids,
     };
   }

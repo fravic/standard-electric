@@ -8,6 +8,8 @@ import { CornerPosition } from "../../coordinates/types";
 import { Population, TerrainType, HexCell } from "../../HexCell";
 import { createPowerPole } from "../../buildables/PowerPole";
 import { createCoalPlant } from "../../buildables/CoalPlant";
+import { BuildableType } from "../../buildables/schemas";
+import { createBuildable } from "../../buildables/Buildable";
 
 // Helper function to create a power pole at a corner
 const createPowerPoleAtCorner = (
@@ -620,6 +622,9 @@ describe("PowerSystem", () => {
       expect(result.incomePerPlayer).toEqual({
         player1: 10 * 0.1, // 10kW at 0.1/kW
       });
+      expect(result.powerSoldPerPlayerKWh).toEqual({
+        player1: 10, // 10kW sold
+      });
       expect(
         result.grids.find((g) => g.powerPlantIds.includes(cheapPlant.id))
           ?.usedCapacity
@@ -668,8 +673,9 @@ describe("PowerSystem", () => {
 
       // Both grids should be in blackout
       expect(result.grids.every((g) => g.blackout)).toBe(true);
-      // No income during blackout
+      // No income or power sold during blackout
       expect(result.incomePerPlayer).toEqual({});
+      expect(result.powerSoldPerPlayerKWh).toEqual({});
     });
 
     it("should blackout all connected grids when any consumer's demand can't be met", () => {
@@ -715,8 +721,9 @@ describe("PowerSystem", () => {
 
       // Grid should be in blackout
       expect(result.grids[0].blackout).toBe(true);
-      // No income during blackout
+      // No income or power sold during blackout
       expect(result.incomePerPlayer).toEqual({});
+      expect(result.powerSoldPerPlayerKWh).toEqual({});
     });
 
     it("should handle multiple independent grids with some in blackout", () => {
@@ -774,9 +781,12 @@ describe("PowerSystem", () => {
       expect(grid2.blackout).toBe(true);
       expect(grid2.usedCapacity).toBe(0);
 
-      // Only income from Grid 1
+      // Only income and power sold from Grid 1
       expect(result.incomePerPlayer).toEqual({
         player1: 10 * 0.1,
+      });
+      expect(result.powerSoldPerPlayerKWh).toEqual({
+        player1: 10,
       });
     });
 
@@ -829,6 +839,10 @@ describe("PowerSystem", () => {
       expect(result.incomePerPlayer).toEqual({
         player1: 30 * 0.1, // 30kW at 0.1/kW
         player2: 20 * 0.2, // 20kW at 0.2/kW
+      });
+      expect(result.powerSoldPerPlayerKWh).toEqual({
+        player1: 30, // 30kW sold from cheaper plant
+        player2: 20, // 20kW sold from expensive plant
       });
     });
   });
