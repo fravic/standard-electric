@@ -3069,7 +3069,8 @@
         "id": "53"
       },
       "terrainType": "Plains",
-      "population": 3
+      "population": 3,
+      "cityName": "Seattle"
     },
     "8,8": {
       "coordinates": {

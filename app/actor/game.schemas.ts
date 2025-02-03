@@ -23,6 +23,11 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     population: z.nativeEnum(Population),
   }),
   z.object({
+    type: z.literal("UPDATE_HEX_CITY"),
+    coordinates: HexCoordinatesSchema,
+    cityName: z.string().nullable(),
+  }),
+  z.object({
     type: z.literal("TICK"),
   }),
   z.object({

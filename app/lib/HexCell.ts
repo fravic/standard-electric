@@ -34,6 +34,7 @@ export const HexCellSchema = z.object({
     .nullable(),
   terrainType: z.nativeEnum(TerrainType),
   population: z.nativeEnum(Population),
+  cityName: z.string().nullable().optional(),
 });
 
 export type HexCell = z.infer<typeof HexCellSchema>;

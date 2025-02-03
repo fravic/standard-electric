@@ -15,7 +15,8 @@ import {
   GameServiceEventSchema,
 } from "./game.schemas";
 import { Env } from "../env";
-import { gameTimerActor } from "./gameTimerActor";
+import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
+import { TerrainType, Population } from "@/lib/HexCell";
 
 interface Player {
   name: string;

@@ -44,13 +44,19 @@ export const clientStore = createStore({
         isPaintbrushMode: event.enabled,
       },
     }),
-    setSelectedTerrainType: (context, event: { terrainType: TerrainType | null }) => ({
+    setSelectedTerrainType: (
+      context,
+      event: { terrainType: TerrainType | null }
+    ) => ({
       mapBuilder: {
         ...context.mapBuilder,
         selectedTerrainType: event.terrainType,
       },
     }),
-    setSelectedPopulation: (context, event: { population: Population | null }) => ({
+    setSelectedPopulation: (
+      context,
+      event: { population: Population | null }
+    ) => ({
       mapBuilder: {
         ...context.mapBuilder,
         selectedPopulation: event.population,
@@ -59,7 +65,10 @@ export const clientStore = createStore({
     setBuildMode: (context, event: { mode: BuildMode }) => ({
       buildMode: event.mode,
     }),
-    setHoverLocation: (context, event: { worldPoint: [number, number, number] | null }) => ({
+    setHoverLocation: (
+      context,
+      event: { worldPoint: [number, number, number] | null }
+    ) => ({
       hoverLocation: event.worldPoint ? { worldPoint: event.worldPoint } : null,
     }),
     selectHex: (context, event: { coordinates: HexCoordinates | null }) => ({

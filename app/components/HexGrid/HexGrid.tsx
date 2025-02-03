@@ -12,7 +12,10 @@ interface HexGridProps {}
 export function HexGrid({}: HexGridProps) {
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
-  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
+  const buildMode = useSelector(
+    clientStore,
+    (state) => state.context.buildMode
+  );
   const sendGameEvent = GameContext.useSend();
 
   const chunkCountX = Math.ceil(hexGrid.width / HexMetrics.chunkSizeX);

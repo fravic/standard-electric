@@ -20,6 +20,7 @@ import {
 import { HexMesh } from "@/lib/HexMesh";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore } from "@/lib/clientState";
+import { CityLabel } from "./CityLabel";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -155,12 +156,13 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
         metalness={0.0}
         roughness={0.8}
       />
+      {/* Debug Labels */}
       {debug &&
         cells.map((cell) => {
           const [x, y, z] = getCenterPoint(cell);
           return (
             <Text
-              key={coordinatesToString(cell.coordinates)}
+              key={`debug-${coordinatesToString(cell.coordinates)}`}
               position={[x, y + 0.1, z]}
               rotation={[-Math.PI / 2, 0, 0]}
               fontSize={0.2}
@@ -174,6 +176,13 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
             </Text>
           );
         })}
+      {/* City Labels */}
+      {cells.map((cell) => (
+        <CityLabel
+          key={`city-${coordinatesToString(cell.coordinates)}`}
+          cell={cell}
+        />
+      ))}
     </mesh>
   );
 });

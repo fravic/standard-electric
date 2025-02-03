@@ -38,7 +38,8 @@ export default function MapEditor() {
     onSend: (event: GameClientEvent) => {
       if (
         event.type === "UPDATE_HEX_TERRAIN" ||
-        event.type === "UPDATE_HEX_POPULATION"
+        event.type === "UPDATE_HEX_POPULATION" ||
+        event.type === "UPDATE_HEX_CITY"
       ) {
         const coordKey = coordinatesToString(event.coordinates);
 
@@ -47,8 +48,10 @@ export default function MapEditor() {
           if (cell) {
             if (event.type === "UPDATE_HEX_TERRAIN") {
               cell.terrainType = event.terrainType;
-            } else {
+            } else if (event.type === "UPDATE_HEX_POPULATION") {
               cell.population = event.population;
+            } else if (event.type === "UPDATE_HEX_CITY") {
+              cell.cityName = event.cityName;
             }
           }
         });

@@ -3,6 +3,7 @@ import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { clientStore } from "@/lib/clientState";
 import { GameContext } from "@/actor/game.context";
+import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 
 const styles = {
   container: {
@@ -53,10 +54,17 @@ const styles = {
     fontSize: "14px",
     width: "100%",
   },
+  input: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    color: "white",
+    padding: "4px 8px",
+    borderRadius: "3px",
+    fontSize: "12px",
+  },
 };
 
 export const TerrainPaintUI: React.FC = () => {
-  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
   const isPaintbrushMode = useSelector(
     clientStore,
     (state) => state.context.mapBuilder.isPaintbrushMode
@@ -69,100 +77,135 @@ export const TerrainPaintUI: React.FC = () => {
     clientStore,
     (state) => state.context.mapBuilder.selectedPopulation
   );
-  const client = GameContext.useClient();
+  const selectedHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.selectedHexCoordinates
+  );
+  const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
+  const sendGameEvent = GameContext.useSend();
+
+  // Get the current cell's city name
+  const currentCityName = selectedHexCoordinates
+    ? hexGrid.cellsByHexCoordinates[coordinatesToString(selectedHexCoordinates)]
+        ?.cityName || ""
+    : "";
 
   const handleExport = () => {
-    const hexGrid = client.getState().public.hexGrid;
-    console.log("hexGrid", hexGrid);
-    const jsonString = JSON.stringify(hexGrid, null, 2);
-    navigator.clipboard.writeText(jsonString).then(() => {
-      alert("Hex grid copied to clipboard!");
+    const blob = new Blob([JSON.stringify(hexGrid, null, 2)], {
+      type: "application/json",
     });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "hexgrid.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  if (!isDebug) return null;
+  const handleCityNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (selectedHexCoordinates) {
+      sendGameEvent({
+        type: "UPDATE_HEX_CITY",
+        coordinates: selectedHexCoordinates,
+        cityName: e.target.value.trim() || null,
+      });
+    }
+  };
 
   return (
     <div style={styles.container}>
-      <div>
-        <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <input
-            type="checkbox"
-            checked={isPaintbrushMode}
-            onChange={(e) =>
-              clientStore.send({
-                type: "setPaintbrushMode",
-                enabled: e.target.checked,
-              })
-            }
-          />
+      <div style={styles.section}>
+        <div>
           <span style={styles.label}>Paintbrush Mode</span>
-        </label>
-      </div>
-      {isPaintbrushMode && (
-        <>
-          <div style={styles.section}>
-            <span style={styles.label}>Terrain</span>
-            <div style={styles.buttonGrid}>
-              {Object.values(TerrainType).map((type) => (
-                <button
-                  key={type}
-                  style={{
-                    ...styles.button,
-                    ...(selectedTerrainType === type
-                      ? styles.activeButton
-                      : {}),
-                  }}
-                  onClick={() => {
-                    clientStore.send({
-                      type: "setSelectedTerrainType",
-                      terrainType: type,
-                    });
-                  }}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div style={styles.section}>
-            <span style={styles.label}>Population</span>
-            <div style={styles.buttonGrid}>
-              {Object.entries(Population).map(
-                ([name, value]) =>
-                  typeof value === "number" && (
-                    <button
-                      key={name}
-                      style={{
-                        ...styles.button,
-                        ...(selectedPopulation === value
-                          ? styles.activeButton
-                          : {}),
-                      }}
-                      onClick={() => {
-                        clientStore.send({
-                          type: "setSelectedPopulation",
-                          population: value,
-                        });
-                      }}
-                    >
-                      {name}
-                    </button>
-                  )
-              )}
-            </div>
-          </div>
           <button
             style={{
               ...styles.button,
-              ...styles.exportButton,
+              ...(isPaintbrushMode ? styles.activeButton : {}),
+              marginLeft: "8px",
             }}
-            onClick={handleExport}
+            onClick={() =>
+              clientStore.send({
+                type: "setPaintbrushMode",
+                enabled: !isPaintbrushMode,
+              })
+            }
           >
-            Export Hex Grid
+            {isPaintbrushMode ? "On" : "Off"}
           </button>
-        </>
-      )}
+        </div>
+      </div>
+
+      <div style={styles.section}>
+        <span style={styles.label}>Terrain Type</span>
+        <div style={styles.buttonGrid}>
+          {Object.values(TerrainType).map((terrainType) => (
+            <button
+              key={terrainType}
+              style={{
+                ...styles.button,
+                ...(selectedTerrainType === terrainType
+                  ? styles.activeButton
+                  : {}),
+              }}
+              onClick={() =>
+                clientStore.send({
+                  type: "setSelectedTerrainType",
+                  terrainType:
+                    selectedTerrainType === terrainType ? null : terrainType,
+                })
+              }
+            >
+              {terrainType}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={styles.section}>
+        <span style={styles.label}>Population</span>
+        <div style={styles.buttonGrid}>
+          {Object.values(Population)
+            .filter((value) => typeof value === "number")
+            .map((population) => (
+              <button
+                key={population}
+                style={{
+                  ...styles.button,
+                  ...(selectedPopulation === population
+                    ? styles.activeButton
+                    : {}),
+                }}
+                onClick={() =>
+                  clientStore.send({
+                    type: "setSelectedPopulation",
+                    population:
+                      selectedPopulation === population ? null : population,
+                  })
+                }
+              >
+                {Population[population]}
+              </button>
+            ))}
+        </div>
+      </div>
+
+      <div style={styles.section}>
+        <span style={styles.label}>City Name</span>
+        <input
+          type="text"
+          value={currentCityName}
+          onChange={handleCityNameChange}
+          style={styles.input}
+          placeholder="Enter city name..."
+          disabled={!selectedHexCoordinates}
+        />
+      </div>
+
+      <button style={styles.exportButton} onClick={handleExport}>
+        Export Map
+      </button>
     </div>
   );
 };
