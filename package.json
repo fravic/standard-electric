@@ -44,6 +44,8 @@
     "wrangler": "^3.104.0"
   },
   "dependencies": {
+    "@react-spring/three": "^9.7.5",
+    "@react-spring/web": "^9.7.5",
     "@react-three/drei": "^9.121.3",
     "@react-three/fiber": "^8.17.12",
     "@remix-run/cloudflare": "^2.12.1",

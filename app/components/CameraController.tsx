@@ -4,6 +4,7 @@ import { Vector3, Camera, Object3D } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { useSelector } from "@xstate/store/react";
 import { clientStore } from "@/lib/clientState";
+import { useSpring } from "@react-spring/three";
 
 interface CameraConfigType {
   PAN_SPEED: number;
@@ -21,7 +22,7 @@ interface CameraConfigType {
 
 // Camera configuration
 const CAMERA_CONFIG: CameraConfigType = {
-  PAN_SPEED: 12, // Units per second (adjusted for delta time)
+  PAN_SPEED: 15,
   MIN_DISTANCE: 2,
   MAX_DISTANCE: 50,
   MIN_POLAR_ANGLE: 0,
@@ -48,6 +49,18 @@ export function CameraController(): React.ReactNode {
     (state) => state.context.areKeyboardControlsActive
   );
 
+  // Spring for movement velocity only
+  const [springs, springApi] = useSpring(() => ({
+    vx: 0,
+    vz: 0,
+    config: {
+      tension: 50,
+      friction: 15,
+      clamp: true, // Prevents spring bounce-back
+      precision: 0.0001,
+    },
+  }));
+
   // Helper function to clamp a value between min and max
   const clamp = (value: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, value));
@@ -70,7 +83,7 @@ export function CameraController(): React.ReactNode {
       orbitControls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
       orbitControls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
     }
-  }, [controls, camera]);
+  }, [controls]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
@@ -95,6 +108,8 @@ export function CameraController(): React.ReactNode {
   useEffect(() => {
     const panCamera = (): void => {
       if (!areKeyboardControlsActive || !controls) {
+        // When inactive, smoothly bring velocity to zero
+        springApi.start({ vx: 0, vz: 0 });
         animationFrameRef.current = requestAnimationFrame(panCamera);
         return;
       }
@@ -109,44 +124,76 @@ export function CameraController(): React.ReactNode {
       lookDir.normalize();
 
       const right = new Vector3(-lookDir.z, 0, lookDir.x);
-      const movement = new Vector3(0, 0, 0);
+      const targetVelocity = { x: 0, z: 0 };
 
-      // Calculate movement vector
-      if (keys.current["w"]) movement.add(lookDir);
-      if (keys.current["s"]) movement.sub(lookDir);
-      if (keys.current["a"]) movement.sub(right);
-      if (keys.current["d"]) movement.add(right);
+      // Calculate target velocity based on input
+      if (keys.current["w"]) {
+        targetVelocity.x += lookDir.x;
+        targetVelocity.z += lookDir.z;
+      }
+      if (keys.current["s"]) {
+        targetVelocity.x -= lookDir.x;
+        targetVelocity.z -= lookDir.z;
+      }
+      if (keys.current["a"]) {
+        targetVelocity.x -= right.x;
+        targetVelocity.z -= right.z;
+      }
+      if (keys.current["d"]) {
+        targetVelocity.x += right.x;
+        targetVelocity.z += right.z;
+      }
 
-      if (movement.length() > 0) {
-        // Normalize and apply speed with delta time
-        movement.normalize();
-        const zoomFactor = camera.position.y / 10;
-        const currentSpeed =
-          CAMERA_CONFIG.PAN_SPEED * Math.max(1, zoomFactor) * deltaTime;
-        movement.multiplyScalar(currentSpeed);
+      // Normalize target velocity if it exists
+      const length = Math.sqrt(
+        targetVelocity.x * targetVelocity.x +
+          targetVelocity.z * targetVelocity.z
+      );
+      if (length > 0) {
+        targetVelocity.x /= length;
+        targetVelocity.z /= length;
+      }
 
-        // Calculate new positions
-        const newCameraPos = camera.position.clone().add(movement);
-        const newTargetPos = (controls as OrbitControls).target
-          .clone()
-          .add(movement);
+      // Apply speed scaling
+      const zoomFactor = camera.position.y / 10;
+      const speed = CAMERA_CONFIG.PAN_SPEED * Math.max(1, zoomFactor);
+      targetVelocity.x *= speed;
+      targetVelocity.z *= speed;
 
-        // Check and apply movement for each axis independently
-        const canMoveX =
-          isWithinBounds(newCameraPos.x, "X") &&
-          isWithinBounds(newTargetPos.x, "X");
-        const canMoveZ =
-          isWithinBounds(newCameraPos.z, "Z") &&
-          isWithinBounds(newTargetPos.z, "Z");
+      // Update spring velocity
+      springApi.start({
+        vx: targetVelocity.x,
+        vz: targetVelocity.z,
+      });
 
-        if (canMoveX) {
-          camera.position.x = newCameraPos.x;
-          (controls as OrbitControls).target.x = newTargetPos.x;
-        }
-        if (canMoveZ) {
-          camera.position.z = newCameraPos.z;
-          (controls as OrbitControls).target.z = newTargetPos.z;
-        }
+      // Apply movement using current velocity
+      const movement = new Vector3(
+        springs.vx.get() * deltaTime,
+        0,
+        springs.vz.get() * deltaTime
+      );
+
+      // Calculate new positions
+      const newCameraPos = camera.position.clone().add(movement);
+      const newTargetPos = (controls as OrbitControls).target
+        .clone()
+        .add(movement);
+
+      // Check and apply movement for each axis independently
+      const canMoveX =
+        isWithinBounds(newCameraPos.x, "X") &&
+        isWithinBounds(newTargetPos.x, "X");
+      const canMoveZ =
+        isWithinBounds(newCameraPos.z, "Z") &&
+        isWithinBounds(newTargetPos.z, "Z");
+
+      if (canMoveX) {
+        camera.position.x = newCameraPos.x;
+        (controls as OrbitControls).target.x = newTargetPos.x;
+      }
+      if (canMoveZ) {
+        camera.position.z = newCameraPos.z;
+        (controls as OrbitControls).target.z = newTargetPos.z;
       }
 
       animationFrameRef.current = requestAnimationFrame(panCamera);
@@ -159,7 +206,7 @@ export function CameraController(): React.ReactNode {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [camera, controls, areKeyboardControlsActive]);
+  }, [camera, controls, areKeyboardControlsActive, springs, springApi]);
 
   return null;
 }
