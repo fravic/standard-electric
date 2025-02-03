@@ -20,6 +20,7 @@ interface ClientState {
     worldPoint: [number, number, number];
   } | null;
   selectedHexCoordinates: HexCoordinates | null;
+  areKeyboardControlsActive: boolean;
 }
 
 export const clientStore = createStore({
@@ -33,6 +34,7 @@ export const clientStore = createStore({
     buildMode: null,
     hoverLocation: null,
     selectedHexCoordinates: null,
+    areKeyboardControlsActive: true,
   } as ClientState,
   on: {
     setIsDebug: (context, event: { isDebug: boolean }) => ({
@@ -73,6 +75,9 @@ export const clientStore = createStore({
     }),
     selectHex: (context, event: { coordinates: HexCoordinates | null }) => ({
       selectedHexCoordinates: event.coordinates,
+    }),
+    setKeyboardControlsActive: (context, event: { active: boolean }) => ({
+      areKeyboardControlsActive: event.active,
     }),
   },
 });

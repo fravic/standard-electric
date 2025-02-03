@@ -106,10 +106,11 @@ export const TerrainPaintUI: React.FC = () => {
 
   const handleCityNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedHexCoordinates) {
+      const value = e.target.value.trim();
       sendGameEvent({
         type: "UPDATE_HEX_CITY",
         coordinates: selectedHexCoordinates,
-        cityName: e.target.value.trim() || null,
+        cityName: value || null,
       });
     }
   };
@@ -197,6 +198,18 @@ export const TerrainPaintUI: React.FC = () => {
           type="text"
           value={currentCityName}
           onChange={handleCityNameChange}
+          onFocus={() =>
+            clientStore.send({
+              type: "setKeyboardControlsActive",
+              active: false,
+            })
+          }
+          onBlur={() =>
+            clientStore.send({
+              type: "setKeyboardControlsActive",
+              active: true,
+            })
+          }
           style={styles.input}
           placeholder="Enter city name..."
           disabled={!selectedHexCoordinates}

@@ -2,6 +2,8 @@ import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { Vector3, Camera, Object3D } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { useSelector } from "@xstate/store/react";
+import { clientStore } from "@/lib/clientState";
 
 interface CameraConfigType {
   PAN_SPEED: number;
@@ -40,6 +42,11 @@ export function CameraController(): React.ReactNode {
   const { camera, controls } = useThree();
   const keys = useRef<KeyMap>({});
   const lastTime = useRef<number>(performance.now());
+  const animationFrameRef = useRef<number>();
+  const areKeyboardControlsActive = useSelector(
+    clientStore,
+    (state) => state.context.areKeyboardControlsActive
+  );
 
   // Helper function to clamp a value between min and max
   const clamp = (value: number, min: number, max: number): number =>
@@ -67,22 +74,33 @@ export function CameraController(): React.ReactNode {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
+      if (!areKeyboardControlsActive) return;
       keys.current[e.key.toLowerCase()] = true;
     };
 
     const handleKeyUp = (e: KeyboardEvent): void => {
+      if (!areKeyboardControlsActive) return;
       keys.current[e.key.toLowerCase()] = false;
     };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
-    const panCamera = (): void => {
-      if (!controls) return;
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [areKeyboardControlsActive]);
 
-      // Calculate delta time in seconds
+  useEffect(() => {
+    const panCamera = (): void => {
+      if (!areKeyboardControlsActive || !controls) {
+        animationFrameRef.current = requestAnimationFrame(panCamera);
+        return;
+      }
+
       const currentTime = performance.now();
-      const deltaTime = (currentTime - lastTime.current) / 1000; // Convert to seconds
+      const deltaTime = (currentTime - lastTime.current) / 1000;
       lastTime.current = currentTime;
 
       const lookDir = new Vector3();
@@ -131,17 +149,17 @@ export function CameraController(): React.ReactNode {
         }
       }
 
-      requestAnimationFrame(panCamera);
+      animationFrameRef.current = requestAnimationFrame(panCamera);
     };
 
-    const animationFrame = requestAnimationFrame(panCamera);
+    panCamera();
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      cancelAnimationFrame(animationFrame);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
-  }, [camera, controls]);
+  }, [camera, controls, areKeyboardControlsActive]);
 
   return null;
 }
