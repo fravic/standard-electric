@@ -11,6 +11,7 @@ import { HexMetrics } from "@/lib/HexMetrics";
 import { Vertex } from "@/lib/types";
 import { GameContext } from "@/actor/game.context";
 import { isNightTime } from "@/lib/time";
+import { BUILDING_COLORS, NATURE_COLORS } from "@/lib/palette";
 
 interface HexGridDecorationsProps {
   cells: HexCell[];
@@ -50,12 +51,12 @@ const Tree: React.FC<{ position: THREE.Vector3; seed: number }> = ({
       {/* Trunk */}
       <mesh position={[0, trunkHeight / 2, 0]}>
         <cylinderGeometry args={[trunkRadius, trunkRadius, trunkHeight, 6]} />
-        <meshStandardMaterial color="#8B4513" />
+        <meshStandardMaterial color={NATURE_COLORS.TREE_TRUNK} />
       </mesh>
       {/* Leaves */}
       <mesh position={[0, trunkHeight + leavesRadius * 0.7, 0]}>
         <coneGeometry args={[leavesRadius, treeHeight, 5]} />
-        <meshStandardMaterial color="#228B22" />
+        <meshStandardMaterial color={NATURE_COLORS.TREE_LEAVES} />
       </mesh>
     </group>
   );
@@ -99,7 +100,7 @@ const Building: React.FC<{
   const scaledHeight = height * randomScale;
 
   // Create window texture for walls
-  const textureSize = 64;
+  const textureSize = 128;
   const canvas = document.createElement("canvas");
   canvas.width = textureSize;
   canvas.height = textureSize;
@@ -107,19 +108,21 @@ const Building: React.FC<{
   if (!ctx) return null;
 
   // Fill background color (building wall)
-  ctx.fillStyle = "#A0A0A0";
+  ctx.fillStyle = BUILDING_COLORS.WALL;
   ctx.fillRect(0, 0, textureSize, textureSize);
 
   // Calculate window parameters
-  const windowRows = 4;
+  const windowRows = 3;
   const windowCols = 2;
-  const windowMargin = textureSize * 0.1;
+  const windowMargin = textureSize * 0.15;
   const windowWidth = (textureSize - windowMargin * 3) / windowCols;
   const windowHeight =
     (textureSize - windowMargin * (windowRows + 1)) / windowRows;
 
   // Draw windows
-  ctx.fillStyle = isNight ? "#FFD700" : "#cccccc";
+  ctx.fillStyle = isNight
+    ? BUILDING_COLORS.WINDOW_NIGHT
+    : BUILDING_COLORS.WINDOW_DAY;
   for (let row = 0; row < windowRows; row++) {
     for (let col = 0; col < windowCols; col++) {
       const windowRng = seedrandom(`${seed}-window-${row}-${col}`);
@@ -144,7 +147,7 @@ const Building: React.FC<{
       <mesh position={[0, scaledHeight / 2, 0]}>
         <boxGeometry args={[scaledWidth, scaledHeight, scaledWidth]} />
         <meshStandardMaterial
-          color="#FFFFFF"
+          color={BUILDING_COLORS.BASE}
           map={texture}
           emissiveMap={texture}
           emissiveIntensity={isNight ? 2.0 : 0}
@@ -154,7 +157,7 @@ const Building: React.FC<{
       {/* Roof */}
       <mesh position={[0, scaledHeight + 0.02, 0]}>
         <boxGeometry args={[scaledWidth * 1.1, 0.04, scaledWidth * 1.1]} />
-        <meshStandardMaterial color="#808080" roughness={0.7} />
+        <meshStandardMaterial color={BUILDING_COLORS.ROOF} roughness={0.7} />
       </mesh>
     </group>
   );

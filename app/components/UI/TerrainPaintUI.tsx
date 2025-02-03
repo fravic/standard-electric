@@ -4,11 +4,12 @@ import { TerrainType, Population } from "../../lib/HexCell";
 import { clientStore } from "@/lib/clientState";
 import { GameContext } from "@/actor/game.context";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
+import { UI_COLORS } from "@/lib/palette";
 
 const styles = {
   container: {
     position: "fixed" as const,
-    top: "120px", // Position below HexDetailsUI
+    top: "200px", // Position below HexDetailsUI
     right: "10px",
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     color: "white",
@@ -25,16 +26,16 @@ const styles = {
     fontWeight: "bold" as const,
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: UI_COLORS.PRIMARY,
     border: "none",
-    color: "white",
+    color: UI_COLORS.TEXT_LIGHT,
     padding: "4px 8px",
     fontSize: "12px",
     borderRadius: "3px",
     cursor: "pointer",
   },
   activeButton: {
-    backgroundColor: "#45a049",
+    backgroundColor: UI_COLORS.PRIMARY_DARK,
   },
   buttonGrid: {
     display: "grid",
@@ -48,16 +49,17 @@ const styles = {
     gap: "8px",
   },
   exportButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: UI_COLORS.PRIMARY,
+    color: UI_COLORS.TEXT_LIGHT,
     marginTop: "10px",
     padding: "8px 16px",
     fontSize: "14px",
     width: "100%",
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    color: "white",
+    backgroundColor: UI_COLORS.PRIMARY_DARK,
+    border: `1px solid ${UI_COLORS.PRIMARY_DARK}`,
+    color: UI_COLORS.TEXT_LIGHT,
     padding: "4px 8px",
     borderRadius: "3px",
     fontSize: "12px",
@@ -110,7 +112,7 @@ export const TerrainPaintUI: React.FC = () => {
 
   const handleCityNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedHexCoordinates) {
-      const value = e.target.value.trim();
+      const value = e.target.value;
       sendGameEvent({
         type: "UPDATE_HEX_CITY",
         coordinates: selectedHexCoordinates,

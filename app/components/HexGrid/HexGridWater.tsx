@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
+import { WATER_COLORS } from "@/lib/palette";
 
 const waterVertexShader = `
 varying vec2 vUv;
@@ -96,7 +97,7 @@ export const HexGridWater = React.memo(function HexGridWater({
             center,
             HexMetrics.getFirstCorner(center, d),
             HexMetrics.getSecondCorner(center, d),
-            new THREE.Color(0xaaaaff),
+            new THREE.Color(WATER_COLORS.DEEP),
             [0, 0],
             // UVs depend on whether the cell is on the shoreline or not. 1 is
             // shoreline, 0 is deep water.
@@ -137,8 +138,8 @@ export const HexGridWater = React.memo(function HexGridWater({
   const uniforms = useMemo(
     () => ({
       time: { value: 0 },
-      deepColor: { value: new THREE.Color(0xc1e4ff) },
-      shallowColor: { value: new THREE.Color(0xd3ecff) },
+      deepColor: { value: new THREE.Color(WATER_COLORS.DEEP) },
+      shallowColor: { value: new THREE.Color(WATER_COLORS.SHALLOW) },
       waveNoiseTexture: { value: waveNoiseTexture },
       waveDistortionTexture: { value: waveDistortionTexture },
     }),

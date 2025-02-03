@@ -1992,7 +1992,8 @@
         "id": "06"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "San Francisco"
     },
     "5,19": {
       "coordinates": {
@@ -2766,7 +2767,8 @@
         "id": "06"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 1,
+      "cityName": "Sacramento"
     },
     "7,17": {
       "coordinates": {
@@ -3130,7 +3132,8 @@
         "id": "41"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "Portland"
     },
     "8,13": {
       "coordinates": {
@@ -3250,7 +3253,8 @@
         "id": "06"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "Los Angeles"
     },
     "8,23": {
       "coordinates": {
@@ -3703,7 +3707,8 @@
         "id": "06"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "San Diego"
     },
     "9,26": {
       "coordinates": {
@@ -4051,7 +4056,8 @@
         "id": "32"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Las Vegas"
     },
     "10,20": {
       "coordinates": {
@@ -5230,7 +5236,8 @@
         "id": "16"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 1,
+      "cityName": "Boise"
     },
     "13,13": {
       "coordinates": {
@@ -5362,7 +5369,8 @@
         "id": "04"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Phoenix"
     },
     "13,24": {
       "coordinates": {
@@ -8266,7 +8274,8 @@
         "id": "08"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "Denver"
     },
     "20,19": {
       "coordinates": {
@@ -8314,7 +8323,8 @@
         "id": "35"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Albuquerque"
     },
     "20,23": {
       "coordinates": {
@@ -11881,7 +11891,8 @@
         "id": "48"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "San Antonio"
     },
     "28,33": {
       "coordinates": {
@@ -12742,7 +12753,8 @@
         "id": "48"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Austin"
     },
     "30,31": {
       "coordinates": {
@@ -13489,7 +13501,8 @@
         "id": "29"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Kansas City"
     },
     "32,21": {
       "coordinates": {
@@ -13561,7 +13574,8 @@
         "id": "40"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Dallas-Fort Worth"
     },
     "32,27": {
       "coordinates": {
@@ -13834,7 +13848,8 @@
         "id": "27"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Minneapolis"
     },
     "33,14": {
       "coordinates": {
@@ -14038,7 +14053,8 @@
         "id": "48"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Houston"
     },
     "33,31": {
       "coordinates": {
@@ -15202,7 +15218,8 @@
         "id": "29"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "St Louis"
     },
     "36,22": {
       "coordinates": {
@@ -15748,7 +15765,8 @@
         "id": "22"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 1,
+      "cityName": "New Orleans"
     },
     "37,32": {
       "coordinates": {
@@ -15930,7 +15948,7 @@
         "name": "Michigan",
         "id": "26"
       },
-      "terrainType": "Plains",
+      "terrainType": "Water",
       "population": 0
     },
     "38,12": {
@@ -15975,7 +15993,7 @@
         "name": "Wisconsin",
         "id": "55"
       },
-      "terrainType": "Plains",
+      "terrainType": "Water",
       "population": 0
     },
     "38,16": {
@@ -15988,7 +16006,8 @@
         "id": "17"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Chicago"
     },
     "38,17": {
       "coordinates": {
@@ -17611,7 +17630,8 @@
         "id": "26"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 1,
+      "cityName": "Detroit"
     },
     "42,15": {
       "coordinates": {
@@ -18931,7 +18951,8 @@
         "id": "37"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 1,
+      "cityName": "Charlotte"
     },
     "45,24": {
       "coordinates": {
@@ -19846,7 +19867,8 @@
         "id": "12"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Orlando"
     },
     "47,32": {
       "coordinates": {
@@ -20278,7 +20300,8 @@
         "id": "12"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 3,
+      "cityName": "Miami"
     },
     "48,34": {
       "coordinates": {
@@ -20908,7 +20931,8 @@
         "id": "42"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 0,
+      "cityName": "Philadelphia"
     },
     "50,17": {
       "coordinates": {
@@ -21673,7 +21697,8 @@
         "id": "36"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 4,
+      "cityName": "New York"
     },
     "52,16": {
       "coordinates": {
@@ -22036,7 +22061,8 @@
         "id": "25"
       },
       "terrainType": "Plains",
-      "population": 0
+      "population": 2,
+      "cityName": "Boston"
     },
     "53,14": {
       "coordinates": {

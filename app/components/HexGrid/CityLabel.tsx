@@ -17,17 +17,6 @@ export function CityLabel({ cell }: CityLabelProps) {
 
   return (
     <group position={[x, 0, z]}>
-      {/* Vertical connector using a thin rectangular mesh */}
-      <mesh position={[0, labelHeight / 2, 0]}>
-        <boxGeometry args={[0.02, labelHeight, 0.02]} />
-        <meshBasicMaterial
-          color="#000000"
-          transparent
-          opacity={0.5}
-          depthTest={false}
-        />
-      </mesh>
-
       {/* Label */}
       <group position={[0, labelHeight, 0]}>
         <Billboard>

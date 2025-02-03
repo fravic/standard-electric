@@ -6,6 +6,7 @@ import {
   toWorldPoint,
 } from "./coordinates/HexCoordinates";
 import { StateInfo } from "./MapData";
+import { TERRAIN_COLORS } from "@/lib/palette";
 
 export enum TerrainType {
   Forest = "Forest",
@@ -74,33 +75,22 @@ export function getColor(cell: HexCell): Color {
   // Set base color based on terrain type
   switch (cell.terrainType) {
     case TerrainType.Forest:
-      baseColor = new Color(0x2d5a27); // Dark green
+      baseColor = new Color(TERRAIN_COLORS.FOREST);
       break;
     case TerrainType.Plains:
-      baseColor = new Color(0x90a955); // Light green
+      baseColor = new Color(TERRAIN_COLORS.PLAINS);
       break;
     case TerrainType.Mountains:
-      baseColor = new Color(0x6b705c); // Gray
+      baseColor = new Color(TERRAIN_COLORS.MOUNTAINS);
       break;
     case TerrainType.Desert:
-      baseColor = new Color(0xe6c229); // Sand yellow
+      baseColor = new Color(TERRAIN_COLORS.DESERT);
       break;
     case TerrainType.Water:
-      baseColor = new Color(0x1e88e5); // Blue
+      baseColor = new Color(TERRAIN_COLORS.WATER);
       break;
     default:
       baseColor = new Color(0xc9eba1); // Default light green
-  }
-
-  if (cell.stateInfo?.name) {
-    const hsl: HSL = { h: 0, s: 0, l: 0 };
-    baseColor.getHSL(hsl);
-    // Vary lightness slightly based on state hash
-    hsl.l = Math.max(
-      0.4,
-      Math.min(0.9, hsl.l + ((stateHash(cell) % 40) - 20) / 100)
-    );
-    baseColor.setHSL(hsl.h, hsl.s, hsl.l);
   }
 
   return baseColor;

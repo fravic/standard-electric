@@ -8,6 +8,7 @@ import { clientStore } from "@/lib/clientState";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import { formatPowerKWh } from "@/lib/power/formatPower";
 import { isDayTime } from "@/lib/time";
+import { UI_COLORS } from "@/lib/palette";
 
 const POWER_SELL_GOAL_KWH = 1_000_000_000; // 1 TWh in kWh
 
@@ -16,7 +17,7 @@ const styles = {
     position: "fixed" as const,
     top: "10px",
     left: "10px",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: UI_COLORS.BACKGROUND,
     color: "white",
     padding: "10px",
     borderRadius: "5px",
@@ -31,7 +32,7 @@ const styles = {
     position: "fixed" as const,
     top: "10px",
     right: "10px",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: UI_COLORS.BACKGROUND,
     color: "white",
     padding: "10px",
     borderRadius: "5px",
@@ -44,9 +45,9 @@ const styles = {
     fontWeight: "bold" as const,
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: UI_COLORS.PRIMARY,
     border: "none",
-    color: "white",
+    color: UI_COLORS.TEXT_LIGHT,
     padding: "8px 16px",
     textAlign: "center" as const,
     textDecoration: "none",
@@ -58,12 +59,14 @@ const styles = {
     transition: "background-color 0.3s",
   },
   disabledButton: {
-    backgroundColor: "#cccccc",
+    backgroundColor: UI_COLORS.PRIMARY_DARK,
+    color: UI_COLORS.TEXT_DARK,
     cursor: "not-allowed",
     opacity: 0.7,
   },
   activeButton: {
-    backgroundColor: "#45a049",
+    backgroundColor: UI_COLORS.PRIMARY_DARK,
+    color: UI_COLORS.TEXT_LIGHT,
   },
   progressContainer: {
     width: "100%",
@@ -74,15 +77,15 @@ const styles = {
   },
   progressBar: {
     height: "20px",
-    backgroundColor: "#4CAF50",
+    backgroundColor: UI_COLORS.PRIMARY,
     borderRadius: "3px",
     transition: "width 0.3s ease-in-out",
   },
   progressText: {
     position: "absolute" as const,
     width: "100%",
-    color: "white",
-    textShadow: "1px 1px 1px rgba(0,0,0,0.5)",
+    color: UI_COLORS.TEXT_DARK,
+    textShadow: "0px 1px 0px rgba(0,0,0,0.5)",
     fontSize: "12px",
     lineHeight: "20px",
     paddingLeft: "5px",
