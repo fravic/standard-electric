@@ -134,22 +134,23 @@ export const HexGridWater = React.memo(function HexGridWater({
     }
   });
 
+  const uniforms = useMemo(
+    () => ({
+      time: { value: 0 },
+      deepColor: { value: new THREE.Color(0xc1e4ff) },
+      shallowColor: { value: new THREE.Color(0xd3ecff) },
+      waveNoiseTexture: { value: waveNoiseTexture },
+      waveDistortionTexture: { value: waveDistortionTexture },
+    }),
+    [waveNoiseTexture, waveDistortionTexture]
+  );
+
   return (
     <mesh geometry={waterGeometry}>
       <shaderMaterial
         ref={waterMaterialRef}
         transparent
-        uniforms={{
-          time: { value: 0 },
-          deepColor: { value: new THREE.Color(0xc1e4ff) },
-          shallowColor: { value: new THREE.Color(0xd3ecff) },
-          waveNoiseTexture: {
-            value: waveNoiseTexture,
-          },
-          waveDistortionTexture: {
-            value: waveDistortionTexture,
-          },
-        }}
+        uniforms={uniforms}
         vertexShader={waterVertexShader}
         fragmentShader={waterFragmentShader}
       />
