@@ -9,6 +9,8 @@ import {
 } from "@/lib/HexCell";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { Vertex } from "@/lib/types";
+import { GameContext } from "@/actor/game.context";
+import { isNightTime } from "@/lib/time";
 
 interface HexGridDecorationsProps {
   cells: HexCell[];
@@ -65,6 +67,9 @@ const Building: React.FC<{
   population: Population;
   seed: number;
 }> = ({ position, population, seed }) => {
+  const { totalTicks } = GameContext.useSelector((state) => state.public.time);
+  const isNight = isNightTime(totalTicks);
+
   // Use seed to generate consistent random variations
   const rng = seedrandom(`${seed}`);
   const randomScale = 0.8 + rng() * 0.4; // 0.8-1.2 scale variation
@@ -72,15 +77,15 @@ const Building: React.FC<{
   const getSize = () => {
     switch (population) {
       case Population.Village:
-        return { width: 0.1, height: 0.2 }; // Reduced from 0.4/0.8
+        return { width: 0.1, height: 0.2 };
       case Population.Town:
-        return { width: 0.12, height: 0.3 }; // Reduced from 0.5/1.2
+        return { width: 0.12, height: 0.3 };
       case Population.City:
-        return { width: 0.15, height: 0.5 }; // Reduced from 0.6/2.0
+        return { width: 0.15, height: 0.5 };
       case Population.Metropolis:
-        return { width: 0.18, height: 0.7 }; // Reduced from 0.7/3.0
+        return { width: 0.18, height: 0.7 };
       case Population.Megalopolis:
-        return { width: 0.2, height: 1.0 }; // Reduced from 0.8/4.0
+        return { width: 0.2, height: 1.0 };
       default:
         return { width: 0, height: 0 };
     }
@@ -93,12 +98,63 @@ const Building: React.FC<{
   const scaledWidth = width * randomScale;
   const scaledHeight = height * randomScale;
 
+  // Create window texture for walls
+  const textureSize = 64;
+  const canvas = document.createElement("canvas");
+  canvas.width = textureSize;
+  canvas.height = textureSize;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Fill background color (building wall)
+  ctx.fillStyle = "#A0A0A0";
+  ctx.fillRect(0, 0, textureSize, textureSize);
+
+  // Calculate window parameters
+  const windowRows = 4;
+  const windowCols = 2;
+  const windowMargin = textureSize * 0.1;
+  const windowWidth = (textureSize - windowMargin * 3) / windowCols;
+  const windowHeight =
+    (textureSize - windowMargin * (windowRows + 1)) / windowRows;
+
+  // Draw windows
+  ctx.fillStyle = isNight ? "#FFD700" : "#cccccc";
+  for (let row = 0; row < windowRows; row++) {
+    for (let col = 0; col < windowCols; col++) {
+      const windowRng = seedrandom(`${seed}-window-${row}-${col}`);
+      if (windowRng() > 0.3) {
+        // 70% chance for a window
+        const x = windowMargin + col * (windowWidth + windowMargin);
+        const y = windowMargin + row * (windowHeight + windowMargin);
+        ctx.fillRect(x, y, windowWidth, windowHeight);
+      }
+    }
+  }
+
+  // Create Three.js texture
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.repeat.set(1, Math.ceil(scaledHeight / scaledWidth));
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+
   return (
     <group position={position}>
-      {/* Main building */}
+      {/* Main building walls */}
       <mesh position={[0, scaledHeight / 2, 0]}>
         <boxGeometry args={[scaledWidth, scaledHeight, scaledWidth]} />
-        <meshStandardMaterial color="#A0A0A0" />
+        <meshStandardMaterial
+          color="#FFFFFF"
+          map={texture}
+          emissiveMap={texture}
+          emissiveIntensity={isNight ? 2.0 : 0}
+          toneMapped={false}
+        />
+      </mesh>
+      {/* Roof */}
+      <mesh position={[0, scaledHeight + 0.02, 0]}>
+        <boxGeometry args={[scaledWidth * 1.1, 0.04, scaledWidth * 1.1]} />
+        <meshStandardMaterial color="#808080" roughness={0.7} />
       </mesh>
     </group>
   );

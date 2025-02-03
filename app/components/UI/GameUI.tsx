@@ -7,6 +7,7 @@ import { GameContext } from "@/actor/game.context";
 import { clientStore } from "@/lib/clientState";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import { formatPowerKWh } from "@/lib/power/formatPower";
+import { isDayTime } from "@/lib/time";
 
 const POWER_SELL_GOAL_KWH = 1_000_000_000; // 1 TWh in kWh
 
@@ -97,16 +98,14 @@ export const GameUI: React.FC = () => {
     clientStore,
     (state) => state.context.buildMode
   );
-  const time = GameContext.useSelector((state) => state.public.time);
+  const { totalTicks } = GameContext.useSelector((state) => state.public.time);
+  const timeEmoji = isDayTime(totalTicks) ? "☀️" : "🌙";
 
   const canAffordPowerPole = player.money >= BUILDABLE_COSTS.power_pole;
   const canAffordCoalPlant = player.money >= BUILDABLE_COSTS.coal_plant;
 
   // Calculate day number (assuming 24 ticks = 1 day)
-  const dayNumber = Math.floor(time.totalTicks / 24) + 1;
-  // Calculate if it's day or night (assuming 12 ticks of day, 12 of night)
-  const isDaytime = time.totalTicks % 24 < 12;
-  const timeEmoji = isDaytime ? "☀️" : "🌙";
+  const dayNumber = Math.floor(totalTicks / 24) + 1;
 
   // Calculate power progress (already in kWh)
   const powerProgress =

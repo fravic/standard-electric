@@ -1,6 +1,7 @@
 import React from "react";
 import { TICKS_PER_CYCLE } from "@/lib/constants";
 import { GameContext } from "@/actor/game.context";
+import { isNightTime } from "@/lib/time";
 
 const CLOCK_SIZE = 80;
 const CENTER = CLOCK_SIZE / 2;
@@ -92,10 +93,10 @@ export function Clock() {
   // Calculate current cycle and tick
   const currentCycle = Math.floor(totalTicks / TICKS_PER_CYCLE) + 1;
   const currentTick = totalTicks % TICKS_PER_CYCLE;
+  const isNight = isNightTime(totalTicks);
 
   // Convert tick (0-11) to degrees (0-360), with 0 pointing up
   const degrees = (currentTick / TICKS_PER_CYCLE) * 360;
-  const isNight = currentTick >= 9 || currentTick < 3;
 
   return (
     <div style={styles.container}>
