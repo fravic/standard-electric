@@ -1,16 +1,33 @@
-import { TICKS_PER_CYCLE } from "./constants";
+import { HOURS_PER_DAY } from "./constants";
+
+export const SUNRISE_HOUR = 6; // 6 AM
+export const NOON_HOUR = 12; // 12 PM
+export const SUNSET_HOUR = 20; // 8 PM
+export const MIDNIGHT_HOUR = 0; // 12 AM
+
+// Twilight periods for color transitions
+export const SUNSET_START_HOUR = 18; // 6 PM - start transitioning to sunset colors
+export const NIGHT_START_HOUR = 21; // 9 PM - fully dark
 
 /**
- * Returns true if it's night time (between 9PM and 3AM game time)
+ * Returns true if it's night time (after NIGHT_START_HOUR or before SUNRISE_HOUR)
  */
 export function isNightTime(totalTicks: number): boolean {
-  const currentTick = totalTicks % TICKS_PER_CYCLE;
-  return currentTick >= 9 || currentTick < 3;
+  const currentHour = totalTicks % HOURS_PER_DAY;
+  return currentHour >= NIGHT_START_HOUR || currentHour < SUNRISE_HOUR;
 }
 
 /**
- * Returns true if it's day time (between 3AM and 9PM game time)
+ * Returns true if it's sunset time (between SUNSET_START_HOUR and NIGHT_START_HOUR)
+ */
+export function isSunsetTime(totalTicks: number): boolean {
+  const currentHour = totalTicks % HOURS_PER_DAY;
+  return currentHour >= SUNSET_START_HOUR && currentHour < NIGHT_START_HOUR;
+}
+
+/**
+ * Returns true if it's day time (between SUNRISE_HOUR and SUNSET_START_HOUR)
  */
 export function isDayTime(totalTicks: number): boolean {
-  return !isNightTime(totalTicks);
+  return !isNightTime(totalTicks) && !isSunsetTime(totalTicks);
 }

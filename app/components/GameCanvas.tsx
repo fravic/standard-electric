@@ -11,6 +11,7 @@ import { KernelSize, BlendFunction } from "postprocessing";
 import { CameraController } from "./CameraController";
 import { HexGrid } from "./HexGrid/HexGrid";
 import { WATER_COLORS } from "@/lib/palette";
+import { Lighting } from "./Lighting";
 
 export function GameCanvas() {
   return (
@@ -27,8 +28,7 @@ export function GameCanvas() {
       <color attach="background" args={[WATER_COLORS.BACKGROUND]} />
       <OrbitControls makeDefault />
       <CameraController />
-      <ambientLight intensity={1} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <Lighting />
       <HexGrid />
       <EffectComposer>
         <Bloom
@@ -38,8 +38,8 @@ export function GameCanvas() {
           kernelSize={KernelSize.SMALL}
         />
         <Scanline
-          blendFunction={BlendFunction.OVERLAY} // blend mode
-          density={1.25} // scanline density
+          blendFunction={BlendFunction.OVERLAY}
+          density={1.25}
           opacity={0.1}
         />
       </EffectComposer>

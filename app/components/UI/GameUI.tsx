@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "@xstate/store/react";
 import { HexDetailsUI } from "./HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
-import { PLAYER_ID } from "../../lib/constants";
+import { PLAYER_ID, HOURS_PER_DAY } from "../../lib/constants";
 import { GameContext } from "@/actor/game.context";
 import { clientStore } from "@/lib/clientState";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
@@ -106,11 +106,7 @@ export const GameUI: React.FC = () => {
 
   const canAffordPowerPole = player.money >= BUILDABLE_COSTS.power_pole;
   const canAffordCoalPlant = player.money >= BUILDABLE_COSTS.coal_plant;
-
-  // Calculate day number (assuming 24 ticks = 1 day)
-  const dayNumber = Math.floor(totalTicks / 24) + 1;
-
-  // Calculate power progress (already in kWh)
+  const dayNumber = Math.floor(totalTicks / HOURS_PER_DAY) + 1;
   const powerProgress =
     Math.min(player.powerSoldKWh / POWER_SELL_GOAL_KWH, 1) * 100;
 

@@ -1,11 +1,9 @@
 import { fromCallback } from "xstate";
-
-export const TICK_INTERVAL_MS = 5000;
-
+import { MILLISECONDS_PER_IN_GAME_HOUR } from "@/lib/constants";
 export const gameTimerActor = fromCallback(({ sendBack, receive }) => {
   const interval = setInterval(() => {
     sendBack({ type: "TICK" });
-  }, TICK_INTERVAL_MS);
+  }, MILLISECONDS_PER_IN_GAME_HOUR);
 
   return () => clearInterval(interval);
 });
