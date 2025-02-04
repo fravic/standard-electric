@@ -6,8 +6,8 @@ export const SUNSET_HOUR = 20; // 8 PM
 export const MIDNIGHT_HOUR = 0; // 12 AM
 
 // Twilight periods for color transitions
-export const SUNSET_START_HOUR = 18; // 6 PM - start transitioning to sunset colors
-export const NIGHT_START_HOUR = 21; // 9 PM - fully dark
+export const SUNSET_START_HOUR = 19; // 7 PM - start transitioning to sunset colors
+export const NIGHT_START_HOUR = 22; // 10 PM - fully dark
 
 /**
  * Returns true if it's night time (after NIGHT_START_HOUR or before SUNRISE_HOUR)

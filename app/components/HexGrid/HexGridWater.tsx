@@ -5,17 +5,28 @@ import { useTexture } from "@react-three/drei";
 import { WATER_COLORS } from "@/lib/palette";
 
 const waterVertexShader = `
+#include <common>
+#include <lights_pars_begin>
+
 varying vec2 vUv;
 varying vec3 vPosition;
+varying vec3 vNormal;
 
 void main() {
+    #include <beginnormal_vertex>
+    #include <defaultnormal_vertex>
+
     vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
     vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
 }
 `;
 
 const waterFragmentShader = `
+#include <common>
+#include <lights_pars_begin>
+
 precision highp float;
 
 uniform float time;
@@ -24,10 +35,9 @@ uniform vec3 shallowColor;
 uniform sampler2D waveNoiseTexture;
 uniform sampler2D waveDistortionTexture;
 
-// 0 is deep water, 1 is shallow water
 varying vec2 vUv;
-
 varying vec3 vPosition;
+varying vec3 vNormal;
 
 #define WAVE_SCALE vec2(0.01, 0.02)
 #define WAVE_SPEED vec2(0.001, 0.004)
@@ -36,6 +46,8 @@ varying vec3 vPosition;
 #define WAVE_NOISE_CUTOFF 0.75
 #define WAVE_DISTORTION_STRENGTH 0.2
 #define WAVE_COLOR_STRENGTH 0.4
+#define LIGHTING_INTENSITY 0.8  // How much the lighting affects the water
+#define MIN_BRIGHTNESS 0.4      // Minimum brightness of water even in darkness
 
 // Anti-aliasing
 #define SMOOTHSTEP_AA 0.01
@@ -62,6 +74,22 @@ void main() {
     float waveNoiseCutoff = clamp(waterDepth / FOAM_DISTANCE, 0.0, 1.0) * WAVE_NOISE_CUTOFF;
     waveNoise = smoothstep(waveNoiseCutoff - SMOOTHSTEP_AA, waveNoiseCutoff + SMOOTHSTEP_AA, waveNoise);
     color = color + waveNoise * WAVE_COLOR_STRENGTH;
+    
+    // Calculate lighting using Three.js built-in light uniforms
+    vec3 lighting = vec3(0.0);
+    
+    // Ambient light (reduced intensity)
+    lighting += ambientLightColor * 0.7;
+    
+    // Directional light (reduced intensity)
+    vec3 normal = normalize(vNormal);
+    vec3 lightDir = normalize(directionalLights[0].direction);
+    float diffuse = max(dot(normal, lightDir), 0.0);
+    lighting += directionalLights[0].color * diffuse * 0.6;
+    
+    // Mix between base color and lit color
+    vec3 litColor = color * lighting;
+    color = mix(color * MIN_BRIGHTNESS, litColor, LIGHTING_INTENSITY);
     
     gl_FragColor = vec4(color, 1.0);
 }
@@ -129,12 +157,6 @@ export const HexGridWater = React.memo(function HexGridWater({
     "/textures/water_wave_distortion.png",
   ]);
 
-  useFrame((state) => {
-    if (waterMaterialRef.current) {
-      waterMaterialRef.current.uniforms.time.value = state.clock.elapsedTime;
-    }
-  });
-
   const uniforms = useMemo(
     () => ({
       time: { value: 0 },
@@ -142,9 +164,16 @@ export const HexGridWater = React.memo(function HexGridWater({
       shallowColor: { value: new THREE.Color(WATER_COLORS.SHALLOW) },
       waveNoiseTexture: { value: waveNoiseTexture },
       waveDistortionTexture: { value: waveDistortionTexture },
+      ...THREE.UniformsLib.lights, // Include Three.js light uniforms
     }),
     [waveNoiseTexture, waveDistortionTexture]
   );
+
+  useFrame((state) => {
+    if (waterMaterialRef.current) {
+      waterMaterialRef.current.uniforms.time.value = state.clock.elapsedTime;
+    }
+  });
 
   return (
     <mesh geometry={waterGeometry}>
@@ -154,6 +183,7 @@ export const HexGridWater = React.memo(function HexGridWater({
         uniforms={uniforms}
         vertexShader={waterVertexShader}
         fragmentShader={waterFragmentShader}
+        lights // Enable Three.js light handling
       />
     </mesh>
   );
