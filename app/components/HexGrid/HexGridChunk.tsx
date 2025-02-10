@@ -28,6 +28,7 @@ import { Buildable } from "../Buildable";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore } from "@/lib/clientState";
+import { HighlightedHexCells } from "./HighlightedHexCells";
 
 interface HexGridChunkProps {
   chunk: {
@@ -55,6 +56,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const hoverLocation = useSelector(
     clientStore,
     (state) => state.context.hoverLocation
+  );
+  const hoveringHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.hoveringHexCoordinates
   );
   const buildables = GameContext.useSelector(
     (state) => state.public.buildables ?? []
@@ -117,11 +122,31 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return null;
   }, [buildMode, validCoordinates, buildables, hoverLocation]);
 
-  const handleHover = useCallback((event: ThreeEvent<PointerEvent>) => {
-    const point = event.point;
+  const handleHover = useCallback(
+    (event: ThreeEvent<PointerEvent>) => {
+      const point = event.point;
+      const coords = fromWorldPoint([point.x, point.y, point.z]);
+      const isValidCoord = validCoordinates.some((c) => equals(c, coords));
+
+      clientStore.send({
+        type: "setHoverLocation",
+        worldPoint: [point.x, point.y, point.z],
+      });
+
+      if (isValidCoord) {
+        clientStore.send({
+          type: "setHoveringHex",
+          coordinates: coords,
+        });
+      }
+    },
+    [validCoordinates]
+  );
+
+  const handlePointerLeave = useCallback(() => {
     clientStore.send({
-      type: "setHoverLocation",
-      worldPoint: [point.x, point.y, point.z],
+      type: "setHoveringHex",
+      coordinates: null,
     });
   }, []);
 
@@ -166,6 +191,18 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       .filter((cell): cell is HexCell => cell !== null);
   }, [grid, validCoordinates]);
 
+  // Get cells to highlight based on hovering state
+  const highlightedCells = useMemo(() => {
+    if (!hoveringHexCoordinates) return [];
+
+    const hoveringCell = getCell(grid, hoveringHexCoordinates);
+    if (!hoveringCell?.stateInfo?.name) return [];
+
+    return cells.filter(
+      (cell) => cell.stateInfo?.name === hoveringCell.stateInfo?.name
+    );
+  }, [cells, grid, hoveringHexCoordinates]);
+
   // Filter buildables in this chunk
   const chunkBuildables = useMemo(() => {
     return buildables.filter((buildable) => {
@@ -190,9 +227,18 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         onClick={handleClick}
         onUpdateCell={handleCellUpdate}
         onHover={handleHover}
+        onPointerLeave={handlePointerLeave}
         debug={debug}
       />
       <HexGridWater cells={cells} grid={grid} />
+      {highlightedCells.length > 0 && (
+        <HighlightedHexCells
+          cells={highlightedCells}
+          color={[1, 1, 0.9]} // Very subtle yellow tint
+          opacity={0.05}
+          height={0.05}
+        />
+      )}
       <PowerLines chunkCells={cells.map((cell: HexCell) => cell.coordinates)} />
       {chunkBuildables.map((buildable) => (
         <Buildable key={buildable.id} buildable={buildable} />

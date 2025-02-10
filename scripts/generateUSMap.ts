@@ -1,10 +1,10 @@
-import { TerrainType } from "../src/lib/HexCell";
-import { getStateInfoAtCoordinates } from "../src/lib/MapData";
+import { TerrainType } from "../app/lib/HexCell";
+import { getStateInfoAtCoordinates } from "../app/lib/MapData";
 import fs from "fs";
 import path from "path";
-import { createHexGrid, HexGrid } from "../src/lib/HexGrid";
-import { createHexCell } from "../src/lib/HexCell";
-import { loadUnitedStatesMapData } from "../src/lib/unitedStatesGeoUtils";
+import { createHexGrid, HexGrid } from "../app/lib/HexGrid";
+import { createHexCell } from "../app/lib/HexCell";
+import { loadUnitedStatesMapData } from "../app/lib/unitedStatesGeoUtils";
 
 async function generateMap() {
   // Load the US map data
@@ -15,7 +15,7 @@ async function generateMap() {
   }
 
   // Create hex grid
-  const hexGrid = createHexGrid(60, 40);
+  const hexGrid = createHexGrid(30, 24);
 
   // Generate cells
   for (let x = 0; x < hexGrid.width; x++) {

@@ -20,6 +20,7 @@ interface ClientState {
     worldPoint: [number, number, number];
   } | null;
   selectedHexCoordinates: HexCoordinates | null;
+  hoveringHexCoordinates: HexCoordinates | null;
   areKeyboardControlsActive: boolean;
 }
 
@@ -34,6 +35,7 @@ export const clientStore = createStore({
     buildMode: null,
     hoverLocation: null,
     selectedHexCoordinates: null,
+    hoveringHexCoordinates: null,
     areKeyboardControlsActive: true,
   } as ClientState,
   on: {
@@ -78,6 +80,12 @@ export const clientStore = createStore({
     }),
     setKeyboardControlsActive: (context, event: { active: boolean }) => ({
       areKeyboardControlsActive: event.active,
+    }),
+    setHoveringHex: (
+      context,
+      event: { coordinates: HexCoordinates | null }
+    ) => ({
+      hoveringHexCoordinates: event.coordinates,
     }),
   },
 });

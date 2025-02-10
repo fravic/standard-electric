@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { GameContext } from "@/actor/game.context";
@@ -9,33 +9,36 @@ import { clientStore } from "@/lib/clientState";
 const styles = {
   container: {
     position: "fixed" as const,
-    top: "50px",
-    right: "10px",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     color: "white",
-    padding: "10px",
-    borderRadius: "5px",
+    padding: "6px",
+    borderRadius: "4px",
     fontFamily: "monospace",
-    fontSize: "14px",
-    zIndex: 1000,
+    fontSize: "12px",
+    zIndex: 100,
     display: "flex",
     flexDirection: "column" as const,
-    gap: "10px",
+    gap: "4px",
+    pointerEvents: "none" as "none",
+    maxWidth: "200px",
   },
   label: {
     fontWeight: "bold" as const,
+    opacity: 0.8,
   },
   section: {
-    borderTop: "1px solid rgba(255, 255, 255, 0.2)",
-    paddingTop: "8px",
-    marginTop: "8px",
+    borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+    paddingTop: "4px",
+    marginTop: "4px",
   },
 };
 
 export function HexDetailsUI() {
-  const selectedHexCoordinates = useSelector(
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isOverMap, setIsOverMap] = useState(false);
+  const hoveringHexCoordinates = useSelector(
     clientStore,
-    (state) => state.context.selectedHexCoordinates
+    (state) => state.context.hoveringHexCoordinates
   );
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const buildables = GameContext.useSelector(
@@ -43,11 +46,39 @@ export function HexDetailsUI() {
   );
   const players = GameContext.useSelector((state) => state.public.players);
 
-  if (!selectedHexCoordinates) {
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX + 15, y: e.clientY + 15 });
+    };
+
+    // Check if mouse is over the map (canvas) or UI elements
+    const handleMouseOver = (e: MouseEvent) => {
+      // Check if the target is the canvas (map) or its children
+      const isCanvas = (e.target as HTMLElement)?.tagName === "CANVAS";
+      setIsOverMap(isCanvas);
+
+      if (!isCanvas) {
+        clientStore.send({
+          type: "setHoveringHex",
+          coordinates: null,
+        });
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseover", handleMouseOver, true);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseover", handleMouseOver, true);
+    };
+  }, []);
+
+  if (!hoveringHexCoordinates || !isOverMap) {
     return null;
   }
 
-  const cell = HexGridService.getCell(hexGrid, selectedHexCoordinates);
+  const cell = HexGridService.getCell(hexGrid, hoveringHexCoordinates);
   if (!cell) {
     return null;
   }
@@ -56,15 +87,21 @@ export function HexDetailsUI() {
   const powerPlant = buildables.find(
     (b) =>
       b.coordinates &&
-      HexCoordinatesService.equals(b.coordinates, selectedHexCoordinates)
+      HexCoordinatesService.equals(b.coordinates, hoveringHexCoordinates)
   );
 
   return (
-    <div style={styles.container}>
+    <div
+      style={{
+        ...styles.container,
+        left: `${mousePos.x}px`,
+        top: `${mousePos.y}px`,
+      }}
+    >
       <div>
         <span style={styles.label}>
           {cell.stateInfo?.name}{" "}
-          {HexCoordinatesService.coordinatesToString(selectedHexCoordinates)}
+          {HexCoordinatesService.coordinatesToString(hoveringHexCoordinates)}
         </span>
       </div>
       <div>
