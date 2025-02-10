@@ -1,9 +1,11 @@
 import { GameProvider } from "@/actor/game.context";
 import type { GameMachine } from "@/actor/game.machine";
+import { AuthContext } from "@/auth.context";
 import { Game } from "@/components/Game";
 import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, useParams } from "@remix-run/react";
 import { createAccessToken, createActorFetch } from "actor-kit/server";
+import { authClient } from "@/auth.client";
 
 // Create a client-only wrapper component
 export async function loader({ request, params, context }: LoaderFunctionArgs) {
@@ -37,14 +39,16 @@ export default function GameRoute() {
   const { host, accessToken, payload } = useLoaderData<typeof loader>();
 
   return (
-    <GameProvider
-      host={host}
-      actorId={gameId!}
-      accessToken={accessToken}
-      checksum={payload.checksum}
-      initialSnapshot={payload.snapshot as any}
-    >
-      <Game />
-    </GameProvider>
+    <AuthContext.Provider client={authClient}>
+      <GameProvider
+        host={host}
+        actorId={gameId!}
+        accessToken={accessToken}
+        checksum={payload.checksum}
+        initialSnapshot={payload.snapshot as any}
+      >
+        <Game />
+      </GameProvider>
+    </AuthContext.Provider>
   );
 }

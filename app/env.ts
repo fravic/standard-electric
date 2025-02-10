@@ -18,4 +18,11 @@ export interface Env {
   ACTOR_KIT_HOST: string;
   SESSION_JWT_SECRET: string;
   [key: string]: DurableObjectNamespace<AnyActorServer> | unknown;
+
+  // Required for auth-kit
+  AUTH_SECRET: string;
+  SENDGRID_API_KEY: string;
+
+  // KV Storage for auth data
+  KV_STORAGE: KVNamespace;
 }

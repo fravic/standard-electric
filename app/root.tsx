@@ -10,6 +10,9 @@ import {
 
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 
+import { AuthContext } from "./auth.context";
+import { authClient } from "./auth.client";
+
 //   import { SessionProvider } from "./session.context";
 //   import { SessionMachine } from "./session.machine";
 import styles from "./styles.css";
@@ -66,20 +69,25 @@ export default function App() {
   const isDevelopment = true;
 
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-        {isDevelopment && <LiveReload />}
-      </body>
-    </html>
+    <AuthContext.Provider
+      client={authClient}
+      fallback={<div>Initializing auth...</div>}
+    >
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+          {isDevelopment && <LiveReload />}
+        </body>
+      </html>
+    </AuthContext.Provider>
   );
 }
 

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Vertex } from "../types";
 
 export const HexCoordinatesSchema = z.object({
   x: z.number(),

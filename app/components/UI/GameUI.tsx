@@ -2,13 +2,14 @@ import React from "react";
 import { useSelector } from "@xstate/store/react";
 import { HexDetailsUI } from "./HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
-import { PLAYER_ID, HOURS_PER_DAY } from "../../lib/constants";
+import { HOURS_PER_DAY } from "../../lib/constants";
 import { GameContext } from "@/actor/game.context";
 import { clientStore } from "@/lib/clientState";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import { formatPowerKWh } from "@/lib/power/formatPower";
 import { isDayTime } from "@/lib/time";
 import { UI_COLORS } from "@/lib/palette";
+import { AuthContext } from "@/auth.context";
 
 const POWER_SELL_GOAL_KWH = 1_000_000_000; // 1 TWh in kWh
 
@@ -94,8 +95,9 @@ const styles = {
 };
 
 export const GameUI: React.FC = () => {
+  const userId = AuthContext.useSelector((state) => state.userId);
   const player = GameContext.useSelector(
-    (state) => state.public.players[PLAYER_ID]
+    (state) => state.public.players[userId!]
   );
   const buildMode = useSelector(
     clientStore,

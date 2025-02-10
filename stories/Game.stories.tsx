@@ -7,7 +7,6 @@ import { GameContext } from "@/actor/game.context";
 import { GameMachine } from "@/actor/game.machine";
 import { Game } from "@/components/Game";
 import { HexGrid } from "@/lib/HexGrid";
-import { PLAYER_ID } from "@/lib/constants";
 
 import hexGrid from "@/../public/hexgrid.json";
 import { CornerPosition } from "@/lib/coordinates/types";
@@ -30,6 +29,8 @@ const meta: Meta<typeof Game> = {
 export default meta;
 type Story = StoryObj<typeof Game>;
 
+const PLAYER_ID = "fake-player-id";
+
 export const Blank: Story = {
   play: async ({ canvasElement, mount }) => {
     const client = createActorKitMockClient<GameMachine>({
@@ -40,6 +41,7 @@ export const Blank: Story = {
             [PLAYER_ID]: {
               name: "Player 1",
               money: 10,
+              powerSoldKWh: 0,
             },
           },
           time: {
@@ -76,6 +78,7 @@ export const WithPowerLines: Story = {
             [PLAYER_ID]: {
               name: "Player 1",
               money: 10,
+              powerSoldKWh: 0,
             },
           },
           time: {

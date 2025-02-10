@@ -2,3 +2,7 @@ ACTOR_KIT_HOST=localhost:8787
 ACTOR_KIT_SECRET=foobarbaz
 SESSION_JWT_SECRET=foobarbaz2
 NODE_ENV=development
+AUTH_SECRET=foobarbaz
+SENDGRID_API_KEY=foobarbaz
+KV_STORAGE_ID=cloudflare_kv_storage_id
+KV_STORAGE_PREVIEW_ID=cloudflare_kv_storage_id

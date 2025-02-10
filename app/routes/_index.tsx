@@ -1,5 +1,6 @@
+import { AuthContext } from "@/auth.context";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { json } from "@remix-run/react";
+import { json, useLoaderData } from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -17,19 +18,39 @@ export const meta: MetaFunction = () => {
 // });
 
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
-  // const host = context.env.ACTOR_KIT_HOST;
-  // const gameId = crypto.randomUUID();
-  // const deviceType = getDeviceType(request.headers.get("user-agent"));
-  // return json({ gameId, deviceType, host });
-  return json({});
+  // Access userId and sessionId from context
+  const { userId, sessionId } = context;
+
+  // Example: Fetch user data from KV
+  const userData = await context.env.KV_STORAGE.get(`user:${userId}`);
+
+  return json({
+    userId,
+    sessionId,
+    userData: userData ? JSON.parse(userData) : null,
+  });
 }
 
 export type LoaderData = {
   gameId: string;
   deviceType: string;
   host: string;
+  userId: string;
+  sessionId: string;
+  userData: any;
 };
 
 export default function Index() {
-  return <>Standard Electric</>;
+  const { sessionId, userData } = useLoaderData<LoaderData>();
+  const userId = AuthContext.useSelector((state) => state.userId);
+
+  return (
+    <div>
+      <h1>Standard Electric</h1>
+      <div>
+        Logged in as: {userId} ({sessionId})
+      </div>
+      <pre>{JSON.stringify(userData, null, 2)}</pre>
+    </div>
+  );
 }
