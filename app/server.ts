@@ -1,11 +1,11 @@
 import { createRequestHandler, logDevReady } from "@remix-run/cloudflare";
 import * as build from "@remix-run/dev/server-build";
+import { DurableObject } from "cloudflare:workers";
 import { createActorKitRouter } from "actor-kit/worker";
-import { WorkerEntrypoint } from "cloudflare:workers";
+import { AuthHooks, withAuth } from "@open-game-collective/auth-kit/worker";
+
 import { Env } from "./env";
 export { GameServer as Game } from "./actor/game.server";
-export { Remix } from "./remix.server";
-import { AuthHooks, withAuth } from "@open-game-collective/auth-kit/worker";
 
 declare module "@remix-run/cloudflare" {
   interface AppLoadContext {
@@ -82,13 +82,14 @@ const authHooks: AuthHooks<Env> = {
 };
 
 const handler = withAuth<Env>(
-  async (request, env, { userId, sessionId }) => {
+  async (request, env, { userId, sessionId, sessionToken }) => {
     try {
       // Inject the userId, sessionId, and pageSessionId into the request context
       return await handleRemixRequest(request, {
         env,
         userId,
         sessionId,
+        sessionToken,
         pageSessionId: crypto.randomUUID(),
       });
     } catch (error) {
@@ -99,6 +100,16 @@ const handler = withAuth<Env>(
   { hooks: authHooks }
 );
 
+export class Remix extends DurableObject<Env> {
+  constructor(state: DurableObjectState, env: Env) {
+    super(state, env);
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    return handler(request, this.env);
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
@@ -108,7 +119,7 @@ export default {
       return actorKitRouter(request, env, ctx);
     }
 
-    // Otherwise, use Remix handler
+    // Otherwise, use the Remix Durable Object
     return handler(request, env);
   },
 } satisfies ExportedHandler<Env>;

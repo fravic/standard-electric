@@ -6,16 +6,16 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { createAuthClient } from "@open-game-collective/auth-kit/client";
 
 import { AuthContext } from "./auth.context";
-import { authClient } from "./auth.client";
 
-//   import { SessionProvider } from "./session.context";
-//   import { SessionMachine } from "./session.machine";
 import styles from "./styles.css";
+import { useState } from "react";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -32,47 +32,28 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  //   const fetchSession = createActorFetch<SessionMachine>({
-  //     actorType: "session",
-  //     host: context.env.ACTOR_KIT_HOST,
-  //   });
-
-  //   const accessToken = await createAccessToken({
-  //     signingKey: context.env.ACTOR_KIT_SECRET,
-  //     actorId: context.sessionId,
-  //     actorType: "session",
-  //     callerId: context.userId,
-  //     callerType: "client",
-  //   });
-  //   const payload = await fetchSession({
-  //     actorId: context.sessionId,
-  //     accessToken,
-  //     input: {
-  //       url: request.url,
-  //     },
-  //   });
-
-  // TODO fetch the session here....
   return json({
     sessionId: context.sessionId,
-    // accessToken,
-    // payload,
-    // host: context.env.ACTOR_KIT_HOST,
-    // NODE_ENV: context.env.NODE_ENV,
+    sessionToken: context.sessionToken,
+    userId: context.userId,
   });
 }
 
 export default function App() {
-  //   const { NODE_ENV, host, sessionId, accessToken, payload } =
-  //     useLoaderData<typeof loader>();
-  //   const isDevelopment = NODE_ENV === "development";
   const isDevelopment = true;
 
+  const { sessionId, sessionToken, userId } = useLoaderData<typeof loader>();
+
+  const [authClient] = useState(
+    createAuthClient({
+      host: "localhost:8787",
+      userId: userId,
+      sessionToken: sessionToken,
+    })
+  );
+
   return (
-    <AuthContext.Provider
-      client={authClient}
-      fallback={<div>Initializing auth...</div>}
-    >
+    <AuthContext.Provider client={authClient}>
       <html lang="en">
         <head>
           <meta charSet="utf-8" />
@@ -89,16 +70,4 @@ export default function App() {
       </html>
     </AuthContext.Provider>
   );
-}
-
-{
-  /* <SessionProvider
-  host={host}
-  actorId={sessionId}
-  checksum={payload.checksum}
-  accessToken={accessToken}
-  initialSnapshot={payload.snapshot}
-  >
-  <Outlet />
-  </SessionProvider> */
 }
