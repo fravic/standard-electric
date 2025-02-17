@@ -3,12 +3,11 @@ import { ActorKitStateMachine } from "actor-kit";
 import { produce, current } from "immer";
 import { nanoid } from "nanoid";
 
-import { HexGrid, HexGridSchema } from "../lib/HexGrid";
+import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
 import { createBuildable } from "@/lib/buildables/Buildable";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import hexGridData from "../../public/hexgrid.json";
-import { PLAYER_ID } from "@/lib/constants";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/lib/power/PowerSystem";
 
@@ -21,7 +20,27 @@ export const gameMachine = setup({
   actors: {
     gameTimer: gameTimerActor,
   },
+  guards: {
+    isHost: ({ context, event }) => {
+      const playerId = event.caller.id;
+      return context.public.players[playerId]?.isHost === true;
+    },
+  },
   actions: {
+    joinGame: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
+        public: produce(context.public, (draft) => {
+          if (event.type === "JOIN_GAME") {
+            draft.players[event.caller.id] = {
+              name: event.name,
+              money: 100,
+              powerSoldKWh: 0,
+              isHost: Object.keys(draft.players).length === 0,
+            };
+          }
+        }),
+      })
+    ),
     startGameTimer: spawnChild(gameTimerActor, { id: "gameTimer" } as any),
     stopGameTimer: stopChild("gameTimer"),
     gameTick: assign(({ context }) => ({
@@ -52,21 +71,21 @@ export const gameMachine = setup({
           if (event.type === "ADD_BUILDABLE") {
             // Check if player has enough money
             const cost = BUILDABLE_COSTS[event.buildable.type];
-            if (draft.players[PLAYER_ID].money < cost) {
+            if (draft.players[event.caller.id].money < cost) {
               console.log("Not enough money to build! ", {
-                playerId: PLAYER_ID,
+                playerId: event.caller.id,
                 cost,
-                money: draft.players[PLAYER_ID].money,
+                money: draft.players[event.caller.id].money,
               });
               return;
             }
 
             // Deduct cost and create buildable
-            draft.players[PLAYER_ID].money -= cost;
+            draft.players[event.caller.id].money -= cost;
             const buildable = createBuildable({
               id: nanoid(),
               buildable: event.buildable,
-              playerId: PLAYER_ID,
+              playerId: event.caller.id,
               context: context,
             });
             draft.buildables.push(buildable);
@@ -77,7 +96,7 @@ export const gameMachine = setup({
   },
 }).createMachine({
   id: "game",
-  initial: "active",
+  initial: "lobby",
   context: ({ input }: { input: GameInput }) => ({
     public: {
       id: input.id,
@@ -87,16 +106,7 @@ export const gameMachine = setup({
         selectedTerrainType: null,
         selectedPopulation: null,
       },
-      players: {
-        [PLAYER_ID]: {
-          name: "Player 1",
-          money: 100,
-          buildMode: null,
-          hoverLocation: null,
-          selectedHexCoordinates: null,
-          powerSoldKWh: 0,
-        },
-      },
+      players: {},
       time: {
         totalTicks: 0,
         isPaused: true,
@@ -107,6 +117,17 @@ export const gameMachine = setup({
     private: {},
   }),
   states: {
+    lobby: {
+      on: {
+        JOIN_GAME: {
+          actions: "joinGame",
+        },
+        START_GAME: {
+          target: "active",
+          guard: "isHost",
+        },
+      },
+    },
     active: {
       entry: ["stopGameTimer", "startGameTimer"],
       exit: ["stopGameTimer"],

@@ -3,14 +3,12 @@ import React, { useCallback, useMemo } from "react";
 import { ThreeEvent } from "@react-three/fiber";
 import { useSelector } from "@xstate/store/react";
 
-import { HexCell, TerrainType, Population } from "@/lib/HexCell";
+import { HexCell } from "@/lib/HexCell";
 import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
-import { createCornerCoordinates } from "@/lib/coordinates/CornerCoordinates";
 import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
 import { HexGrid, getCell } from "@/lib/HexGrid";
 import { GameContext } from "@/actor/game.context";
-import { PLAYER_ID } from "@/lib/constants";
 import {
   PowerPole,
   createPowerPole,
@@ -28,6 +26,7 @@ import { Buildable } from "../Buildable";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore } from "@/lib/clientState";
+import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 
 interface HexGridChunkProps {
@@ -49,6 +48,8 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   onCellClick,
   debug = false,
 }: HexGridChunkProps) {
+  const userId = AuthContext.useSelector((state) => state.userId);
+
   const buildMode = useSelector(
     clientStore,
     (state) => state.context.buildMode
@@ -98,7 +99,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         const ghostPole = createPowerPole({
           id: "ghost",
           cornerCoordinates: nearestCorner,
-          playerId: PLAYER_ID,
+          playerId: userId!,
           connectedToIds: findPossibleConnectionsForCoordinates(
             nearestCorner,
             otherPoles
@@ -113,7 +114,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         return createCoalPlant({
           id: "ghost",
           coordinates: coords,
-          playerId: PLAYER_ID,
+          playerId: userId!,
           isGhost: true,
           pricePerKwh: 0.1,
         });

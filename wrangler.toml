@@ -7,11 +7,17 @@ main = "./dist/index.js"
 assets = { directory = "./public" }
 
 [vars]
+NODE_ENV = "development"
+WEB_HOST = "localhost:8787"
 ACTOR_KIT_HOST = "standard-electric.jonathanrmumm.workers.dev"
+
+[[kv_namespaces]]
+binding = "KV_STORAGE"
+id = "${KV_STORAGE_ID}"
+preview_id = "${KV_STORAGE_PREVIEW_ID}"
 
 [observability]
 enabled = true
-
 
 [[durable_objects.bindings]]
 name = "REMIX"

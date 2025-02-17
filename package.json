@@ -47,6 +47,7 @@
     "wrangler": "^3.104.0"
   },
   "dependencies": {
+    "@open-game-collective/auth-kit": "^0.0.2",
     "@react-spring/three": "^9.7.5",
     "@react-spring/web": "^9.7.5",
     "@react-three/drei": "^9.121.3",

@@ -5,7 +5,6 @@ import {
   WithActorKitEvent,
   WithActorKitInput,
 } from "actor-kit";
-import { ActorRefFromLogic } from "xstate";
 
 import { Buildable } from "../lib/buildables/Buildable";
 import { HexGrid } from "../lib/HexGrid";
@@ -15,13 +14,12 @@ import {
   GameServiceEventSchema,
 } from "./game.schemas";
 import { Env } from "../env";
-import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
-import { TerrainType, Population } from "@/lib/HexCell";
 
 export interface Player {
   name: string;
   money: number;
   powerSoldKWh: number;
+  isHost: boolean;
 }
 
 interface GamePublicContext {
