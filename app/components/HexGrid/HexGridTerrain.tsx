@@ -27,6 +27,7 @@ interface HexGridTerrainProps {
   cells: HexCell[];
   onClick: (event: ThreeEvent<MouseEvent | PointerEvent>) => void;
   onHover: (event: ThreeEvent<PointerEvent>) => void;
+  onPointerLeave: () => void;
   onUpdateCell?: (
     coordinates: HexCoordinates,
     updates: Partial<HexCell>
@@ -38,6 +39,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   cells,
   onClick,
   onHover,
+  onPointerLeave,
   onUpdateCell,
   debug = false,
 }: HexGridTerrainProps) {
@@ -151,6 +153,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
         geometry={terrainGeometry}
         onClick={handleClick}
         onPointerMove={debouncedOnHover}
+        onPointerLeave={onPointerLeave}
       >
         <meshStandardMaterial
           vertexColors
