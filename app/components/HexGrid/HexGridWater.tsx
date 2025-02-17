@@ -81,12 +81,6 @@ void main() {
     // Ambient light (reduced intensity)
     lighting += ambientLightColor * 0.7;
     
-    // Directional light (reduced intensity)
-    vec3 normal = normalize(vNormal);
-    vec3 lightDir = normalize(directionalLights[0].direction);
-    float diffuse = max(dot(normal, lightDir), 0.0);
-    lighting += directionalLights[0].color * diffuse * 0.6;
-    
     // Mix between base color and lit color
     vec3 litColor = color * lighting;
     color = mix(color * MIN_BRIGHTNESS, litColor, LIGHTING_INTENSITY);
@@ -95,12 +89,7 @@ void main() {
 }
 `;
 
-import {
-  getCenterPoint,
-  HexCell,
-  isUnderwater,
-  TerrainType,
-} from "../../lib/HexCell";
+import { getCenterPoint, HexCell, isUnderwater } from "../../lib/HexCell";
 import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
 import { HexMesh } from "../../lib/HexMesh";
 import { getCell, HexGrid } from "../../lib/HexGrid";

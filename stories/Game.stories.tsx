@@ -12,6 +12,8 @@ import hexGrid from "@/../public/hexgrid.json";
 import { CornerPosition } from "@/lib/coordinates/types";
 import { createPowerPole } from "@/lib/buildables/PowerPole";
 import { clientStore } from "@/lib/clientState";
+import { AuthContext } from "@/auth.context";
+import { AuthClient } from "@open-game-collective/auth-kit/client";
 
 const meta: Meta<typeof Game> = {
   component: Game,
@@ -31,6 +33,23 @@ type Story = StoryObj<typeof Game>;
 
 const PLAYER_ID = "fake-player-id";
 
+const mockAuthClient: AuthClient = {
+  getState: () => ({
+    isLoading: false,
+    host: "localhost:8787",
+    userId: PLAYER_ID,
+    sessionToken: "fake-session-token",
+    refreshToken: "fake-refresh-token",
+    isVerified: true,
+    error: undefined,
+  }),
+  subscribe: () => () => {},
+  requestCode: () => Promise.resolve(),
+  verifyEmail: () => Promise.resolve({ success: true }),
+  logout: () => Promise.resolve(),
+  refresh: () => Promise.resolve(),
+} as any as AuthClient;
+
 export const Blank: Story = {
   play: async ({ canvasElement, mount }) => {
     const client = createActorKitMockClient<GameMachine>({
@@ -42,10 +61,11 @@ export const Blank: Story = {
               name: "Player 1",
               money: 10,
               powerSoldKWh: 0,
+              isHost: true,
             },
           },
           time: {
-            totalTicks: 0,
+            totalTicks: 18,
             isPaused: false,
           },
           buildables: [],
@@ -61,9 +81,11 @@ export const Blank: Story = {
     });
 
     await mount(
-      <GameContext.ProviderFromClient client={client}>
-        <Game />
-      </GameContext.ProviderFromClient>
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
     );
   },
 };
@@ -79,6 +101,7 @@ export const WithPowerLines: Story = {
               name: "Player 1",
               money: 10,
               powerSoldKWh: 0,
+              isHost: true,
             },
           },
           time: {
@@ -133,9 +156,11 @@ export const WithPowerLines: Story = {
     clientStore.send({ type: "setIsDebug", isDebug: true });
 
     await mount(
-      <GameContext.ProviderFromClient client={client}>
-        <Game />
-      </GameContext.ProviderFromClient>
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
     );
   },
 };

@@ -70,7 +70,7 @@ export const HighlightedHexCells: React.FC<HighlightedHexCellsProps> = ({
   });
 
   return (
-    <animated.mesh geometry={highlightGeometry} raycast={null}>
+    <animated.mesh geometry={highlightGeometry} raycast={undefined}>
       <animated.meshBasicMaterial
         vertexColors
         transparent

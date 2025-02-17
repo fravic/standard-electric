@@ -18,16 +18,8 @@ export function isNightTime(totalTicks: number): boolean {
 }
 
 /**
- * Returns true if it's sunset time (between SUNSET_START_HOUR and NIGHT_START_HOUR)
- */
-export function isSunsetTime(totalTicks: number): boolean {
-  const currentHour = totalTicks % HOURS_PER_DAY;
-  return currentHour >= SUNSET_START_HOUR && currentHour < NIGHT_START_HOUR;
-}
-
-/**
  * Returns true if it's day time (between SUNRISE_HOUR and SUNSET_START_HOUR)
  */
 export function isDayTime(totalTicks: number): boolean {
-  return !isNightTime(totalTicks) && !isSunsetTime(totalTicks);
+  return !isNightTime(totalTicks);
 }

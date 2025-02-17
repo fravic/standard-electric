@@ -235,8 +235,8 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       {highlightedCells.length > 0 && (
         <HighlightedHexCells
           cells={highlightedCells}
-          color={[1, 1, 0.9]} // Very subtle yellow tint
-          opacity={0.05}
+          color={[1, 1, 1]}
+          opacity={0.02}
           height={0.05}
         />
       )}
