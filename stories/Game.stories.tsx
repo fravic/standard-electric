@@ -65,7 +65,7 @@ export const Blank: Story = {
             },
           },
           time: {
-            totalTicks: 18,
+            totalTicks: 0,
             isPaused: false,
           },
           buildables: [],

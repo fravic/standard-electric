@@ -1,4 +1,4 @@
-import { HOURS_PER_DAY } from "./constants";
+import { BUSINESS_DAY_START, HOURS_PER_DAY } from "./constants";
 
 export const SUNRISE_HOUR = 6; // 6 AM
 export const NOON_HOUR = 12; // 12 PM
@@ -13,7 +13,7 @@ export const NIGHT_START_HOUR = 22; // 10 PM - fully dark
  * Returns true if it's night time (after NIGHT_START_HOUR or before SUNRISE_HOUR)
  */
 export function isNightTime(totalTicks: number): boolean {
-  const currentHour = totalTicks % HOURS_PER_DAY;
+  const currentHour = ticksToHour(totalTicks);
   return currentHour >= NIGHT_START_HOUR || currentHour < SUNRISE_HOUR;
 }
 
@@ -22,4 +22,12 @@ export function isNightTime(totalTicks: number): boolean {
  */
 export function isDayTime(totalTicks: number): boolean {
   return !isNightTime(totalTicks);
+}
+
+/**
+ * Converts ticks to hour of day
+ */
+export function ticksToHour(totalTicks: number): number {
+  // Events and the start of the game occur at the start of the business day
+  return (totalTicks + BUSINESS_DAY_START) % HOURS_PER_DAY;
 }

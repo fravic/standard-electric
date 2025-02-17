@@ -2,6 +2,7 @@ import { useSpring, animated } from "@react-spring/three";
 import { GameContext } from "@/actor/game.context";
 import { HOURS_PER_DAY, MILLISECONDS_PER_IN_GAME_HOUR } from "@/lib/constants";
 import { useEffect } from "react";
+import { ticksToHour } from "@/lib/time";
 
 // Lighting waypoints for different times of day
 const WAYPOINTS = [
@@ -54,7 +55,7 @@ function getWaypoint(hour: number) {
 
 export function Lighting() {
   const { totalTicks } = GameContext.useSelector((state) => state.public.time);
-  const hour = totalTicks % HOURS_PER_DAY;
+  const hour = ticksToHour(totalTicks);
 
   const waypoint = getWaypoint(hour);
 
