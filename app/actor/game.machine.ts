@@ -36,6 +36,16 @@ export const gameMachine = setup({
               money: 100,
               powerSoldKWh: 0,
               isHost: Object.keys(draft.players).length === 0,
+              blueprintsById: {
+                // Temporary
+                coal_plant_small: {
+                  id: "coal_plant_small",
+                  type: "coal_plant",
+                  name: "Small Coal Plant",
+                  powerGenerationKW: 1000,
+                  startingPrice: 10,
+                },
+              },
             };
           }
         }),
@@ -83,7 +93,6 @@ export const gameMachine = setup({
             // Deduct cost and create buildable
             draft.players[event.caller.id].money -= cost;
             const buildable = createBuildable({
-              id: nanoid(),
               buildable: event.buildable,
               playerId: event.caller.id,
               context: context,

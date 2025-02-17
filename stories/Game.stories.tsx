@@ -62,6 +62,15 @@ export const Blank: Story = {
               money: 10,
               powerSoldKWh: 0,
               isHost: true,
+              blueprintsById: {
+                coal_plant_small: {
+                  id: "coal_plant_small",
+                  type: "coal_plant",
+                  name: "Small Coal Plant",
+                  powerGenerationKW: 1000,
+                  startingPrice: 10,
+                },
+              },
             },
           },
           time: {
@@ -102,6 +111,7 @@ export const WithPowerLines: Story = {
               money: 10,
               powerSoldKWh: 0,
               isHost: true,
+              blueprintsById: {},
             },
           },
           time: {

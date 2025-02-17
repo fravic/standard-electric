@@ -7,9 +7,6 @@ import {
 import { CornerPosition } from "../../coordinates/types";
 import { Population, TerrainType, HexCell } from "../../HexCell";
 import { createPowerPole } from "../../buildables/PowerPole";
-import { createCoalPlant } from "../../buildables/CoalPlant";
-import { BuildableType } from "../../buildables/schemas";
-import { createBuildable } from "../../buildables/Buildable";
 
 // Helper function to create a power pole at a corner
 const createPowerPoleAtCorner = (
@@ -32,14 +29,15 @@ const createPowerPlantAtHex = (
   powerGenerationKW: number = 100,
   pricePerKwh: number = 0.1
 ) => {
-  return createCoalPlant({
+  return {
     id: `plant-${coordinates.x}-${coordinates.z}`,
+    type: "coal_plant" as const,
     coordinates,
     playerId,
     isGhost: false,
     powerGenerationKW,
     pricePerKwh,
-  });
+  };
 };
 
 describe("PowerSystem", () => {

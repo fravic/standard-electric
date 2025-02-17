@@ -1,6 +1,6 @@
-import { BuildableType } from "./schemas";
+import { Buildable } from "./schemas";
 
-export const BUILDABLE_COSTS: Record<BuildableType, number> = {
+export const BUILDABLE_COSTS: Record<Buildable["type"], number> = {
   power_pole: 1,
-  coal_plant: 10,
+  coal_plant: 0,
 };

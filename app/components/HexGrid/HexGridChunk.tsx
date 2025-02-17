@@ -14,7 +14,6 @@ import {
   createPowerPole,
   findPossibleConnectionsForCoordinates,
 } from "@/lib/buildables/PowerPole";
-import { createCoalPlant } from "@/lib/buildables/CoalPlant";
 import {
   createHexCoordinates,
   equals,
@@ -25,9 +24,10 @@ import {
 import { Buildable } from "../Buildable";
 import { PowerLines } from "../PowerSystem/PowerLines";
 import { HexMetrics } from "@/lib/HexMetrics";
-import { clientStore } from "@/lib/clientState";
+import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
+import { isPowerPlantType } from "@/lib/buildables/PowerPlant";
 
 interface HexGridChunkProps {
   chunk: {
@@ -49,6 +49,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   debug = false,
 }: HexGridChunkProps) {
   const userId = AuthContext.useSelector((state) => state.userId);
+  const player = GameContext.useSelector(
+    (state) => state.public.players[userId!]
+  );
 
   const buildMode = useSelector(
     clientStore,
@@ -82,7 +85,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   }, [chunk]);
 
   const ghostBuildable = useMemo(() => {
-    if (!hoverLocation || !buildMode) return null;
+    if (!hoverLocation || !buildMode || !player) return null;
 
     const point = new THREE.Vector3(
       hoverLocation.worldPoint[0],
@@ -108,20 +111,33 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         });
         return ghostPole;
       }
-    } else if (buildMode.type === "coal_plant") {
+    }
+
+    if (buildMode && isPowerPlantBuildMode(buildMode)) {
       const coords = fromWorldPoint([point.x, point.y, point.z]);
-      if (validCoordinates.some((c) => equals(c, coords))) {
-        return createCoalPlant({
-          id: "ghost",
-          coordinates: coords,
-          playerId: userId!,
-          isGhost: true,
-          pricePerKwh: 0.1,
-        });
+      const isValidCoord = validCoordinates.some((c) => equals(c, coords));
+
+      if (isValidCoord) {
+        const blueprint = player.blueprintsById[buildMode.blueprintId];
+        if (blueprint) {
+          return {
+            id: "ghost",
+            type: "coal_plant" as const,
+            coordinates: coords,
+            playerId: userId!,
+            isGhost: true,
+            name: blueprint.name,
+            powerGenerationKW: blueprint.powerGenerationKW,
+            pricePerKwh: 0.1,
+            startingPrice: blueprint.startingPrice,
+            requiredState: blueprint.requiredState,
+          };
+        }
       }
     }
+
     return null;
-  }, [buildMode, validCoordinates, buildables, hoverLocation]);
+  }, [buildMode, validCoordinates, buildables, hoverLocation, player, userId]);
 
   const handleHover = useCallback(
     (event: ThreeEvent<PointerEvent>) => {

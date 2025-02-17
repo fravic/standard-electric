@@ -1,0 +1,42 @@
+{
+  "blueprints": [
+    {
+      "id": "coal_plant_small",
+      "type": "coal_plant",
+      "name": "Small Coal Plant",
+      "powerGenerationKW": 1000,
+      "startingPrice": 10
+    },
+    {
+      "id": "coal_plant_medium",
+      "type": "coal_plant",
+      "name": "Medium Coal Plant",
+      "powerGenerationKW": 2000,
+      "startingPrice": 18,
+      "requiredState": "California"
+    },
+    {
+      "id": "coal_plant_large",
+      "type": "coal_plant",
+      "name": "Large Coal Plant",
+      "powerGenerationKW": 3000,
+      "startingPrice": 25,
+      "requiredState": "Texas"
+    },
+    {
+      "id": "coal_plant_xl",
+      "type": "coal_plant",
+      "name": "Extra Large Coal Plant",
+      "powerGenerationKW": 4000,
+      "startingPrice": 35
+    },
+    {
+      "id": "coal_plant_mega",
+      "type": "coal_plant",
+      "name": "Mega Coal Plant",
+      "powerGenerationKW": 5000,
+      "startingPrice": 45,
+      "requiredState": "Wyoming"
+    }
+  ]
+}

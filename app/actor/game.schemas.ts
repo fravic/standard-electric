@@ -17,6 +17,7 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
       type: true,
       coordinates: true,
       cornerCoordinates: true,
+      id: true,
     }),
   }),
   z.object({

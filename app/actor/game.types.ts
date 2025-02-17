@@ -6,7 +6,7 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { Buildable } from "../lib/buildables/Buildable";
+import { Buildable, PowerPlantBlueprint } from "../lib/buildables/schemas";
 import { HexGrid } from "../lib/HexGrid";
 import {
   GameClientEventSchema,
@@ -20,6 +20,7 @@ export interface Player {
   money: number;
   powerSoldKWh: number;
   isHost: boolean;
+  blueprintsById: Record<string, PowerPlantBlueprint>;
 }
 
 interface GamePublicContext {

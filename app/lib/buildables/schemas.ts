@@ -7,26 +7,38 @@ import {
 export const BuildableSchema = z.object({
   id: z.string(),
   type: z.union([z.literal("power_pole"), z.literal("coal_plant")]),
-  playerId: z.string(),
   isGhost: z.boolean().optional(),
-  powerGenerationKW: z.number().optional(),
-  pricePerKwh: z.number().optional(),
   coordinates: HexCoordinatesSchema.optional(),
   cornerCoordinates: CornerCoordinatesSchema.optional(),
 });
 
-export type BuildableType = "power_pole" | "coal_plant";
-export type Buildable = z.infer<typeof BuildableSchema>;
-
 export const PowerPoleSchema = BuildableSchema.extend({
   type: z.literal("power_pole"),
+  playerId: z.string(),
   cornerCoordinates: CornerCoordinatesSchema,
   connectedToIds: z.array(z.string()),
 });
 
-export const CoalPlantSchema = BuildableSchema.extend({
+export const PowerPlantBlueprintSchema = BuildableSchema.extend({
   type: z.literal("coal_plant"),
-  coordinates: HexCoordinatesSchema,
+  name: z.string(),
   powerGenerationKW: z.number(),
+  startingPrice: z.number(),
+  requiredState: z.string().optional(),
+});
+
+export const PowerPlantSchema = PowerPlantBlueprintSchema.extend({
+  coordinates: HexCoordinatesSchema,
+  playerId: z.string(),
+  isGhost: z.boolean().optional(),
   pricePerKwh: z.number(),
 });
+
+export const CoalPlantSchema = PowerPlantSchema.extend({});
+
+export type PowerPole = z.infer<typeof PowerPoleSchema>;
+export type PowerPlantBlueprint = z.infer<typeof PowerPlantBlueprintSchema>;
+export type PowerPlant = z.infer<typeof PowerPlantSchema>;
+export type CoalPlant = z.infer<typeof CoalPlantSchema>;
+export type Buildable = z.infer<typeof BuildableSchema>;
+export type PowerPlantType = PowerPlant["type"];

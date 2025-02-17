@@ -6,7 +6,8 @@ import { GameContext } from "@/actor/game.context";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { CornerCoordinates } from "@/lib/coordinates/CornerCoordinates";
 import { clientStore } from "@/lib/clientState";
-
+import { nanoid } from "nanoid";
+import { isPowerPlantType } from "@/lib/buildables/PowerPlant";
 interface HexGridProps {}
 
 export function HexGrid({}: HexGridProps) {
@@ -25,21 +26,23 @@ export function HexGrid({}: HexGridProps) {
     coordinates: HexCoordinates,
     nearestCorner: CornerCoordinates | null
   ) => {
-    if (buildMode?.type === "power_pole") {
+    if (buildMode && buildMode.type === "power_pole") {
       if (nearestCorner) {
         sendGameEvent({
           type: "ADD_BUILDABLE",
           buildable: {
+            id: nanoid(),
             type: "power_pole",
             cornerCoordinates: nearestCorner,
           },
         });
       }
-    } else if (buildMode?.type === "coal_plant") {
+    } else if (buildMode && isPowerPlantType(buildMode.type)) {
       sendGameEvent({
         type: "ADD_BUILDABLE",
         buildable: {
-          type: "coal_plant",
+          id: buildMode.blueprintId,
+          type: buildMode.type,
           coordinates,
         },
       });

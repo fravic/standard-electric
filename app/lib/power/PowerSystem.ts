@@ -6,7 +6,7 @@ import {
 import { HexCell, Population } from "../HexCell";
 import { Buildable } from "../buildables/schemas";
 import { isPowerPole, PowerPole } from "../buildables/PowerPole";
-import { CoalPlant, isCoalPlant } from "../buildables/CoalPlant";
+import { isPowerPlant } from "../buildables/PowerPlant";
 import { HexGrid } from "../HexGrid";
 import {
   cornerToString,
@@ -76,7 +76,7 @@ export class PowerSystem {
 
   private initializePowerSystem() {
     // Initialize power plants from coal plants
-    this.powerPlants = this.buildables.filter(isCoalPlant).map((plant) => ({
+    this.powerPlants = this.buildables.filter(isPowerPlant).map((plant) => ({
       id: plant.id,
       playerId: plant.playerId,
       pricePerKwh: plant.pricePerKwh,
