@@ -8,6 +8,7 @@ import { UI_COLORS } from "@/lib/palette";
 import { isDayTime } from "@/lib/time";
 import { PlayerBar } from "./PlayerBar";
 import { BuildBar } from "./BuildBar";
+import { Lobby } from "./Lobby";
 
 const styles = {
   playersContainer: {
@@ -37,6 +38,7 @@ export const GameUI: React.FC = () => {
   const userId = AuthContext.useSelector((state) => state.userId);
   const { players, time } = GameContext.useSelector((state) => state.public);
   const currentPlayer = userId ? players[userId] : undefined;
+  const gameState = GameContext.useSelector((state) => state.value);
   const { totalTicks } = time;
   const timeEmoji = isDayTime(totalTicks) ? "☀️" : "🌙";
   const dayNumber = Math.floor(totalTicks / HOURS_PER_DAY) + 1;
@@ -48,6 +50,8 @@ export const GameUI: React.FC = () => {
     return p1.name.localeCompare(p2.name);
   });
 
+  const isInLobby = gameState === "lobby";
+
   return (
     <>
       <div style={styles.playersContainer}>
@@ -58,13 +62,18 @@ export const GameUI: React.FC = () => {
             isCurrentPlayer={playerId === userId}
           />
         ))}
-        {currentPlayer && <BuildBar player={currentPlayer} />}
+        {!isInLobby && currentPlayer && <BuildBar player={currentPlayer} />}
       </div>
-      <div style={styles.timeContainer}>
-        Day {dayNumber} {timeEmoji}
-      </div>
-      <TerrainPaintUI />
-      <HexDetailsUI />
+      {!isInLobby && (
+        <>
+          <div style={styles.timeContainer}>
+            Day {dayNumber} {timeEmoji}
+          </div>
+          <TerrainPaintUI />
+          <HexDetailsUI />
+        </>
+      )}
+      {isInLobby && <Lobby players={players} />}
     </>
   );
 };

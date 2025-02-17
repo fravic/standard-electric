@@ -20,16 +20,27 @@ export const gameMachine = setup({
   actors: {
     gameTimer: gameTimerActor,
   },
+  guards: {
+    isHost: ({ context, event }) => {
+      const playerId = event.caller.id;
+      return context.public.players[playerId]?.isHost === true;
+    },
+  },
   actions: {
-    joinGame: assign(({ context, event }) => ({
-      public: produce(context.public, (draft) => {
-        draft.players[event.caller.id] = {
-          name: event.caller.id, // TODO: Add name to user object
-          money: 100,
-          powerSoldKWh: 0,
-        };
-      }),
-    })),
+    joinGame: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
+        public: produce(context.public, (draft) => {
+          if (event.type === "JOIN_GAME") {
+            draft.players[event.caller.id] = {
+              name: event.name,
+              money: 100,
+              powerSoldKWh: 0,
+              isHost: Object.keys(draft.players).length === 0,
+            };
+          }
+        }),
+      })
+    ),
     startGameTimer: spawnChild(gameTimerActor, { id: "gameTimer" } as any),
     stopGameTimer: stopChild("gameTimer"),
     gameTick: assign(({ context }) => ({
@@ -85,7 +96,7 @@ export const gameMachine = setup({
   },
 }).createMachine({
   id: "game",
-  initial: "active",
+  initial: "lobby",
   context: ({ input }: { input: GameInput }) => ({
     public: {
       id: input.id,
@@ -106,13 +117,21 @@ export const gameMachine = setup({
     private: {},
   }),
   states: {
-    active: {
-      entry: ["stopGameTimer", "startGameTimer"],
-      exit: ["stopGameTimer"],
+    lobby: {
       on: {
         JOIN_GAME: {
           actions: "joinGame",
         },
+        START_GAME: {
+          target: "active",
+          guard: "isHost",
+        },
+      },
+    },
+    active: {
+      entry: ["stopGameTimer", "startGameTimer"],
+      exit: ["stopGameTimer"],
+      on: {
         ADD_BUILDABLE: {
           actions: "addBuildable",
         },

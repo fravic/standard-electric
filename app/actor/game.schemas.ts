@@ -6,6 +6,10 @@ import { HexCoordinatesSchema } from "@/lib/coordinates/types";
 export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("JOIN_GAME"),
+    name: z.string(),
+  }),
+  z.object({
+    type: z.literal("START_GAME"),
   }),
   z.object({
     type: z.literal("ADD_BUILDABLE"),

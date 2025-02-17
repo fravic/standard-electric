@@ -19,6 +19,7 @@ export interface Player {
   name: string;
   money: number;
   powerSoldKWh: number;
+  isHost: boolean;
 }
 
 interface GamePublicContext {

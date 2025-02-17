@@ -5,6 +5,7 @@ import { clientStore } from "@/lib/clientState";
 import { GameContext } from "@/actor/game.context";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { UI_COLORS } from "@/lib/palette";
+import { TextInput } from "./TextInput";
 
 const styles = {
   container: {
@@ -200,25 +201,12 @@ export const TerrainPaintUI: React.FC = () => {
 
       <div style={styles.section}>
         <span style={styles.label}>City Name</span>
-        <input
-          type="text"
+        <TextInput
           value={currentCityName}
           onChange={handleCityNameChange}
-          onFocus={() =>
-            clientStore.send({
-              type: "setKeyboardControlsActive",
-              active: false,
-            })
-          }
-          onBlur={() =>
-            clientStore.send({
-              type: "setKeyboardControlsActive",
-              active: true,
-            })
-          }
-          style={styles.input}
           placeholder="Enter city name..."
           disabled={!selectedHexCoordinates}
+          style={{ fontSize: "12px", padding: "4px 8px" }}
         />
       </div>
 
