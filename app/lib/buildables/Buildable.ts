@@ -6,7 +6,7 @@ import {
   isPowerPole,
 } from "./PowerPole";
 import { createPowerPlant } from "./PowerPlant";
-import { BuildableSchema, Buildable } from "./schemas";
+import { BuildableSchema, Buildable, BuiltBuildable } from "./schemas";
 import { GameContext } from "@/actor/game.types";
 
 export { BuildableSchema };
@@ -72,4 +72,8 @@ export function getBuildableWorldPoint(
   throw new Error(
     `Invalid buildable type or missing coordinates: ${buildable.type}`
   );
+}
+
+export function isBuilt(buildable: Buildable): buildable is BuiltBuildable {
+  return "playerId" in buildable;
 }

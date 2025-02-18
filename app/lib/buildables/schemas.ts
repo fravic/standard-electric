@@ -34,11 +34,9 @@ export const PowerPlantSchema = PowerPlantBlueprintSchema.extend({
   pricePerKwh: z.number(),
 });
 
-export const CoalPlantSchema = PowerPlantSchema.extend({});
-
 export type PowerPole = z.infer<typeof PowerPoleSchema>;
 export type PowerPlantBlueprint = z.infer<typeof PowerPlantBlueprintSchema>;
 export type PowerPlant = z.infer<typeof PowerPlantSchema>;
-export type CoalPlant = z.infer<typeof CoalPlantSchema>;
 export type Buildable = z.infer<typeof BuildableSchema>;
 export type PowerPlantType = PowerPlant["type"];
+export type BuiltBuildable = PowerPole | PowerPlant;

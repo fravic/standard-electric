@@ -6,22 +6,14 @@ import { GameContext } from "@/actor/game.context";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { UI_COLORS } from "@/lib/palette";
 import { TextInput } from "./TextInput";
+import { Card } from "./Card";
 
 const styles = {
   container: {
     position: "fixed" as const,
-    top: "200px", // Position below HexDetailsUI
+    top: "200px",
     right: "10px",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    color: "white",
-    padding: "10px",
-    borderRadius: "5px",
-    fontFamily: "monospace",
-    fontSize: "14px",
     zIndex: 1000,
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "10px",
   },
   label: {
     fontWeight: "bold" as const,
@@ -88,10 +80,8 @@ export const TerrainPaintUI: React.FC = () => {
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const sendGameEvent = GameContext.useSend();
 
-  // Don't render if not in debug mode
   if (!isDebug) return null;
 
-  // Get the current cell's city name
   const currentCityName = selectedHexCoordinates
     ? hexGrid.cellsByHexCoordinates[coordinatesToString(selectedHexCoordinates)]
         ?.cityName || ""
@@ -124,95 +114,97 @@ export const TerrainPaintUI: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      <div style={styles.section}>
-        <div>
-          <span style={styles.label}>Paintbrush Mode</span>
-          <button
-            style={{
-              ...styles.button,
-              ...(isPaintbrushMode ? styles.activeButton : {}),
-              marginLeft: "8px",
-            }}
-            onClick={() =>
-              clientStore.send({
-                type: "setPaintbrushMode",
-                enabled: !isPaintbrushMode,
-              })
-            }
-          >
-            {isPaintbrushMode ? "On" : "Off"}
-          </button>
-        </div>
-      </div>
-
-      <div style={styles.section}>
-        <span style={styles.label}>Terrain Type</span>
-        <div style={styles.buttonGrid}>
-          {Object.values(TerrainType).map((terrainType) => (
+      <Card style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div style={styles.section}>
+          <div>
+            <span style={styles.label}>Paintbrush Mode</span>
             <button
-              key={terrainType}
               style={{
                 ...styles.button,
-                ...(selectedTerrainType === terrainType
-                  ? styles.activeButton
-                  : {}),
+                ...(isPaintbrushMode ? styles.activeButton : {}),
+                marginLeft: "8px",
               }}
               onClick={() =>
                 clientStore.send({
-                  type: "setSelectedTerrainType",
-                  terrainType:
-                    selectedTerrainType === terrainType ? null : terrainType,
+                  type: "setPaintbrushMode",
+                  enabled: !isPaintbrushMode,
                 })
               }
             >
-              {terrainType}
+              {isPaintbrushMode ? "On" : "Off"}
             </button>
-          ))}
+          </div>
         </div>
-      </div>
 
-      <div style={styles.section}>
-        <span style={styles.label}>Population</span>
-        <div style={styles.buttonGrid}>
-          {Object.values(Population)
-            .filter((value) => typeof value === "number")
-            .map((population) => (
+        <div style={styles.section}>
+          <span style={styles.label}>Terrain Type</span>
+          <div style={styles.buttonGrid}>
+            {Object.values(TerrainType).map((terrainType) => (
               <button
-                key={population}
+                key={terrainType}
                 style={{
                   ...styles.button,
-                  ...(selectedPopulation === population
+                  ...(selectedTerrainType === terrainType
                     ? styles.activeButton
                     : {}),
                 }}
                 onClick={() =>
                   clientStore.send({
-                    type: "setSelectedPopulation",
-                    population:
-                      selectedPopulation === population ? null : population,
+                    type: "setSelectedTerrainType",
+                    terrainType:
+                      selectedTerrainType === terrainType ? null : terrainType,
                   })
                 }
               >
-                {Population[population]}
+                {terrainType}
               </button>
             ))}
+          </div>
         </div>
-      </div>
 
-      <div style={styles.section}>
-        <span style={styles.label}>City Name</span>
-        <TextInput
-          value={currentCityName}
-          onChange={handleCityNameChange}
-          placeholder="Enter city name..."
-          disabled={!selectedHexCoordinates}
-          style={{ fontSize: "12px", padding: "4px 8px" }}
-        />
-      </div>
+        <div style={styles.section}>
+          <span style={styles.label}>Population</span>
+          <div style={styles.buttonGrid}>
+            {Object.values(Population)
+              .filter((value) => typeof value === "number")
+              .map((population) => (
+                <button
+                  key={population}
+                  style={{
+                    ...styles.button,
+                    ...(selectedPopulation === population
+                      ? styles.activeButton
+                      : {}),
+                  }}
+                  onClick={() =>
+                    clientStore.send({
+                      type: "setSelectedPopulation",
+                      population:
+                        selectedPopulation === population ? null : population,
+                    })
+                  }
+                >
+                  {Population[population]}
+                </button>
+              ))}
+          </div>
+        </div>
 
-      <button style={styles.exportButton} onClick={handleExport}>
-        Export Map
-      </button>
+        <div style={styles.section}>
+          <span style={styles.label}>City Name</span>
+          <TextInput
+            value={currentCityName}
+            onChange={handleCityNameChange}
+            placeholder="Enter city name..."
+            disabled={!selectedHexCoordinates}
+            style={{ fontSize: "12px", padding: "4px 8px" }}
+          />
+        </div>
+
+        <button style={styles.exportButton} onClick={handleExport}>
+          Export Map
+        </button>
+      </Card>
     </div>
   );
 };

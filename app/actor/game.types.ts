@@ -17,10 +17,30 @@ import { Env } from "../env";
 
 export interface Player {
   name: string;
+  number: number;
   money: number;
   powerSoldKWh: number;
   isHost: boolean;
   blueprintsById: Record<string, PowerPlantBlueprint>;
+}
+
+export interface Auction {
+  availableBlueprints: PowerPlantBlueprint[];
+  currentBlueprint: null | {
+    blueprint: PowerPlantBlueprint;
+    bids: {
+      playerId: string;
+      amount?: number;
+      passed?: boolean;
+    }[];
+  };
+  purchases: {
+    playerId: string;
+    blueprintId: string;
+    price: number;
+  }[];
+  isPassingAllowed: boolean;
+  passedPlayerIds: string[];
 }
 
 interface GamePublicContext {
@@ -34,6 +54,8 @@ interface GamePublicContext {
   };
   buildables: Buildable[];
   hexGrid: HexGrid;
+  auction: Auction | null;
+  randomSeed: number;
 }
 
 export type GamePrivateContext = {};

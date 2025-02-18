@@ -1,0 +1,104 @@
+import React from "react";
+import { UI_COLORS } from "@/lib/palette";
+import { Player, Auction } from "@/actor/game.types";
+import { getBidderPriorityOrder, getCurrentBidderId } from "@/lib/auction";
+
+interface AuctionBidderProps {
+  players: Record<string, Player>;
+  auction: Auction;
+  totalTicks: number;
+  randomSeed: number;
+}
+
+export function AuctionBidder({
+  players,
+  auction,
+  totalTicks,
+  randomSeed,
+}: AuctionBidderProps) {
+  const bidderOrder = getBidderPriorityOrder(
+    players,
+    auction,
+    totalTicks,
+    randomSeed
+  );
+
+  // Ensure these arrays exist with defaults
+  const passedPlayerIds = auction.passedPlayerIds ?? [];
+  const purchases = auction.purchases ?? [];
+  const currentBidderId = getCurrentBidderId(
+    players,
+    auction,
+    totalTicks,
+    randomSeed
+  );
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.5rem",
+        marginBottom: "1rem",
+      }}
+    >
+      <h3
+        style={{
+          color: UI_COLORS.TEXT_LIGHT,
+          marginTop: 0,
+          marginBottom: "0.5rem",
+        }}
+      >
+        Bidding Order
+      </h3>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+        }}
+      >
+        {bidderOrder.map((playerId) => {
+          const player = players[playerId];
+          const hasPassed = passedPlayerIds.includes(playerId);
+          const purchase = purchases.find((p) => p.playerId === playerId);
+          const isInactive = hasPassed || purchase;
+          const isCurrentBidder = playerId === currentBidderId;
+
+          return (
+            <div
+              key={playerId}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                opacity: isInactive ? 0.5 : 1,
+                color: UI_COLORS.TEXT_LIGHT,
+                padding: "0.5rem",
+                backgroundColor: isCurrentBidder
+                  ? UI_COLORS.PRIMARY_DARK
+                  : "transparent",
+                borderRadius: "4px",
+              }}
+            >
+              {isCurrentBidder && (
+                <span style={{ marginRight: "0.5rem" }}>➜</span>
+              )}
+              <span>{player.name}</span>
+              <span style={{ marginLeft: "auto", fontSize: "0.9em" }}>
+                {hasPassed
+                  ? "(Passed)"
+                  : purchase
+                  ? `(Bought ${
+                      players[playerId].blueprintsById[purchase.blueprintId]
+                        ?.name ?? "Unknown Plant"
+                    })`
+                  : ""}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

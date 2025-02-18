@@ -4,77 +4,7 @@ import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
 import { useSelector } from "@xstate/store/react";
 import { Player } from "@/actor/game.types";
-
-interface BuildButtonProps {
-  onClick: () => void;
-  disabled?: boolean;
-  isActive?: boolean;
-  name: string;
-  price?: number;
-  details?: {
-    powerGenerationKW?: number;
-    requiredState?: string;
-  };
-}
-
-const BuildButton: React.FC<BuildButtonProps> = ({
-  onClick,
-  disabled,
-  isActive,
-  name,
-  price,
-  details,
-}) => {
-  return (
-    <button
-      style={{
-        backgroundColor: UI_COLORS.PRIMARY,
-        border: "none",
-        color: UI_COLORS.TEXT_LIGHT,
-        padding: "8px 16px",
-        textAlign: "center",
-        textDecoration: "none",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-        fontSize: "14px",
-        cursor: disabled ? "not-allowed" : "pointer",
-        borderRadius: "4px",
-        transition: "background-color 0.3s",
-        ...(isActive && {
-          backgroundColor: UI_COLORS.PRIMARY_DARK,
-          color: UI_COLORS.TEXT_LIGHT,
-        }),
-        ...(disabled && {
-          backgroundColor: UI_COLORS.PRIMARY_DARK,
-          color: UI_COLORS.TEXT_DARK,
-          opacity: 0.7,
-        }),
-      }}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: "2px",
-        }}
-      >
-        <div>{name}</div>
-        {details && (
-          <div style={{ fontSize: "12px", opacity: 0.8 }}>
-            {details.powerGenerationKW && `${details.powerGenerationKW}kW`}
-            {details.requiredState && ` • ${details.requiredState}`}
-          </div>
-        )}
-      </div>
-      {isActive ? "Cancel" : price ? `Place ($${price})` : "Place"}
-    </button>
-  );
-};
+import { BuildButton } from "./BuildButton";
 
 interface BuildBarProps {
   player: Player;
@@ -101,6 +31,7 @@ export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
       });
     }
   };
+
   const handlePowerPoleClick = () => {
     if (buildMode?.type === "power_pole") {
       clientStore.send({ type: "setBuildMode", mode: null });

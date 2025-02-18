@@ -9,6 +9,7 @@ import { isDayTime } from "@/lib/time";
 import { PlayerBar } from "./PlayerBar";
 import { BuildBar } from "./BuildBar";
 import { Lobby } from "./Lobby";
+import { PowerPlantAuction } from "./PowerPlantAuction";
 
 const styles = {
   playersContainer: {
@@ -52,6 +53,8 @@ export const GameUI: React.FC = () => {
 
   const isInLobby = gameState === "lobby";
 
+  if (!currentPlayer) return null;
+
   return (
     <>
       <div style={styles.playersContainer}>
@@ -62,7 +65,7 @@ export const GameUI: React.FC = () => {
             isCurrentPlayer={playerId === userId}
           />
         ))}
-        {!isInLobby && currentPlayer && <BuildBar player={currentPlayer} />}
+        {!isInLobby && <BuildBar player={currentPlayer} />}
       </div>
       {!isInLobby && (
         <>
@@ -73,6 +76,7 @@ export const GameUI: React.FC = () => {
           <HexDetailsUI />
         </>
       )}
+      {gameState === "auction" && <PowerPlantAuction />}
       {isInLobby && <Lobby players={players} />}
     </>
   );

@@ -59,6 +59,7 @@ export const Blank: Story = {
           players: {
             [PLAYER_ID]: {
               name: "Player 1",
+              number: 1,
               money: 10,
               powerSoldKWh: 0,
               isHost: true,
@@ -77,8 +78,10 @@ export const Blank: Story = {
             totalTicks: 0,
             isPaused: false,
           },
+          auction: null,
           buildables: [],
           hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
         },
         private: {},
         value: "active",
@@ -108,6 +111,7 @@ export const WithPowerLines: Story = {
           players: {
             [PLAYER_ID]: {
               name: "Player 1",
+              number: 1,
               money: 10,
               powerSoldKWh: 0,
               isHost: true,
@@ -118,6 +122,7 @@ export const WithPowerLines: Story = {
             totalTicks: 10,
             isPaused: false,
           },
+          auction: null,
           buildables: [
             createPowerPole({
               id: "power-pole-1",
@@ -157,6 +162,7 @@ export const WithPowerLines: Story = {
             }),
           ],
           hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
         },
         private: {},
         value: "active",
@@ -164,6 +170,187 @@ export const WithPowerLines: Story = {
     });
 
     clientStore.send({ type: "setIsDebug", isDebug: true });
+
+    await mount(
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
+    );
+  },
+};
+
+export const Auction: Story = {
+  play: async ({ canvasElement, mount }) => {
+    const client = createActorKitMockClient<GameMachine>({
+      initialSnapshot: {
+        public: {
+          id: "game-123",
+          players: {
+            [PLAYER_ID]: {
+              name: "Player 1",
+              number: 1,
+              money: 100,
+              powerSoldKWh: 0,
+              isHost: true,
+              blueprintsById: {},
+            },
+          },
+          time: {
+            totalTicks: 0,
+            isPaused: false,
+          },
+          buildables: [],
+          hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
+          auction: {
+            availableBlueprints: [
+              {
+                id: "coal_plant_small",
+                type: "coal_plant",
+                name: "Small Coal Plant",
+                powerGenerationKW: 1000,
+                startingPrice: 10,
+              },
+              {
+                id: "coal_plant_medium",
+                type: "coal_plant",
+                name: "Medium Coal Plant",
+                powerGenerationKW: 2000,
+                startingPrice: 18,
+                requiredState: "California",
+              },
+              {
+                id: "coal_plant_large",
+                type: "coal_plant",
+                name: "Large Coal Plant",
+                powerGenerationKW: 3000,
+                startingPrice: 25,
+                requiredState: "Texas",
+              },
+            ],
+            currentBlueprint: null,
+            purchases: [],
+            passedPlayerIds: [],
+            isPassingAllowed: true,
+          },
+        },
+        private: {},
+        value: "auction",
+      },
+    });
+
+    client.subscribe((snapshot) => {
+      action("game-state-change")(snapshot);
+    });
+
+    clientStore.send({ type: "setIsDebug", isDebug: false });
+
+    await mount(
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
+    );
+  },
+};
+
+export const AuctionWithCurrentBlueprint: Story = {
+  play: async ({ canvasElement, mount }) => {
+    const client = createActorKitMockClient<GameMachine>({
+      initialSnapshot: {
+        public: {
+          id: "game-123",
+          players: {
+            [PLAYER_ID]: {
+              name: "Player 1",
+              number: 1,
+              money: 100,
+              powerSoldKWh: 0,
+              isHost: true,
+              blueprintsById: {},
+            },
+            "player-2": {
+              name: "Player 2",
+              number: 2,
+              money: 100,
+              powerSoldKWh: 1000,
+              isHost: false,
+              blueprintsById: {},
+            },
+            "player-3": {
+              name: "Player 3",
+              number: 3,
+              money: 100,
+              powerSoldKWh: 500,
+              isHost: false,
+              blueprintsById: {},
+            },
+          },
+          time: {
+            totalTicks: 0,
+            isPaused: false,
+          },
+          buildables: [],
+          hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
+          auction: {
+            availableBlueprints: [
+              {
+                id: "coal_plant_medium",
+                type: "coal_plant",
+                name: "Medium Coal Plant",
+                powerGenerationKW: 2000,
+                startingPrice: 18,
+                requiredState: "California",
+              },
+              {
+                id: "coal_plant_large",
+                type: "coal_plant",
+                name: "Large Coal Plant",
+                powerGenerationKW: 3000,
+                startingPrice: 25,
+                requiredState: "Texas",
+              },
+            ],
+            currentBlueprint: {
+              blueprint: {
+                id: "coal_plant_small",
+                type: "coal_plant",
+                name: "Small Coal Plant",
+                powerGenerationKW: 1000,
+                startingPrice: 10,
+              },
+              bids: [
+                {
+                  playerId: PLAYER_ID,
+                  amount: 10,
+                },
+                {
+                  playerId: "player-2",
+                  amount: 12,
+                },
+                {
+                  playerId: "player-3",
+                  passed: true,
+                },
+              ],
+            },
+            purchases: [],
+            passedPlayerIds: ["player-3"],
+            isPassingAllowed: true,
+          },
+        },
+        private: {},
+        value: "auction",
+      },
+    });
+
+    client.subscribe((snapshot) => {
+      action("game-state-change")(snapshot);
+    });
 
     await mount(
       <AuthContext.Provider client={mockAuthClient}>

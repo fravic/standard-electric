@@ -5,16 +5,12 @@ import { GameContext } from "@/actor/game.context";
 import * as HexGridService from "@/lib/HexGrid";
 import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
 import { clientStore } from "@/lib/clientState";
+import { Card } from "./Card";
+import { isBuilt } from "@/lib/buildables/Buildable";
 
 const styles = {
   container: {
     position: "fixed" as const,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    color: "white",
-    padding: "6px",
-    borderRadius: "4px",
-    fontFamily: "monospace",
-    fontSize: "12px",
     zIndex: 100,
     display: "flex",
     flexDirection: "column" as const,
@@ -51,9 +47,7 @@ export function HexDetailsUI() {
       setMousePos({ x: e.clientX + 15, y: e.clientY + 15 });
     };
 
-    // Check if mouse is over the map (canvas) or UI elements
     const handleMouseOver = (e: MouseEvent) => {
-      // Check if the target is the canvas (map) or its children
       const isCanvas = (e.target as HTMLElement)?.tagName === "CANVAS";
       setIsOverMap(isCanvas);
 
@@ -83,7 +77,6 @@ export function HexDetailsUI() {
     return null;
   }
 
-  // Find any power plants on this hex
   const powerPlant = buildables.find(
     (b) =>
       b.coordinates &&
@@ -98,32 +91,36 @@ export function HexDetailsUI() {
         top: `${mousePos.y}px`,
       }}
     >
-      <div>
-        <span style={styles.label}>
-          {cell.stateInfo?.name}{" "}
-          {HexCoordinatesService.coordinatesToString(hoveringHexCoordinates)}
-        </span>
-      </div>
-      <div>
-        <span style={styles.label}>Terrain: </span>
-        {cell.terrainType || TerrainType.Plains}
-      </div>
-      <div>
-        <span style={styles.label}>Population: </span>
-        {Population[cell.population] || "Unpopulated"}
-      </div>
-      {powerPlant && (
-        <div style={styles.section}>
-          <div>
-            <span style={styles.label}>Power Plant: </span>
-            {powerPlant.type === "coal_plant" ? "Coal Plant" : powerPlant.type}
-          </div>
-          <div>
-            <span style={styles.label}>Owner: </span>
-            {players[powerPlant.playerId]?.name || "Unknown"}
-          </div>
+      <Card variant="dark">
+        <div>
+          <span style={styles.label}>
+            {cell.stateInfo?.name}{" "}
+            {HexCoordinatesService.coordinatesToString(hoveringHexCoordinates)}
+          </span>
         </div>
-      )}
+        <div>
+          <span style={styles.label}>Terrain: </span>
+          {cell.terrainType || TerrainType.Plains}
+        </div>
+        <div>
+          <span style={styles.label}>Population: </span>
+          {Population[cell.population] || "Unpopulated"}
+        </div>
+        {powerPlant && isBuilt(powerPlant) && (
+          <div style={styles.section}>
+            <div>
+              <span style={styles.label}>Power Plant: </span>
+              {powerPlant.type === "coal_plant"
+                ? "Coal Plant"
+                : powerPlant.type}
+            </div>
+            <div>
+              <span style={styles.label}>Owner: </span>
+              {players[powerPlant.playerId]?.name || "Unknown"}
+            </div>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

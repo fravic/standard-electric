@@ -33,6 +33,7 @@ export const gameMachine = setup({
           if (event.type === "JOIN_GAME") {
             draft.players[event.caller.id] = {
               name: event.name,
+              number: Object.keys(draft.players).length + 1,
               money: 100,
               powerSoldKWh: 0,
               isHost: Object.keys(draft.players).length === 0,
@@ -102,6 +103,37 @@ export const gameMachine = setup({
         }),
       })
     ),
+
+    // Auctions
+    startAuction: assign(({ context }: { context: GameContext }) => ({
+      public: produce(context.public, (draft) => {
+        // Set up available blueprints
+      }),
+    })),
+    auctionPlaceBid: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
+        public: produce(context.public, (draft) => {
+          if (event.type === "AUCTION_PLACE_BID") {
+          }
+        }),
+      })
+    ),
+    auctionPassBid: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
+        public: produce(context.public, (draft) => {
+          if (event.type === "AUCTION_PASS_BID") {
+          }
+        }),
+      })
+    ),
+    auctionPass: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
+        public: produce(context.public, (draft) => {
+          if (event.type === "AUCTION_PASS") {
+          }
+        }),
+      })
+    ),
   },
 }).createMachine({
   id: "game",
@@ -122,6 +154,8 @@ export const gameMachine = setup({
       },
       buildables: [],
       hexGrid: HexGridSchema.parse(hexGridData),
+      auction: null,
+      randomSeed: Math.floor(Math.random() * 1000000),
     },
     private: {},
   }),
@@ -134,6 +168,20 @@ export const gameMachine = setup({
         START_GAME: {
           target: "active",
           guard: "isHost",
+        },
+      },
+    },
+    auction: {
+      entry: ["startAuction"],
+      on: {
+        AUCTION_PLACE_BID: {
+          actions: "auctionPlaceBid",
+        },
+        AUCTION_PASS_BID: {
+          actions: "auctionPassBid",
+        },
+        AUCTION_PASS: {
+          actions: "auctionPass",
         },
       },
     },
