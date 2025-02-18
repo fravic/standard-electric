@@ -2,6 +2,10 @@ import {
   getBidderPriorityOrder,
   getNextInitiatorPlayerId,
   getNextBidderPlayerId,
+  canPlayerAffordBid,
+  shouldEndBidding,
+  shouldEndAuction,
+  processBlueprintWinner,
 } from "../auction";
 import { Player, Auction } from "@/actor/game.types";
 
@@ -237,6 +241,152 @@ describe("auction", () => {
         123
       );
       expect(nextBidder).toBe("player1"); // cycles back to player1
+    });
+  });
+
+  describe("canPlayerAffordBid", () => {
+    it("should return true if player has enough money", () => {
+      const player = { ...mockPlayers.player1, money: 100 };
+      expect(canPlayerAffordBid(player, 50)).toBe(true);
+    });
+
+    it("should return false if player does not have enough money", () => {
+      const player = { ...mockPlayers.player1, money: 100 };
+      expect(canPlayerAffordBid(player, 150)).toBe(false);
+    });
+
+    it("should return true if bid amount equals player money", () => {
+      const player = { ...mockPlayers.player1, money: 100 };
+      expect(canPlayerAffordBid(player, 100)).toBe(true);
+    });
+  });
+
+  describe("shouldEndBidding", () => {
+    it("should return false when there is no current blueprint", () => {
+      expect(shouldEndBidding(mockPlayers, mockAuction)).toBe(false);
+    });
+
+    it("should return true when only one player has not passed", () => {
+      const auctionWithBids: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [
+            { playerId: "player1", amount: 10 },
+            { playerId: "player2", passed: true },
+            { playerId: "player3", passed: true },
+          ],
+        },
+      };
+      expect(shouldEndBidding(mockPlayers, auctionWithBids)).toBe(true);
+    });
+
+    it("should return false when multiple players have not passed", () => {
+      const auctionWithBids: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [
+            { playerId: "player1", amount: 10 },
+            { playerId: "player2", amount: 12 },
+            { playerId: "player3", passed: true },
+          ],
+        },
+      };
+      expect(shouldEndBidding(mockPlayers, auctionWithBids)).toBe(false);
+    });
+  });
+
+  describe("shouldEndAuction", () => {
+    it("should return false when there is no auction", () => {
+      expect(shouldEndAuction(mockPlayers, null as any)).toBe(false);
+    });
+
+    it("should return true when all players have either passed or purchased", () => {
+      const auctionComplete: Auction = {
+        ...mockAuction,
+        passedPlayerIds: ["player1", "player3"],
+        purchases: [{ playerId: "player2", blueprintId: "test", price: 10 }],
+      };
+      expect(shouldEndAuction(mockPlayers, auctionComplete)).toBe(true);
+    });
+
+    it("should return false when some players have not passed or purchased", () => {
+      const auctionIncomplete: Auction = {
+        ...mockAuction,
+        passedPlayerIds: ["player1"],
+        purchases: [{ playerId: "player2", blueprintId: "test", price: 10 }],
+      };
+      expect(shouldEndAuction(mockPlayers, auctionIncomplete)).toBe(false);
+    });
+  });
+
+  describe("processBlueprintWinner", () => {
+    it("should return null when there is no current blueprint", () => {
+      expect(processBlueprintWinner(mockPlayers, mockAuction)).toBeNull();
+    });
+
+    it("should return null when there are no valid bids", () => {
+      const auctionWithNoBids: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [
+            { playerId: "player1", passed: true },
+            { playerId: "player2", passed: true },
+          ],
+        },
+      };
+      expect(processBlueprintWinner(mockPlayers, auctionWithNoBids)).toBeNull();
+    });
+
+    it("should process winner correctly", () => {
+      const auctionWithBids: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [
+            { playerId: "player1", amount: 10 },
+            { playerId: "player2", amount: 15 },
+            { playerId: "player3", passed: true },
+          ],
+        },
+      };
+
+      const result = processBlueprintWinner(mockPlayers, auctionWithBids);
+      expect(result).not.toBeNull();
+      expect(result!.currentBlueprint).toBeNull();
+      expect(result!.purchases).toHaveLength(1);
+      expect(result!.purchases[0]).toEqual({
+        playerId: "player2",
+        blueprintId: "test",
+        price: 15,
+      });
+      expect(result!.availableBlueprints).toHaveLength(0);
     });
   });
 });

@@ -12,7 +12,14 @@ import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/lib/power/PowerSystem";
 import { PowerPlantBlueprintsSchema } from "@/lib/buildables/schemas";
-import { getNextInitiatorPlayerId, getNextBidderPlayerId } from "@/lib/auction";
+import {
+  getNextInitiatorPlayerId,
+  getNextBidderPlayerId,
+  canPlayerAffordBid,
+  shouldEndBidding,
+  shouldEndAuction,
+  processBlueprintWinner,
+} from "@/lib/auction";
 
 export const gameMachine = setup({
   types: {
@@ -63,49 +70,18 @@ export const gameMachine = setup({
           (b) => b.id === event.blueprintId
         );
         if (!blueprint) return false;
-        return player.money >= blueprint.startingPrice;
+        return canPlayerAffordBid(player, blueprint.startingPrice);
       }
       if (event.type === "AUCTION_PLACE_BID") {
-        return player.money >= event.amount;
+        return canPlayerAffordBid(player, event.amount);
       }
       return false;
     },
     shouldEndBidding: ({ context }) => {
-      if (!context.public.auction?.currentBlueprint) return false;
-
-      // Count how many players have not passed
-      const bids = context.public.auction.currentBlueprint.bids;
-      const activePlayers = new Set(
-        Object.keys(context.public.players).filter(
-          (playerId) =>
-            !context.public.auction!.purchases.some(
-              (p) => p.playerId === playerId
-            )
-        )
-      );
-
-      // Count passed players from bids
-      const passedPlayers = new Set(
-        bids.filter((bid) => bid.passed).map((bid) => bid.playerId)
-      );
-
-      // Only one player left bidding
-      return activePlayers.size - passedPlayers.size <= 1;
+      return shouldEndBidding(context.public.players, context.public.auction!);
     },
     shouldEndAuction: ({ context }) => {
-      if (!context.public.auction) return false;
-
-      const allPlayers = Object.keys(context.public.players);
-      const purchasedPlayers = new Set(
-        context.public.auction.purchases.map((p) => p.playerId)
-      );
-      const passedPlayers = new Set(context.public.auction.passedPlayerIds);
-
-      // All players must have either passed or purchased
-      return allPlayers.every(
-        (playerId) =>
-          purchasedPlayers.has(playerId) || passedPlayers.has(playerId)
-      );
+      return shouldEndAuction(context.public.players, context.public.auction!);
     },
   },
   actions: {
@@ -261,44 +237,21 @@ export const gameMachine = setup({
     ),
     endBidding: assign(({ context }) => ({
       public: produce(context.public, (draft) => {
-        if (!draft.auction?.currentBlueprint) return;
+        const newAuctionState = processBlueprintWinner(
+          context.public.players,
+          context.public.auction!
+        );
+        if (!newAuctionState) return;
 
-        // Find the winning bid (highest non-passed bid)
-        const winningBid = draft.auction.currentBlueprint.bids
-          .filter((bid) => !bid.passed && bid.amount !== undefined)
-          .reduce((highest, current) => {
-            if (!highest || (current.amount || 0) > (highest.amount || 0)) {
-              return current;
-            }
-            return highest;
-          }, null as { playerId: string; amount?: number } | null);
+        // Update player money and blueprints
+        const purchase =
+          newAuctionState.purchases[newAuctionState.purchases.length - 1];
+        draft.players[purchase.playerId].money -= purchase.price;
+        draft.players[purchase.playerId].blueprintsById[purchase.blueprintId] =
+          context.public.auction!.currentBlueprint!.blueprint;
 
-        if (winningBid && winningBid.amount) {
-          const blueprint = draft.auction.currentBlueprint.blueprint;
-
-          // Add blueprint to winner's collection
-          draft.players[winningBid.playerId].blueprintsById[blueprint.id] =
-            blueprint;
-
-          // Deduct money from winner
-          draft.players[winningBid.playerId].money -= winningBid.amount;
-
-          // Record the purchase
-          draft.auction.purchases.push({
-            playerId: winningBid.playerId,
-            blueprintId: blueprint.id,
-            price: winningBid.amount,
-          });
-
-          // Remove the blueprint from available blueprints
-          draft.auction.availableBlueprints =
-            draft.auction.availableBlueprints.filter(
-              (b) => b.id !== blueprint.id
-            );
-
-          // Clear current blueprint
-          draft.auction.currentBlueprint = null;
-        }
+        // Update auction state
+        draft.auction = newAuctionState;
       }),
     })),
   },
