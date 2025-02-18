@@ -55,4 +55,5 @@ export const UI_COLORS = {
   BACKGROUND: "rgba(0, 0, 0, 0.75)",
   TEXT_LIGHT: PALETTE.BASE_WHITE,
   TEXT_DARK: PALETTE.DARK_GREEN,
+  ERROR: "#FF4444",
 } as const;

@@ -49,7 +49,7 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     blueprintId: z.string(),
   }),
   z.object({
-    type: z.literal("PASS_BID"),
+    type: z.literal("PASS_AUCTION"),
   }),
   z.object({
     type: z.literal("AUCTION_PLACE_BID"),

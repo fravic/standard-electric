@@ -80,9 +80,11 @@ export function getNextBidderPlayerId(
     randomSeed
   );
 
-  // Filter out players who have already purchased
+  // Filter out players who have already purchased or passed the auction
   const eligibleBidders = bidderOrder.filter(
-    (playerId) => !auction.purchases.some((p) => p.playerId === playerId)
+    (playerId) =>
+      !auction.purchases.some((p) => p.playerId === playerId) &&
+      !auction.passedPlayerIds.includes(playerId)
   );
 
   if (eligibleBidders.length === 0) return null;

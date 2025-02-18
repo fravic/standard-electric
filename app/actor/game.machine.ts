@@ -70,6 +70,43 @@ export const gameMachine = setup({
       }
       return false;
     },
+    shouldEndBidding: ({ context }) => {
+      if (!context.public.auction?.currentBlueprint) return false;
+
+      // Count how many players have not passed
+      const bids = context.public.auction.currentBlueprint.bids;
+      const activePlayers = new Set(
+        Object.keys(context.public.players).filter(
+          (playerId) =>
+            !context.public.auction!.purchases.some(
+              (p) => p.playerId === playerId
+            )
+        )
+      );
+
+      // Count passed players from bids
+      const passedPlayers = new Set(
+        bids.filter((bid) => bid.passed).map((bid) => bid.playerId)
+      );
+
+      // Only one player left bidding
+      return activePlayers.size - passedPlayers.size <= 1;
+    },
+    shouldEndAuction: ({ context }) => {
+      if (!context.public.auction) return false;
+
+      const allPlayers = Object.keys(context.public.players);
+      const purchasedPlayers = new Set(
+        context.public.auction.purchases.map((p) => p.playerId)
+      );
+      const passedPlayers = new Set(context.public.auction.passedPlayerIds);
+
+      // All players must have either passed or purchased
+      return allPlayers.every(
+        (playerId) =>
+          purchasedPlayers.has(playerId) || passedPlayers.has(playerId)
+      );
+    },
   },
   actions: {
     joinGame: assign(
@@ -149,12 +186,14 @@ export const gameMachine = setup({
         );
         const availableBlueprints = Object.values(powerPlantBlueprints).slice(
           0,
-          3
+          // First auction has at least one blueprint per player
+          Math.max(Object.keys(context.public.players).length, 3)
         );
         draft.auction = {
           currentBlueprint: null,
           availableBlueprints,
           purchases: [],
+          // No passing allowed on the first auction
           isPassingAllowed: false,
           passedPlayerIds: [],
         };
@@ -185,7 +224,7 @@ export const gameMachine = setup({
     auctionPass: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
-          if (event.type === "AUCTION_PASS_BID" && draft.auction) {
+          if (event.type === "PASS_AUCTION" && draft.auction) {
             draft.auction.passedPlayerIds.push(event.caller.id);
           }
         }),
@@ -220,6 +259,48 @@ export const gameMachine = setup({
         }),
       })
     ),
+    endBidding: assign(({ context }) => ({
+      public: produce(context.public, (draft) => {
+        if (!draft.auction?.currentBlueprint) return;
+
+        // Find the winning bid (highest non-passed bid)
+        const winningBid = draft.auction.currentBlueprint.bids
+          .filter((bid) => !bid.passed && bid.amount !== undefined)
+          .reduce((highest, current) => {
+            if (!highest || (current.amount || 0) > (highest.amount || 0)) {
+              return current;
+            }
+            return highest;
+          }, null as { playerId: string; amount?: number } | null);
+
+        if (winningBid && winningBid.amount) {
+          const blueprint = draft.auction.currentBlueprint.blueprint;
+
+          // Add blueprint to winner's collection
+          draft.players[winningBid.playerId].blueprintsById[blueprint.id] =
+            blueprint;
+
+          // Deduct money from winner
+          draft.players[winningBid.playerId].money -= winningBid.amount;
+
+          // Record the purchase
+          draft.auction.purchases.push({
+            playerId: winningBid.playerId,
+            blueprintId: blueprint.id,
+            price: winningBid.amount,
+          });
+
+          // Remove the blueprint from available blueprints
+          draft.auction.availableBlueprints =
+            draft.auction.availableBlueprints.filter(
+              (b) => b.id !== blueprint.id
+            );
+
+          // Clear current blueprint
+          draft.auction.currentBlueprint = null;
+        }
+      }),
+    })),
   },
 }).createMachine({
   id: "game",
@@ -262,19 +343,34 @@ export const gameMachine = setup({
       initial: "initiatingBid",
       states: {
         initiatingBid: {
+          always: {
+            target: "#game.active",
+            guard: "shouldEndAuction",
+          },
           on: {
             INITIATE_BID: {
               actions: "auctionInitiateBid",
               target: "biddingOnBlueprint",
               guards: ["isCurrentInitiator", "canAffordBid"],
             },
-            PASS_BID: {
+            PASS_AUCTION: {
               actions: "auctionPass",
               guard: "isCurrentInitiator",
             },
           },
         },
         biddingOnBlueprint: {
+          always: [
+            {
+              target: "initiatingBid",
+              guard: "shouldEndBidding",
+              actions: "endBidding",
+            },
+            {
+              target: "#game.active",
+              guard: "shouldEndAuction",
+            },
+          ],
           on: {
             AUCTION_PLACE_BID: {
               actions: "auctionPlaceBid",

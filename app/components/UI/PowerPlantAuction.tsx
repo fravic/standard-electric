@@ -211,9 +211,9 @@ export function PowerPlantAuction() {
               <Button
                 fullWidth
                 style={{ marginTop: "1rem" }}
-                onClick={() => sendGameEvent({ type: "PASS_BID" })}
+                onClick={() => sendGameEvent({ type: "PASS_AUCTION" })}
               >
-                Pass
+                Pass Auction
               </Button>
             )}
         </div>
