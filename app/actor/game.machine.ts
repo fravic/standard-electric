@@ -20,6 +20,7 @@ import {
   shouldEndAuction,
   processBlueprintWinner,
 } from "@/lib/auction";
+import { isPowerPlant } from "@/lib/buildables/PowerPlant";
 
 export const gameMachine = setup({
   types: {
@@ -148,6 +149,13 @@ export const gameMachine = setup({
               context: context,
             });
             draft.buildables.push(buildable);
+
+            // If it's a power plant, remove the blueprint from the player's collection
+            if (isPowerPlant(event.buildable)) {
+              delete draft.players[event.caller.id].blueprintsById[
+                event.buildable.id
+              ];
+            }
           }
         }),
       })
