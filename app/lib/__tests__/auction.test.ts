@@ -1,4 +1,8 @@
-import { getBidderPriorityOrder, getCurrentBidderId } from "../auction";
+import {
+  getBidderPriorityOrder,
+  getNextInitiatorPlayerId,
+  getNextBidderPlayerId,
+} from "../auction";
 import { Player, Auction } from "@/actor/game.types";
 
 describe("auction", () => {
@@ -72,15 +76,15 @@ describe("auction", () => {
     });
   });
 
-  describe("getCurrentBidderId", () => {
+  describe("getNextInitiatorPlayerId", () => {
     it("should return first player when no one has passed or purchased", () => {
-      const currentBidder = getCurrentBidderId(
+      const nextBidder = getNextInitiatorPlayerId(
         mockPlayers,
         mockAuction,
         0,
         123
       );
-      expect(currentBidder).toBe("player1");
+      expect(nextBidder).toBe("player1");
     });
 
     it("should skip players who have passed", () => {
@@ -88,13 +92,13 @@ describe("auction", () => {
         ...mockAuction,
         passedPlayerIds: ["player1"],
       };
-      const currentBidder = getCurrentBidderId(
+      const nextBidder = getNextInitiatorPlayerId(
         mockPlayers,
         auctionWithPass,
         0,
         123
       );
-      expect(currentBidder).toBe("player3");
+      expect(nextBidder).toBe("player3");
     });
 
     it("should skip players who have purchased", () => {
@@ -102,13 +106,13 @@ describe("auction", () => {
         ...mockAuction,
         purchases: [{ playerId: "player1", blueprintId: "test", price: 10 }],
       };
-      const currentBidder = getCurrentBidderId(
+      const nextBidder = getNextInitiatorPlayerId(
         mockPlayers,
         auctionWithPurchase,
         0,
         123
       );
-      expect(currentBidder).toBe("player3");
+      expect(nextBidder).toBe("player3");
     });
 
     it("should return undefined when all players have passed or purchased", () => {
@@ -117,13 +121,122 @@ describe("auction", () => {
         passedPlayerIds: ["player1", "player3"],
         purchases: [{ playerId: "player2", blueprintId: "test", price: 10 }],
       };
-      const currentBidder = getCurrentBidderId(
+      const nextBidder = getNextInitiatorPlayerId(
         mockPlayers,
         auctionComplete,
         0,
         123
       );
-      expect(currentBidder).toBeUndefined();
+      expect(nextBidder).toBeUndefined();
+    });
+  });
+
+  describe("getNextBidderPlayerId", () => {
+    it("should return null when there is no current blueprint", () => {
+      const nextBidder = getNextBidderPlayerId(
+        mockPlayers,
+        mockAuction,
+        0,
+        123
+      );
+      expect(nextBidder).toBeNull();
+    });
+
+    it("should return first eligible player when there are no bids", () => {
+      const auctionWithBlueprint: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [],
+        },
+      };
+      const nextBidder = getNextBidderPlayerId(
+        mockPlayers,
+        auctionWithBlueprint,
+        0,
+        123
+      );
+      expect(nextBidder).toBe("player1");
+    });
+
+    it("should return next player after last bidder", () => {
+      const auctionWithBids: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [{ playerId: "player1", amount: 10 }],
+        },
+      };
+      const nextBidder = getNextBidderPlayerId(
+        mockPlayers,
+        auctionWithBids,
+        0,
+        123
+      );
+      expect(nextBidder).toBe("player3"); // player3 is next in priority order
+    });
+
+    it("should skip players who have purchased", () => {
+      const auctionWithPurchase: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [{ playerId: "player1", amount: 10 }],
+        },
+        purchases: [{ playerId: "player3", blueprintId: "other", price: 10 }],
+      };
+      const nextBidder = getNextBidderPlayerId(
+        mockPlayers,
+        auctionWithPurchase,
+        0,
+        123
+      );
+      expect(nextBidder).toBe("player2"); // player3 has purchased, so player2 is next
+    });
+
+    it("should cycle back to first eligible player", () => {
+      const auctionWithBids: Auction = {
+        ...mockAuction,
+        currentBlueprint: {
+          blueprint: {
+            id: "test",
+            type: "coal_plant",
+            name: "Test Plant",
+            powerGenerationKW: 1000,
+            startingPrice: 10,
+          },
+          bids: [
+            { playerId: "player1", amount: 10 },
+            { playerId: "player3", amount: 11 },
+            { playerId: "player2", amount: 12 },
+          ],
+        },
+      };
+      const nextBidder = getNextBidderPlayerId(
+        mockPlayers,
+        auctionWithBids,
+        0,
+        123
+      );
+      expect(nextBidder).toBe("player1"); // cycles back to player1
     });
   });
 });

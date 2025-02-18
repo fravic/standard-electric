@@ -27,6 +27,8 @@ export const PowerPlantBlueprintSchema = BuildableSchema.extend({
   requiredState: z.string().optional(),
 });
 
+export const PowerPlantBlueprintsSchema = z.array(PowerPlantBlueprintSchema);
+
 export const PowerPlantSchema = PowerPlantBlueprintSchema.extend({
   coordinates: HexCoordinatesSchema,
   playerId: z.string(),

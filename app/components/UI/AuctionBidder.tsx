@@ -1,7 +1,12 @@
 import React from "react";
 import { UI_COLORS } from "@/lib/palette";
 import { Player, Auction } from "@/actor/game.types";
-import { getBidderPriorityOrder, getCurrentBidderId } from "@/lib/auction";
+import {
+  getBidderPriorityOrder,
+  getNextBidderPlayerId,
+  getNextInitiatorPlayerId,
+} from "@/lib/auction";
+import { GameContext } from "@/actor/game.context";
 
 interface AuctionBidderProps {
   players: Record<string, Player>;
@@ -26,7 +31,13 @@ export function AuctionBidder({
   // Ensure these arrays exist with defaults
   const passedPlayerIds = auction.passedPlayerIds ?? [];
   const purchases = auction.purchases ?? [];
-  const currentBidderId = getCurrentBidderId(
+  const currentBidderId = getNextBidderPlayerId(
+    players,
+    auction,
+    totalTicks,
+    randomSeed
+  );
+  const currentInitiatorId = getNextInitiatorPlayerId(
     players,
     auction,
     totalTicks,
@@ -63,7 +74,11 @@ export function AuctionBidder({
           const hasPassed = passedPlayerIds.includes(playerId);
           const purchase = purchases.find((p) => p.playerId === playerId);
           const isInactive = hasPassed || purchase;
-          const isCurrentBidder = playerId === currentBidderId;
+          const isInitiator = playerId === currentInitiatorId;
+          const isBidder = playerId === currentBidderId;
+          const isPlayerTurn =
+            (auction.currentBlueprint && isBidder) ||
+            (!auction.currentBlueprint && isInitiator);
 
           return (
             <div
@@ -75,15 +90,13 @@ export function AuctionBidder({
                 opacity: isInactive ? 0.5 : 1,
                 color: UI_COLORS.TEXT_LIGHT,
                 padding: "0.5rem",
-                backgroundColor: isCurrentBidder
+                backgroundColor: isPlayerTurn
                   ? UI_COLORS.PRIMARY_DARK
                   : "transparent",
                 borderRadius: "4px",
               }}
             >
-              {isCurrentBidder && (
-                <span style={{ marginRight: "0.5rem" }}>➜</span>
-              )}
+              {isPlayerTurn && <span style={{ marginRight: "0.5rem" }}>➜</span>}
               <span>{player.name}</span>
               <span style={{ marginLeft: "auto", fontSize: "0.9em" }}>
                 {hasPassed

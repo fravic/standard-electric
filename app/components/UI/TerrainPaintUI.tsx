@@ -23,7 +23,6 @@ const styles = {
     border: "none",
     color: UI_COLORS.TEXT_LIGHT,
     padding: "4px 8px",
-    fontSize: "12px",
     borderRadius: "3px",
     cursor: "pointer",
   },
@@ -46,7 +45,6 @@ const styles = {
     color: UI_COLORS.TEXT_LIGHT,
     marginTop: "10px",
     padding: "8px 16px",
-    fontSize: "14px",
     width: "100%",
   },
   input: {
@@ -55,7 +53,6 @@ const styles = {
     color: UI_COLORS.TEXT_LIGHT,
     padding: "4px 8px",
     borderRadius: "3px",
-    fontSize: "12px",
   },
 };
 
@@ -197,7 +194,7 @@ export const TerrainPaintUI: React.FC = () => {
             onChange={handleCityNameChange}
             placeholder="Enter city name..."
             disabled={!selectedHexCoordinates}
-            style={{ fontSize: "12px", padding: "4px 8px" }}
+            style={{ padding: "4px 8px" }}
           />
         </div>
 

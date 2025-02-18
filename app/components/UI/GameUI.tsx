@@ -30,7 +30,6 @@ const styles = {
     padding: "10px",
     borderRadius: "5px",
     fontFamily: "monospace",
-    fontSize: "14px",
     zIndex: 1000,
   },
 };
@@ -39,10 +38,11 @@ export const GameUI: React.FC = () => {
   const userId = AuthContext.useSelector((state) => state.userId);
   const { players, time } = GameContext.useSelector((state) => state.public);
   const currentPlayer = userId ? players[userId] : undefined;
-  const gameState = GameContext.useSelector((state) => state.value);
   const { totalTicks } = time;
   const timeEmoji = isDayTime(totalTicks) ? "☀️" : "🌙";
   const dayNumber = Math.floor(totalTicks / HOURS_PER_DAY) + 1;
+  const isLobby = GameContext.useMatches("lobby");
+  const isAuction = GameContext.useMatches("auction");
 
   // Sort players so current player is first, then alphabetically by name
   const sortedPlayers = Object.entries(players).sort(([id1, p1], [id2, p2]) => {
@@ -50,10 +50,6 @@ export const GameUI: React.FC = () => {
     if (id2 === userId) return 1;
     return p1.name.localeCompare(p2.name);
   });
-
-  const isInLobby = gameState === "lobby";
-
-  if (!currentPlayer) return null;
 
   return (
     <>
@@ -65,9 +61,9 @@ export const GameUI: React.FC = () => {
             isCurrentPlayer={playerId === userId}
           />
         ))}
-        {!isInLobby && <BuildBar player={currentPlayer} />}
+        {!isLobby && currentPlayer && <BuildBar player={currentPlayer} />}
       </div>
-      {!isInLobby && (
+      {!isLobby && (
         <>
           <div style={styles.timeContainer}>
             Day {dayNumber} {timeEmoji}
@@ -76,8 +72,8 @@ export const GameUI: React.FC = () => {
           <HexDetailsUI />
         </>
       )}
-      {gameState === "auction" && <PowerPlantAuction />}
-      {isInLobby && <Lobby players={players} />}
+      {isAuction && <PowerPlantAuction />}
+      {isLobby && <Lobby players={players} />}
     </>
   );
 };

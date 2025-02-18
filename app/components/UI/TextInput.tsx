@@ -9,7 +9,6 @@ const styles = {
     color: UI_COLORS.TEXT_LIGHT,
     padding: "8px",
     borderRadius: "4px",
-    fontSize: "14px",
     width: "100%",
   },
 };

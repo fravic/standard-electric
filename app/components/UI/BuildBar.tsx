@@ -51,7 +51,6 @@ export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
         padding: "10px",
         borderRadius: "5px",
         fontFamily: "monospace",
-        fontSize: "14px",
         display: "flex",
         flexDirection: "column",
         gap: "10px",

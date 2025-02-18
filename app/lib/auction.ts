@@ -34,10 +34,10 @@ export function getBidderPriorityOrder(
 }
 
 /**
- * Returns the ID of the player whose turn it currently is to bid.
+ * Returns the ID of the player whose turn it is to initiate the next auction.
  * This is the first player in the priority order who hasn't passed or purchased.
  */
-export function getCurrentBidderId(
+export function getNextInitiatorPlayerId(
   players: Record<string, Player>,
   auction: Auction,
   totalTicks: number,
@@ -57,4 +57,47 @@ export function getCurrentBidderId(
       !passedPlayerIds.includes(playerId) &&
       !purchases.some((p) => p.playerId === playerId)
   );
+}
+
+/**
+ * Returns the ID of the player whose turn it is to bid on the current blueprint.
+ * Returns null if there is no current blueprint.
+ * Only players who haven't purchased a blueprint can bid.
+ * The order follows the priority order, starting after the last bidder.
+ */
+export function getNextBidderPlayerId(
+  players: Record<string, Player>,
+  auction: Auction,
+  totalTicks: number,
+  randomSeed: number
+): string | null {
+  if (!auction.currentBlueprint) return null;
+
+  const bidderOrder = getBidderPriorityOrder(
+    players,
+    auction,
+    totalTicks,
+    randomSeed
+  );
+
+  // Filter out players who have already purchased
+  const eligibleBidders = bidderOrder.filter(
+    (playerId) => !auction.purchases.some((p) => p.playerId === playerId)
+  );
+
+  if (eligibleBidders.length === 0) return null;
+
+  const bids = auction.currentBlueprint.bids;
+  if (bids.length === 0) return eligibleBidders[0];
+
+  // Get the last non-passed bid
+  const lastBid = bids[bids.length - 1];
+  if (!lastBid) return eligibleBidders[0];
+
+  // Find the index of the last bidder
+  const lastBidderIndex = eligibleBidders.indexOf(lastBid.playerId);
+  if (lastBidderIndex === -1) return eligibleBidders[0];
+
+  // Return the next eligible bidder in the order
+  return eligibleBidders[(lastBidderIndex + 1) % eligibleBidders.length];
 }

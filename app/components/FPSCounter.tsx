@@ -51,7 +51,7 @@ export function FPSCounter(): React.ReactNode {
     padding: "5px 10px",
     borderRadius: "5px",
     fontFamily: "monospace",
-    fontSize: "14px",
+    fontSize: "12px",
     zIndex: 1000,
   };
 

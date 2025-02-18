@@ -30,7 +30,6 @@ export const Button: React.FC<ButtonProps> = ({
         justifyContent: "space-between",
         alignItems: "center",
         width: fullWidth ? "100%" : "auto",
-        fontSize: "14px",
         cursor: disabled ? "not-allowed" : "pointer",
         borderRadius: "4px",
         transition: "background-color 0.3s",

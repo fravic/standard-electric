@@ -11,6 +11,7 @@ interface BuildButtonProps {
     powerGenerationKW?: number;
     requiredState?: string;
   };
+  variant?: "place" | "bid";
 }
 
 export const BuildButton: React.FC<BuildButtonProps> = ({
@@ -20,6 +21,7 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
   name,
   price,
   details,
+  variant = "place",
 }) => {
   return (
     <Button onClick={onClick} disabled={disabled} isActive={isActive} fullWidth>
@@ -39,7 +41,13 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
           </div>
         )}
       </div>
-      {isActive ? "Cancel" : price ? `Place ($${price})` : "Place"}
+      {isActive
+        ? "Cancel"
+        : price
+        ? `${variant === "bid" ? "Bid" : "Place"} ($${price})`
+        : variant === "bid"
+        ? "Bid"
+        : "Place"}
     </Button>
   );
 };

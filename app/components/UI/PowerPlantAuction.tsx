@@ -6,6 +6,7 @@ import { BuildButton } from "./BuildButton";
 import { AuctionBidder } from "./AuctionBidder";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import { getNextBidderPlayerId, getNextInitiatorPlayerId } from "@/lib/auction";
 
 export function PowerPlantAuction() {
   const userId = AuthContext.useSelector((state) => state.userId);
@@ -14,7 +15,33 @@ export function PowerPlantAuction() {
   );
   const sendGameEvent = GameContext.useSend();
 
-  if (!auction || !userId) return null;
+  if (!auction) return null;
+
+  const currentBidderId = getNextBidderPlayerId(
+    players,
+    auction,
+    time.totalTicks,
+    randomSeed
+  );
+  const isCurrentBidder = currentBidderId === userId;
+  const currentInitiatorId = getNextInitiatorPlayerId(
+    players,
+    auction,
+    time.totalTicks,
+    randomSeed
+  );
+  const isCurrentInitiator = currentInitiatorId === userId;
+  const currentPlayer = userId ? players[userId] : undefined;
+
+  // Calculate minimum bid if there's a current blueprint
+  const currentBid = auction.currentBlueprint?.bids
+    .filter((bid) => !bid.passed)
+    .reduce((max, bid) => Math.max(max, bid.amount || 0), 0);
+  const minimumBid = currentBid
+    ? currentBid + 1
+    : auction.currentBlueprint?.blueprint.startingPrice;
+  const canAffordBid =
+    minimumBid && currentPlayer ? currentPlayer.money >= minimumBid : false;
 
   return (
     <div
@@ -45,7 +72,7 @@ export function PowerPlantAuction() {
           randomSeed={randomSeed}
         />
 
-        {auction.currentBlueprint ? (
+        {auction.currentBlueprint && (
           <Card variant="dark" style={{ marginBottom: "1rem" }}>
             <h3
               style={{
@@ -57,13 +84,14 @@ export function PowerPlantAuction() {
               Current Auction
             </h3>
             <BuildButton
+              variant="bid"
               name={auction.currentBlueprint.blueprint.name}
               details={{
                 powerGenerationKW:
                   auction.currentBlueprint.blueprint.powerGenerationKW,
                 requiredState: auction.currentBlueprint.blueprint.requiredState,
               }}
-              price={auction.currentBlueprint.blueprint.startingPrice}
+              price={minimumBid}
               disabled={true}
               onClick={() => {}}
             />
@@ -103,47 +131,92 @@ export function PowerPlantAuction() {
                 </div>
               ))}
             </div>
+            {isCurrentBidder && (
+              <div
+                style={{ marginTop: "1rem", display: "flex", gap: "0.5rem" }}
+              >
+                <Button
+                  fullWidth
+                  disabled={!canAffordBid}
+                  onClick={() => {
+                    if (auction.currentBlueprint && minimumBid) {
+                      sendGameEvent({
+                        type: "AUCTION_PLACE_BID",
+                        amount: minimumBid,
+                      });
+                    }
+                  }}
+                >
+                  Bid ${minimumBid}
+                </Button>
+                <Button
+                  fullWidth
+                  onClick={() => {
+                    if (auction.currentBlueprint) {
+                      sendGameEvent({
+                        type: "AUCTION_PASS_BID",
+                      });
+                    }
+                  }}
+                >
+                  Pass
+                </Button>
+              </div>
+            )}
           </Card>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-            }}
-          >
-            {auction.availableBlueprints.map((blueprint) => (
-              <BuildButton
-                key={blueprint.id}
-                name={blueprint.name}
-                details={{
-                  powerGenerationKW: blueprint.powerGenerationKW,
-                  requiredState: blueprint.requiredState,
-                }}
-                price={blueprint.startingPrice}
-                onClick={() =>
-                  sendGameEvent({
-                    type: "AUCTION_PLACE_BID",
-                    blueprintId: blueprint.id,
-                    amount: blueprint.startingPrice,
-                  })
-                }
-                isActive={
-                  auction.currentBlueprint?.blueprint.id === blueprint.id
-                }
-              />
-            ))}
-          </div>
         )}
 
-        <Button
-          fullWidth
-          style={{ marginTop: "1rem" }}
-          disabled={!auction.isPassingAllowed}
-          onClick={() => sendGameEvent({ type: "AUCTION_PASS" })}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
         >
-          Pass
-        </Button>
+          <h3
+            style={{
+              color: UI_COLORS.TEXT_LIGHT,
+              marginTop: 0,
+              marginBottom: "1rem",
+            }}
+          >
+            Available Power Plants
+          </h3>
+          {auction.availableBlueprints.map((blueprint) => (
+            <BuildButton
+              key={blueprint.id}
+              variant="bid"
+              name={blueprint.name}
+              details={{
+                powerGenerationKW: blueprint.powerGenerationKW,
+                requiredState: blueprint.requiredState,
+              }}
+              price={blueprint.startingPrice}
+              disabled={
+                !isCurrentInitiator ||
+                auction.currentBlueprint !== null ||
+                (currentPlayer?.money ?? 0) < blueprint.startingPrice
+              }
+              onClick={() =>
+                sendGameEvent({
+                  type: "INITIATE_BID",
+                  blueprintId: blueprint.id,
+                })
+              }
+            />
+          ))}
+          {isCurrentInitiator &&
+            !auction.currentBlueprint &&
+            auction.isPassingAllowed && (
+              <Button
+                fullWidth
+                style={{ marginTop: "1rem" }}
+                onClick={() => sendGameEvent({ type: "PASS_BID" })}
+              >
+                Pass
+              </Button>
+            )}
+        </div>
       </Card>
     </div>
   );

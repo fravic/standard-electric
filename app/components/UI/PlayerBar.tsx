@@ -13,7 +13,6 @@ const styles = {
       isCurrentPlayer ? `2px solid ${UI_COLORS.PRIMARY}` : "none",
   },
   money: {
-    fontSize: "16px",
     fontWeight: "bold" as const,
   },
   progressContainer: {
