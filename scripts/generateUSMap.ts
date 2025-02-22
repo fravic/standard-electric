@@ -1,5 +1,5 @@
 import { TerrainType } from "../app/lib/HexCell";
-import { getStateInfoAtCoordinates } from "../app/lib/MapData";
+import { getStateNameAtCoordinates } from "../app/lib/MapData";
 import fs from "fs";
 import path from "path";
 import { createHexGrid, HexGrid } from "../app/lib/HexGrid";
@@ -25,14 +25,14 @@ async function generateMap() {
       const normalizedZ = (z / hexGrid.height) * 100;
 
       // Get state info at these coordinates
-      const stateInfo = getStateInfoAtCoordinates(
+      const regionName = getStateNameAtCoordinates(
         mapData,
         normalizedX,
         normalizedZ
       );
-      const cell = createHexCell(x, z, stateInfo);
+      const cell = createHexCell(x, z, regionName);
 
-      if (!stateInfo) {
+      if (!regionName) {
         // This is a water tile
         cell.terrainType = TerrainType.Water;
       } else {

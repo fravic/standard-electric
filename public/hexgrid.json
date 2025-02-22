@@ -7,7 +7,7 @@
         "x": 0,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -16,7 +16,7 @@
         "x": 0,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -25,7 +25,7 @@
         "x": 0,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -34,7 +34,7 @@
         "x": 0,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -43,7 +43,7 @@
         "x": 0,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -52,7 +52,7 @@
         "x": 0,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -61,7 +61,7 @@
         "x": 0,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -70,7 +70,7 @@
         "x": 0,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -79,7 +79,7 @@
         "x": 0,
         "z": 8
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -88,7 +88,7 @@
         "x": 0,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -97,7 +97,7 @@
         "x": 0,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -106,7 +106,7 @@
         "x": 0,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -115,7 +115,7 @@
         "x": 0,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -124,7 +124,7 @@
         "x": 0,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -133,7 +133,7 @@
         "x": 0,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -142,7 +142,7 @@
         "x": 0,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -151,7 +151,7 @@
         "x": 0,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -160,7 +160,7 @@
         "x": 0,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -169,7 +169,7 @@
         "x": 0,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -178,7 +178,7 @@
         "x": 0,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -187,7 +187,7 @@
         "x": 0,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -196,7 +196,7 @@
         "x": 0,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -205,7 +205,7 @@
         "x": 0,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -214,7 +214,7 @@
         "x": 0,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -223,7 +223,7 @@
         "x": 1,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -232,7 +232,7 @@
         "x": 1,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -241,7 +241,7 @@
         "x": 1,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -250,7 +250,7 @@
         "x": 1,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -259,7 +259,7 @@
         "x": 1,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -268,7 +268,7 @@
         "x": 1,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -277,7 +277,7 @@
         "x": 1,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -286,7 +286,7 @@
         "x": 1,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -295,7 +295,7 @@
         "x": 1,
         "z": 8
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -304,7 +304,7 @@
         "x": 1,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -313,7 +313,7 @@
         "x": 1,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -322,7 +322,7 @@
         "x": 1,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -331,7 +331,7 @@
         "x": 1,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -340,7 +340,7 @@
         "x": 1,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -349,7 +349,7 @@
         "x": 1,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -358,7 +358,7 @@
         "x": 1,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -367,7 +367,7 @@
         "x": 1,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -376,7 +376,7 @@
         "x": 1,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -385,7 +385,7 @@
         "x": 1,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -394,7 +394,7 @@
         "x": 1,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -403,7 +403,7 @@
         "x": 1,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -412,7 +412,7 @@
         "x": 1,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -421,7 +421,7 @@
         "x": 1,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -430,7 +430,7 @@
         "x": 1,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -439,7 +439,7 @@
         "x": 2,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -448,7 +448,7 @@
         "x": 2,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -457,7 +457,7 @@
         "x": 2,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -466,7 +466,7 @@
         "x": 2,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -475,7 +475,7 @@
         "x": 2,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -484,7 +484,7 @@
         "x": 2,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -493,7 +493,7 @@
         "x": 2,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -502,7 +502,7 @@
         "x": 2,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -511,7 +511,7 @@
         "x": 2,
         "z": 8
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -520,7 +520,7 @@
         "x": 2,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -529,7 +529,7 @@
         "x": 2,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -538,7 +538,7 @@
         "x": 2,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -547,7 +547,7 @@
         "x": 2,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -556,7 +556,7 @@
         "x": 2,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -565,7 +565,7 @@
         "x": 2,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -574,7 +574,7 @@
         "x": 2,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -583,7 +583,7 @@
         "x": 2,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -592,7 +592,7 @@
         "x": 2,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -601,7 +601,7 @@
         "x": 2,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -610,7 +610,7 @@
         "x": 2,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -619,7 +619,7 @@
         "x": 2,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -628,7 +628,7 @@
         "x": 2,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -637,7 +637,7 @@
         "x": 2,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -646,7 +646,7 @@
         "x": 2,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -655,7 +655,7 @@
         "x": 3,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -664,7 +664,7 @@
         "x": 3,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -673,7 +673,7 @@
         "x": 3,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -682,7 +682,7 @@
         "x": 3,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -691,7 +691,7 @@
         "x": 3,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -700,7 +700,7 @@
         "x": 3,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -709,10 +709,7 @@
         "x": 3,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -721,10 +718,7 @@
         "x": 3,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -733,10 +727,7 @@
         "x": 3,
         "z": 8
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -745,10 +736,7 @@
         "x": 3,
         "z": 9
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -757,10 +745,7 @@
         "x": 3,
         "z": 10
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -769,10 +754,7 @@
         "x": 3,
         "z": 11
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -781,10 +763,7 @@
         "x": 3,
         "z": 12
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -793,10 +772,7 @@
         "x": 3,
         "z": 13
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -805,7 +781,7 @@
         "x": 3,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -814,7 +790,7 @@
         "x": 3,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -823,7 +799,7 @@
         "x": 3,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -832,7 +808,7 @@
         "x": 3,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -841,7 +817,7 @@
         "x": 3,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -850,7 +826,7 @@
         "x": 3,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -859,7 +835,7 @@
         "x": 3,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -868,7 +844,7 @@
         "x": 3,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -877,7 +853,7 @@
         "x": 3,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -886,7 +862,7 @@
         "x": 3,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -895,7 +871,7 @@
         "x": 4,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -904,7 +880,7 @@
         "x": 4,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -913,7 +889,7 @@
         "x": 4,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -922,7 +898,7 @@
         "x": 4,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -931,7 +907,7 @@
         "x": 4,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -940,10 +916,7 @@
         "x": 4,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Washington",
-        "id": "53"
-      },
+      "regionName": "Washington",
       "terrainType": "Plains",
       "population": 0
     },
@@ -952,10 +925,7 @@
         "x": 4,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -964,10 +934,7 @@
         "x": 4,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -976,10 +943,7 @@
         "x": 4,
         "z": 8
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -988,10 +952,7 @@
         "x": 4,
         "z": 9
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1000,10 +961,7 @@
         "x": 4,
         "z": 10
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1012,10 +970,7 @@
         "x": 4,
         "z": 11
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1024,10 +979,7 @@
         "x": 4,
         "z": 12
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1036,10 +988,7 @@
         "x": 4,
         "z": 13
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1048,10 +997,7 @@
         "x": 4,
         "z": 14
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1060,7 +1006,7 @@
         "x": 4,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1069,7 +1015,7 @@
         "x": 4,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1078,7 +1024,7 @@
         "x": 4,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1087,7 +1033,7 @@
         "x": 4,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1096,7 +1042,7 @@
         "x": 4,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1105,7 +1051,7 @@
         "x": 4,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1114,7 +1060,7 @@
         "x": 4,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1123,7 +1069,7 @@
         "x": 4,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1132,7 +1078,7 @@
         "x": 4,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1141,7 +1087,7 @@
         "x": 5,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1150,7 +1096,7 @@
         "x": 5,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1159,7 +1105,7 @@
         "x": 5,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1168,7 +1114,7 @@
         "x": 5,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1177,10 +1123,7 @@
         "x": 5,
         "z": 4
       },
-      "stateInfo": {
-        "name": "Washington",
-        "id": "53"
-      },
+      "regionName": "Washington",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1189,10 +1132,7 @@
         "x": 5,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Washington",
-        "id": "53"
-      },
+      "regionName": "Washington",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1201,10 +1141,7 @@
         "x": 5,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1213,10 +1150,7 @@
         "x": 5,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1225,10 +1159,7 @@
         "x": 5,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1237,10 +1168,7 @@
         "x": 5,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1249,10 +1177,7 @@
         "x": 5,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1261,10 +1186,7 @@
         "x": 5,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1273,10 +1195,7 @@
         "x": 5,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1285,10 +1204,7 @@
         "x": 5,
         "z": 13
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1297,10 +1213,7 @@
         "x": 5,
         "z": 14
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1309,10 +1222,7 @@
         "x": 5,
         "z": 15
       },
-      "stateInfo": {
-        "name": "California",
-        "id": "06"
-      },
+      "regionName": "California",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1321,7 +1231,7 @@
         "x": 5,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1330,7 +1240,7 @@
         "x": 5,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1339,7 +1249,7 @@
         "x": 5,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1348,7 +1258,7 @@
         "x": 5,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1357,7 +1267,7 @@
         "x": 5,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1366,7 +1276,7 @@
         "x": 5,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1375,7 +1285,7 @@
         "x": 5,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1384,7 +1294,7 @@
         "x": 5,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1393,7 +1303,7 @@
         "x": 6,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1402,7 +1312,7 @@
         "x": 6,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1411,7 +1321,7 @@
         "x": 6,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1420,7 +1330,7 @@
         "x": 6,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1429,10 +1339,7 @@
         "x": 6,
         "z": 4
       },
-      "stateInfo": {
-        "name": "Washington",
-        "id": "53"
-      },
+      "regionName": "Washington",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1441,10 +1348,7 @@
         "x": 6,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Washington",
-        "id": "53"
-      },
+      "regionName": "Washington",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1453,10 +1357,7 @@
         "x": 6,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Oregon",
-        "id": "41"
-      },
+      "regionName": "Oregon",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1465,10 +1366,7 @@
         "x": 6,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1477,10 +1375,7 @@
         "x": 6,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1489,10 +1384,7 @@
         "x": 6,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1501,10 +1393,7 @@
         "x": 6,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1513,10 +1402,7 @@
         "x": 6,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1525,10 +1411,7 @@
         "x": 6,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Nevada",
-        "id": "32"
-      },
+      "regionName": "Nevada",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1537,10 +1420,7 @@
         "x": 6,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1549,10 +1429,7 @@
         "x": 6,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1561,10 +1438,7 @@
         "x": 6,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1573,7 +1447,7 @@
         "x": 6,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1582,7 +1456,7 @@
         "x": 6,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1591,7 +1465,7 @@
         "x": 6,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1600,7 +1474,7 @@
         "x": 6,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1609,7 +1483,7 @@
         "x": 6,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1618,7 +1492,7 @@
         "x": 6,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1627,7 +1501,7 @@
         "x": 6,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1636,7 +1510,7 @@
         "x": 6,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1645,7 +1519,7 @@
         "x": 7,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1654,7 +1528,7 @@
         "x": 7,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1663,7 +1537,7 @@
         "x": 7,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1672,7 +1546,7 @@
         "x": 7,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1681,10 +1555,7 @@
         "x": 7,
         "z": 4
       },
-      "stateInfo": {
-        "name": "Washington",
-        "id": "53"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1693,10 +1564,7 @@
         "x": 7,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1705,10 +1573,7 @@
         "x": 7,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1717,10 +1582,7 @@
         "x": 7,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1729,10 +1591,7 @@
         "x": 7,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1741,10 +1600,7 @@
         "x": 7,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1753,10 +1609,7 @@
         "x": 7,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1765,10 +1618,7 @@
         "x": 7,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1777,10 +1627,7 @@
         "x": 7,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1789,10 +1636,7 @@
         "x": 7,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1801,10 +1645,7 @@
         "x": 7,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1813,10 +1654,7 @@
         "x": 7,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1825,10 +1663,7 @@
         "x": 7,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1837,7 +1672,7 @@
         "x": 7,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1846,7 +1681,7 @@
         "x": 7,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1855,7 +1690,7 @@
         "x": 7,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1864,7 +1699,7 @@
         "x": 7,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1873,7 +1708,7 @@
         "x": 7,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1882,7 +1717,7 @@
         "x": 7,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1891,7 +1726,7 @@
         "x": 7,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1900,7 +1735,7 @@
         "x": 8,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1909,7 +1744,7 @@
         "x": 8,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1918,7 +1753,7 @@
         "x": 8,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1927,7 +1762,7 @@
         "x": 8,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -1936,10 +1771,7 @@
         "x": 8,
         "z": 4
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1948,10 +1780,7 @@
         "x": 8,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1960,10 +1789,7 @@
         "x": 8,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1972,10 +1798,7 @@
         "x": 8,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1984,10 +1807,7 @@
         "x": 8,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Idaho",
-        "id": "16"
-      },
+      "regionName": "Idaho",
       "terrainType": "Plains",
       "population": 0
     },
@@ -1996,10 +1816,7 @@
         "x": 8,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2008,10 +1825,7 @@
         "x": 8,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2020,10 +1834,7 @@
         "x": 8,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2032,10 +1843,7 @@
         "x": 8,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2044,10 +1852,7 @@
         "x": 8,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2056,10 +1861,7 @@
         "x": 8,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2068,10 +1870,7 @@
         "x": 8,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2080,10 +1879,7 @@
         "x": 8,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Arizona",
-        "id": "04"
-      },
+      "regionName": "Arizona",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2092,7 +1888,7 @@
         "x": 8,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2101,7 +1897,7 @@
         "x": 8,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2110,7 +1906,7 @@
         "x": 8,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2119,7 +1915,7 @@
         "x": 8,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2128,7 +1924,7 @@
         "x": 8,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2137,7 +1933,7 @@
         "x": 8,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2146,7 +1942,7 @@
         "x": 8,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2155,7 +1951,7 @@
         "x": 9,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2164,7 +1960,7 @@
         "x": 9,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2173,7 +1969,7 @@
         "x": 9,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2182,7 +1978,7 @@
         "x": 9,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2191,7 +1987,7 @@
         "x": 9,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2200,10 +1996,7 @@
         "x": 9,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2212,10 +2005,7 @@
         "x": 9,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2224,10 +2014,7 @@
         "x": 9,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2236,10 +2023,7 @@
         "x": 9,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2248,10 +2032,7 @@
         "x": 9,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2260,10 +2041,7 @@
         "x": 9,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2272,10 +2050,7 @@
         "x": 9,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Utah",
-        "id": "49"
-      },
+      "regionName": "Utah",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2284,10 +2059,7 @@
         "x": 9,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2296,10 +2068,7 @@
         "x": 9,
         "z": 13
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2308,10 +2077,7 @@
         "x": 9,
         "z": 14
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2320,10 +2086,7 @@
         "x": 9,
         "z": 15
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2332,10 +2095,7 @@
         "x": 9,
         "z": 16
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2344,7 +2104,7 @@
         "x": 9,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2353,7 +2113,7 @@
         "x": 9,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2362,7 +2122,7 @@
         "x": 9,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2371,7 +2131,7 @@
         "x": 9,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2380,7 +2140,7 @@
         "x": 9,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2389,7 +2149,7 @@
         "x": 9,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2398,7 +2158,7 @@
         "x": 9,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2407,7 +2167,7 @@
         "x": 10,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2416,7 +2176,7 @@
         "x": 10,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2425,7 +2185,7 @@
         "x": 10,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2434,7 +2194,7 @@
         "x": 10,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2443,7 +2203,7 @@
         "x": 10,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2452,10 +2212,7 @@
         "x": 10,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2464,10 +2221,7 @@
         "x": 10,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2476,10 +2230,7 @@
         "x": 10,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2488,10 +2239,7 @@
         "x": 10,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2500,10 +2248,7 @@
         "x": 10,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2512,10 +2257,7 @@
         "x": 10,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2524,10 +2266,7 @@
         "x": 10,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2536,10 +2275,7 @@
         "x": 10,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2548,10 +2284,7 @@
         "x": 10,
         "z": 13
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2560,10 +2293,7 @@
         "x": 10,
         "z": 14
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2572,10 +2302,7 @@
         "x": 10,
         "z": 15
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2584,10 +2311,7 @@
         "x": 10,
         "z": 16
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2596,10 +2320,7 @@
         "x": 10,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2608,7 +2329,7 @@
         "x": 10,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2617,7 +2338,7 @@
         "x": 10,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2626,7 +2347,7 @@
         "x": 10,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2635,7 +2356,7 @@
         "x": 10,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2644,7 +2365,7 @@
         "x": 10,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2653,7 +2374,7 @@
         "x": 10,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2662,7 +2383,7 @@
         "x": 11,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2671,7 +2392,7 @@
         "x": 11,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2680,7 +2401,7 @@
         "x": 11,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2689,7 +2410,7 @@
         "x": 11,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2698,7 +2419,7 @@
         "x": 11,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2707,10 +2428,7 @@
         "x": 11,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2719,10 +2437,7 @@
         "x": 11,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2731,10 +2446,7 @@
         "x": 11,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Montana",
-        "id": "30"
-      },
+      "regionName": "Montana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2743,10 +2455,7 @@
         "x": 11,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2755,10 +2464,7 @@
         "x": 11,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2767,10 +2473,7 @@
         "x": 11,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Wyoming",
-        "id": "56"
-      },
+      "regionName": "Wyoming",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2779,10 +2482,7 @@
         "x": 11,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2791,10 +2491,7 @@
         "x": 11,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2803,10 +2500,7 @@
         "x": 11,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2815,10 +2509,7 @@
         "x": 11,
         "z": 14
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2827,10 +2518,7 @@
         "x": 11,
         "z": 15
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2839,10 +2527,7 @@
         "x": 11,
         "z": 16
       },
-      "stateInfo": {
-        "name": "New Mexico",
-        "id": "35"
-      },
+      "regionName": "New Mexico",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2851,10 +2536,7 @@
         "x": 11,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2863,10 +2545,7 @@
         "x": 11,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2875,7 +2554,7 @@
         "x": 11,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2884,7 +2563,7 @@
         "x": 11,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2893,7 +2572,7 @@
         "x": 11,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2902,7 +2581,7 @@
         "x": 11,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2911,7 +2590,7 @@
         "x": 11,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2920,7 +2599,7 @@
         "x": 12,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2929,7 +2608,7 @@
         "x": 12,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2938,7 +2617,7 @@
         "x": 12,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2947,7 +2626,7 @@
         "x": 12,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2956,7 +2635,7 @@
         "x": 12,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -2965,10 +2644,7 @@
         "x": 12,
         "z": 5
       },
-      "stateInfo": {
-        "name": "North Dakota",
-        "id": "38"
-      },
+      "regionName": "North Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2977,10 +2653,7 @@
         "x": 12,
         "z": 6
       },
-      "stateInfo": {
-        "name": "North Dakota",
-        "id": "38"
-      },
+      "regionName": "North Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -2989,10 +2662,7 @@
         "x": 12,
         "z": 7
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3001,10 +2671,7 @@
         "x": 12,
         "z": 8
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3013,10 +2680,7 @@
         "x": 12,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3025,10 +2689,7 @@
         "x": 12,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3037,10 +2698,7 @@
         "x": 12,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3049,10 +2707,7 @@
         "x": 12,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3061,10 +2716,7 @@
         "x": 12,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Colorado",
-        "id": "08"
-      },
+      "regionName": "Colorado",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3073,10 +2725,7 @@
         "x": 12,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3085,10 +2734,7 @@
         "x": 12,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3097,10 +2743,7 @@
         "x": 12,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3109,10 +2752,7 @@
         "x": 12,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3121,10 +2761,7 @@
         "x": 12,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3133,7 +2770,7 @@
         "x": 12,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3142,7 +2779,7 @@
         "x": 12,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3151,7 +2788,7 @@
         "x": 12,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3160,7 +2797,7 @@
         "x": 12,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3169,7 +2806,7 @@
         "x": 12,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3178,7 +2815,7 @@
         "x": 13,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3187,7 +2824,7 @@
         "x": 13,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3196,7 +2833,7 @@
         "x": 13,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3205,7 +2842,7 @@
         "x": 13,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3214,7 +2851,7 @@
         "x": 13,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3223,10 +2860,7 @@
         "x": 13,
         "z": 5
       },
-      "stateInfo": {
-        "name": "North Dakota",
-        "id": "38"
-      },
+      "regionName": "North Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3235,10 +2869,7 @@
         "x": 13,
         "z": 6
       },
-      "stateInfo": {
-        "name": "North Dakota",
-        "id": "38"
-      },
+      "regionName": "North Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3247,10 +2878,7 @@
         "x": 13,
         "z": 7
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3259,10 +2887,7 @@
         "x": 13,
         "z": 8
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3271,10 +2896,7 @@
         "x": 13,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3283,10 +2905,7 @@
         "x": 13,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3295,10 +2914,7 @@
         "x": 13,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3307,10 +2923,7 @@
         "x": 13,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3319,10 +2932,7 @@
         "x": 13,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3331,10 +2941,7 @@
         "x": 13,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3343,10 +2950,7 @@
         "x": 13,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3355,10 +2959,7 @@
         "x": 13,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3367,10 +2968,7 @@
         "x": 13,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3379,10 +2977,7 @@
         "x": 13,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3391,10 +2986,7 @@
         "x": 13,
         "z": 19
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3403,7 +2995,7 @@
         "x": 13,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3412,7 +3004,7 @@
         "x": 13,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3421,7 +3013,7 @@
         "x": 13,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3430,7 +3022,7 @@
         "x": 13,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3439,7 +3031,7 @@
         "x": 14,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3448,7 +3040,7 @@
         "x": 14,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3457,7 +3049,7 @@
         "x": 14,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3466,7 +3058,7 @@
         "x": 14,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3475,7 +3067,7 @@
         "x": 14,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3484,10 +3076,7 @@
         "x": 14,
         "z": 5
       },
-      "stateInfo": {
-        "name": "North Dakota",
-        "id": "38"
-      },
+      "regionName": "North Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3496,10 +3085,7 @@
         "x": 14,
         "z": 6
       },
-      "stateInfo": {
-        "name": "North Dakota",
-        "id": "38"
-      },
+      "regionName": "North Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3508,10 +3094,7 @@
         "x": 14,
         "z": 7
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3520,10 +3103,7 @@
         "x": 14,
         "z": 8
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3532,10 +3112,7 @@
         "x": 14,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3544,10 +3121,7 @@
         "x": 14,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3556,10 +3130,7 @@
         "x": 14,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3568,10 +3139,7 @@
         "x": 14,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3580,10 +3148,7 @@
         "x": 14,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3592,10 +3157,7 @@
         "x": 14,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Oklahoma",
-        "id": "40"
-      },
+      "regionName": "Oklahoma",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3604,10 +3166,7 @@
         "x": 14,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Oklahoma",
-        "id": "40"
-      },
+      "regionName": "Oklahoma",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3616,10 +3175,7 @@
         "x": 14,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3628,10 +3184,7 @@
         "x": 14,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3640,10 +3193,7 @@
         "x": 14,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3652,10 +3202,7 @@
         "x": 14,
         "z": 19
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3664,10 +3211,7 @@
         "x": 14,
         "z": 20
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3676,10 +3220,7 @@
         "x": 14,
         "z": 21
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3688,7 +3229,7 @@
         "x": 14,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3697,7 +3238,7 @@
         "x": 14,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3706,7 +3247,7 @@
         "x": 15,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3715,7 +3256,7 @@
         "x": 15,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3724,7 +3265,7 @@
         "x": 15,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3733,7 +3274,7 @@
         "x": 15,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3742,7 +3283,7 @@
         "x": 15,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3751,10 +3292,7 @@
         "x": 15,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3763,10 +3301,7 @@
         "x": 15,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3775,10 +3310,7 @@
         "x": 15,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3787,10 +3319,7 @@
         "x": 15,
         "z": 8
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3799,10 +3328,7 @@
         "x": 15,
         "z": 9
       },
-      "stateInfo": {
-        "name": "South Dakota",
-        "id": "46"
-      },
+      "regionName": "South Dakota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3811,10 +3337,7 @@
         "x": 15,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3823,10 +3346,7 @@
         "x": 15,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Nebraska",
-        "id": "31"
-      },
+      "regionName": "Nebraska",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3835,10 +3355,7 @@
         "x": 15,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3847,10 +3364,7 @@
         "x": 15,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Kansas",
-        "id": "20"
-      },
+      "regionName": "Kansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3859,10 +3373,7 @@
         "x": 15,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Oklahoma",
-        "id": "40"
-      },
+      "regionName": "Oklahoma",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3871,10 +3382,7 @@
         "x": 15,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Oklahoma",
-        "id": "40"
-      },
+      "regionName": "Oklahoma",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3883,10 +3391,7 @@
         "x": 15,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3895,10 +3400,7 @@
         "x": 15,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3907,10 +3409,7 @@
         "x": 15,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3919,10 +3418,7 @@
         "x": 15,
         "z": 19
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -3931,7 +3427,7 @@
         "x": 15,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3940,7 +3436,7 @@
         "x": 15,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3949,7 +3445,7 @@
         "x": 15,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3958,7 +3454,7 @@
         "x": 15,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3967,7 +3463,7 @@
         "x": 16,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3976,7 +3472,7 @@
         "x": 16,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3985,7 +3481,7 @@
         "x": 16,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -3994,7 +3490,7 @@
         "x": 16,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4003,7 +3499,7 @@
         "x": 16,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4012,10 +3508,7 @@
         "x": 16,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4024,10 +3517,7 @@
         "x": 16,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4036,10 +3526,7 @@
         "x": 16,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4048,10 +3535,7 @@
         "x": 16,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4060,10 +3544,7 @@
         "x": 16,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Iowa",
-        "id": "19"
-      },
+      "regionName": "Iowa",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4072,10 +3553,7 @@
         "x": 16,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Iowa",
-        "id": "19"
-      },
+      "regionName": "Iowa",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4084,10 +3562,7 @@
         "x": 16,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4096,10 +3571,7 @@
         "x": 16,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4108,10 +3580,7 @@
         "x": 16,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4120,10 +3589,7 @@
         "x": 16,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Oklahoma",
-        "id": "40"
-      },
+      "regionName": "Oklahoma",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4132,10 +3598,7 @@
         "x": 16,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Oklahoma",
-        "id": "40"
-      },
+      "regionName": "Oklahoma",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4144,10 +3607,7 @@
         "x": 16,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4156,10 +3616,7 @@
         "x": 16,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4168,10 +3625,7 @@
         "x": 16,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Texas",
-        "id": "48"
-      },
+      "regionName": "Texas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4180,7 +3634,7 @@
         "x": 16,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4189,7 +3643,7 @@
         "x": 16,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4198,7 +3652,7 @@
         "x": 16,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4207,7 +3661,7 @@
         "x": 16,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4216,7 +3670,7 @@
         "x": 16,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4225,7 +3679,7 @@
         "x": 17,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4234,7 +3688,7 @@
         "x": 17,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4243,7 +3697,7 @@
         "x": 17,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4252,7 +3706,7 @@
         "x": 17,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4261,7 +3715,7 @@
         "x": 17,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4270,7 +3724,7 @@
         "x": 17,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4279,10 +3733,7 @@
         "x": 17,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4291,10 +3742,7 @@
         "x": 17,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Wisconsin",
-        "id": "55"
-      },
+      "regionName": "Wisconsin",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4303,10 +3751,7 @@
         "x": 17,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Minnesota",
-        "id": "27"
-      },
+      "regionName": "Minnesota",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4315,10 +3760,7 @@
         "x": 17,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Iowa",
-        "id": "19"
-      },
+      "regionName": "Iowa",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4327,10 +3769,7 @@
         "x": 17,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Iowa",
-        "id": "19"
-      },
+      "regionName": "Iowa",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4339,10 +3778,7 @@
         "x": 17,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4351,10 +3787,7 @@
         "x": 17,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4363,10 +3796,7 @@
         "x": 17,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4375,10 +3805,7 @@
         "x": 17,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Arkansas",
-        "id": "05"
-      },
+      "regionName": "Arkansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4387,10 +3814,7 @@
         "x": 17,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Arkansas",
-        "id": "05"
-      },
+      "regionName": "Arkansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4399,10 +3823,7 @@
         "x": 17,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Arkansas",
-        "id": "05"
-      },
+      "regionName": "Arkansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4411,10 +3832,7 @@
         "x": 17,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Louisiana",
-        "id": "22"
-      },
+      "regionName": "Louisiana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4423,10 +3841,7 @@
         "x": 17,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Louisiana",
-        "id": "22"
-      },
+      "regionName": "Louisiana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4435,7 +3850,7 @@
         "x": 17,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4444,7 +3859,7 @@
         "x": 17,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4453,7 +3868,7 @@
         "x": 17,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4462,7 +3877,7 @@
         "x": 17,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4471,7 +3886,7 @@
         "x": 17,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4480,7 +3895,7 @@
         "x": 18,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4489,7 +3904,7 @@
         "x": 18,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4498,7 +3913,7 @@
         "x": 18,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4507,7 +3922,7 @@
         "x": 18,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4516,7 +3931,7 @@
         "x": 18,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4525,7 +3940,7 @@
         "x": 18,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4534,7 +3949,7 @@
         "x": 18,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4543,10 +3958,7 @@
         "x": 18,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Wisconsin",
-        "id": "55"
-      },
+      "regionName": "Wisconsin",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4555,10 +3967,7 @@
         "x": 18,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Wisconsin",
-        "id": "55"
-      },
+      "regionName": "Wisconsin",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4567,10 +3976,7 @@
         "x": 18,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Wisconsin",
-        "id": "55"
-      },
+      "regionName": "Wisconsin",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4579,10 +3985,7 @@
         "x": 18,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Illinois",
-        "id": "17"
-      },
+      "regionName": "Illinois",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4591,10 +3994,7 @@
         "x": 18,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Illinois",
-        "id": "17"
-      },
+      "regionName": "Illinois",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4603,10 +4003,7 @@
         "x": 18,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4615,10 +4012,7 @@
         "x": 18,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Missouri",
-        "id": "29"
-      },
+      "regionName": "Missouri",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4627,10 +4021,7 @@
         "x": 18,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Arkansas",
-        "id": "05"
-      },
+      "regionName": "Arkansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4639,10 +4030,7 @@
         "x": 18,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Arkansas",
-        "id": "05"
-      },
+      "regionName": "Arkansas",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4651,10 +4039,7 @@
         "x": 18,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Mississippi",
-        "id": "28"
-      },
+      "regionName": "Mississippi",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4663,10 +4048,7 @@
         "x": 18,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Mississippi",
-        "id": "28"
-      },
+      "regionName": "Mississippi",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4675,10 +4057,7 @@
         "x": 18,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Louisiana",
-        "id": "22"
-      },
+      "regionName": "Louisiana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4687,7 +4066,7 @@
         "x": 18,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4696,7 +4075,7 @@
         "x": 18,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4705,7 +4084,7 @@
         "x": 18,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4714,7 +4093,7 @@
         "x": 18,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4723,7 +4102,7 @@
         "x": 18,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4732,7 +4111,7 @@
         "x": 19,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4741,7 +4120,7 @@
         "x": 19,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4750,7 +4129,7 @@
         "x": 19,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4759,7 +4138,7 @@
         "x": 19,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4768,7 +4147,7 @@
         "x": 19,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4777,7 +4156,7 @@
         "x": 19,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4786,7 +4165,7 @@
         "x": 19,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4795,10 +4174,7 @@
         "x": 19,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4807,10 +4183,7 @@
         "x": 19,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Wisconsin",
-        "id": "55"
-      },
+      "regionName": "Wisconsin",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4819,10 +4192,7 @@
         "x": 19,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Wisconsin",
-        "id": "55"
-      },
+      "regionName": "Wisconsin",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4831,10 +4201,7 @@
         "x": 19,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Illinois",
-        "id": "17"
-      },
+      "regionName": "Illinois",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4843,10 +4210,7 @@
         "x": 19,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Illinois",
-        "id": "17"
-      },
+      "regionName": "Illinois",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4855,10 +4219,7 @@
         "x": 19,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Illinois",
-        "id": "17"
-      },
+      "regionName": "Illinois",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4867,10 +4228,7 @@
         "x": 19,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Illinois",
-        "id": "17"
-      },
+      "regionName": "Illinois",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4879,10 +4237,7 @@
         "x": 19,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Tennessee",
-        "id": "47"
-      },
+      "regionName": "Tennessee",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4891,10 +4246,7 @@
         "x": 19,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Mississippi",
-        "id": "28"
-      },
+      "regionName": "Mississippi",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4903,10 +4255,7 @@
         "x": 19,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Mississippi",
-        "id": "28"
-      },
+      "regionName": "Mississippi",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4915,10 +4264,7 @@
         "x": 19,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Mississippi",
-        "id": "28"
-      },
+      "regionName": "Mississippi",
       "terrainType": "Plains",
       "population": 0
     },
@@ -4927,7 +4273,7 @@
         "x": 19,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4936,7 +4282,7 @@
         "x": 19,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4945,7 +4291,7 @@
         "x": 19,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4954,7 +4300,7 @@
         "x": 19,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4963,7 +4309,7 @@
         "x": 19,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4972,7 +4318,7 @@
         "x": 19,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4981,7 +4327,7 @@
         "x": 20,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4990,7 +4336,7 @@
         "x": 20,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -4999,7 +4345,7 @@
         "x": 20,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5008,7 +4354,7 @@
         "x": 20,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5017,7 +4363,7 @@
         "x": 20,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5026,7 +4372,7 @@
         "x": 20,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5035,10 +4381,7 @@
         "x": 20,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5047,10 +4390,7 @@
         "x": 20,
         "z": 7
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5059,10 +4399,7 @@
         "x": 20,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5071,10 +4408,7 @@
         "x": 20,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5083,10 +4417,7 @@
         "x": 20,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Indiana",
-        "id": "18"
-      },
+      "regionName": "Indiana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5095,10 +4426,7 @@
         "x": 20,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Indiana",
-        "id": "18"
-      },
+      "regionName": "Indiana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5107,10 +4435,7 @@
         "x": 20,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Indiana",
-        "id": "18"
-      },
+      "regionName": "Indiana",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5119,10 +4444,7 @@
         "x": 20,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Kentucky",
-        "id": "21"
-      },
+      "regionName": "Kentucky",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5131,10 +4453,7 @@
         "x": 20,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Tennessee",
-        "id": "47"
-      },
+      "regionName": "Tennessee",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5143,10 +4462,7 @@
         "x": 20,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Alabama",
-        "id": "01"
-      },
+      "regionName": "Alabama",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5155,10 +4471,7 @@
         "x": 20,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Alabama",
-        "id": "01"
-      },
+      "regionName": "Alabama",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5167,10 +4480,7 @@
         "x": 20,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Alabama",
-        "id": "01"
-      },
+      "regionName": "Alabama",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5179,7 +4489,7 @@
         "x": 20,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5188,7 +4498,7 @@
         "x": 20,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5197,7 +4507,7 @@
         "x": 20,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5206,7 +4516,7 @@
         "x": 20,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5215,7 +4525,7 @@
         "x": 20,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5224,7 +4534,7 @@
         "x": 20,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5233,7 +4543,7 @@
         "x": 21,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5242,7 +4552,7 @@
         "x": 21,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5251,7 +4561,7 @@
         "x": 21,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5260,7 +4570,7 @@
         "x": 21,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5269,7 +4579,7 @@
         "x": 21,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5278,7 +4588,7 @@
         "x": 21,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5287,7 +4597,7 @@
         "x": 21,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5296,7 +4606,7 @@
         "x": 21,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5305,10 +4615,7 @@
         "x": 21,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5317,10 +4624,7 @@
         "x": 21,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Michigan",
-        "id": "26"
-      },
+      "regionName": "Michigan",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5329,10 +4633,7 @@
         "x": 21,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Ohio",
-        "id": "39"
-      },
+      "regionName": "Ohio",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5341,10 +4642,7 @@
         "x": 21,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Ohio",
-        "id": "39"
-      },
+      "regionName": "Ohio",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5353,10 +4651,7 @@
         "x": 21,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Kentucky",
-        "id": "21"
-      },
+      "regionName": "Kentucky",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5365,10 +4660,7 @@
         "x": 21,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Kentucky",
-        "id": "21"
-      },
+      "regionName": "Kentucky",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5377,10 +4669,7 @@
         "x": 21,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Tennessee",
-        "id": "47"
-      },
+      "regionName": "Tennessee",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5389,10 +4678,7 @@
         "x": 21,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Georgia",
-        "id": "13"
-      },
+      "regionName": "Georgia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5401,10 +4687,7 @@
         "x": 21,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Alabama",
-        "id": "01"
-      },
+      "regionName": "Alabama",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5413,10 +4696,7 @@
         "x": 21,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Alabama",
-        "id": "01"
-      },
+      "regionName": "Alabama",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5425,7 +4705,7 @@
         "x": 21,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5434,7 +4714,7 @@
         "x": 21,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5443,7 +4723,7 @@
         "x": 21,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5452,7 +4732,7 @@
         "x": 21,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5461,7 +4741,7 @@
         "x": 21,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5470,7 +4750,7 @@
         "x": 21,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5479,7 +4759,7 @@
         "x": 22,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5488,7 +4768,7 @@
         "x": 22,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5497,7 +4777,7 @@
         "x": 22,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5506,7 +4786,7 @@
         "x": 22,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5515,7 +4795,7 @@
         "x": 22,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5524,7 +4804,7 @@
         "x": 22,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5533,7 +4813,7 @@
         "x": 22,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5542,7 +4822,7 @@
         "x": 22,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5551,7 +4831,7 @@
         "x": 22,
         "z": 8
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5560,7 +4840,7 @@
         "x": 22,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5569,10 +4849,7 @@
         "x": 22,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Ohio",
-        "id": "39"
-      },
+      "regionName": "Ohio",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5581,10 +4858,7 @@
         "x": 22,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Ohio",
-        "id": "39"
-      },
+      "regionName": "Ohio",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5593,10 +4867,7 @@
         "x": 22,
         "z": 12
       },
-      "stateInfo": {
-        "name": "West Virginia",
-        "id": "54"
-      },
+      "regionName": "West Virginia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5605,10 +4876,7 @@
         "x": 22,
         "z": 13
       },
-      "stateInfo": {
-        "name": "Tennessee",
-        "id": "47"
-      },
+      "regionName": "Tennessee",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5617,10 +4885,7 @@
         "x": 22,
         "z": 14
       },
-      "stateInfo": {
-        "name": "Tennessee",
-        "id": "47"
-      },
+      "regionName": "North Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5629,10 +4894,7 @@
         "x": 22,
         "z": 15
       },
-      "stateInfo": {
-        "name": "Georgia",
-        "id": "13"
-      },
+      "regionName": "Georgia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5641,10 +4903,7 @@
         "x": 22,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Georgia",
-        "id": "13"
-      },
+      "regionName": "Georgia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5653,10 +4912,7 @@
         "x": 22,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Georgia",
-        "id": "13"
-      },
+      "regionName": "Georgia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5665,11 +4921,8 @@
         "x": 22,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Florida",
-        "id": "12"
-      },
-      "terrainType": "Plains",
+      "regionName": null,
+      "terrainType": "Water",
       "population": 0
     },
     "22,19": {
@@ -5677,7 +4930,7 @@
         "x": 22,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5686,7 +4939,7 @@
         "x": 22,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5695,7 +4948,7 @@
         "x": 22,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5704,7 +4957,7 @@
         "x": 22,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5713,7 +4966,7 @@
         "x": 22,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5722,7 +4975,7 @@
         "x": 23,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5731,7 +4984,7 @@
         "x": 23,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5740,7 +4993,7 @@
         "x": 23,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5749,7 +5002,7 @@
         "x": 23,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5758,7 +5011,7 @@
         "x": 23,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5767,7 +5020,7 @@
         "x": 23,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5776,7 +5029,7 @@
         "x": 23,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5785,7 +5038,7 @@
         "x": 23,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5794,10 +5047,7 @@
         "x": 23,
         "z": 8
       },
-      "stateInfo": {
-        "name": "New York",
-        "id": "36"
-      },
+      "regionName": "New York",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5806,10 +5056,7 @@
         "x": 23,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Pennsylvania",
-        "id": "42"
-      },
+      "regionName": "Pennsylvania",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5818,10 +5065,7 @@
         "x": 23,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Pennsylvania",
-        "id": "42"
-      },
+      "regionName": "Pennsylvania",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5830,10 +5074,7 @@
         "x": 23,
         "z": 11
       },
-      "stateInfo": {
-        "name": "West Virginia",
-        "id": "54"
-      },
+      "regionName": "West Virginia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5842,10 +5083,7 @@
         "x": 23,
         "z": 12
       },
-      "stateInfo": {
-        "name": "West Virginia",
-        "id": "54"
-      },
+      "regionName": "Virginia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5854,10 +5092,7 @@
         "x": 23,
         "z": 13
       },
-      "stateInfo": {
-        "name": "North Carolina",
-        "id": "37"
-      },
+      "regionName": "North Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5866,10 +5101,7 @@
         "x": 23,
         "z": 14
       },
-      "stateInfo": {
-        "name": "South Carolina",
-        "id": "45"
-      },
+      "regionName": "South Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5878,10 +5110,7 @@
         "x": 23,
         "z": 15
       },
-      "stateInfo": {
-        "name": "South Carolina",
-        "id": "45"
-      },
+      "regionName": "South Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5890,10 +5119,7 @@
         "x": 23,
         "z": 16
       },
-      "stateInfo": {
-        "name": "Georgia",
-        "id": "13"
-      },
+      "regionName": "Georgia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5902,10 +5128,7 @@
         "x": 23,
         "z": 17
       },
-      "stateInfo": {
-        "name": "Georgia",
-        "id": "13"
-      },
+      "regionName": "Georgia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5914,10 +5137,7 @@
         "x": 23,
         "z": 18
       },
-      "stateInfo": {
-        "name": "Florida",
-        "id": "12"
-      },
+      "regionName": "Florida",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5926,10 +5146,7 @@
         "x": 23,
         "z": 19
       },
-      "stateInfo": {
-        "name": "Florida",
-        "id": "12"
-      },
+      "regionName": "Florida",
       "terrainType": "Plains",
       "population": 0
     },
@@ -5938,7 +5155,7 @@
         "x": 23,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5947,7 +5164,7 @@
         "x": 23,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5956,7 +5173,7 @@
         "x": 23,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5965,7 +5182,7 @@
         "x": 23,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5974,7 +5191,7 @@
         "x": 24,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5983,7 +5200,7 @@
         "x": 24,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -5992,7 +5209,7 @@
         "x": 24,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6001,7 +5218,7 @@
         "x": 24,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6010,7 +5227,7 @@
         "x": 24,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6019,7 +5236,7 @@
         "x": 24,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6028,7 +5245,7 @@
         "x": 24,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6037,7 +5254,7 @@
         "x": 24,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6046,10 +5263,7 @@
         "x": 24,
         "z": 8
       },
-      "stateInfo": {
-        "name": "New York",
-        "id": "36"
-      },
+      "regionName": "New York",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6058,10 +5272,7 @@
         "x": 24,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Pennsylvania",
-        "id": "42"
-      },
+      "regionName": "Pennsylvania",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6070,10 +5281,7 @@
         "x": 24,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Pennsylvania",
-        "id": "42"
-      },
+      "regionName": "Pennsylvania",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6082,10 +5290,7 @@
         "x": 24,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Virginia",
-        "id": "51"
-      },
+      "regionName": "Virginia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6094,10 +5299,7 @@
         "x": 24,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Virginia",
-        "id": "51"
-      },
+      "regionName": "Virginia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6106,10 +5308,7 @@
         "x": 24,
         "z": 13
       },
-      "stateInfo": {
-        "name": "North Carolina",
-        "id": "37"
-      },
+      "regionName": "North Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6118,10 +5317,7 @@
         "x": 24,
         "z": 14
       },
-      "stateInfo": {
-        "name": "North Carolina",
-        "id": "37"
-      },
+      "regionName": "North Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6130,10 +5326,7 @@
         "x": 24,
         "z": 15
       },
-      "stateInfo": {
-        "name": "South Carolina",
-        "id": "45"
-      },
+      "regionName": "South Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6142,7 +5335,7 @@
         "x": 24,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6151,7 +5344,7 @@
         "x": 24,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6160,7 +5353,7 @@
         "x": 24,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6169,7 +5362,7 @@
         "x": 24,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6178,10 +5371,7 @@
         "x": 24,
         "z": 20
       },
-      "stateInfo": {
-        "name": "Florida",
-        "id": "12"
-      },
+      "regionName": "Florida",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6190,7 +5380,7 @@
         "x": 24,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6199,7 +5389,7 @@
         "x": 24,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6208,7 +5398,7 @@
         "x": 24,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6217,7 +5407,7 @@
         "x": 25,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6226,7 +5416,7 @@
         "x": 25,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6235,7 +5425,7 @@
         "x": 25,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6244,7 +5434,7 @@
         "x": 25,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6253,7 +5443,7 @@
         "x": 25,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6262,7 +5452,7 @@
         "x": 25,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6271,7 +5461,7 @@
         "x": 25,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6280,10 +5470,7 @@
         "x": 25,
         "z": 7
       },
-      "stateInfo": {
-        "name": "New York",
-        "id": "36"
-      },
+      "regionName": "New York",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6292,10 +5479,7 @@
         "x": 25,
         "z": 8
       },
-      "stateInfo": {
-        "name": "New York",
-        "id": "36"
-      },
+      "regionName": "New York",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6304,10 +5488,7 @@
         "x": 25,
         "z": 9
       },
-      "stateInfo": {
-        "name": "Pennsylvania",
-        "id": "42"
-      },
+      "regionName": "Pennsylvania",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6316,10 +5497,7 @@
         "x": 25,
         "z": 10
       },
-      "stateInfo": {
-        "name": "Delaware",
-        "id": "10"
-      },
+      "regionName": "Delaware",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6328,10 +5506,7 @@
         "x": 25,
         "z": 11
       },
-      "stateInfo": {
-        "name": "Maryland",
-        "id": "24"
-      },
+      "regionName": "Maryland",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6340,10 +5515,7 @@
         "x": 25,
         "z": 12
       },
-      "stateInfo": {
-        "name": "Virginia",
-        "id": "51"
-      },
+      "regionName": "Virginia",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6352,10 +5524,7 @@
         "x": 25,
         "z": 13
       },
-      "stateInfo": {
-        "name": "North Carolina",
-        "id": "37"
-      },
+      "regionName": "North Carolina",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6364,7 +5533,7 @@
         "x": 25,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6373,7 +5542,7 @@
         "x": 25,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6382,7 +5551,7 @@
         "x": 25,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6391,7 +5560,7 @@
         "x": 25,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6400,7 +5569,7 @@
         "x": 25,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6409,7 +5578,7 @@
         "x": 25,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6418,7 +5587,7 @@
         "x": 25,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6427,7 +5596,7 @@
         "x": 25,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6436,7 +5605,7 @@
         "x": 25,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6445,7 +5614,7 @@
         "x": 25,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6454,7 +5623,7 @@
         "x": 26,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6463,7 +5632,7 @@
         "x": 26,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6472,7 +5641,7 @@
         "x": 26,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6481,7 +5650,7 @@
         "x": 26,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6490,7 +5659,7 @@
         "x": 26,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6499,7 +5668,7 @@
         "x": 26,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6508,10 +5677,7 @@
         "x": 26,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Vermont",
-        "id": "50"
-      },
+      "regionName": "Vermont",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6520,10 +5686,7 @@
         "x": 26,
         "z": 7
       },
-      "stateInfo": {
-        "name": "New Hampshire",
-        "id": "33"
-      },
+      "regionName": "New Hampshire",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6532,10 +5695,7 @@
         "x": 26,
         "z": 8
       },
-      "stateInfo": {
-        "name": "New York",
-        "id": "36"
-      },
+      "regionName": "Massachusetts",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6544,10 +5704,7 @@
         "x": 26,
         "z": 9
       },
-      "stateInfo": {
-        "name": "New York",
-        "id": "36"
-      },
+      "regionName": "New York",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6556,7 +5713,7 @@
         "x": 26,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6565,7 +5722,7 @@
         "x": 26,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6574,7 +5731,7 @@
         "x": 26,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6583,7 +5740,7 @@
         "x": 26,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6592,7 +5749,7 @@
         "x": 26,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6601,7 +5758,7 @@
         "x": 26,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6610,7 +5767,7 @@
         "x": 26,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6619,7 +5776,7 @@
         "x": 26,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6628,7 +5785,7 @@
         "x": 26,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6637,7 +5794,7 @@
         "x": 26,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6646,7 +5803,7 @@
         "x": 26,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6655,7 +5812,7 @@
         "x": 26,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6664,7 +5821,7 @@
         "x": 26,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6673,7 +5830,7 @@
         "x": 26,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6682,7 +5839,7 @@
         "x": 27,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6691,7 +5848,7 @@
         "x": 27,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6700,7 +5857,7 @@
         "x": 27,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6709,7 +5866,7 @@
         "x": 27,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6718,10 +5875,7 @@
         "x": 27,
         "z": 4
       },
-      "stateInfo": {
-        "name": "Maine",
-        "id": "23"
-      },
+      "regionName": "Maine",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6730,10 +5884,7 @@
         "x": 27,
         "z": 5
       },
-      "stateInfo": {
-        "name": "Maine",
-        "id": "23"
-      },
+      "regionName": "Maine",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6742,10 +5893,7 @@
         "x": 27,
         "z": 6
       },
-      "stateInfo": {
-        "name": "Maine",
-        "id": "23"
-      },
+      "regionName": "Maine",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6754,7 +5902,7 @@
         "x": 27,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6763,10 +5911,7 @@
         "x": 27,
         "z": 8
       },
-      "stateInfo": {
-        "name": "Massachusetts",
-        "id": "25"
-      },
+      "regionName": "Massachusetts",
       "terrainType": "Plains",
       "population": 0
     },
@@ -6775,7 +5920,7 @@
         "x": 27,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6784,7 +5929,7 @@
         "x": 27,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6793,7 +5938,7 @@
         "x": 27,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6802,7 +5947,7 @@
         "x": 27,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6811,7 +5956,7 @@
         "x": 27,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6820,7 +5965,7 @@
         "x": 27,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6829,7 +5974,7 @@
         "x": 27,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6838,7 +5983,7 @@
         "x": 27,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6847,7 +5992,7 @@
         "x": 27,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6856,7 +6001,7 @@
         "x": 27,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6865,7 +6010,7 @@
         "x": 27,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6874,7 +6019,7 @@
         "x": 27,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6883,7 +6028,7 @@
         "x": 27,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6892,7 +6037,7 @@
         "x": 27,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6901,7 +6046,7 @@
         "x": 27,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6910,7 +6055,7 @@
         "x": 28,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6919,7 +6064,7 @@
         "x": 28,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6928,7 +6073,7 @@
         "x": 28,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6937,7 +6082,7 @@
         "x": 28,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6946,7 +6091,7 @@
         "x": 28,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6955,7 +6100,7 @@
         "x": 28,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6964,7 +6109,7 @@
         "x": 28,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6973,7 +6118,7 @@
         "x": 28,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6982,7 +6127,7 @@
         "x": 28,
         "z": 8
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -6991,7 +6136,7 @@
         "x": 28,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7000,7 +6145,7 @@
         "x": 28,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7009,7 +6154,7 @@
         "x": 28,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7018,7 +6163,7 @@
         "x": 28,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7027,7 +6172,7 @@
         "x": 28,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7036,7 +6181,7 @@
         "x": 28,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7045,7 +6190,7 @@
         "x": 28,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7054,7 +6199,7 @@
         "x": 28,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7063,7 +6208,7 @@
         "x": 28,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7072,7 +6217,7 @@
         "x": 28,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7081,7 +6226,7 @@
         "x": 28,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7090,7 +6235,7 @@
         "x": 28,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7099,7 +6244,7 @@
         "x": 28,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7108,7 +6253,7 @@
         "x": 28,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7117,7 +6262,7 @@
         "x": 28,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7126,7 +6271,7 @@
         "x": 29,
         "z": 0
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7135,7 +6280,7 @@
         "x": 29,
         "z": 1
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7144,7 +6289,7 @@
         "x": 29,
         "z": 2
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7153,7 +6298,7 @@
         "x": 29,
         "z": 3
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7162,7 +6307,7 @@
         "x": 29,
         "z": 4
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7171,7 +6316,7 @@
         "x": 29,
         "z": 5
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7180,7 +6325,7 @@
         "x": 29,
         "z": 6
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7189,7 +6334,7 @@
         "x": 29,
         "z": 7
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7198,7 +6343,7 @@
         "x": 29,
         "z": 8
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7207,7 +6352,7 @@
         "x": 29,
         "z": 9
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7216,7 +6361,7 @@
         "x": 29,
         "z": 10
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7225,7 +6370,7 @@
         "x": 29,
         "z": 11
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7234,7 +6379,7 @@
         "x": 29,
         "z": 12
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7243,7 +6388,7 @@
         "x": 29,
         "z": 13
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7252,7 +6397,7 @@
         "x": 29,
         "z": 14
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7261,7 +6406,7 @@
         "x": 29,
         "z": 15
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7270,7 +6415,7 @@
         "x": 29,
         "z": 16
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7279,7 +6424,7 @@
         "x": 29,
         "z": 17
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7288,7 +6433,7 @@
         "x": 29,
         "z": 18
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7297,7 +6442,7 @@
         "x": 29,
         "z": 19
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7306,7 +6451,7 @@
         "x": 29,
         "z": 20
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7315,7 +6460,7 @@
         "x": 29,
         "z": 21
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7324,7 +6469,7 @@
         "x": 29,
         "z": 22
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     },
@@ -7333,7 +6478,7 @@
         "x": 29,
         "z": 23
       },
-      "stateInfo": null,
+      "regionName": null,
       "terrainType": "Water",
       "population": 0
     }

@@ -561,7 +561,7 @@ describe("PowerSystem", () => {
       coordinates,
       population,
       terrainType: TerrainType.Plains,
-      stateInfo: null,
+      regionName: null,
     });
 
     beforeEach(() => {

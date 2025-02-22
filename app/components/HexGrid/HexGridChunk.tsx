@@ -213,11 +213,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     if (!hoveringHexCoordinates) return [];
 
     const hoveringCell = getCell(grid, hoveringHexCoordinates);
-    if (!hoveringCell?.stateInfo?.name) return [];
+    if (!hoveringCell?.regionName) return [];
 
-    return cells.filter(
-      (cell) => cell.stateInfo?.name === hoveringCell.stateInfo?.name
-    );
+    return cells.filter((cell) => cell.regionName === hoveringCell.regionName);
   }, [cells, grid, hoveringHexCoordinates]);
 
   // Filter buildables in this chunk

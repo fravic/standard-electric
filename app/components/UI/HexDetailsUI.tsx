@@ -94,7 +94,7 @@ export function HexDetailsUI() {
       <Card variant="dark">
         <div>
           <span style={styles.label}>
-            {cell.stateInfo?.name}{" "}
+            {cell.regionName}{" "}
             {HexCoordinatesService.coordinatesToString(hoveringHexCoordinates)}
           </span>
         </div>

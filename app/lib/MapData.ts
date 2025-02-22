@@ -2,11 +2,6 @@ import * as d3 from "d3-geo";
 import { Feature, MultiPolygon, Polygon } from "geojson";
 import type { Topology, Objects, ArcIndexes } from "topojson-specification";
 
-export interface StateInfo {
-  name: string;
-  id: string;
-}
-
 export interface StateProperties {
   name: string;
 }
@@ -44,13 +39,13 @@ export interface MapData {
 
 const PROJECTION_SCALE = [1, 0.7];
 
-export function getStateInfoAtCoordinates(
+export function getStateNameAtCoordinates(
   mapData: MapData,
 
   // These coordinates should be percentages of the map between 0 and 100
   x: number,
   y: number
-): StateInfo | null {
+): string | null {
   if (!mapData.projection || !mapData.polygon) return null;
 
   try {
@@ -97,10 +92,7 @@ export function getStateInfoAtCoordinates(
           mapData.states &&
           state.id in mapData.states
         ) {
-          return {
-            name: mapData.states[state.id].properties.name,
-            id: String(mapData.states[state.id].id),
-          };
+          return mapData.states[state.id].properties.name;
         }
       }
     }

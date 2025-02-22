@@ -26,6 +26,9 @@ export default function MapEditor() {
             name: "Map Editor",
             money: 1000,
             powerSoldKWh: 0,
+            blueprintsById: {},
+            isHost: true,
+            number: 0,
           },
         },
         time: {
@@ -34,6 +37,8 @@ export default function MapEditor() {
         },
         buildables: [],
         hexGrid: hexGrid as HexGrid,
+        auction: null,
+        randomSeed: 0,
       },
       private: {},
       value: "active",

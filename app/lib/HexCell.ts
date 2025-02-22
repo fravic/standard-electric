@@ -5,7 +5,6 @@ import {
   HexCoordinatesSchema,
   toWorldPoint,
 } from "./coordinates/HexCoordinates";
-import { StateInfo } from "./MapData";
 import { TERRAIN_COLORS } from "@/lib/palette";
 
 export enum TerrainType {
@@ -27,12 +26,7 @@ export enum Population {
 
 export const HexCellSchema = z.object({
   coordinates: HexCoordinatesSchema,
-  stateInfo: z
-    .object({
-      name: z.string(),
-      id: z.string(),
-    })
-    .nullable(),
+  regionName: z.string().nullable(),
   terrainType: z.nativeEnum(TerrainType),
   population: z.nativeEnum(Population),
   cityName: z.string().nullable().optional(),
@@ -43,7 +37,7 @@ export type HexCell = z.infer<typeof HexCellSchema>;
 export function createHexCell(
   x: number,
   z: number,
-  stateInfo: StateInfo | null = null
+  regionName: string | null = null
 ): HexCell {
   // Randomly assign terrain type
   const terrainTypes = Object.values(TerrainType);
@@ -52,7 +46,7 @@ export function createHexCell(
 
   return {
     coordinates: { x, z },
-    stateInfo,
+    regionName,
     terrainType,
     population: Population.Unpopulated,
   };
@@ -60,13 +54,6 @@ export function createHexCell(
 
 export function isUnderwater(cell: HexCell): boolean {
   return cell.terrainType === TerrainType.Water;
-}
-
-export function stateHash(cell: HexCell): number {
-  return Array.from(cell.stateInfo?.name ?? "").reduce(
-    (acc, char) => char.charCodeAt(0) + ((acc << 5) - acc),
-    0
-  );
 }
 
 export function getColor(cell: HexCell): Color {
