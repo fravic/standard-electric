@@ -20,6 +20,7 @@
     "@storybook/addon-interactions": "8.5.0-beta.8",
     "@storybook/addon-links": "^8.4.7",
     "@storybook/addon-onboarding": "8.5.0-beta.8",
+    "@storybook/addon-themes": "^8.5.8",
     "@storybook/blocks": "8.5.0-beta.8",
     "@storybook/react": "8.5.0-beta.8",
     "@storybook/test": "8.5.0-beta.8",

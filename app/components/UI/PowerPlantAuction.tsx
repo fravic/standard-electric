@@ -94,6 +94,9 @@ export function PowerPlantAuction() {
               price={minimumBid}
               disabled={true}
               onClick={() => {}}
+              style={{
+                border: "1px solid rgba(255, 255, 255, 0.4)",
+              }}
             />
             <div
               style={{

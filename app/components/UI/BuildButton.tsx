@@ -12,6 +12,7 @@ interface BuildButtonProps {
     requiredState?: string;
   };
   variant?: "place" | "bid";
+  style?: React.CSSProperties;
 }
 
 export const BuildButton: React.FC<BuildButtonProps> = ({
@@ -22,9 +23,16 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
   price,
   details,
   variant = "place",
+  style,
 }) => {
   return (
-    <Button onClick={onClick} disabled={disabled} isActive={isActive} fullWidth>
+    <Button
+      onClick={onClick}
+      disabled={disabled}
+      isActive={isActive}
+      fullWidth
+      style={style}
+    >
       <div
         style={{
           display: "flex",
