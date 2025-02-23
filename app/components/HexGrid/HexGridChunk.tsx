@@ -27,7 +27,7 @@ import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
-import { isPowerPlantType } from "@/lib/buildables/PowerPlant";
+import { useMapEditor } from "@/routes/mapEditor";
 
 interface HexGridChunkProps {
   chunk: {
@@ -96,6 +96,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     if (buildMode.type === "power_pole") {
       const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
       if (nearestCorner) {
+        const hexCell = getCell(grid, nearestCorner.hex);
+        if (!hexCell?.regionName) {
+          return;
+        }
         const otherPoles = buildables.filter(
           (b): b is PowerPole => b.type === "power_pole"
         );
@@ -116,8 +120,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     if (buildMode && isPowerPlantBuildMode(buildMode)) {
       const coords = fromWorldPoint([point.x, point.y, point.z]);
       const isValidCoord = validCoordinates.some((c) => equals(c, coords));
+      const cell = getCell(grid, coords);
 
-      if (isValidCoord) {
+      if (isValidCoord && cell?.regionName) {
         const blueprint = player.blueprintsById[buildMode.blueprintId];
         if (blueprint) {
           return {
@@ -182,21 +187,15 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     [buildMode, validCoordinates, onCellClick]
   );
 
+  const { updateHexPopulation, updateHexTerrain } = useMapEditor();
+
   const handleCellUpdate = useCallback(
     (coordinates: HexCoordinates, updates: Partial<HexCell>) => {
       if (updates.terrainType !== undefined) {
-        sendGameEvent({
-          type: "UPDATE_HEX_TERRAIN",
-          coordinates,
-          terrainType: updates.terrainType,
-        });
+        updateHexTerrain(coordinates, updates.terrainType);
       }
       if (updates.population !== undefined) {
-        sendGameEvent({
-          type: "UPDATE_HEX_POPULATION",
-          coordinates,
-          population: updates.population,
-        });
+        updateHexPopulation(coordinates, updates.population);
       }
     },
     []

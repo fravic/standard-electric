@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { BuildableSchema } from "@/lib/buildables/Buildable";
-import { TerrainType, Population } from "@/lib/HexCell";
-import { HexCoordinatesSchema } from "@/lib/coordinates/types";
 
 export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
@@ -19,21 +17,6 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
       cornerCoordinates: true,
       id: true,
     }),
-  }),
-  z.object({
-    type: z.literal("UPDATE_HEX_TERRAIN"),
-    coordinates: HexCoordinatesSchema,
-    terrainType: z.nativeEnum(TerrainType),
-  }),
-  z.object({
-    type: z.literal("UPDATE_HEX_POPULATION"),
-    coordinates: HexCoordinatesSchema,
-    population: z.nativeEnum(Population),
-  }),
-  z.object({
-    type: z.literal("UPDATE_HEX_CITY"),
-    coordinates: HexCoordinatesSchema,
-    cityName: z.string().nullable(),
   }),
   z.object({
     type: z.literal("TICK"),

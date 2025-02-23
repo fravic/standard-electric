@@ -3,6 +3,7 @@ import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { clientStore } from "@/lib/clientState";
 import { GameContext } from "@/actor/game.context";
+import { useMapEditor } from "@/routes/mapEditor";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { UI_COLORS } from "@/lib/palette";
 import { TextInput } from "./TextInput";
@@ -75,14 +76,16 @@ export const TerrainPaintUI: React.FC = () => {
     (state) => state.context.selectedHexCoordinates
   );
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
-  const sendGameEvent = GameContext.useSend();
+  const { updateRegionName, updateHexCity } = useMapEditor();
 
   if (!isDebug) return null;
 
-  const currentCityName = selectedHexCoordinates
+  const selectedCell = selectedHexCoordinates
     ? hexGrid.cellsByHexCoordinates[coordinatesToString(selectedHexCoordinates)]
-        ?.cityName || ""
-    : "";
+    : null;
+
+  const currentCityName = selectedCell?.cityName || "";
+  const currentRegionName = selectedCell?.regionName || "";
 
   const handleExport = () => {
     const blob = new Blob([JSON.stringify(hexGrid, null, 2)], {
@@ -101,11 +104,20 @@ export const TerrainPaintUI: React.FC = () => {
   const handleCityNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedHexCoordinates) {
       const value = e.target.value;
-      sendGameEvent({
-        type: "UPDATE_HEX_CITY",
-        coordinates: selectedHexCoordinates,
-        cityName: value || null,
-      });
+      updateHexCity(selectedHexCoordinates, value || null);
+    }
+  };
+
+  const handleRegionNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (selectedHexCoordinates) {
+      const value = e.target.value;
+      updateRegionName(selectedHexCoordinates, value || null);
+    }
+  };
+
+  const handleClearRegion = () => {
+    if (selectedHexCoordinates) {
+      updateRegionName(selectedHexCoordinates, null);
     }
   };
 
@@ -193,6 +205,30 @@ export const TerrainPaintUI: React.FC = () => {
             value={currentCityName}
             onChange={handleCityNameChange}
             placeholder="Enter city name..."
+            disabled={!selectedHexCoordinates}
+            style={{ padding: "4px 8px" }}
+          />
+        </div>
+
+        <div style={styles.section}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <span style={styles.label}>Region Name</span>
+            <button
+              style={{
+                ...styles.button,
+                padding: "2px 6px",
+                fontSize: "12px",
+              }}
+              onClick={handleClearRegion}
+              disabled={!selectedHexCoordinates || !currentRegionName}
+            >
+              Clear
+            </button>
+          </div>
+          <TextInput
+            value={currentRegionName}
+            onChange={handleRegionNameChange}
+            placeholder="Enter region name..."
             disabled={!selectedHexCoordinates}
             style={{ padding: "4px 8px" }}
           />

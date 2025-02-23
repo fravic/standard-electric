@@ -80,6 +80,13 @@ export function getColor(cell: HexCell): Color {
       baseColor = new Color(0xc9eba1); // Default light green
   }
 
+  // Darken color if cell has no region name
+  if (!cell.regionName) {
+    const hsl: HSL = { h: 0, s: 0, l: 0 };
+    baseColor.getHSL(hsl);
+    baseColor.setHSL(hsl.h, hsl.s, hsl.l * 0.7); // Reduce lightness by 30%
+  }
+
   return baseColor;
 }
 
