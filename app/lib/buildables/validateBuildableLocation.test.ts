@@ -10,9 +10,6 @@ import {
 } from "./schemas";
 import {
   fromCubeCoordinates,
-  getQ,
-  getR,
-  getS,
   coordinatesToString,
 } from "../coordinates/HexCoordinates";
 
@@ -143,16 +140,6 @@ describe("validateBuildableLocation", () => {
       requiredState: "California",
     },
     // Blueprint with no required state
-    generic_plant: {
-      id: "generic_plant",
-      type: "coal_plant",
-      name: "Generic Power Plant",
-      powerGenerationKW: 1000,
-      startingPrice: 10,
-    },
-  };
-
-  const player2Blueprints: Record<string, PowerPlantBlueprint> = {
     generic_plant: {
       id: "generic_plant",
       type: "coal_plant",
