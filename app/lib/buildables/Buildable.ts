@@ -5,12 +5,74 @@ import {
   findPossibleConnectionsForCoordinates,
   isPowerPole,
 } from "./PowerPole";
-import { createPowerPlant } from "./PowerPlant";
+import { createPowerPlant, isPowerPlant } from "./PowerPlant";
 import { BuildableSchema, Buildable, BuiltBuildable } from "./schemas";
 import { GameContext } from "@/actor/game.types";
+import { HexGrid, getCell } from "../HexGrid";
 
 export { BuildableSchema };
 export type { Buildable };
+
+/**
+ * Validates if a buildable can be placed at the specified location
+ * based on region requirements and other constraints.
+ */
+export function validateBuildableLocation(
+  buildable: Pick<
+    Buildable,
+    "type" | "coordinates" | "cornerCoordinates" | "id"
+  >,
+  grid: HexGrid,
+  context: GameContext,
+  playerId: string
+): { valid: boolean; reason?: string } {
+  // For power poles, check if the corner is in a valid region
+  if (buildable.type === "power_pole" && buildable.cornerCoordinates) {
+    const hexCell = getCell(grid, buildable.cornerCoordinates.hex);
+    if (!hexCell?.regionName) {
+      return { valid: false, reason: "Power poles must be placed in a region" };
+    }
+    return { valid: true };
+  }
+
+  // For power plants, check if the hex is in a valid region and matches the required state
+  if (isPowerPlant(buildable) && buildable.coordinates) {
+    const cell = getCell(grid, buildable.coordinates);
+
+    // Check if cell exists and has a region
+    if (!cell) {
+      return { valid: false, reason: "Invalid hex coordinate" };
+    }
+
+    if (!cell.regionName) {
+      return {
+        valid: false,
+        reason: "Power plants must be placed in a region",
+      };
+    }
+
+    // Check if the region matches the required state (if specified)
+    const player = context.public.players[playerId];
+    const blueprint = player?.blueprintsById[buildable.id];
+
+    if (
+      blueprint?.requiredState &&
+      cell.regionName !== blueprint.requiredState
+    ) {
+      return {
+        valid: false,
+        reason: `This power plant must be placed in ${blueprint.requiredState}`,
+      };
+    }
+
+    return { valid: true };
+  }
+
+  return {
+    valid: false,
+    reason: "Invalid buildable type or missing coordinates",
+  };
+}
 
 export function createBuildable({
   buildable,
@@ -39,7 +101,7 @@ export function createBuildable({
     });
   }
 
-  if (buildable.type === "coal_plant" && buildable.coordinates) {
+  if (isPowerPlant(buildable) && buildable.coordinates) {
     const player = context.public.players[playerId];
     const blueprint = player.blueprintsById[buildable.id];
     if (!blueprint) {
@@ -65,7 +127,7 @@ export function getBuildableWorldPoint(
   if (buildable.type === "power_pole" && buildable.cornerCoordinates) {
     const point = getCornerWorldPoint(buildable.cornerCoordinates);
     return [point[0], 0, point[2]];
-  } else if (buildable.type === "coal_plant" && buildable.coordinates) {
+  } else if (isPowerPlant(buildable) && buildable.coordinates) {
     const point = toWorldPoint(buildable.coordinates);
     return [point[0], 0.5, point[2]];
   }

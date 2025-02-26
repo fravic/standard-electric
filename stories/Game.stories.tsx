@@ -237,7 +237,7 @@ export const Auction: Story = {
           },
         },
         private: {},
-        value: "auction",
+        value: { auction: "initiatingBid" },
       },
     });
 
@@ -344,13 +344,94 @@ export const AuctionWithCurrentBlueprint: Story = {
           },
         },
         private: {},
-        value: "auction",
+        value: { auction: "biddingOnBlueprint" },
       },
     });
 
     client.subscribe((snapshot) => {
       action("game-state-change")(snapshot);
     });
+
+    await mount(
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
+    );
+  },
+};
+
+export const BuildablePlacementValidation: Story = {
+  play: async ({ canvasElement, mount }) => {
+    const client = createActorKitMockClient<GameMachine>({
+      initialSnapshot: {
+        public: {
+          id: "game-123",
+          players: {
+            [PLAYER_ID]: {
+              name: "Player 1",
+              number: 1,
+              money: 1000, // Plenty of money to build
+              powerSoldKWh: 0,
+              isHost: true,
+              blueprintsById: {
+                // Blueprint with California as required state
+                california_plant: {
+                  id: "california_plant",
+                  type: "coal_plant",
+                  name: "California Power Plant",
+                  powerGenerationKW: 2000,
+                  startingPrice: 20,
+                  requiredState: "California",
+                },
+                // Blueprint with no required state
+                generic_plant: {
+                  id: "generic_plant",
+                  type: "coal_plant",
+                  name: "Generic Power Plant",
+                  powerGenerationKW: 1000,
+                  startingPrice: 10,
+                },
+              },
+            },
+          },
+          time: {
+            totalTicks: 0,
+            isPaused: false,
+          },
+          auction: null,
+          buildables: [],
+          hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
+          // These properties are in the game.machine.ts but not in the types
+          isDebug: false,
+          mapBuilder: {
+            isPaintbrushMode: false,
+            selectedTerrainType: null,
+            selectedPopulation: null,
+          },
+        } as any, // Use type assertion to avoid TypeScript errors
+        private: {},
+        value: "active",
+      },
+    });
+
+    client.subscribe((snapshot) => {
+      action("game-state-change")(snapshot);
+    });
+
+    // Enable build mode for the California plant to test validation
+    clientStore.send({
+      type: "setBuildMode",
+      mode: {
+        type: "coal_plant",
+        blueprintId: "california_plant",
+      },
+    });
+
+    // Enable debug mode to see region names
+    clientStore.send({ type: "setIsDebug", isDebug: true });
 
     await mount(
       <AuthContext.Provider client={mockAuthClient}>

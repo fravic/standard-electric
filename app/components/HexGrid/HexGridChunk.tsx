@@ -28,6 +28,7 @@ import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 import { useMapEditor } from "@/routes/mapEditor";
+import { validateBuildableLocation } from "@/lib/buildables/Buildable";
 
 interface HexGridChunkProps {
   chunk: {
@@ -52,6 +53,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const player = GameContext.useSelector(
     (state) => state.public.players[userId!]
   );
+  const gameState = GameContext.useSelector((state) => state);
 
   const buildMode = useSelector(
     clientStore,
@@ -96,13 +98,27 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     if (buildMode.type === "power_pole") {
       const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
       if (nearestCorner) {
-        const hexCell = getCell(grid, nearestCorner.hex);
-        if (!hexCell?.regionName) {
-          return;
+        const ghostPoleData = {
+          id: "ghost",
+          type: "power_pole" as const,
+          cornerCoordinates: nearestCorner,
+        };
+
+        const validation = validateBuildableLocation(
+          ghostPoleData,
+          grid,
+          gameState,
+          userId!
+        );
+
+        if (!validation.valid) {
+          return null;
         }
+
         const otherPoles = buildables.filter(
           (b): b is PowerPole => b.type === "power_pole"
         );
+
         const ghostPole = createPowerPole({
           id: "ghost",
           cornerCoordinates: nearestCorner,
@@ -120,29 +136,52 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     if (buildMode && isPowerPlantBuildMode(buildMode)) {
       const coords = fromWorldPoint([point.x, point.y, point.z]);
       const isValidCoord = validCoordinates.some((c) => equals(c, coords));
-      const cell = getCell(grid, coords);
+      const blueprint = player.blueprintsById[buildMode.blueprintId];
 
-      if (isValidCoord && cell?.regionName) {
-        const blueprint = player.blueprintsById[buildMode.blueprintId];
-        if (blueprint) {
-          return {
-            id: "ghost",
-            type: "coal_plant" as const,
-            coordinates: coords,
-            playerId: userId!,
-            isGhost: true,
-            name: blueprint.name,
-            powerGenerationKW: blueprint.powerGenerationKW,
-            pricePerKwh: 0.1,
-            startingPrice: blueprint.startingPrice,
-            requiredState: blueprint.requiredState,
-          };
+      if (isValidCoord && blueprint) {
+        const ghostBuildableData = {
+          id: buildMode.blueprintId,
+          type: "coal_plant" as const,
+          coordinates: coords,
+        };
+
+        const validation = validateBuildableLocation(
+          ghostBuildableData,
+          grid,
+          gameState,
+          userId!
+        );
+
+        if (!validation.valid) {
+          return null;
         }
+
+        return {
+          id: "ghost",
+          type: "coal_plant" as const,
+          coordinates: coords,
+          playerId: userId!,
+          isGhost: true,
+          name: blueprint.name,
+          powerGenerationKW: blueprint.powerGenerationKW,
+          pricePerKwh: 0.1,
+          startingPrice: blueprint.startingPrice,
+          requiredState: blueprint.requiredState,
+        };
       }
     }
 
     return null;
-  }, [buildMode, validCoordinates, buildables, hoverLocation, player, userId]);
+  }, [
+    buildMode,
+    validCoordinates,
+    buildables,
+    hoverLocation,
+    player,
+    userId,
+    grid,
+    gameState,
+  ]);
 
   const handleHover = useCallback(
     (event: ThreeEvent<PointerEvent>) => {
@@ -217,6 +256,16 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return cells.filter((cell) => cell.regionName === hoveringCell.regionName);
   }, [cells, grid, hoveringHexCoordinates]);
 
+  // Get cells to highlight based on required state for power plant build mode
+  const requiredStateHighlightedCells = useMemo(() => {
+    if (!buildMode || !isPowerPlantBuildMode(buildMode) || !player) return [];
+
+    const blueprint = player.blueprintsById[buildMode.blueprintId];
+    if (!blueprint || !blueprint.requiredState) return [];
+
+    return cells.filter((cell) => cell.regionName === blueprint.requiredState);
+  }, [cells, buildMode, player]);
+
   // Filter buildables in this chunk
   const chunkBuildables = useMemo(() => {
     return buildables.filter((buildable) => {
@@ -251,6 +300,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           color={[1, 1, 1]}
           opacity={0.02}
           height={0.05}
+        />
+      )}
+      {requiredStateHighlightedCells.length > 0 && (
+        <HighlightedHexCells
+          cells={requiredStateHighlightedCells}
+          color={[0.2, 0.8, 0.2]}
+          opacity={0.05}
+          height={0.1}
         />
       )}
       <PowerLines chunkCells={cells.map((cell: HexCell) => cell.coordinates)} />

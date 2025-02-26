@@ -5,7 +5,10 @@ import { nanoid } from "nanoid";
 
 import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
-import { createBuildable } from "@/lib/buildables/Buildable";
+import {
+  createBuildable,
+  validateBuildableLocation,
+} from "@/lib/buildables/Buildable";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import hexGridData from "../../public/hexgrid.json";
 import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
@@ -141,6 +144,23 @@ export const gameMachine = setup({
               return;
             }
 
+            // Validate buildable location
+            const validation = validateBuildableLocation(
+              event.buildable,
+              context.public.hexGrid,
+              context,
+              event.caller.id
+            );
+
+            if (!validation.valid) {
+              console.log("Invalid buildable location: ", {
+                playerId: event.caller.id,
+                buildable: event.buildable,
+                reason: validation.reason,
+              });
+              return;
+            }
+
             // Deduct cost and create buildable
             draft.players[event.caller.id].money -= cost;
             const buildable = createBuildable({
@@ -148,6 +168,7 @@ export const gameMachine = setup({
               playerId: event.caller.id,
               context: context,
             });
+
             draft.buildables.push(buildable);
 
             // If it's a power plant, remove the blueprint from the player's collection
