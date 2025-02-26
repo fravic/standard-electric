@@ -148,8 +148,9 @@ export const gameMachine = setup({
             const validation = validateBuildableLocation(
               event.buildable,
               context.public.hexGrid,
-              context,
-              event.caller.id
+              context.public.buildables,
+              event.caller.id,
+              draft.players[event.caller.id].blueprintsById
             );
 
             if (!validation.valid) {

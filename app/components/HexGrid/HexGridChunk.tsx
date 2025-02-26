@@ -28,7 +28,7 @@ import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 import { useMapEditor } from "@/routes/mapEditor";
-import { validateBuildableLocation } from "@/lib/buildables/Buildable";
+import { validateBuildableLocation } from "@/lib/buildables/validateBuildableLocation";
 
 interface HexGridChunkProps {
   chunk: {
@@ -107,8 +107,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         const validation = validateBuildableLocation(
           ghostPoleData,
           grid,
-          gameState,
-          userId!
+          gameState.public.buildables,
+          userId!,
+          player.blueprintsById
         );
 
         if (!validation.valid) {
@@ -148,8 +149,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         const validation = validateBuildableLocation(
           ghostBuildableData,
           grid,
-          gameState,
-          userId!
+          gameState.public.buildables,
+          userId!,
+          player.blueprintsById
         );
 
         if (!validation.valid) {
