@@ -442,3 +442,132 @@ export const BuildablePlacementValidation: Story = {
     );
   },
 };
+
+export const GridConnectivityValidation: Story = {
+  play: async ({ canvasElement, mount }) => {
+    // Create a client with an existing power plant and power poles
+    const client = createActorKitMockClient<GameMachine>({
+      initialSnapshot: {
+        public: {
+          id: "game-123",
+          players: {
+            [PLAYER_ID]: {
+              name: "Player 1",
+              number: 1,
+              money: 1000, // Plenty of money to build
+              powerSoldKWh: 0,
+              isHost: true,
+              blueprintsById: {
+                // Blueprint with no required state for additional plants
+                generic_plant: {
+                  id: "generic_plant",
+                  type: "coal_plant",
+                  name: "Generic Power Plant",
+                  powerGenerationKW: 1000,
+                  startingPrice: 10,
+                },
+              },
+            },
+            "player-2": {
+              name: "Player 2",
+              number: 2,
+              money: 1000,
+              powerSoldKWh: 0,
+              isHost: false,
+              blueprintsById: {
+                generic_plant: {
+                  id: "generic_plant",
+                  type: "coal_plant",
+                  name: "Generic Power Plant",
+                  powerGenerationKW: 1000,
+                  startingPrice: 10,
+                },
+              },
+            },
+          },
+          time: {
+            totalTicks: 0,
+            isPaused: false,
+          },
+          auction: null,
+          // Add an existing power plant and power poles for Player 1
+          buildables: [
+            {
+              id: "existing-plant",
+              type: "coal_plant",
+              coordinates: { x: 10, z: 10 },
+              playerId: PLAYER_ID,
+              name: "Existing Power Plant",
+              powerGenerationKW: 1000,
+              pricePerKwh: 0.1,
+              startingPrice: 10,
+            },
+            createPowerPole({
+              id: "power-pole-1",
+              cornerCoordinates: {
+                hex: { x: 10, z: 10 },
+                position: CornerPosition.North,
+              },
+              playerId: PLAYER_ID,
+              connectedToIds: [],
+            }),
+            // Add a power plant for Player 2 in a different area
+            {
+              id: "player2-plant",
+              type: "coal_plant",
+              coordinates: { x: 20, z: 20 },
+              playerId: "player-2",
+              name: "Player 2 Power Plant",
+              powerGenerationKW: 1000,
+              pricePerKwh: 0.1,
+              startingPrice: 10,
+            },
+            createPowerPole({
+              id: "player2-pole",
+              cornerCoordinates: {
+                hex: { x: 20, z: 20 },
+                position: CornerPosition.North,
+              },
+              playerId: "player-2",
+              connectedToIds: [],
+            }),
+          ],
+          hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
+          // These properties are in the game.machine.ts but not in the types
+          isDebug: false,
+          mapBuilder: {
+            isPaintbrushMode: false,
+            selectedTerrainType: null,
+            selectedPopulation: null,
+          },
+        } as any, // Use type assertion to avoid TypeScript errors
+        private: {},
+        value: "active",
+      },
+    });
+
+    client.subscribe((snapshot) => {
+      action("game-state-change")(snapshot);
+    });
+
+    // Enable build mode for power poles to test grid connectivity validation
+    clientStore.send({
+      type: "setBuildMode",
+      mode: {
+        type: "power_pole",
+      },
+    });
+
+    // Enable debug mode to see region names and grid connectivity
+    clientStore.send({ type: "setIsDebug", isDebug: true });
+
+    await mount(
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
+    );
+  },
+};

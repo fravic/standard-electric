@@ -6,12 +6,13 @@ import {
 import { HexCell, Population } from "../HexCell";
 import { Buildable } from "../buildables/schemas";
 import { isPowerPole, PowerPole } from "../buildables/PowerPole";
-import { isPowerPlant } from "../buildables/PowerPlant";
+import { isPowerPlant, isPowerPlantType } from "../buildables/PowerPlant";
 import { HexGrid } from "../HexGrid";
 import {
   cornerToString,
   getAdjacentHexes,
 } from "../coordinates/CornerCoordinates";
+import { findPossibleConnectionsForCoordinates } from "../buildables/PowerPole";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -361,6 +362,105 @@ export class PowerSystem {
       incomePerPlayer,
       powerSoldPerPlayerKWh: powerSoldPerPlayer,
       grids: this.grids,
+    };
+  }
+
+  /**
+   * Validates if a new buildable can be placed at the specified location
+   * based on connectivity to the player's existing grid.
+   *
+   * @param buildableType The type of buildable (e.g., 'power_pole', 'coal_plant', etc.)
+   * @param playerId The ID of the player placing the buildable
+   * @param coordinates The hex coordinates for a power plant
+   * @param cornerCoordinates The corner coordinates for a power pole
+   * @returns An object indicating if the placement is valid and a reason if invalid
+   */
+  validateBuildablePlacement(
+    buildableType: Buildable["type"],
+    playerId: string,
+    coordinates?: HexCoordinates,
+    cornerCoordinates?: { hex: HexCoordinates; position: number }
+  ): { valid: boolean; reason?: string } {
+    // Check if this is the player's first power plant (always allowed)
+    const playerBuildables = this.buildables.filter(
+      (b) => "playerId" in b && b.playerId === playerId
+    );
+    const playerHasPowerPlants = playerBuildables.some(isPowerPlant);
+
+    // First power plant is always allowed
+    if (isPowerPlantType(buildableType) && !playerHasPowerPlants) {
+      return { valid: true };
+    }
+
+    // Find the player's existing grids
+    const playerGrids = this.grids.filter((grid) => {
+      // Check if any power plant in this grid belongs to the player
+      return grid.powerPlantIds.some((plantId) => {
+        const plant = this.powerPlants.find((p) => p.id === plantId);
+        return plant && plant.playerId === playerId;
+      });
+    });
+
+    // If player has no existing grid, they need to place a power plant first
+    if (playerGrids.length === 0) {
+      return {
+        valid: false,
+        reason: "You must place a power plant first",
+      };
+    }
+
+    // For power poles, check if it's adjacent to the player's existing grid
+    if (buildableType === "power_pole" && cornerCoordinates) {
+      // Get all power poles owned by the player
+      const playerPoles = Object.values(this.powerPolesById).filter(
+        (pole) => pole.playerId === playerId
+      );
+
+      // Use findPossibleConnectionsForCoordinates to check if the new pole can connect to existing poles
+      const possibleConnections = findPossibleConnectionsForCoordinates(
+        cornerCoordinates,
+        playerPoles
+      );
+
+      if (possibleConnections.length === 0) {
+        return {
+          valid: false,
+          reason: "Power poles must be connected to your existing grid",
+        };
+      }
+
+      return { valid: true };
+    }
+
+    // For power plants, check if it's adjacent to the player's existing grid
+    if (isPowerPlantType(buildableType) && coordinates) {
+      // Get all power poles in the player's grids
+      const playerPoleIds = new Set<string>();
+      playerGrids.forEach((grid) => {
+        grid.powerPoleIds.forEach((poleId) => playerPoleIds.add(poleId));
+      });
+
+      // Check if any existing pole is adjacent to the new plant
+      const isConnected = Object.values(this.powerPolesById)
+        .filter((pole) => playerPoleIds.has(pole.id))
+        .some((pole) => {
+          const poleHexes = getAdjacentHexes(pole.cornerCoordinates);
+          return poleHexes.some((hex) => equals(hex, coordinates));
+        });
+
+      if (!isConnected) {
+        return {
+          valid: false,
+          reason: "Power plants must be connected to your existing grid",
+        };
+      }
+
+      return { valid: true };
+    }
+
+    return {
+      valid: false,
+      reason: "Invalid buildable type or missing coordinates",
     };
   }
 }

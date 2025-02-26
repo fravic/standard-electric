@@ -9,6 +9,7 @@ import { createPowerPlant, isPowerPlant } from "./PowerPlant";
 import { BuildableSchema, Buildable, BuiltBuildable } from "./schemas";
 import { GameContext } from "@/actor/game.types";
 import { HexGrid, getCell } from "../HexGrid";
+import { PowerSystem } from "../power/PowerSystem";
 
 export { BuildableSchema };
 export type { Buildable };
@@ -26,12 +27,28 @@ export function validateBuildableLocation(
   context: GameContext,
   playerId: string
 ): { valid: boolean; reason?: string } {
+  // First, check region requirements
+
   // For power poles, check if the corner is in a valid region
   if (buildable.type === "power_pole" && buildable.cornerCoordinates) {
     const hexCell = getCell(grid, buildable.cornerCoordinates.hex);
     if (!hexCell?.regionName) {
       return { valid: false, reason: "Power poles must be placed in a region" };
     }
+
+    // Now check grid connectivity
+    const powerSystem = new PowerSystem(grid, context.public.buildables);
+    const connectivityValidation = powerSystem.validateBuildablePlacement(
+      "power_pole",
+      playerId,
+      undefined,
+      buildable.cornerCoordinates
+    );
+
+    if (!connectivityValidation.valid) {
+      return connectivityValidation;
+    }
+
     return { valid: true };
   }
 
@@ -63,6 +80,19 @@ export function validateBuildableLocation(
         valid: false,
         reason: `This power plant must be placed in ${blueprint.requiredState}`,
       };
+    }
+
+    // Now check grid connectivity
+    const powerSystem = new PowerSystem(grid, context.public.buildables);
+    const connectivityValidation = powerSystem.validateBuildablePlacement(
+      buildable.type,
+      playerId,
+      buildable.coordinates,
+      undefined
+    );
+
+    if (!connectivityValidation.valid) {
+      return connectivityValidation;
     }
 
     return { valid: true };
