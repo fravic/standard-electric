@@ -1,0 +1,7 @@
+---
+description: This rule is helpful whenever creating or modifying test files (ie. files that end in `.test.ts(x)`)
+globs: *.test.ts, *.test.tsx
+---
+
+# Run tests
+After creating or updating any tests, run the tests using the command `bun test`. Specific tests can be run by providing a path after the command, eg, `bun test path/to/test`.

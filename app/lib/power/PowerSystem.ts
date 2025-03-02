@@ -28,6 +28,7 @@ type PowerSystemResult = {
   incomePerPlayer: Record<string, number>;
   powerSoldPerPlayerKWh: Record<string, number>;
   grids: Grid[];
+  currentFuelStorageByPowerPlantId: Record<string, number>; // Power plant ID -> fuel storage level
 };
 
 type PowerPlant = {
@@ -38,6 +39,10 @@ type PowerPlant = {
   remainingCapacity: number;
   gridId: string;
   coordinates: HexCoordinates;
+  fuelType: string | null;
+  fuelConsumptionPerKWh: number;
+  maxFuelStorage: number;
+  currentFuelStorage: number;
 };
 
 type PowerPlantConnection = {
@@ -85,6 +90,10 @@ export class PowerSystem {
       remainingCapacity: plant.powerGenerationKW,
       gridId: plant.id, // Each plant starts in its own grid
       coordinates: plant.coordinates,
+      fuelType: plant.fuelType || null,
+      fuelConsumptionPerKWh: plant.fuelConsumptionPerKWh || 0,
+      maxFuelStorage: plant.maxFuelStorage || 0,
+      currentFuelStorage: plant.currentFuelStorage || 0,
     }));
 
     // Initialize power poles
@@ -224,11 +233,19 @@ export class PowerSystem {
   resolveOneHourOfPowerProduction(): PowerSystemResult {
     // Reset capacities and statuses
     this.powerPlants.forEach((plant) => {
-      plant.remainingCapacity = plant.maxCapacity;
+      // Check if there's enough fuel for at least some power generation
+      // For simplicity, we'll check if there's enough fuel for at least 1 KWh
+      if (plant.currentFuelStorage >= plant.fuelConsumptionPerKWh) {
+        plant.remainingCapacity = plant.maxCapacity;
+      } else {
+        plant.remainingCapacity = 0; // No power generation if not enough fuel
+      }
     });
+
     this.consumers.forEach((consumer) => {
       consumer.remainingDemand = consumer.demandKwh;
     });
+
     this.grids.forEach((grid) => {
       grid.usedCapacity = 0;
       grid.blackout = false;
@@ -237,6 +254,7 @@ export class PowerSystem {
     // Track power sold per player
     const powerSoldPerPlayer: Record<string, number> = {};
     const incomePerPlayer: Record<string, number> = {};
+    const currentFuelStorageByPowerPlantId: Record<string, number> = {};
 
     // First pass: Check for blackouts
     // Calculate total demand per grid and available capacity per consumer
@@ -358,10 +376,34 @@ export class PowerSystem {
       }
     }
 
+    // After power distribution, consume fuel for plants that generated power
+    this.powerPlants.forEach((plant) => {
+      // Only consume fuel if the plant generated power (used some capacity)
+      const plantGrid = this.grids.find((g) =>
+        g.powerPlantIds.includes(plant.id)
+      );
+
+      // Check if this specific plant has generated power
+      const powerGeneratedKWh = plant.maxCapacity - plant.remainingCapacity;
+
+      if (plantGrid && powerGeneratedKWh > 0) {
+        // Consume fuel based on the actual power generated
+        const fuelConsumed = powerGeneratedKWh * plant.fuelConsumptionPerKWh;
+        plant.currentFuelStorage = Math.max(
+          0,
+          plant.currentFuelStorage - fuelConsumed
+        );
+      }
+
+      // Record the current fuel level
+      currentFuelStorageByPowerPlantId[plant.id] = plant.currentFuelStorage;
+    });
+
     return {
       incomePerPlayer,
       powerSoldPerPlayerKWh: powerSoldPerPlayer,
       grids: this.grids,
+      currentFuelStorageByPowerPlantId,
     };
   }
 

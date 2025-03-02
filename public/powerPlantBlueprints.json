@@ -5,7 +5,10 @@
       "type": "coal_plant",
       "name": "Small Coal Plant",
       "powerGenerationKW": 1000,
-      "startingPrice": 10
+      "startingPrice": 10,
+      "fuelType": "coal",
+      "fuelConsumptionPerKWh": 0.1,
+      "maxFuelStorage": 1000
     },
     {
       "id": "coal_plant_medium",
@@ -13,7 +16,10 @@
       "name": "Medium Coal Plant",
       "powerGenerationKW": 2000,
       "startingPrice": 18,
-      "requiredState": "California"
+      "requiredState": "California",
+      "fuelType": "coal",
+      "fuelConsumptionPerKWh": 0.09,
+      "maxFuelStorage": 1800
     },
     {
       "id": "coal_plant_large",
@@ -21,14 +27,20 @@
       "name": "Large Coal Plant",
       "powerGenerationKW": 3000,
       "startingPrice": 25,
-      "requiredState": "Texas"
+      "requiredState": "Texas",
+      "fuelType": "coal",
+      "fuelConsumptionPerKWh": 0.08,
+      "maxFuelStorage": 2500
     },
     {
       "id": "coal_plant_xl",
       "type": "coal_plant",
       "name": "Extra Large Coal Plant",
       "powerGenerationKW": 4000,
-      "startingPrice": 35
+      "startingPrice": 35,
+      "fuelType": "coal",
+      "fuelConsumptionPerKWh": 0.08,
+      "maxFuelStorage": 3200
     },
     {
       "id": "coal_plant_mega",
@@ -36,7 +48,10 @@
       "name": "Mega Coal Plant",
       "powerGenerationKW": 5000,
       "startingPrice": 45,
-      "requiredState": "Wyoming"
+      "requiredState": "Wyoming",
+      "fuelType": "coal",
+      "fuelConsumptionPerKWh": 0.08,
+      "maxFuelStorage": 4000
     }
   ]
 }

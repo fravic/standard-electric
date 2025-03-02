@@ -25,6 +25,11 @@ const meta: Meta<typeof Game> = {
   ],
   parameters: {
     layout: "fullscreen",
+    docs: {
+      story: {
+        autoplay: true,
+      },
+    },
   },
 };
 

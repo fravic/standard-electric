@@ -49,5 +49,9 @@ export function createPowerPlant({
     pricePerKwh,
     startingPrice: blueprint.startingPrice,
     requiredState: blueprint.requiredState,
+    fuelType: blueprint.fuelType || null,
+    fuelConsumptionPerKWh: blueprint.fuelConsumptionPerKWh || 0,
+    maxFuelStorage: blueprint.maxFuelStorage || 0,
+    currentFuelStorage: 0, // Start with zero fuel
   };
 }

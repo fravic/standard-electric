@@ -117,6 +117,8 @@ export const gameMachine = setup({
           current(draft.buildables)
         );
         const powerSystemResult = powerSystem.resolveOneHourOfPowerProduction();
+
+        // Update player income and power sold
         Object.keys(powerSystemResult.incomePerPlayer).forEach((playerId) => {
           const income = powerSystemResult.incomePerPlayer[playerId] ?? 0;
           const powerSoldKWh =
@@ -126,6 +128,19 @@ export const gameMachine = setup({
           );
           draft.players[playerId].money += income;
           draft.players[playerId].powerSoldKWh += powerSoldKWh;
+        });
+
+        // Update fuel storage levels for power plants
+        Object.entries(
+          powerSystemResult.currentFuelStorageByPowerPlantId
+        ).forEach(([plantId, fuelLevel]) => {
+          const plantIndex = draft.buildables.findIndex(
+            (b) => b.id === plantId && isPowerPlant(b)
+          );
+          if (plantIndex !== -1) {
+            (draft.buildables[plantIndex] as any).currentFuelStorage =
+              fuelLevel;
+          }
         });
       }),
     })),

@@ -25,6 +25,9 @@ export const PowerPlantBlueprintSchema = BuildableSchema.extend({
   powerGenerationKW: z.number(),
   startingPrice: z.number(),
   requiredState: z.string().optional(),
+  fuelType: z.string().nullable().optional(),
+  fuelConsumptionPerKWh: z.number().optional(),
+  maxFuelStorage: z.number().optional(),
 });
 
 export const PowerPlantBlueprintsSchema = z.array(PowerPlantBlueprintSchema);
@@ -34,6 +37,7 @@ export const PowerPlantSchema = PowerPlantBlueprintSchema.extend({
   playerId: z.string(),
   isGhost: z.boolean().optional(),
   pricePerKwh: z.number(),
+  currentFuelStorage: z.number().optional(),
 });
 
 export type PowerPole = z.infer<typeof PowerPoleSchema>;
