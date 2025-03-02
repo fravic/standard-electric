@@ -14,6 +14,7 @@ import {
   GameServiceEventSchema,
 } from "./game.schemas";
 import { Env } from "../env";
+import { CommodityMarketState } from "../lib/market/CommodityMarket";
 
 export interface Player {
   name: string;
@@ -56,6 +57,7 @@ interface GamePublicContext {
   hexGrid: HexGrid;
   auction: Auction | null;
   randomSeed: number;
+  commodityMarket: CommodityMarketState;
 }
 
 export type GamePrivateContext = {};

@@ -24,6 +24,13 @@ import {
   processBlueprintWinner,
 } from "@/lib/auction";
 import { isPowerPlant } from "@/lib/buildables/PowerPlant";
+import {
+  initializeCommodityMarket,
+  buyCommodity,
+  sellCommodity,
+  CommodityType,
+} from "../lib/market/CommodityMarket";
+import { PowerPlant } from "../lib/buildables/schemas";
 
 export const gameMachine = setup({
   types: {
@@ -299,6 +306,138 @@ export const gameMachine = setup({
         draft.auction = newAuctionState;
       }),
     })),
+    buyCommodity: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => {
+        if (event.type !== "BUY_COMMODITY") return context;
+
+        const playerId = event.caller.id;
+        const player = context.public.players[playerId];
+        if (!player) return context;
+
+        // Find the specific power plant by ID
+        const powerPlant = context.public.buildables.find(
+          (b) =>
+            b.id === event.powerPlantId &&
+            isPowerPlant(b) &&
+            b.playerId === playerId
+        ) as PowerPlant | undefined;
+
+        if (!powerPlant) return context;
+
+        // Check if the power plant can use this fuel type
+        if (powerPlant.fuelType !== event.fuelType) return context;
+
+        // Calculate available space in the fuel storage
+        const availableStorage =
+          (powerPlant.maxFuelStorage || 0) -
+          (powerPlant.currentFuelStorage || 0);
+        if (availableStorage <= 0) return context;
+
+        // Calculate how much fuel we can actually buy
+        const { updatedMarket, totalCost, fuelAmount } = buyCommodity(
+          context.public.commodityMarket,
+          event.fuelType,
+          event.units
+        );
+
+        // Check if player has enough money
+        if (player.money < totalCost) return context;
+
+        // Calculate how much fuel we can actually store (might be limited by storage capacity)
+        const actualFuelToAdd = Math.min(availableStorage, fuelAmount);
+
+        // If we can't store any fuel, don't proceed with the purchase
+        if (actualFuelToAdd <= 0) return context;
+
+        // Calculate the actual cost based on how much fuel we're adding
+        const actualCost = (actualFuelToAdd / fuelAmount) * totalCost;
+
+        return {
+          public: produce(context.public, (draft) => {
+            // Update player's money
+            draft.players[playerId].money -= actualCost;
+
+            // Update power plant's fuel storage
+            const plantIndex = draft.buildables.findIndex(
+              (b) => b.id === powerPlant.id
+            );
+            if (plantIndex >= 0) {
+              const plant = draft.buildables[plantIndex] as PowerPlant;
+              plant.currentFuelStorage =
+                (plant.currentFuelStorage || 0) + actualFuelToAdd;
+            }
+
+            // Update market state
+            draft.commodityMarket = updatedMarket;
+          }),
+        };
+      }
+    ),
+
+    sellCommodity: assign(
+      ({ context, event }: { context: GameContext; event: GameEvent }) => {
+        if (event.type !== "SELL_COMMODITY") return context;
+
+        const playerId = event.caller.id;
+        const player = context.public.players[playerId];
+        if (!player) return context;
+
+        // Find the specific power plant by ID
+        const powerPlant = context.public.buildables.find(
+          (b) =>
+            b.id === event.powerPlantId &&
+            isPowerPlant(b) &&
+            b.playerId === playerId
+        ) as PowerPlant | undefined;
+
+        if (!powerPlant) return context;
+
+        // Check if the power plant has this fuel type
+        if (powerPlant.fuelType !== event.fuelType) return context;
+
+        // Check if the power plant has enough fuel to sell
+        const currentFuel = powerPlant.currentFuelStorage || 0;
+        if (currentFuel <= 0) return context;
+
+        // Calculate how much fuel we can actually sell
+        const { updatedMarket, totalProfit, fuelAmount } = sellCommodity(
+          context.public.commodityMarket,
+          event.fuelType,
+          event.units
+        );
+
+        // Calculate how much fuel we can actually sell (might be limited by what we have)
+        const actualFuelToSell = Math.min(currentFuel, fuelAmount);
+
+        // If we don't have any fuel to sell, don't proceed
+        if (actualFuelToSell <= 0) return context;
+
+        // Calculate the actual profit based on how much fuel we're selling
+        const actualProfit = (actualFuelToSell / fuelAmount) * totalProfit;
+
+        return {
+          public: produce(context.public, (draft) => {
+            // Update player's money
+            draft.players[playerId].money += actualProfit;
+
+            // Update power plant's fuel storage
+            const plantIndex = draft.buildables.findIndex(
+              (b) => b.id === powerPlant.id
+            );
+            if (plantIndex >= 0) {
+              const plant = draft.buildables[plantIndex] as PowerPlant;
+              plant.currentFuelStorage = Math.max(
+                0,
+                (plant.currentFuelStorage || 0) - actualFuelToSell
+              );
+            }
+
+            // Update market state
+            draft.commodityMarket = updatedMarket;
+          }),
+        };
+      }
+    ),
   },
 }).createMachine({
   id: "game",
@@ -321,6 +460,7 @@ export const gameMachine = setup({
       hexGrid: HexGridSchema.parse(hexGridData),
       auction: null,
       randomSeed: Math.floor(Math.random() * 1000000),
+      commodityMarket: initializeCommodityMarket(),
     },
     private: {},
   }),
@@ -397,6 +537,12 @@ export const gameMachine = setup({
         },
         RESUME: {
           actions: ["stopGameTimer", "startGameTimer"],
+        },
+        BUY_COMMODITY: {
+          actions: "buyCommodity",
+        },
+        SELL_COMMODITY: {
+          actions: "sellCommodity",
         },
       },
     },

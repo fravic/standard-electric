@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BuildableSchema } from "@/lib/buildables/Buildable";
+import { CommodityType } from "@/lib/market/CommodityMarket";
 
 export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
@@ -40,6 +41,18 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("AUCTION_PASS_BID"),
+  }),
+  z.object({
+    type: z.literal("BUY_COMMODITY"),
+    fuelType: z.nativeEnum(CommodityType),
+    units: z.number().positive(),
+    powerPlantId: z.string(),
+  }),
+  z.object({
+    type: z.literal("SELL_COMMODITY"),
+    fuelType: z.nativeEnum(CommodityType),
+    units: z.number().positive(),
+    powerPlantId: z.string(),
   }),
 ]);
 

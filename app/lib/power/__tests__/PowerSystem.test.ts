@@ -7,6 +7,7 @@ import {
 import { CornerPosition } from "../../coordinates/types";
 import { Population, TerrainType, HexCell } from "../../HexCell";
 import { createPowerPole } from "../../buildables/PowerPole";
+import { CommodityType } from "../../market/CommodityMarket";
 
 // Helper function to create a power pole at a corner
 const createPowerPoleAtCorner = (
@@ -28,10 +29,10 @@ const createPowerPlantAtHex = (
   playerId: string = "player1",
   powerGenerationKW: number = 100,
   pricePerKwh: number = 0.1,
-  fuelType: string | null = "coal",
+  fuelType: CommodityType | null = CommodityType.COAL,
   fuelConsumptionPerKWh: number = 0.1,
   maxFuelStorage: number = 1000,
-  currentFuelStorage: number = 1000
+  currentFuelStorage: number = 0
 ) => {
   return {
     id: `plant-${coordinates.x}-${coordinates.z}`,
@@ -590,13 +591,21 @@ describe("PowerSystem", () => {
         { x: 1, z: 0 },
         "player1",
         100,
-        0.1
+        0.1,
+        CommodityType.COAL,
+        0.1,
+        1000,
+        1000
       );
       const expensivePlant = createPowerPlantAtHex(
         { x: -1, z: 0 },
         "player2",
         100,
-        0.2
+        0.2,
+        CommodityType.COAL,
+        0.1,
+        1000,
+        1000
       );
 
       // Create poles and connect them to the plants
@@ -748,7 +757,16 @@ describe("PowerSystem", () => {
         );
 
       // Grid 1: Sufficient capacity
-      const plant1 = createPowerPlantAtHex({ x: 1, z: 0 }, "player1", 20, 0.1);
+      const plant1 = createPowerPlantAtHex(
+        { x: 1, z: 0 },
+        "player1",
+        20,
+        0.1,
+        CommodityType.COAL,
+        0.1,
+        1000,
+        1000 // Explicitly set fuel storage
+      );
       const pole1 = createPowerPoleAtCorner(consumer1Hex, CornerPosition.North);
       const pole2 = createPowerPoleAtCorner(
         { x: 1, z: 0 },
@@ -757,7 +775,16 @@ describe("PowerSystem", () => {
       );
 
       // Grid 2: Insufficient capacity
-      const plant2 = createPowerPlantAtHex({ x: 4, z: 0 }, "player2", 50, 0.1);
+      const plant2 = createPowerPlantAtHex(
+        { x: 4, z: 0 },
+        "player2",
+        50,
+        0.1,
+        CommodityType.COAL,
+        0.1,
+        1000,
+        1000 // Explicitly set fuel storage
+      );
       const pole3 = createPowerPoleAtCorner(consumer2Hex, CornerPosition.North);
       const pole4 = createPowerPoleAtCorner(
         { x: 4, z: 0 },
@@ -805,8 +832,26 @@ describe("PowerSystem", () => {
         );
 
       // Two separate plants/grids, both connected to the consumer
-      const plant1 = createPowerPlantAtHex({ x: 1, z: 0 }, "player1", 30, 0.1);
-      const plant2 = createPowerPlantAtHex({ x: -1, z: 0 }, "player2", 30, 0.2);
+      const plant1 = createPowerPlantAtHex(
+        { x: 1, z: 0 },
+        "player1",
+        30,
+        0.1,
+        CommodityType.COAL,
+        0.1,
+        1000,
+        1000 // Explicitly set fuel storage
+      );
+      const plant2 = createPowerPlantAtHex(
+        { x: 4, z: 0 },
+        "player2",
+        30,
+        0.2,
+        CommodityType.COAL,
+        0.1,
+        1000,
+        1000 // Explicitly set fuel storage
+      );
 
       // Create poles and connect them to the plants
       const pole1 = createPowerPoleAtCorner(
@@ -821,7 +866,7 @@ describe("PowerSystem", () => {
       );
       const pole3 = createPowerPoleAtCorner(consumerHex, CornerPosition.South);
       const pole4 = createPowerPoleAtCorner(
-        { x: -1, z: 0 },
+        { x: 4, z: 0 },
         CornerPosition.North,
         [pole3.id]
       );
@@ -871,7 +916,7 @@ describe("PowerSystem", () => {
         "player1",
         100, // 100 kW capacity
         0.1, // price per kWh
-        "coal",
+        CommodityType.COAL,
         0.1, // 0.1 fuel per kWh
         1000, // max fuel storage
         1000 // current fuel storage
@@ -902,7 +947,7 @@ describe("PowerSystem", () => {
         "player1",
         100, // 100 kW capacity
         0.1, // price per kWh
-        "coal",
+        CommodityType.COAL,
         0.1, // 0.1 fuel per kWh
         1000, // max fuel storage
         0.05 // not enough fuel for even 1 kWh
@@ -949,7 +994,7 @@ describe("PowerSystem", () => {
         "player1",
         100, // 100 kW capacity
         0.1, // price per kWh
-        "coal",
+        CommodityType.COAL,
         0.1, // 0.1 fuel per kWh
         1000, // max fuel storage
         1000 // current fuel storage
@@ -985,7 +1030,7 @@ describe("PowerSystem", () => {
         "player1",
         30, // 30 kW capacity
         0.1, // price per kWh
-        "coal",
+        CommodityType.COAL,
         0.1, // 0.1 fuel per kWh
         1000, // max fuel storage
         1000 // current fuel storage
@@ -996,7 +1041,7 @@ describe("PowerSystem", () => {
         "player2",
         30, // 30 kW capacity
         0.2, // price per kWh
-        "coal",
+        CommodityType.COAL,
         0.05, // 0.05 fuel per kWh (more efficient)
         1000, // max fuel storage
         1000 // current fuel storage

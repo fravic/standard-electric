@@ -7,6 +7,7 @@ import { GameContext } from "@/actor/game.context";
 import { GameMachine } from "@/actor/game.machine";
 import { Game } from "@/components/Game";
 import { HexGrid } from "@/lib/HexGrid";
+import { initializeCommodityMarket } from "@/lib/market/CommodityMarket";
 
 import hexGrid from "@/../public/hexgrid.json";
 import { CornerPosition } from "@/lib/coordinates/types";
@@ -87,6 +88,7 @@ export const Blank: Story = {
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
+          commodityMarket: initializeCommodityMarket(),
         },
         private: {},
         value: "active",
@@ -168,6 +170,7 @@ export const WithPowerLines: Story = {
           ],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
+          commodityMarket: initializeCommodityMarket(),
         },
         private: {},
         value: "active",
@@ -209,6 +212,7 @@ export const Auction: Story = {
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
+          commodityMarket: initializeCommodityMarket(),
           auction: {
             availableBlueprints: [
               {
@@ -301,6 +305,7 @@ export const AuctionWithCurrentBlueprint: Story = {
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
+          commodityMarket: initializeCommodityMarket(),
           auction: {
             availableBlueprints: [
               {
@@ -416,6 +421,7 @@ export const BuildablePlacementValidation: Story = {
             selectedTerrainType: null,
             selectedPopulation: null,
           },
+          commodityMarket: initializeCommodityMarket(),
         } as any, // Use type assertion to avoid TypeScript errors
         private: {},
         value: "active",
@@ -546,6 +552,7 @@ export const GridConnectivityValidation: Story = {
             selectedTerrainType: null,
             selectedPopulation: null,
           },
+          commodityMarket: initializeCommodityMarket(),
         } as any, // Use type assertion to avoid TypeScript errors
         private: {},
         value: "active",

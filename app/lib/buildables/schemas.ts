@@ -3,6 +3,7 @@ import {
   HexCoordinatesSchema,
   CornerCoordinatesSchema,
 } from "../coordinates/types";
+import { CommodityType } from "../market/CommodityMarket";
 
 export const BuildableSchema = z.object({
   id: z.string(),
@@ -25,7 +26,7 @@ export const PowerPlantBlueprintSchema = BuildableSchema.extend({
   powerGenerationKW: z.number(),
   startingPrice: z.number(),
   requiredState: z.string().optional(),
-  fuelType: z.string().nullable().optional(),
+  fuelType: z.nativeEnum(CommodityType).nullable().optional(),
   fuelConsumptionPerKWh: z.number().optional(),
   maxFuelStorage: z.number().optional(),
 });
