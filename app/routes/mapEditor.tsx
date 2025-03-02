@@ -11,7 +11,7 @@ import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { TerrainType, Population } from "@/lib/HexCell";
 import { GameClientEventSchema } from "@/actor/game.schemas";
 import { AuthContext } from "@/auth.context";
-
+import { initializeCommodityMarket } from "@/lib/market/CommodityMarket";
 import hexGrid from "@/../public/hexgrid.json";
 
 type GameClientEvent = z.infer<typeof GameClientEventSchema>;
@@ -75,6 +75,7 @@ export default function MapEditor() {
         hexGrid: hexGrid as HexGrid,
         auction: null,
         randomSeed: 0,
+        commodityMarket: initializeCommodityMarket(),
       },
       private: {},
       value: "active",

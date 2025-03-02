@@ -98,6 +98,7 @@ export const Blank: Story = {
     client.subscribe((snapshot) => {
       action("game-state-change")(snapshot);
     });
+    clientStore.send({ type: "setIsDebug", isDebug: false });
 
     await mount(
       <AuthContext.Provider client={mockAuthClient}>
@@ -177,7 +178,7 @@ export const WithPowerLines: Story = {
       },
     });
 
-    clientStore.send({ type: "setIsDebug", isDebug: true });
+    clientStore.send({ type: "setIsDebug", isDebug: false });
 
     await mount(
       <AuthContext.Provider client={mockAuthClient}>
@@ -361,6 +362,7 @@ export const AuctionWithCurrentBlueprint: Story = {
     client.subscribe((snapshot) => {
       action("game-state-change")(snapshot);
     });
+    clientStore.send({ type: "setIsDebug", isDebug: false });
 
     await mount(
       <AuthContext.Provider client={mockAuthClient}>
@@ -372,7 +374,7 @@ export const AuctionWithCurrentBlueprint: Story = {
   },
 };
 
-export const BuildablePlacementValidation: Story = {
+export const BuildablePlacementInCalifornia: Story = {
   play: async ({ canvasElement, mount }) => {
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
@@ -431,6 +433,7 @@ export const BuildablePlacementValidation: Story = {
     client.subscribe((snapshot) => {
       action("game-state-change")(snapshot);
     });
+    clientStore.send({ type: "setIsDebug", isDebug: false });
 
     // Enable build mode for the California plant to test validation
     clientStore.send({
@@ -441,8 +444,7 @@ export const BuildablePlacementValidation: Story = {
       },
     });
 
-    // Enable debug mode to see region names
-    clientStore.send({ type: "setIsDebug", isDebug: true });
+    clientStore.send({ type: "setIsDebug", isDebug: false });
 
     await mount(
       <AuthContext.Provider client={mockAuthClient}>
@@ -571,7 +573,76 @@ export const GridConnectivityValidation: Story = {
       },
     });
 
-    // Enable debug mode to see region names and grid connectivity
+    clientStore.send({ type: "setIsDebug", isDebug: false });
+
+    await mount(
+      <AuthContext.Provider client={mockAuthClient}>
+        <GameContext.ProviderFromClient client={client}>
+          <Game />
+        </GameContext.ProviderFromClient>
+      </AuthContext.Provider>
+    );
+  },
+};
+
+export const DebugMode: Story = {
+  play: async ({ canvasElement, mount }) => {
+    // Create a client with an existing power plant and power poles
+    const client = createActorKitMockClient<GameMachine>({
+      initialSnapshot: {
+        public: {
+          id: "game-123",
+          players: {
+            [PLAYER_ID]: {
+              name: "Player 1",
+              number: 1,
+              money: 1000,
+              powerSoldKWh: 0,
+              isHost: true,
+              blueprintsById: {},
+            },
+            "player-2": {
+              name: "Player 2",
+              number: 2,
+              money: 1000,
+              powerSoldKWh: 0,
+              isHost: false,
+              blueprintsById: {
+                generic_plant: {
+                  id: "generic_plant",
+                  type: "coal_plant",
+                  name: "Generic Power Plant",
+                  powerGenerationKW: 1000,
+                  startingPrice: 10,
+                },
+              },
+            },
+          },
+          time: {
+            totalTicks: 0,
+            isPaused: false,
+          },
+          auction: null,
+          buildables: [],
+          hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
+          isDebug: false,
+          mapBuilder: {
+            isPaintbrushMode: false,
+            selectedTerrainType: null,
+            selectedPopulation: null,
+          },
+          commodityMarket: initializeCommodityMarket(),
+        } as any, // Use type assertion to avoid TypeScript errors
+        private: {},
+        value: "active",
+      },
+    });
+
+    client.subscribe((snapshot) => {
+      action("game-state-change")(snapshot);
+    });
+
     clientStore.send({ type: "setIsDebug", isDebug: true });
 
     await mount(
