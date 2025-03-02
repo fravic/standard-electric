@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { HexDetailsUI } from "./HexDetailsUI";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { HOURS_PER_DAY } from "../../lib/constants";
@@ -10,6 +10,13 @@ import { PlayerBar } from "./PlayerBar";
 import { BuildBar } from "./BuildBar";
 import { Lobby } from "./Lobby";
 import { PowerPlantAuction } from "./PowerPlantAuction";
+import { BuildableDetails } from "./BuildableDetails";
+import { CommodityMarketModal } from "./CommodityMarketModal";
+import { Button } from "./Button";
+import { clientStore } from "@/lib/clientState";
+import { useSelector } from "@xstate/store/react";
+import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
+import { Buildable } from "@/lib/buildables/schemas";
 
 const styles = {
   playersContainer: {
@@ -32,11 +39,21 @@ const styles = {
     fontFamily: "monospace",
     zIndex: 1000,
   },
+  marketButton: {
+    position: "fixed" as const,
+    top: "70px",
+    right: "10px",
+    zIndex: 1000,
+  },
 };
 
 export const GameUI: React.FC = () => {
+  const [showMarketModal, setShowMarketModal] = useState(false);
+
   const userId = AuthContext.useSelector((state) => state.userId);
-  const { players, time } = GameContext.useSelector((state) => state.public);
+  const { players, time, buildables } = GameContext.useSelector(
+    (state) => state.public
+  );
   const currentPlayer = userId ? players[userId] : undefined;
   const { totalTicks } = time;
   const timeEmoji = isDayTime(totalTicks) ? "☀️" : "🌙";
@@ -44,12 +61,26 @@ export const GameUI: React.FC = () => {
   const isLobby = GameContext.useMatches("lobby");
   const isAuction = GameContext.useMatches("auction");
 
+  // Get selected hex coordinates from client state
+  const selectedHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.selectedHexCoordinates
+  );
+
   // Sort players so current player is first, then alphabetically by name
   const sortedPlayers = Object.entries(players).sort(([id1, p1], [id2, p2]) => {
     if (id1 === userId) return -1;
     if (id2 === userId) return 1;
     return p1.name.localeCompare(p2.name);
   });
+
+  const selectedBuildable = selectedHexCoordinates
+    ? buildables.find(
+        (b) =>
+          b.coordinates &&
+          HexCoordinatesService.equals(b.coordinates, selectedHexCoordinates)
+      ) || null
+    : null;
 
   return (
     <>
@@ -68,12 +99,25 @@ export const GameUI: React.FC = () => {
           <div style={styles.timeContainer}>
             Day {dayNumber} {timeEmoji}
           </div>
+          <div style={styles.marketButton}>
+            <Button onClick={() => setShowMarketModal(true)}>
+              Commodity Market
+            </Button>
+          </div>
           <TerrainPaintUI />
           <HexDetailsUI />
         </>
       )}
       {isAuction && <PowerPlantAuction />}
       {isLobby && <Lobby players={players} />}
+
+      {/* Render BuildableDetails when a buildable is selected */}
+      {selectedBuildable && <BuildableDetails buildable={selectedBuildable} />}
+
+      {/* Commodity Market Modal */}
+      {showMarketModal && (
+        <CommodityMarketModal onClose={() => setShowMarketModal(false)} />
+      )}
     </>
   );
 };
