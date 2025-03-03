@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useSelector } from "@xstate/store/react";
 
 import { GameUI } from "./UI/GameUI";
-import { HexDetailsUI } from "./UI/HexDetailsUI";
 import { GameContext } from "@/actor/game.context";
 import { clientStore } from "@/lib/clientState";
 import { FPSCounter } from "./FPSCounter";
@@ -29,7 +28,6 @@ export function Game() {
     <div style={{ width: "100vw", height: "100vh" }}>
       <GameCanvas />
       <GameUI />
-      <HexDetailsUI />
       {isDebug && <FPSCounter />}
     </div>
   );

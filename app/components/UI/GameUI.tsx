@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HexDetailsUI } from "./HexDetailsUI";
+import { HexPreviewTooltip } from "./HexPreviewTooltip";
 import { TerrainPaintUI } from "./TerrainPaintUI";
 import { HOURS_PER_DAY } from "../../lib/constants";
 import { GameContext } from "@/actor/game.context";
@@ -10,13 +10,11 @@ import { PlayerBar } from "./PlayerBar";
 import { BuildBar } from "./BuildBar";
 import { Lobby } from "./Lobby";
 import { PowerPlantAuction } from "./PowerPlantAuction";
-import { BuildableDetails } from "./BuildableDetails";
+import { HexDetails } from "./HexDetails";
 import { CommodityMarketModal } from "./CommodityMarketModal";
 import { Button } from "./Button";
 import { clientStore } from "@/lib/clientState";
 import { useSelector } from "@xstate/store/react";
-import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
-import { Buildable } from "@/lib/buildables/schemas";
 
 const styles = {
   playersContainer: {
@@ -51,9 +49,7 @@ export const GameUI: React.FC = () => {
   const [showMarketModal, setShowMarketModal] = useState(false);
 
   const userId = AuthContext.useSelector((state) => state.userId);
-  const { players, time, buildables } = GameContext.useSelector(
-    (state) => state.public
-  );
+  const { players, time } = GameContext.useSelector((state) => state.public);
   const currentPlayer = userId ? players[userId] : undefined;
   const { totalTicks } = time;
   const timeEmoji = isDayTime(totalTicks) ? "☀️" : "🌙";
@@ -73,14 +69,6 @@ export const GameUI: React.FC = () => {
     if (id2 === userId) return 1;
     return p1.name.localeCompare(p2.name);
   });
-
-  const selectedBuildable = selectedHexCoordinates
-    ? buildables.find(
-        (b) =>
-          b.coordinates &&
-          HexCoordinatesService.equals(b.coordinates, selectedHexCoordinates)
-      ) || null
-    : null;
 
   return (
     <>
@@ -105,16 +93,12 @@ export const GameUI: React.FC = () => {
             </Button>
           </div>
           <TerrainPaintUI />
-          <HexDetailsUI />
+          <HexPreviewTooltip />
+          <HexDetails />
         </>
       )}
       {isAuction && <PowerPlantAuction />}
       {isLobby && <Lobby players={players} />}
-
-      {/* Render BuildableDetails when a buildable is selected */}
-      {selectedBuildable && <BuildableDetails buildable={selectedBuildable} />}
-
-      {/* Commodity Market Modal */}
       {showMarketModal && (
         <CommodityMarketModal onClose={() => setShowMarketModal(false)} />
       )}

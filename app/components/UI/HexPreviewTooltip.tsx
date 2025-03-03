@@ -29,7 +29,7 @@ const styles = {
   },
 };
 
-export function HexDetailsUI() {
+export function HexPreviewTooltip() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isOverMap, setIsOverMap] = useState(false);
   const hoveringHexCoordinates = useSelector(
