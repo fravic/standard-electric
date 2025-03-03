@@ -7,6 +7,8 @@ import {
   getMarketRates,
   CommodityType,
   CommodityMarketState,
+  buyFuelForPowerPlant,
+  sellFuelFromPowerPlant,
 } from "../CommodityMarket";
 
 describe("CommodityMarket", () => {
@@ -189,6 +191,243 @@ describe("CommodityMarket", () => {
       expect(
         market.commodities[CommodityType.COAL].currentExchangeRate
       ).toBeLessThan(initialCoalRate);
+    });
+  });
+
+  describe("buyFuelForPowerPlant", () => {
+    it("should successfully buy fuel when all conditions are met", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        maxFuelStorage: 100,
+        currentFuelStorage: 0,
+      };
+      const playerMoney = 1000;
+      const units = 5;
+
+      const result = buyFuelForPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+        playerMoney,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.actualCost).toBe(
+        calculateBuyPrice(market, CommodityType.COAL, units)
+      );
+      expect(result.actualFuelAdded).toBe(
+        units * market.commodities[CommodityType.COAL].config.unitSize
+      );
+      expect(
+        result.updatedMarket.commodities[CommodityType.COAL].currentExchangeRate
+      ).toBeGreaterThan(
+        market.commodities[CommodityType.COAL].currentExchangeRate
+      );
+    });
+
+    it("should fail when there is no available storage", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        maxFuelStorage: 50,
+        currentFuelStorage: 50, // Full storage
+      };
+      const playerMoney = 1000;
+      const units = 5;
+
+      const result = buyFuelForPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+        playerMoney,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.actualCost).toBe(0);
+      expect(result.actualFuelAdded).toBe(0);
+      expect(result.updatedMarket).toEqual(market); // Market should remain unchanged
+    });
+
+    it("should fail when player doesn't have enough money", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        maxFuelStorage: 100,
+        currentFuelStorage: 0,
+      };
+      const playerMoney = 0;
+      const units = 5;
+
+      const result = buyFuelForPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+        playerMoney,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.actualCost).toBe(0);
+      expect(result.actualFuelAdded).toBe(0);
+      expect(result.updatedMarket).toEqual(market); // Market should remain unchanged
+    });
+
+    it("should limit fuel added based on available storage", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        maxFuelStorage: 50,
+        currentFuelStorage: 30, // Only 20 units of storage left
+      };
+      const playerMoney = 1000;
+      const units = 5; // Trying to buy 5 units (50 fuel)
+
+      const result = buyFuelForPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+        playerMoney,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.actualFuelAdded).toBe(20); // Should be limited to available storage
+      expect(result.actualCost).toBeLessThan(
+        calculateBuyPrice(market, CommodityType.COAL, units)
+      ); // Cost should be proportionally reduced
+    });
+
+    it("should fail when power plant fuel type doesn't match", () => {
+      const powerPlant = {
+        fuelType: CommodityType.OIL,
+        maxFuelStorage: 100,
+        currentFuelStorage: 0,
+      };
+      const playerMoney = 1000;
+      const units = 5;
+
+      const result = buyFuelForPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+        playerMoney,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.actualCost).toBe(0);
+      expect(result.actualFuelAdded).toBe(0);
+      expect(result.updatedMarket).toEqual(market); // Market should remain unchanged
+    });
+  });
+
+  describe("sellFuelFromPowerPlant", () => {
+    it("should successfully sell fuel when all conditions are met", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        currentFuelStorage: 100,
+      };
+      const units = 5;
+
+      const result = sellFuelFromPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.totalProfit).toBe(
+        calculateSellPrice(market, CommodityType.COAL, units)
+      );
+      expect(result.actualFuelRemoved).toBe(
+        units * market.commodities[CommodityType.COAL].config.unitSize
+      );
+      expect(
+        result.updatedMarket.commodities[CommodityType.COAL].currentExchangeRate
+      ).toBeLessThan(
+        market.commodities[CommodityType.COAL].currentExchangeRate
+      );
+    });
+
+    it("should fail when there is no available fuel", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        currentFuelStorage: 0,
+      };
+      const units = 5;
+
+      const result = sellFuelFromPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.totalProfit).toBe(0);
+      expect(result.actualFuelRemoved).toBe(0);
+      expect(result.updatedMarket).toEqual(market); // Market should remain unchanged
+    });
+
+    it("should adjust units sold based on available fuel", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        currentFuelStorage: 25, // Only enough for 2.5 units of coal (10 per unit)
+      };
+      const units = 5; // Trying to sell 5 units
+
+      const result = sellFuelFromPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.actualFuelRemoved).toBe(20); // Should sell 2 full units (20 fuel)
+      expect(result.totalProfit).toBe(
+        calculateSellPrice(market, CommodityType.COAL, 2)
+      ); // Profit for 2 units
+    });
+
+    it("should fail when available fuel is less than one unit", () => {
+      const powerPlant = {
+        fuelType: CommodityType.COAL,
+        currentFuelStorage: 5, // Less than one unit of coal (10 per unit)
+      };
+      const units = 1;
+
+      const result = sellFuelFromPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.totalProfit).toBe(0);
+      expect(result.actualFuelRemoved).toBe(0);
+      expect(result.updatedMarket).toEqual(market); // Market should remain unchanged
+    });
+
+    it("should fail when power plant fuel type doesn't match", () => {
+      const powerPlant = {
+        fuelType: CommodityType.OIL,
+        currentFuelStorage: 100,
+      };
+      const units = 5;
+
+      const result = sellFuelFromPowerPlant({
+        market,
+        powerPlant,
+        fuelType: CommodityType.COAL,
+        units,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.totalProfit).toBe(0);
+      expect(result.actualFuelRemoved).toBe(0);
+      expect(result.updatedMarket).toEqual(market); // Market should remain unchanged
     });
   });
 });

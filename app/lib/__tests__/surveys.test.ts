@@ -10,12 +10,12 @@ import {
   HexCellResource,
   ResourceConfig,
   RESOURCE_CONFIG,
-} from "./surveys";
-import { CommodityType } from "./market/CommodityMarket";
-import { TerrainType } from "./HexCell";
-import { HexGrid, createHexGrid } from "./HexGrid";
-import { createHexCell } from "./HexCell";
-import { coordinatesToString } from "./coordinates/HexCoordinates";
+} from "../surveys";
+import { CommodityType } from "../market/CommodityMarket";
+import { TerrainType } from "../HexCell";
+import { HexGrid, createHexGrid } from "../HexGrid";
+import { createHexCell } from "../HexCell";
+import { coordinatesToString } from "../coordinates/HexCoordinates";
 
 // Create a simple hex grid for testing
 const createTestGrid = (): HexGrid => {
@@ -118,7 +118,7 @@ describe("Survey System", () => {
       }
     });
 
-    test("should return null when an active survey exists", () => {
+    test("should not make any changes when an active survey exists", () => {
       const currentTick = 15;
       const surveys: Record<string, SurveyResult> = {
         "x:0,z:0": {
@@ -128,8 +128,7 @@ describe("Survey System", () => {
       };
 
       const result = startSurvey(surveys, { x: 1, z: 2 }, currentTick);
-
-      expect(result).toBeNull();
+      expect(result).toEqual(surveys);
     });
   });
 

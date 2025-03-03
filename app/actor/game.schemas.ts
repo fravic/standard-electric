@@ -51,9 +51,9 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("SELL_COMMODITY"),
+    powerPlantId: z.string(),
     fuelType: z.nativeEnum(CommodityType),
     units: z.number().positive(),
-    powerPlantId: z.string(),
   }),
   z.object({
     type: z.literal("SURVEY_HEX_TILE"),

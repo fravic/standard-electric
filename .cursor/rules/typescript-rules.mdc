@@ -7,3 +7,4 @@ globs: *.tsx, *.ts
 - Never use `any` to override typings
 - Avoid excessive or redundant comments
 - Never attempt to run the project using `bun dev` or `bun storybook`; programmer will check the output manually
+- If there are more than two arguments to a function, use an object as input to name the arguments

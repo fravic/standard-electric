@@ -200,3 +200,159 @@ export function getMarketRates(market: CommodityMarketState): Record<
 
   return rates;
 }
+
+/**
+ * Buys fuel for a power plant, handling storage capacity limits
+ */
+export function buyFuelForPowerPlant({
+  market,
+  powerPlant,
+  fuelType,
+  units,
+  playerMoney,
+}: {
+  market: CommodityMarketState;
+  powerPlant: {
+    fuelType?: CommodityType | null;
+    maxFuelStorage?: number;
+    currentFuelStorage?: number;
+  };
+  fuelType: CommodityType;
+  units: number;
+  playerMoney: number;
+}): {
+  updatedMarket: CommodityMarketState;
+  actualCost: number;
+  actualFuelAdded: number;
+  success: boolean;
+} {
+  // Check if the power plant can use this fuel type
+  if (powerPlant.fuelType !== fuelType) {
+    return {
+      updatedMarket: market,
+      actualCost: 0,
+      actualFuelAdded: 0,
+      success: false,
+    };
+  }
+
+  // Calculate available space in the fuel storage
+  const maxStorage = powerPlant.maxFuelStorage || 0;
+  const currentStorage = powerPlant.currentFuelStorage || 0;
+  const availableStorage = maxStorage - currentStorage;
+
+  // If there's no storage available, return early
+  if (availableStorage <= 0) {
+    return {
+      updatedMarket: market,
+      actualCost: 0,
+      actualFuelAdded: 0,
+      success: false,
+    };
+  }
+
+  // Calculate how much fuel we can buy from the market
+  const { updatedMarket, totalCost, fuelAmount } = buyCommodity(
+    market,
+    fuelType,
+    units
+  );
+
+  // Check if player has enough money
+  if (playerMoney < totalCost) {
+    return {
+      updatedMarket: market,
+      actualCost: 0,
+      actualFuelAdded: 0,
+      success: false,
+    };
+  }
+
+  // Calculate how much fuel we can actually store (might be limited by storage capacity)
+  const actualFuelToAdd = Math.min(availableStorage, fuelAmount);
+
+  // If we can't store any fuel, don't proceed with the purchase
+  if (actualFuelToAdd <= 0) {
+    return {
+      updatedMarket: market,
+      actualCost: 0,
+      actualFuelAdded: 0,
+      success: false,
+    };
+  }
+
+  // Calculate the actual cost based on how much fuel we're adding
+  const actualCost = (actualFuelToAdd / fuelAmount) * totalCost;
+
+  return {
+    updatedMarket,
+    actualCost,
+    actualFuelAdded: actualFuelToAdd,
+    success: true,
+  };
+}
+
+/**
+ * Sells fuel from a power plant
+ */
+export function sellFuelFromPowerPlant({
+  market,
+  powerPlant,
+  fuelType,
+  units,
+}: {
+  market: CommodityMarketState;
+  powerPlant: {
+    fuelType?: CommodityType | null;
+    currentFuelStorage?: number;
+  };
+  fuelType: CommodityType;
+  units: number;
+}): {
+  updatedMarket: CommodityMarketState;
+  totalProfit: number;
+  actualFuelRemoved: number;
+  success: boolean;
+} {
+  // Check if the power plant can use this fuel type
+  if (powerPlant.fuelType !== fuelType) {
+    return {
+      updatedMarket: market,
+      totalProfit: 0,
+      actualFuelRemoved: 0,
+      success: false,
+    };
+  }
+
+  const availableFuel = powerPlant.currentFuelStorage || 0;
+
+  // Calculate how much fuel would be sold
+  const unitSize = market.commodities[fuelType].config.unitSize;
+  const fuelToSell = units * unitSize;
+
+  // Check if there's enough fuel to sell
+  if (fuelToSell > availableFuel) {
+    // Adjust units to match available fuel
+    units = Math.floor(availableFuel / unitSize);
+
+    // If no full units can be sold, return early
+    if (units <= 0) {
+      return {
+        updatedMarket: market,
+        totalProfit: 0,
+        actualFuelRemoved: 0,
+        success: false,
+      };
+    }
+  }
+
+  // Sell the fuel
+  const result = sellCommodity(market, fuelType, units);
+
+  return {
+    updatedMarket: result.updatedMarket,
+    totalProfit: result.totalProfit,
+    actualFuelRemoved: result.fuelAmount,
+    success: true,
+  };
+}

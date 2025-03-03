@@ -24,6 +24,8 @@ import {
   initializeCommodityMarket,
   buyCommodity,
   sellCommodity,
+  buyFuelForPowerPlant,
+  sellFuelFromPowerPlant,
 } from "../lib/market/CommodityMarket";
 import { PowerPlant } from "../lib/buildables/schemas";
 import {
@@ -357,6 +359,7 @@ export const gameMachine = setup({
         draft.auction = newAuctionState;
       }),
     })),
+    // Commodity Market
     buyCommodity: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => {
         if (event.type !== "BUY_COMMODITY") return context;
@@ -376,35 +379,20 @@ export const gameMachine = setup({
 
             if (!powerPlant) return;
 
-            // Check if the power plant can use this fuel type
-            if (powerPlant.fuelType !== event.fuelType) return;
+            // Use the new function to handle the purchase
+            const result = buyFuelForPowerPlant({
+              market: context.public.commodityMarket,
+              powerPlant,
+              fuelType: event.fuelType,
+              units: event.units,
+              playerMoney: player.money,
+            });
 
-            // Calculate available space in the fuel storage
-            const availableStorage =
-              (powerPlant.maxFuelStorage || 0) -
-              (powerPlant.currentFuelStorage || 0);
-            if (availableStorage <= 0) return;
-
-            // Calculate how much fuel we can actually buy
-            const { updatedMarket, totalCost, fuelAmount } = buyCommodity(
-              context.public.commodityMarket,
-              event.fuelType,
-              event.units
-            );
-
-            // Check if player has enough money
-            if (player.money < totalCost) return;
-
-            // Calculate how much fuel we can actually store (might be limited by storage capacity)
-            const actualFuelToAdd = Math.min(availableStorage, fuelAmount);
-
-            // If we can't store any fuel, don't proceed with the purchase
-            if (actualFuelToAdd <= 0) return;
-            // Calculate the actual cost based on how much fuel we're adding
-            const actualCost = (actualFuelToAdd / fuelAmount) * totalCost;
+            // If the purchase wasn't successful, return early
+            if (!result.success) return;
 
             // Update player's money
-            draft.players[playerId].money -= actualCost;
+            draft.players[playerId].money -= result.actualCost;
 
             // Update power plant's fuel storage
             const plantIndex = draft.buildables.findIndex(
@@ -413,11 +401,11 @@ export const gameMachine = setup({
             if (plantIndex >= 0) {
               const plant = draft.buildables[plantIndex] as PowerPlant;
               plant.currentFuelStorage =
-                (plant.currentFuelStorage || 0) + actualFuelToAdd;
+                (plant.currentFuelStorage || 0) + result.actualFuelAdded;
             }
 
             // Update market state
-            draft.commodityMarket = updatedMarket;
+            draft.commodityMarket = result.updatedMarket;
           }),
         };
       }
@@ -428,7 +416,7 @@ export const gameMachine = setup({
       return {
         public: produce(context.public, (draft) => {
           const playerId = event.caller.id;
-          const { fuelType, units, powerPlantId } = event;
+          const { powerPlantId } = event;
 
           // Find the specific power plant by ID
           const powerPlant = context.public.buildables.find(
@@ -440,7 +428,16 @@ export const gameMachine = setup({
 
           if (!powerPlant) return;
 
-          const result = sellCommodity(draft.commodityMarket, fuelType, units);
+          // Use the new function to handle the sale
+          const result = sellFuelFromPowerPlant({
+            market: context.public.commodityMarket,
+            powerPlant,
+            fuelType: event.fuelType,
+            units: event.units,
+          });
+
+          // If the sale wasn't successful, return early
+          if (!result.success) return;
 
           // Update power plant's fuel storage
           const plantIndex = draft.buildables.findIndex(
@@ -450,10 +447,11 @@ export const gameMachine = setup({
             const plant = draft.buildables[plantIndex] as PowerPlant;
             plant.currentFuelStorage = Math.max(
               0,
-              (plant.currentFuelStorage || 0) - result.fuelAmount
+              (plant.currentFuelStorage || 0) - result.actualFuelRemoved
             );
           }
 
+          // Update player's money and market state
           draft.players[playerId].money += result.totalProfit;
           draft.commodityMarket = result.updatedMarket;
         }),
