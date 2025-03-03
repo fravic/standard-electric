@@ -1,7 +1,6 @@
 import { assign, setup, spawnChild, stopChild } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
 import { produce, current } from "immer";
-import { nanoid } from "nanoid";
 
 import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
@@ -28,9 +27,15 @@ import {
   initializeCommodityMarket,
   buyCommodity,
   sellCommodity,
-  CommodityType,
 } from "../lib/market/CommodityMarket";
 import { PowerPlant } from "../lib/buildables/schemas";
+import { coordinatesToString } from "../lib/coordinates/HexCoordinates";
+import {
+  SERVER_ONLY_ID,
+  precomputeHexCellResources,
+  updateSurveys,
+  startSurvey,
+} from "../lib/surveys";
 
 export const gameMachine = setup({
   types: {
@@ -50,15 +55,14 @@ export const gameMachine = setup({
       if (!context.public.auction || !context.public.auction.currentBlueprint) {
         return false;
       }
-      const playerId = event.caller.id;
-      return (
-        getNextBidderPlayerId(
-          context.public.players,
-          context.public.auction,
-          context.public.time.totalTicks,
-          context.public.randomSeed
-        ) === playerId
+
+      const nextBidderId = getNextBidderPlayerId(
+        context.public.players,
+        context.public.auction,
+        context.public.time.totalTicks,
+        context.public.randomSeed
       );
+      return nextBidderId === event.caller.id;
     },
     isCurrentInitiator: ({ context, event }) => {
       if (!context.public.auction) return false;
@@ -73,20 +77,18 @@ export const gameMachine = setup({
       );
     },
     canAffordBid: ({ context, event }) => {
+      if (
+        !context.public.auction ||
+        !context.public.auction.currentBlueprint ||
+        event.type !== "AUCTION_PLACE_BID"
+      ) {
+        return false;
+      }
+
       const player = context.public.players[event.caller.id];
       if (!player) return false;
 
-      if (event.type === "INITIATE_BID") {
-        const blueprint = context.public.auction!.availableBlueprints.find(
-          (b) => b.id === event.blueprintId
-        );
-        if (!blueprint) return false;
-        return canPlayerAffordBid(player, blueprint.startingPrice);
-      }
-      if (event.type === "AUCTION_PLACE_BID") {
-        return canPlayerAffordBid(player, event.amount);
-      }
-      return false;
+      return canPlayerAffordBid(player, event.amount);
     },
     shouldEndBidding: ({ context }) => {
       return shouldEndBidding(context.public.players, context.public.auction!);
@@ -94,13 +96,41 @@ export const gameMachine = setup({
     shouldEndAuction: ({ context }) => {
       return shouldEndAuction(context.public.players, context.public.auction!);
     },
+    isSurveyedHexCell: ({ context, event }) => {
+      if (event.type !== "ADD_BUILDABLE") {
+        return false;
+      }
+
+      const playerId = event.caller.id;
+      const coordinates = event.buildable.coordinates;
+      if (!coordinates) return false;
+
+      const coordString = coordinatesToString(coordinates);
+
+      // Check if player has a completed survey for this hex cell
+      const playerPrivateContext = context.private[playerId];
+      if (!playerPrivateContext?.surveyResultByHexCell) {
+        return false;
+      }
+
+      const survey = playerPrivateContext.surveyResultByHexCell[coordString];
+      return survey?.isComplete === true;
+    },
   },
   actions: {
     joinGame: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-        public: produce(context.public, (draft) => {
-          if (event.type === "JOIN_GAME") {
-            draft.players[event.caller.id] = {
+      ({ context, event }: { context: GameContext; event: GameEvent }) => {
+        if (event.type !== "JOIN_GAME") return context;
+
+        const playerId = event.caller.id;
+
+        // Initialize private context for the player
+        const updatedPrivate = { ...context.private };
+        updatedPrivate[playerId] = { surveyResultByHexCell: {} };
+
+        return {
+          public: produce(context.public, (draft) => {
+            draft.players[playerId] = {
               name: event.name,
               number: Object.keys(draft.players).length + 1,
               money: 100,
@@ -108,49 +138,75 @@ export const gameMachine = setup({
               isHost: Object.keys(draft.players).length === 0,
               blueprintsById: {},
             };
-          }
-        }),
-      })
+          }),
+          private: updatedPrivate,
+        };
+      }
     ),
     startGameTimer: spawnChild(gameTimerActor, { id: "gameTimer" } as any),
     stopGameTimer: stopChild("gameTimer"),
-    gameTick: assign(({ context }) => ({
-      public: produce(context.public, (draft) => {
-        draft.time.totalTicks += 1;
+    gameTick: assign(({ context }) => {
+      const updatedPrivate = { ...context.private };
 
-        // Calculate and distribute income for each player
-        const powerSystem = new PowerSystem(
-          current(draft.hexGrid),
-          current(draft.buildables)
-        );
-        const powerSystemResult = powerSystem.resolveOneHourOfPowerProduction();
+      // Get the precomputed resources
+      const serverPrivateContext = updatedPrivate[SERVER_ONLY_ID];
+      const precomputedResources = serverPrivateContext?.hexCellResources || {};
 
-        // Update player income and power sold
-        Object.keys(powerSystemResult.incomePerPlayer).forEach((playerId) => {
-          const income = powerSystemResult.incomePerPlayer[playerId] ?? 0;
-          const powerSoldKWh =
-            powerSystemResult.powerSoldPerPlayerKWh[playerId] ?? 0;
-          console.log(
-            `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
+      // Process all player's surveys
+      Object.keys(updatedPrivate).forEach((playerId) => {
+        // Skip the server-only player
+        if (playerId === SERVER_ONLY_ID) return;
+
+        if (updatedPrivate[playerId]?.surveyResultByHexCell) {
+          // Update the player's surveys using the updateSurveys function
+          updatedPrivate[playerId].surveyResultByHexCell = updateSurveys(
+            updatedPrivate[playerId].surveyResultByHexCell,
+            context.public.time.totalTicks,
+            precomputedResources
           );
-          draft.players[playerId].money += income;
-          draft.players[playerId].powerSoldKWh += powerSoldKWh;
-        });
+        }
+      });
 
-        // Update fuel storage levels for power plants
-        Object.entries(
-          powerSystemResult.currentFuelStorageByPowerPlantId
-        ).forEach(([plantId, fuelLevel]) => {
-          const plantIndex = draft.buildables.findIndex(
-            (b) => b.id === plantId && isPowerPlant(b)
+      return {
+        public: produce(context.public, (draft) => {
+          draft.time.totalTicks += 1;
+
+          // Calculate and distribute income for each player
+          const powerSystem = new PowerSystem(
+            current(draft.hexGrid),
+            current(draft.buildables)
           );
-          if (plantIndex !== -1) {
-            (draft.buildables[plantIndex] as any).currentFuelStorage =
-              fuelLevel;
-          }
-        });
-      }),
-    })),
+          const powerSystemResult =
+            powerSystem.resolveOneHourOfPowerProduction();
+
+          // Update player income and power sold
+          Object.keys(powerSystemResult.incomePerPlayer).forEach((playerId) => {
+            const income = powerSystemResult.incomePerPlayer[playerId] ?? 0;
+            const powerSoldKWh =
+              powerSystemResult.powerSoldPerPlayerKWh[playerId] ?? 0;
+            console.log(
+              `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
+            );
+            draft.players[playerId].money += income;
+            draft.players[playerId].powerSoldKWh += powerSoldKWh;
+          });
+
+          // Update fuel storage levels for power plants
+          Object.entries(
+            powerSystemResult.currentFuelStorageByPowerPlantId
+          ).forEach(([plantId, fuelLevel]) => {
+            const plantIndex = draft.buildables.findIndex(
+              (b) => b.id === plantId && isPowerPlant(b)
+            );
+            if (plantIndex !== -1) {
+              (draft.buildables[plantIndex] as any).currentFuelStorage =
+                fuelLevel;
+            }
+          });
+        }),
+        private: updatedPrivate,
+      };
+    }),
     addBuildable: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
@@ -374,70 +430,97 @@ export const gameMachine = setup({
       }
     ),
 
-    sellCommodity: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => {
-        if (event.type !== "SELL_COMMODITY") return context;
+    sellCommodity: assign(({ context, event }) => {
+      if (event.type !== "SELL_COMMODITY") return context;
 
-        const playerId = event.caller.id;
-        const player = context.public.players[playerId];
-        if (!player) return context;
+      const playerId = event.caller.id;
+      const player = context.public.players[playerId];
+      const { fuelType, units, powerPlantId } = event;
 
-        // Find the specific power plant by ID
-        const powerPlant = context.public.buildables.find(
-          (b) =>
-            b.id === event.powerPlantId &&
-            isPowerPlant(b) &&
-            b.playerId === playerId
-        ) as PowerPlant | undefined;
+      // Find the specific power plant by ID
+      const powerPlant = context.public.buildables.find(
+        (b) =>
+          b.id === powerPlantId && isPowerPlant(b) && b.playerId === playerId
+      ) as PowerPlant | undefined;
 
-        if (!powerPlant) return context;
+      if (!powerPlant) return context;
 
-        // Check if the power plant has this fuel type
-        if (powerPlant.fuelType !== event.fuelType) return context;
+      return {
+        public: produce(context.public, (draft) => {
+          const result = sellCommodity(draft.commodityMarket, fuelType, units);
 
-        // Check if the power plant has enough fuel to sell
-        const currentFuel = powerPlant.currentFuelStorage || 0;
-        if (currentFuel <= 0) return context;
-
-        // Calculate how much fuel we can actually sell
-        const { updatedMarket, totalProfit, fuelAmount } = sellCommodity(
-          context.public.commodityMarket,
-          event.fuelType,
-          event.units
-        );
-
-        // Calculate how much fuel we can actually sell (might be limited by what we have)
-        const actualFuelToSell = Math.min(currentFuel, fuelAmount);
-
-        // If we don't have any fuel to sell, don't proceed
-        if (actualFuelToSell <= 0) return context;
-
-        // Calculate the actual profit based on how much fuel we're selling
-        const actualProfit = (actualFuelToSell / fuelAmount) * totalProfit;
-
-        return {
-          public: produce(context.public, (draft) => {
-            // Update player's money
-            draft.players[playerId].money += actualProfit;
-
-            // Update power plant's fuel storage
-            const plantIndex = draft.buildables.findIndex(
-              (b) => b.id === powerPlant.id
+          // Update power plant's fuel storage
+          const plantIndex = draft.buildables.findIndex(
+            (b) => b.id === powerPlantId
+          );
+          if (plantIndex >= 0) {
+            const plant = draft.buildables[plantIndex] as PowerPlant;
+            plant.currentFuelStorage = Math.max(
+              0,
+              (plant.currentFuelStorage || 0) - result.fuelAmount
             );
-            if (plantIndex >= 0) {
-              const plant = draft.buildables[plantIndex] as PowerPlant;
-              plant.currentFuelStorage = Math.max(
-                0,
-                (plant.currentFuelStorage || 0) - actualFuelToSell
-              );
-            }
+          }
 
-            // Update market state
-            draft.commodityMarket = updatedMarket;
-          }),
-        };
+          draft.players[playerId].money += result.totalProfit;
+          draft.commodityMarket = result.updatedMarket;
+        }),
+      };
+    }),
+    surveyHexTile: assign(({ context, event }) => {
+      if (event.type !== "SURVEY_HEX_TILE") return context;
+
+      const playerId = event.caller.id;
+
+      // Initialize private context for this player if it doesn't exist
+      const updatedPrivate = { ...context.private };
+      if (!updatedPrivate[playerId]) {
+        updatedPrivate[playerId] = { surveyResultByHexCell: {} };
       }
-    ),
+
+      // Try to start a new survey
+      const playerSurveys = updatedPrivate[playerId].surveyResultByHexCell;
+      const updatedSurveys = startSurvey(
+        playerSurveys,
+        event.coordinates,
+        context.public.time.totalTicks
+      );
+
+      // If a new survey couldn't be started (player already has an active survey), return unchanged context
+      if (!updatedSurveys) {
+        return context;
+      }
+
+      // Update the player's surveys
+      updatedPrivate[playerId].surveyResultByHexCell = updatedSurveys;
+
+      return {
+        ...context,
+        private: updatedPrivate,
+      };
+    }),
+    precomputeResources: assign(({ context }) => {
+      // Precompute resources for all hex cells
+      const hexCellResources = precomputeHexCellResources(
+        context.public.hexGrid,
+        context.public.randomSeed
+      );
+
+      // Store the precomputed resources in the server-only private context
+      const updatedPrivate = { ...context.private };
+      if (!updatedPrivate[SERVER_ONLY_ID]) {
+        updatedPrivate[SERVER_ONLY_ID] = {
+          surveyResultByHexCell: {},
+          hexCellResources,
+        };
+      } else {
+        updatedPrivate[SERVER_ONLY_ID].hexCellResources = hexCellResources;
+      }
+
+      return {
+        ...context,
+        private: updatedPrivate,
+      };
+    }),
   },
 }).createMachine({
   id: "game",
@@ -473,6 +556,7 @@ export const gameMachine = setup({
         START_GAME: {
           target: "auction",
           guard: "isHost",
+          actions: "precomputeResources",
         },
       },
     },
@@ -527,6 +611,7 @@ export const gameMachine = setup({
       exit: ["stopGameTimer"],
       on: {
         ADD_BUILDABLE: {
+          guard: "isSurveyedHexCell",
           actions: "addBuildable",
         },
         TICK: {
@@ -543,6 +628,9 @@ export const gameMachine = setup({
         },
         SELL_COMMODITY: {
           actions: "sellCommodity",
+        },
+        SURVEY_HEX_TILE: {
+          actions: "surveyHexTile",
         },
       },
     },

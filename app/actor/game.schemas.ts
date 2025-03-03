@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { BuildableSchema } from "@/lib/buildables/Buildable";
 import { CommodityType } from "@/lib/market/CommodityMarket";
+import { HexCoordinatesSchema } from "@/lib/coordinates/types";
 
 export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
@@ -53,6 +54,10 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
     fuelType: z.nativeEnum(CommodityType),
     units: z.number().positive(),
     powerPlantId: z.string(),
+  }),
+  z.object({
+    type: z.literal("SURVEY_HEX_TILE"),
+    coordinates: HexCoordinatesSchema,
   }),
 ]);
 

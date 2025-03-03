@@ -15,6 +15,8 @@ import {
 } from "./game.schemas";
 import { Env } from "../env";
 import { CommodityMarketState } from "../lib/market/CommodityMarket";
+import { HexCoordinates } from "../lib/coordinates/HexCoordinates";
+import { SurveyResult, HexCellResource } from "../lib/surveys";
 
 export interface Player {
   name: string;
@@ -60,7 +62,10 @@ interface GamePublicContext {
   commodityMarket: CommodityMarketState;
 }
 
-export type GamePrivateContext = {};
+export type GamePrivateContext = {
+  surveyResultByHexCell: Record<string, SurveyResult>; // Key is hex coordinates string
+  hexCellResources?: Record<string, HexCellResource | null>; // Only used by SERVER_ONLY_ID
+};
 
 export type GameContext = {
   public: GamePublicContext;
