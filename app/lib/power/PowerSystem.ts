@@ -458,20 +458,36 @@ export class PowerSystem {
         (pole) => pole.playerId === playerId
       );
 
-      // Use findPossibleConnectionsForCoordinates to check if the new pole can connect to existing poles
+      // Check if the new pole can connect to existing poles
       const possibleConnections = findPossibleConnectionsForCoordinates(
         cornerCoordinates,
         playerPoles
       );
 
-      if (possibleConnections.length === 0) {
-        return {
-          valid: false,
-          reason: "Power poles must be connected to your existing grid",
-        };
+      // If connected to existing poles, it's valid
+      if (possibleConnections.length > 0) {
+        return { valid: true };
       }
 
-      return { valid: true };
+      // If not connected to existing poles, check if it's adjacent to a power plant
+      const adjacentHexes = getAdjacentHexes(cornerCoordinates);
+
+      // Check if any of the player's power plants are in the adjacent hexes
+      const isAdjacentToPlayerPlant = this.powerPlants.some(
+        (plant) =>
+          plant.playerId === playerId &&
+          adjacentHexes.some((hex) => equals(hex, plant.coordinates))
+      );
+
+      if (isAdjacentToPlayerPlant) {
+        return { valid: true };
+      }
+
+      return {
+        valid: false,
+        reason:
+          "Power poles must be connected to your existing grid or power plants",
+      };
     }
 
     // For power plants, check if it's adjacent to the player's existing grid

@@ -13,9 +13,6 @@ import { HexGrid } from "../HexGrid";
 export { BuildableSchema };
 export type { Buildable };
 
-// validateBuildableLocation has been moved to its own file
-export { validateBuildableLocation } from "./validateBuildableLocation";
-
 export function createBuildable({
   buildable,
   playerId,

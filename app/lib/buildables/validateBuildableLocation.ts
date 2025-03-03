@@ -2,22 +2,57 @@ import { HexGrid, getCell } from "../HexGrid";
 import { PowerSystem } from "../power/PowerSystem";
 import { Buildable, PowerPlantBlueprint } from "./schemas";
 import { isPowerPlant } from "./PowerPlant";
+import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
+import {
+  coordinatesToString,
+  HexCoordinates,
+} from "../coordinates/HexCoordinates";
 
 /**
  * Validates if a buildable can be placed at the specified location
- * based on region requirements and other constraints.
+ * based on region requirements, survey status, and other constraints.
  */
-export function validateBuildableLocation(
+export function validateBuildableLocation({
+  buildable,
+  grid,
+  allBuildables,
+  playerId,
+  playerBlueprints,
+  surveyedHexCells,
+}: {
   buildable: Pick<
     Buildable,
     "type" | "coordinates" | "cornerCoordinates" | "id"
-  >,
-  grid: HexGrid,
-  allBuildables: Buildable[],
-  playerId: string,
-  playerBlueprints: Record<string, PowerPlantBlueprint>
-): { valid: boolean; reason?: string } {
-  // First, check region requirements
+  >;
+  grid: HexGrid;
+  allBuildables: Buildable[];
+  playerId: string;
+  playerBlueprints: Record<string, PowerPlantBlueprint>;
+  surveyedHexCells?: Set<string>; // Set of hex cell coordinates that have been surveyed
+}): { valid: boolean; reason?: string } {
+  // First, check if the location is surveyed (if surveyedHexCells is provided)
+  if (surveyedHexCells) {
+    if (buildable.coordinates) {
+      // For buildables placed on hex cells (like power plants)
+      const coordString = coordinatesToString(buildable.coordinates);
+      if (!surveyedHexCells.has(coordString)) {
+        return { valid: false, reason: "This location has not been surveyed" };
+      }
+    } else if (buildable.cornerCoordinates) {
+      // For buildables placed on corners (like power poles)
+      // Check if any of the adjacent hexes are surveyed
+      const adjacentHexes = getAdjacentHexes(buildable.cornerCoordinates);
+      const anySurveyed = adjacentHexes.some((hex) =>
+        surveyedHexCells.has(coordinatesToString(hex))
+      );
+
+      if (!anySurveyed) {
+        return { valid: false, reason: "This location has not been surveyed" };
+      }
+    }
+  }
+
+  // Next, check region requirements
 
   // For power poles, check if the corner is in a valid region
   if (buildable.type === "power_pole" && buildable.cornerCoordinates) {

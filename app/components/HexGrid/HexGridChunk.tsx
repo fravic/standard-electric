@@ -65,6 +65,17 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return gameState.private.surveyResultByHexCell || {};
   }, [gameState.private]);
 
+  // Create a set of surveyed hex cells
+  const surveyedHexCells = useMemo(() => {
+    const surveyed = new Set<string>();
+    Object.entries(surveyResultByHexCell).forEach(([coordString, survey]) => {
+      if (survey?.isComplete) {
+        surveyed.add(coordString);
+      }
+    });
+    return surveyed;
+  }, [surveyResultByHexCell]);
+
   const buildMode = useSelector(
     clientStore,
     (state) => state.context.buildMode
@@ -113,13 +124,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           cornerCoordinates: nearestCorner,
         };
 
-        const validation = validateBuildableLocation(
-          ghostPoleData,
+        const validation = validateBuildableLocation({
+          buildable: ghostPoleData,
           grid,
-          gameState.public.buildables,
-          userId!,
-          player.blueprintsById
-        );
+          allBuildables: gameState.public.buildables,
+          playerId: userId!,
+          playerBlueprints: player.blueprintsById,
+          surveyedHexCells,
+        });
 
         if (!validation.valid) {
           return null;
@@ -155,13 +167,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           coordinates: coords,
         };
 
-        const validation = validateBuildableLocation(
-          ghostBuildableData,
+        const validation = validateBuildableLocation({
+          buildable: ghostBuildableData,
           grid,
-          gameState.public.buildables,
-          userId!,
-          player.blueprintsById
-        );
+          allBuildables: gameState.public.buildables,
+          playerId: userId!,
+          playerBlueprints: player.blueprintsById,
+          surveyedHexCells,
+        });
 
         if (!validation.valid) {
           return null;
@@ -192,6 +205,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     userId,
     grid,
     gameState,
+    surveyedHexCells,
   ]);
 
   const handleHover = useCallback(

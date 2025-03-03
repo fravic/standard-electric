@@ -4,10 +4,7 @@ import { produce, current } from "immer";
 
 import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
-import {
-  createBuildable,
-  validateBuildableLocation,
-} from "@/lib/buildables/Buildable";
+import { createBuildable } from "@/lib/buildables/Buildable";
 import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
 import hexGridData from "../../public/hexgrid.json";
 import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
@@ -29,13 +26,18 @@ import {
   sellCommodity,
 } from "../lib/market/CommodityMarket";
 import { PowerPlant } from "../lib/buildables/schemas";
-import { coordinatesToString } from "../lib/coordinates/HexCoordinates";
+import {
+  coordinatesToString,
+  HexCoordinates,
+} from "../lib/coordinates/HexCoordinates";
+import { getAdjacentHexes } from "../lib/coordinates/CornerCoordinates";
 import {
   SERVER_ONLY_ID,
   precomputeHexCellResources,
   updateSurveys,
   startSurvey,
 } from "../lib/surveys";
+import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 
 export const gameMachine = setup({
   types: {
@@ -96,25 +98,40 @@ export const gameMachine = setup({
     shouldEndAuction: ({ context }) => {
       return shouldEndAuction(context.public.players, context.public.auction!);
     },
-    isSurveyedHexCell: ({ context, event }) => {
+    isValidBuildableLocation: ({ context, event }) => {
       if (event.type !== "ADD_BUILDABLE") {
         return false;
       }
 
       const playerId = event.caller.id;
-      const coordinates = event.buildable.coordinates;
-      if (!coordinates) return false;
-
-      const coordString = coordinatesToString(coordinates);
-
-      // Check if player has a completed survey for this hex cell
+      const buildable = event.buildable;
       const playerPrivateContext = context.private[playerId];
+
       if (!playerPrivateContext?.surveyResultByHexCell) {
         return false;
       }
 
-      const survey = playerPrivateContext.surveyResultByHexCell[coordString];
-      return survey?.isComplete === true;
+      // Create a set of surveyed hex cells
+      const surveyedHexCells = new Set<string>();
+      Object.entries(playerPrivateContext.surveyResultByHexCell).forEach(
+        ([coordString, survey]) => {
+          if (survey?.isComplete) {
+            surveyedHexCells.add(coordString);
+          }
+        }
+      );
+
+      // Check if the location is valid according to validateBuildableLocation
+      const validation = validateBuildableLocation({
+        buildable,
+        grid: context.public.hexGrid,
+        allBuildables: context.public.buildables,
+        playerId,
+        playerBlueprints: context.public.players[playerId].blueprintsById,
+        surveyedHexCells,
+      });
+
+      return validation.valid;
     },
   },
   actions: {
@@ -214,24 +231,6 @@ export const gameMachine = setup({
                 playerId: event.caller.id,
                 cost,
                 money: draft.players[event.caller.id].money,
-              });
-              return;
-            }
-
-            // Validate buildable location
-            const validation = validateBuildableLocation(
-              event.buildable,
-              context.public.hexGrid,
-              context.public.buildables,
-              event.caller.id,
-              draft.players[event.caller.id].blueprintsById
-            );
-
-            if (!validation.valid) {
-              console.log("Invalid buildable location: ", {
-                playerId: event.caller.id,
-                buildable: event.buildable,
-                reason: validation.reason,
               });
               return;
             }
@@ -587,7 +586,7 @@ export const gameMachine = setup({
       exit: ["stopGameTimer"],
       on: {
         ADD_BUILDABLE: {
-          guard: "isSurveyedHexCell",
+          guard: "isValidBuildableLocation",
           actions: "addBuildable",
         },
         TICK: {
