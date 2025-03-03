@@ -14,6 +14,7 @@ import {
   HexCell,
   Population,
   getColor,
+  getColorWithExplorationStatus,
   getCenterPoint,
   isUnderwater,
 } from "@/lib/HexCell";
@@ -22,6 +23,9 @@ import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore } from "@/lib/clientState";
 import { CityLabel } from "./CityLabel";
 import { HexGridDecorations } from "./HexGridDecorations";
+import { GameContext } from "@/actor/game.context";
+import { AuthContext } from "@/auth.context";
+import { SurveyResult } from "@/lib/surveys";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -55,6 +59,12 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     clientStore,
     (state) => state.context.mapBuilder.selectedPopulation
   );
+
+  const userId = AuthContext.useSelector((state) => state.userId);
+  const surveyResults = GameContext.useSelector((state) => {
+    if (!userId) return undefined;
+    return state.private.surveyResultByHexCell;
+  });
 
   const debouncedOnHover = useMemo(
     () => debounce(onHover, 50, { maxWait: 50 }),
@@ -119,7 +129,8 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {
       const center = getCenterPoint(cell);
-      const color = getColor(cell);
+      // Use the new function to get color with exploration status
+      const color = getColorWithExplorationStatus(cell, surveyResults);
       for (let d = 0; d < 6; d++) {
         if (!isUnderwater(cell)) {
           hexMesh.addTriangle(
@@ -145,7 +156,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     terrainGeometry.computeVertexNormals();
 
     return { terrainGeometry };
-  }, [cells]);
+  }, [cells, surveyResults]);
 
   return (
     <>

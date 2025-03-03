@@ -7,7 +7,7 @@ import { HexGrid, getCells } from "./HexGrid";
 import { TerrainType } from "./HexCell";
 
 // Define how many ticks a survey takes to complete
-export const SURVEY_DURATION_TICKS = 10;
+export const SURVEY_DURATION_TICKS = 4;
 
 // Server-only player ID for storing ground truth about resources
 export const SERVER_ONLY_ID = "__SERVER_ONLY__";
@@ -310,11 +310,11 @@ export function startSurvey(
   surveyResultByHexCell: Record<string, SurveyResult>,
   coordinates: HexCoordinates,
   currentTick: number
-): Record<string, SurveyResult> | null {
+): Record<string, SurveyResult> {
   // Check if player already has a survey in progress
   if (hasActiveSurvey(surveyResultByHexCell, currentTick)) {
     // Player already has an active survey, don't start a new one
-    return null;
+    return surveyResultByHexCell;
   }
 
   // Add the new survey

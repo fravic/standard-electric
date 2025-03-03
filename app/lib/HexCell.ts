@@ -4,8 +4,10 @@ import { Vertex } from "./types";
 import {
   HexCoordinatesSchema,
   toWorldPoint,
+  coordinatesToString,
 } from "./coordinates/HexCoordinates";
 import { TERRAIN_COLORS } from "@/lib/palette";
+import { SurveyResult } from "./surveys";
 
 export enum TerrainType {
   Forest = "Forest",
@@ -85,6 +87,30 @@ export function getColor(cell: HexCell): Color {
     const hsl: HSL = { h: 0, s: 0, l: 0 };
     baseColor.getHSL(hsl);
     baseColor.setHSL(hsl.h, hsl.s, hsl.l * 0.7); // Reduce lightness by 30%
+  }
+
+  return baseColor;
+}
+
+/**
+ * Get the color of a hex cell, darkening it if it hasn't been surveyed by the player
+ */
+export function getColorWithExplorationStatus(
+  cell: HexCell,
+  surveyResultByHexCell: Record<string, SurveyResult> | undefined
+): Color {
+  const baseColor = getColor(cell);
+
+  // Check if this cell has been surveyed
+  const coordString = coordinatesToString(cell.coordinates);
+  const hasBeenSurveyed =
+    surveyResultByHexCell?.[coordString]?.isComplete === true;
+
+  // If not surveyed, darken the color
+  if (!hasBeenSurveyed) {
+    const hsl: HSL = { h: 0, s: 0, l: 0 };
+    baseColor.getHSL(hsl);
+    baseColor.setHSL(hsl.h, hsl.s * 0.7, hsl.l * 0.5); // Reduce saturation and lightness
   }
 
   return baseColor;

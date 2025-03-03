@@ -9,6 +9,7 @@ import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
 import { HexGrid, getCell } from "@/lib/HexGrid";
 import { GameContext } from "@/actor/game.context";
+import { GamePrivateContext } from "@/actor/game.types";
 import {
   PowerPole,
   createPowerPole,
@@ -29,6 +30,7 @@ import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 import { useMapEditor } from "@/routes/mapEditor";
 import { validateBuildableLocation } from "@/lib/buildables/validateBuildableLocation";
+import { SurveyProgressIndicator } from "./SurveyProgressIndicator";
 
 interface HexGridChunkProps {
   chunk: {
@@ -55,6 +57,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   );
   const gameState = GameContext.useSelector((state) => state);
 
+  // Get current player's survey data and game time
+  const currentTick = gameState.public.time.totalTicks;
+  const surveyResultByHexCell = useMemo(() => {
+    if (!userId) return {};
+    // Access the survey results directly from the private context
+    return gameState.private.surveyResultByHexCell || {};
+  }, [gameState.private]);
+
   const buildMode = useSelector(
     clientStore,
     (state) => state.context.buildMode
@@ -70,7 +80,6 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const buildables = GameContext.useSelector(
     (state) => state.public.buildables ?? []
   );
-  const sendGameEvent = GameContext.useSend();
 
   const validCoordinates = useMemo(() => {
     const coordinates: HexCoordinates[] = [];
@@ -317,6 +326,11 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         <Buildable key={buildable.id} buildable={buildable} />
       ))}
       {ghostBuildable && <Buildable buildable={ghostBuildable} />}
+      <SurveyProgressIndicator
+        cells={cells}
+        surveyResultByHexCell={surveyResultByHexCell}
+        currentTick={currentTick}
+      />
     </group>
   );
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card } from "./Card";
 import { Button } from "./Button";
 import { UI_COLORS } from "@/lib/palette";
@@ -8,8 +8,9 @@ import { Buildable, PowerPlant } from "@/lib/buildables/schemas";
 import { CommodityType, getMarketRates } from "@/lib/market/CommodityMarket";
 import { isPowerPlant } from "@/lib/buildables/PowerPlant";
 import { clientStore } from "@/lib/clientState";
-import { equals } from "@/lib/coordinates/HexCoordinates";
+import { coordinatesToString, equals } from "@/lib/coordinates/HexCoordinates";
 import { useSelector } from "@xstate/store/react";
+import { hasActiveSurvey, SURVEY_DURATION_TICKS } from "@/lib/surveys";
 
 const styles = {
   container: {
@@ -74,6 +75,19 @@ const styles = {
     display: "flex",
     gap: "0.5rem",
     marginTop: "1rem",
+  },
+  resourceSection: {
+    marginTop: "1rem",
+    padding: "1rem",
+    backgroundColor: UI_COLORS.PRIMARY_DARK,
+    borderRadius: "8px",
+  },
+  resourceTitle: {
+    color: UI_COLORS.TEXT_LIGHT,
+    margin: 0,
+    fontSize: "1.2rem",
+    marginBottom: "0.5rem",
+    textTransform: "capitalize" as const,
   },
 };
 
@@ -232,6 +246,122 @@ const PowerPlantDetails: React.FC = () => {
   );
 };
 
+// Component to display survey results or survey button
+const SurveyDetails: React.FC = () => {
+  const selectedHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.selectedHexCoordinates
+  );
+
+  const userId = AuthContext.useSelector((state) => state.userId);
+  const gameState = GameContext.useSelector((state) => state);
+  const sendGameEvent = GameContext.useSend();
+
+  // Get current player's survey data and game time
+  const currentTick = gameState.public.time.totalTicks;
+
+  // Get the survey data for the selected hex
+  const surveyData = useMemo(() => {
+    if (!userId || !selectedHexCoordinates) return null;
+    const playerSurveys = gameState.private.surveyResultByHexCell;
+    if (!playerSurveys) return null;
+    const coordString = coordinatesToString(selectedHexCoordinates);
+    return playerSurveys[coordString] || null;
+  }, [userId, selectedHexCoordinates, gameState.private]);
+
+  // Check if player has any active survey
+  const hasActiveSurveyInProgress = useMemo(() => {
+    if (!userId) return false;
+    const playerSurveys = gameState.private.surveyResultByHexCell;
+    if (!playerSurveys) return false;
+    return hasActiveSurvey(playerSurveys, currentTick);
+  }, [userId, currentTick, gameState.private]);
+
+  // Handle starting a new survey
+  const canSurvey =
+    selectedHexCoordinates && !hasActiveSurveyInProgress && !surveyData;
+  const handleStartSurvey = () => {
+    if (!canSurvey) return;
+
+    sendGameEvent({
+      type: "SURVEY_HEX_TILE",
+      coordinates: selectedHexCoordinates,
+    });
+  };
+
+  // If no survey data and no active survey, show the survey button
+  if (!surveyData && !hasActiveSurveyInProgress) {
+    return (
+      <div style={styles.buttonContainer}>
+        <Button onClick={handleStartSurvey} fullWidth disabled={!canSurvey}>
+          Survey This Hex
+        </Button>
+      </div>
+    );
+  }
+
+  // If survey is in progress but not complete
+  if (surveyData && !surveyData.isComplete) {
+    const progress = Math.min(
+      ((currentTick - surveyData.surveyStartTick) / SURVEY_DURATION_TICKS) *
+        100,
+      100
+    );
+
+    return (
+      <div>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Survey in Progress:</span>
+        </div>
+        <div style={styles.progressContainer}>
+          <div
+            style={{
+              ...styles.progressBar,
+              width: `${progress}%`,
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // If survey is complete and resources were found
+  if (surveyData?.isComplete && surveyData?.resource) {
+    const resource = surveyData.resource;
+
+    return (
+      <div style={styles.resourceSection}>
+        <h3 style={styles.resourceTitle}>Survey Results</h3>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Resource Found:</span>
+          <span style={{ textTransform: "capitalize" }}>
+            {resource.resourceType}
+          </span>
+        </div>
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Amount:</span>
+          <span>{resource.resourceAmount} units</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If survey is complete but no resources were found
+  if (surveyData?.isComplete) {
+    return (
+      <div style={styles.resourceSection}>
+        <h3 style={styles.resourceTitle}>Survey Results</h3>
+        <div style={styles.infoRow}>
+          <span>No resources found in this hex.</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback
+  return null;
+};
+
 // Main HexDetails component
 export const HexDetails: React.FC = () => {
   // Always call all hooks at the top level
@@ -276,11 +406,15 @@ export const HexDetails: React.FC = () => {
 
       <PowerPlantDetails />
 
-      {/* If no power plant is found, we could add other hex details here */}
+      {/* If no power plant is found, show survey details */}
       {!buildable && (
-        <div style={styles.infoRow}>
-          <span>No buildable on this hex</span>
-        </div>
+        <>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Coordinates:</span>
+            <span>{coordinatesToString(selectedHexCoordinates)}</span>
+          </div>
+          <SurveyDetails />
+        </>
       )}
     </Card>
   );

@@ -146,27 +146,6 @@ export const gameMachine = setup({
     startGameTimer: spawnChild(gameTimerActor, { id: "gameTimer" } as any),
     stopGameTimer: stopChild("gameTimer"),
     gameTick: assign(({ context }) => {
-      const updatedPrivate = { ...context.private };
-
-      // Get the precomputed resources
-      const serverPrivateContext = updatedPrivate[SERVER_ONLY_ID];
-      const precomputedResources = serverPrivateContext?.hexCellResources || {};
-
-      // Process all player's surveys
-      Object.keys(updatedPrivate).forEach((playerId) => {
-        // Skip the server-only player
-        if (playerId === SERVER_ONLY_ID) return;
-
-        if (updatedPrivate[playerId]?.surveyResultByHexCell) {
-          // Update the player's surveys using the updateSurveys function
-          updatedPrivate[playerId].surveyResultByHexCell = updateSurveys(
-            updatedPrivate[playerId].surveyResultByHexCell,
-            context.public.time.totalTicks,
-            precomputedResources
-          );
-        }
-      });
-
       return {
         public: produce(context.public, (draft) => {
           draft.time.totalTicks += 1;
@@ -204,7 +183,24 @@ export const gameMachine = setup({
             }
           });
         }),
-        private: updatedPrivate,
+        private: produce(context.private, (draft) => {
+          // Process all player's surveys
+          const precomputedResources =
+            context.private[SERVER_ONLY_ID]!.hexCellResources!;
+          Object.keys(draft).forEach((playerId) => {
+            // Skip the server-only player
+            if (playerId === SERVER_ONLY_ID) return;
+
+            if (draft[playerId]?.surveyResultByHexCell) {
+              // Update the player's surveys using the updateSurveys function
+              draft[playerId].surveyResultByHexCell = updateSurveys(
+                draft[playerId].surveyResultByHexCell,
+                context.public.time.totalTicks + 1, // Use the updated tick value
+                precomputedResources
+              );
+            }
+          });
+        }),
       };
     }),
     addBuildable: assign(
@@ -365,51 +361,49 @@ export const gameMachine = setup({
     buyCommodity: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => {
         if (event.type !== "BUY_COMMODITY") return context;
-
-        const playerId = event.caller.id;
-        const player = context.public.players[playerId];
-        if (!player) return context;
-
-        // Find the specific power plant by ID
-        const powerPlant = context.public.buildables.find(
-          (b) =>
-            b.id === event.powerPlantId &&
-            isPowerPlant(b) &&
-            b.playerId === playerId
-        ) as PowerPlant | undefined;
-
-        if (!powerPlant) return context;
-
-        // Check if the power plant can use this fuel type
-        if (powerPlant.fuelType !== event.fuelType) return context;
-
-        // Calculate available space in the fuel storage
-        const availableStorage =
-          (powerPlant.maxFuelStorage || 0) -
-          (powerPlant.currentFuelStorage || 0);
-        if (availableStorage <= 0) return context;
-
-        // Calculate how much fuel we can actually buy
-        const { updatedMarket, totalCost, fuelAmount } = buyCommodity(
-          context.public.commodityMarket,
-          event.fuelType,
-          event.units
-        );
-
-        // Check if player has enough money
-        if (player.money < totalCost) return context;
-
-        // Calculate how much fuel we can actually store (might be limited by storage capacity)
-        const actualFuelToAdd = Math.min(availableStorage, fuelAmount);
-
-        // If we can't store any fuel, don't proceed with the purchase
-        if (actualFuelToAdd <= 0) return context;
-
-        // Calculate the actual cost based on how much fuel we're adding
-        const actualCost = (actualFuelToAdd / fuelAmount) * totalCost;
-
         return {
           public: produce(context.public, (draft) => {
+            const playerId = event.caller.id;
+            const player = context.public.players[playerId];
+            if (!player) return;
+
+            // Find the specific power plant by ID
+            const powerPlant = context.public.buildables.find(
+              (b) =>
+                b.id === event.powerPlantId &&
+                isPowerPlant(b) &&
+                b.playerId === playerId
+            ) as PowerPlant | undefined;
+
+            if (!powerPlant) return;
+
+            // Check if the power plant can use this fuel type
+            if (powerPlant.fuelType !== event.fuelType) return;
+
+            // Calculate available space in the fuel storage
+            const availableStorage =
+              (powerPlant.maxFuelStorage || 0) -
+              (powerPlant.currentFuelStorage || 0);
+            if (availableStorage <= 0) return;
+
+            // Calculate how much fuel we can actually buy
+            const { updatedMarket, totalCost, fuelAmount } = buyCommodity(
+              context.public.commodityMarket,
+              event.fuelType,
+              event.units
+            );
+
+            // Check if player has enough money
+            if (player.money < totalCost) return;
+
+            // Calculate how much fuel we can actually store (might be limited by storage capacity)
+            const actualFuelToAdd = Math.min(availableStorage, fuelAmount);
+
+            // If we can't store any fuel, don't proceed with the purchase
+            if (actualFuelToAdd <= 0) return;
+            // Calculate the actual cost based on how much fuel we're adding
+            const actualCost = (actualFuelToAdd / fuelAmount) * totalCost;
+
             // Update player's money
             draft.players[playerId].money -= actualCost;
 
@@ -432,21 +426,21 @@ export const gameMachine = setup({
 
     sellCommodity: assign(({ context, event }) => {
       if (event.type !== "SELL_COMMODITY") return context;
-
-      const playerId = event.caller.id;
-      const player = context.public.players[playerId];
-      const { fuelType, units, powerPlantId } = event;
-
-      // Find the specific power plant by ID
-      const powerPlant = context.public.buildables.find(
-        (b) =>
-          b.id === powerPlantId && isPowerPlant(b) && b.playerId === playerId
-      ) as PowerPlant | undefined;
-
-      if (!powerPlant) return context;
-
       return {
         public: produce(context.public, (draft) => {
+          const playerId = event.caller.id;
+          const { fuelType, units, powerPlantId } = event;
+
+          // Find the specific power plant by ID
+          const powerPlant = context.public.buildables.find(
+            (b) =>
+              b.id === powerPlantId &&
+              isPowerPlant(b) &&
+              b.playerId === playerId
+          ) as PowerPlant | undefined;
+
+          if (!powerPlant) return;
+
           const result = sellCommodity(draft.commodityMarket, fuelType, units);
 
           // Update power plant's fuel storage
@@ -468,57 +462,39 @@ export const gameMachine = setup({
     }),
     surveyHexTile: assign(({ context, event }) => {
       if (event.type !== "SURVEY_HEX_TILE") return context;
-
-      const playerId = event.caller.id;
-
-      // Initialize private context for this player if it doesn't exist
-      const updatedPrivate = { ...context.private };
-      if (!updatedPrivate[playerId]) {
-        updatedPrivate[playerId] = { surveyResultByHexCell: {} };
-      }
-
-      // Try to start a new survey
-      const playerSurveys = updatedPrivate[playerId].surveyResultByHexCell;
-      const updatedSurveys = startSurvey(
-        playerSurveys,
-        event.coordinates,
-        context.public.time.totalTicks
-      );
-
-      // If a new survey couldn't be started (player already has an active survey), return unchanged context
-      if (!updatedSurveys) {
-        return context;
-      }
-
-      // Update the player's surveys
-      updatedPrivate[playerId].surveyResultByHexCell = updatedSurveys;
-
       return {
-        ...context,
-        private: updatedPrivate,
+        private: produce(context.private, (draft) => {
+          const playerId = event.caller.id;
+
+          // Initialize private context for this player if it doesn't exist
+          if (!draft[playerId]) {
+            draft[playerId] = { surveyResultByHexCell: {} };
+          }
+
+          // Try to start a new survey
+          const playerSurveys = draft[playerId].surveyResultByHexCell;
+          const updatedSurveys = startSurvey(
+            playerSurveys,
+            event.coordinates,
+            context.public.time.totalTicks
+          );
+          draft[playerId].surveyResultByHexCell = updatedSurveys;
+        }),
       };
     }),
     precomputeResources: assign(({ context }) => {
       // Precompute resources for all hex cells
-      const hexCellResources = precomputeHexCellResources(
-        context.public.hexGrid,
-        context.public.randomSeed
-      );
-
-      // Store the precomputed resources in the server-only private context
-      const updatedPrivate = { ...context.private };
-      if (!updatedPrivate[SERVER_ONLY_ID]) {
-        updatedPrivate[SERVER_ONLY_ID] = {
-          surveyResultByHexCell: {},
-          hexCellResources,
-        };
-      } else {
-        updatedPrivate[SERVER_ONLY_ID].hexCellResources = hexCellResources;
-      }
-
       return {
-        ...context,
-        private: updatedPrivate,
+        private: produce(context.private, (draft) => {
+          const hexCellResources = precomputeHexCellResources(
+            context.public.hexGrid,
+            context.public.randomSeed
+          );
+          draft[SERVER_ONLY_ID] = {
+            surveyResultByHexCell: {},
+            hexCellResources,
+          };
+        }),
       };
     }),
   },

@@ -18,8 +18,13 @@ import { createPowerPole } from "@/lib/buildables/PowerPole";
 import { clientStore } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { AuthClient } from "@open-game-collective/auth-kit/client";
-import { createHexCoordinates } from "@/lib/coordinates/HexCoordinates";
+import {
+  coordinatesToString,
+  createHexCoordinates,
+} from "@/lib/coordinates/HexCoordinates";
 import { PowerPlant } from "@/lib/buildables/schemas";
+import { GamePrivateContext } from "@/actor/game.types";
+import { SURVEY_DURATION_TICKS, SurveyResult } from "@/lib/surveys";
 
 const meta: Meta<typeof Game> = {
   component: Game,
@@ -43,6 +48,34 @@ export default meta;
 type Story = StoryObj<typeof Game>;
 
 const PLAYER_ID = "fake-player-id";
+const PLAYER_2_ID = "player-2";
+const PLAYER_3_ID = "player-3";
+const SERVER_ONLY_ID = "__SERVER_ONLY__";
+
+// Create a basic player object to reduce repetition
+const createPlayer = (
+  id: string,
+  name: string,
+  number: number,
+  money: number = 100,
+  isHost: boolean = false
+) => {
+  return {
+    name,
+    number,
+    money,
+    powerSoldKWh: 0,
+    isHost,
+    blueprintsById: {},
+  };
+};
+
+// Create a default empty private context
+const createEmptyPrivateContext = (): GamePrivateContext => {
+  return {
+    surveyResultByHexCell: {},
+  };
+};
 
 const mockAuthClient: AuthClient = {
   getState: () => ({
@@ -61,19 +94,37 @@ const mockAuthClient: AuthClient = {
   refresh: () => Promise.resolve(),
 } as any as AuthClient;
 
+// Helper function to mount the game component
+const mountGame = async (
+  mount: any,
+  client: any,
+  { isDebug = false }: { isDebug?: boolean } = {}
+) => {
+  clientStore.send({ type: "setIsDebug", isDebug });
+
+  client.subscribe((snapshot: any) => {
+    action("game-state-change")(snapshot);
+  });
+
+  await mount(
+    <AuthContext.Provider client={mockAuthClient}>
+      <GameContext.ProviderFromClient client={client}>
+        <Game />
+      </GameContext.ProviderFromClient>
+    </AuthContext.Provider>
+  );
+};
+
 export const Blank: Story = {
   play: async ({ canvasElement, mount }) => {
+    // Add a blueprint to the player
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
           players: {
             [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 10,
-              powerSoldKWh: 0,
-              isHost: true,
+              ...createPlayer(PLAYER_ID, "Player 1", 1, 10, true),
               blueprintsById: {
                 coal_plant_small: {
                   id: "coal_plant_small",
@@ -85,58 +136,33 @@ export const Blank: Story = {
               },
             },
           },
-          time: {
-            totalTicks: 0,
-            isPaused: false,
-          },
+          time: { totalTicks: 0, isPaused: false },
           auction: null,
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
         },
-        private: {},
+        private: createEmptyPrivateContext(),
         value: "active",
       },
     });
 
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
-    });
-    clientStore.send({ type: "setIsDebug", isDebug: false });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
 
 export const DebugMode: Story = {
   play: async ({ canvasElement, mount }) => {
-    // Create a client with an existing power plant and power poles
+    // Create a client with multiple players
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
           players: {
-            [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 1000,
-              powerSoldKWh: 0,
-              isHost: true,
-              blueprintsById: {},
-            },
-            "player-2": {
-              name: "Player 2",
-              number: 2,
-              money: 1000,
-              powerSoldKWh: 0,
-              isHost: false,
+            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 1000, true),
+            [PLAYER_2_ID]: {
+              ...createPlayer(PLAYER_2_ID, "Player 2", 2, 1000),
               blueprintsById: {
                 generic_plant: {
                   id: "generic_plant",
@@ -148,304 +174,220 @@ export const DebugMode: Story = {
               },
             },
           },
-          time: {
-            totalTicks: 0,
-            isPaused: false,
-          },
+          time: { totalTicks: 0, isPaused: false },
           auction: null,
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
-          isDebug: false,
-          mapBuilder: {
-            isPaintbrushMode: false,
-            selectedTerrainType: null,
-            selectedPopulation: null,
-          },
           commodityMarket: initializeCommodityMarket(),
-        } as any, // Use type assertion to avoid TypeScript errors
-        private: {},
+        },
+        private: createEmptyPrivateContext(),
         value: "active",
       },
     });
 
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
-    });
-
-    clientStore.send({ type: "setIsDebug", isDebug: true });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client, { isDebug: true });
   },
 };
 
 export const WithPowerLines: Story = {
   play: async ({ canvasElement, mount }) => {
+    const buildables = [
+      createPowerPole({
+        id: "power-pole-1",
+        cornerCoordinates: {
+          hex: { x: 10, z: 10 },
+          position: CornerPosition.North,
+        },
+        playerId: PLAYER_ID,
+        connectedToIds: [],
+      }),
+      createPowerPole({
+        id: "power-pole-2",
+        cornerCoordinates: {
+          hex: { x: 10, z: 8 },
+          position: CornerPosition.South,
+        },
+        playerId: PLAYER_ID,
+        connectedToIds: ["power-pole-1"],
+      }),
+      createPowerPole({
+        id: "power-pole-left-1",
+        cornerCoordinates: {
+          hex: { x: 9, z: 9 },
+          position: CornerPosition.North,
+        },
+        playerId: PLAYER_ID,
+        connectedToIds: ["power-pole-2"],
+      }),
+      createPowerPole({
+        id: "power-pole-left-2",
+        cornerCoordinates: {
+          hex: { x: 9, z: 7 },
+          position: CornerPosition.South,
+        },
+        playerId: PLAYER_ID,
+        connectedToIds: ["power-pole-left-1"],
+      }),
+    ];
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
           players: {
-            [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 10,
-              powerSoldKWh: 0,
-              isHost: true,
-              blueprintsById: {},
-            },
+            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
           },
-          time: {
-            totalTicks: 10,
-            isPaused: false,
-          },
+          time: { totalTicks: 10, isPaused: false },
           auction: null,
-          buildables: [
-            createPowerPole({
-              id: "power-pole-1",
-              cornerCoordinates: {
-                hex: { x: 10, z: 10 },
-                position: CornerPosition.North,
-              },
-              playerId: PLAYER_ID,
-              connectedToIds: [],
-            }),
-            createPowerPole({
-              id: "power-pole-2",
-              cornerCoordinates: {
-                hex: { x: 10, z: 8 },
-                position: CornerPosition.South,
-              },
-              playerId: PLAYER_ID,
-              connectedToIds: ["power-pole-1"],
-            }),
-            createPowerPole({
-              id: "power-pole-left-1",
-              cornerCoordinates: {
-                hex: { x: 9, z: 9 },
-                position: CornerPosition.North,
-              },
-              playerId: PLAYER_ID,
-              connectedToIds: ["power-pole-2"],
-            }),
-            createPowerPole({
-              id: "power-pole-left-2",
-              cornerCoordinates: {
-                hex: { x: 9, z: 7 },
-                position: CornerPosition.South,
-              },
-              playerId: PLAYER_ID,
-              connectedToIds: ["power-pole-left-1"],
-            }),
-          ],
+          buildables,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
         },
-        private: {},
+        private: createEmptyPrivateContext(),
         value: "active",
       },
     });
 
-    clientStore.send({ type: "setIsDebug", isDebug: false });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
 
 export const Auction: Story = {
   play: async ({ canvasElement, mount }) => {
+    const auction = {
+      availableBlueprints: [
+        {
+          id: "coal_plant_small",
+          type: "coal_plant" as const,
+          name: "Small Coal Plant",
+          powerGenerationKW: 1000,
+          startingPrice: 10,
+        },
+        {
+          id: "coal_plant_medium",
+          type: "coal_plant" as const,
+          name: "Medium Coal Plant",
+          powerGenerationKW: 2000,
+          startingPrice: 18,
+          requiredState: "California",
+        },
+        {
+          id: "coal_plant_large",
+          type: "coal_plant" as const,
+          name: "Large Coal Plant",
+          powerGenerationKW: 3000,
+          startingPrice: 25,
+          requiredState: "Texas",
+        },
+      ],
+      currentBlueprint: null,
+      purchases: [],
+      passedPlayerIds: [],
+      isPassingAllowed: true,
+    };
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
           players: {
-            [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 100,
-              powerSoldKWh: 0,
-              isHost: true,
-              blueprintsById: {},
-            },
+            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
           },
-          time: {
-            totalTicks: 0,
-            isPaused: false,
-          },
+          time: { totalTicks: 0, isPaused: false },
+          auction,
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
-          auction: {
-            availableBlueprints: [
-              {
-                id: "coal_plant_small",
-                type: "coal_plant",
-                name: "Small Coal Plant",
-                powerGenerationKW: 1000,
-                startingPrice: 10,
-              },
-              {
-                id: "coal_plant_medium",
-                type: "coal_plant",
-                name: "Medium Coal Plant",
-                powerGenerationKW: 2000,
-                startingPrice: 18,
-                requiredState: "California",
-              },
-              {
-                id: "coal_plant_large",
-                type: "coal_plant",
-                name: "Large Coal Plant",
-                powerGenerationKW: 3000,
-                startingPrice: 25,
-                requiredState: "Texas",
-              },
-            ],
-            currentBlueprint: null,
-            purchases: [],
-            passedPlayerIds: [],
-            isPassingAllowed: true,
-          },
         },
-        private: {},
+        private: createEmptyPrivateContext(),
         value: { auction: "initiatingBid" },
       },
     });
 
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
-    });
-
-    clientStore.send({ type: "setIsDebug", isDebug: false });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
 
 export const AuctionWithCurrentBlueprint: Story = {
   play: async ({ canvasElement, mount }) => {
+    const auction = {
+      availableBlueprints: [
+        {
+          id: "coal_plant_medium",
+          type: "coal_plant" as const,
+          name: "Medium Coal Plant",
+          powerGenerationKW: 2000,
+          startingPrice: 18,
+          requiredState: "California",
+        },
+        {
+          id: "coal_plant_large",
+          type: "coal_plant" as const,
+          name: "Large Coal Plant",
+          powerGenerationKW: 3000,
+          startingPrice: 25,
+          requiredState: "Texas",
+        },
+      ],
+      currentBlueprint: {
+        blueprint: {
+          id: "coal_plant_small",
+          type: "coal_plant" as const,
+          name: "Small Coal Plant",
+          powerGenerationKW: 1000,
+          startingPrice: 10,
+        },
+        bids: [
+          {
+            playerId: PLAYER_ID,
+            amount: 10,
+          },
+          {
+            playerId: PLAYER_2_ID,
+            amount: 12,
+          },
+          {
+            playerId: PLAYER_3_ID,
+            passed: true,
+          },
+        ],
+      },
+      purchases: [],
+      passedPlayerIds: [PLAYER_3_ID],
+      isPassingAllowed: true,
+    };
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
           players: {
-            [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 100,
-              powerSoldKWh: 0,
-              isHost: true,
-              blueprintsById: {},
-            },
-            "player-2": {
-              name: "Player 2",
-              number: 2,
-              money: 100,
+            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
+            [PLAYER_2_ID]: {
+              ...createPlayer(PLAYER_2_ID, "Player 2", 2, 100),
               powerSoldKWh: 1000,
-              isHost: false,
-              blueprintsById: {},
             },
-            "player-3": {
-              name: "Player 3",
-              number: 3,
-              money: 100,
+            [PLAYER_3_ID]: {
+              ...createPlayer(PLAYER_3_ID, "Player 3", 3, 100),
               powerSoldKWh: 500,
-              isHost: false,
-              blueprintsById: {},
             },
           },
-          time: {
-            totalTicks: 0,
-            isPaused: false,
-          },
+          time: { totalTicks: 0, isPaused: false },
+          auction,
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
-          auction: {
-            availableBlueprints: [
-              {
-                id: "coal_plant_medium",
-                type: "coal_plant",
-                name: "Medium Coal Plant",
-                powerGenerationKW: 2000,
-                startingPrice: 18,
-                requiredState: "California",
-              },
-              {
-                id: "coal_plant_large",
-                type: "coal_plant",
-                name: "Large Coal Plant",
-                powerGenerationKW: 3000,
-                startingPrice: 25,
-                requiredState: "Texas",
-              },
-            ],
-            currentBlueprint: {
-              blueprint: {
-                id: "coal_plant_small",
-                type: "coal_plant",
-                name: "Small Coal Plant",
-                powerGenerationKW: 1000,
-                startingPrice: 10,
-              },
-              bids: [
-                {
-                  playerId: PLAYER_ID,
-                  amount: 10,
-                },
-                {
-                  playerId: "player-2",
-                  amount: 12,
-                },
-                {
-                  playerId: "player-3",
-                  passed: true,
-                },
-              ],
-            },
-            purchases: [],
-            passedPlayerIds: ["player-3"],
-            isPassingAllowed: true,
-          },
         },
-        private: {},
+        private: createEmptyPrivateContext(),
         value: { auction: "biddingOnBlueprint" },
       },
     });
 
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
-    });
-    clientStore.send({ type: "setIsDebug", isDebug: false });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
 
@@ -457,11 +399,7 @@ export const BuildablePlacementInCalifornia: Story = {
           id: "game-123",
           players: {
             [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 1000, // Plenty of money to build
-              powerSoldKWh: 0,
-              isHost: true,
+              ...createPlayer(PLAYER_ID, "Player 1", 1, 1000, true),
               blueprintsById: {
                 // Blueprint with California as required state
                 california_plant: {
@@ -483,32 +421,17 @@ export const BuildablePlacementInCalifornia: Story = {
               },
             },
           },
-          time: {
-            totalTicks: 0,
-            isPaused: false,
-          },
+          time: { totalTicks: 0, isPaused: false },
           auction: null,
           buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
-          // These properties are in the game.machine.ts but not in the types
-          isDebug: false,
-          mapBuilder: {
-            isPaintbrushMode: false,
-            selectedTerrainType: null,
-            selectedPopulation: null,
-          },
           commodityMarket: initializeCommodityMarket(),
-        } as any, // Use type assertion to avoid TypeScript errors
-        private: {},
+        },
+        private: createEmptyPrivateContext(),
         value: "active",
       },
     });
-
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
-    });
-    clientStore.send({ type: "setIsDebug", isDebug: false });
 
     // Enable build mode for the California plant to test validation
     clientStore.send({
@@ -519,34 +442,63 @@ export const BuildablePlacementInCalifornia: Story = {
       },
     });
 
-    clientStore.send({ type: "setIsDebug", isDebug: false });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
 
 export const GridConnectivityValidation: Story = {
   play: async ({ canvasElement, mount }) => {
-    // Create a client with an existing power plant and power poles
+    const buildables = [
+      // Add an existing power plant and power poles for Player 1
+      {
+        id: "existing-plant",
+        type: "coal_plant" as const,
+        coordinates: { x: 10, z: 10 },
+        playerId: PLAYER_ID,
+        name: "Existing Power Plant",
+        powerGenerationKW: 1000,
+        pricePerKwh: 0.1,
+        startingPrice: 10,
+      },
+      createPowerPole({
+        id: "power-pole-1",
+        cornerCoordinates: {
+          hex: { x: 10, z: 10 },
+          position: CornerPosition.North,
+        },
+        playerId: PLAYER_ID,
+        connectedToIds: [],
+      }),
+      // Add a power plant for Player 2 in a different area
+      {
+        id: "player2-plant",
+        type: "coal_plant" as const,
+        coordinates: { x: 20, z: 20 },
+        playerId: PLAYER_2_ID,
+        name: "Player 2 Power Plant",
+        powerGenerationKW: 1000,
+        pricePerKwh: 0.1,
+        startingPrice: 10,
+      },
+      createPowerPole({
+        id: "player2-pole",
+        cornerCoordinates: {
+          hex: { x: 20, z: 20 },
+          position: CornerPosition.North,
+        },
+        playerId: PLAYER_2_ID,
+        connectedToIds: [],
+      }),
+    ];
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
           id: "game-123",
           players: {
             [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 1000, // Plenty of money to build
-              powerSoldKWh: 0,
-              isHost: true,
+              ...createPlayer(PLAYER_ID, "Player 1", 1, 1000, true),
               blueprintsById: {
-                // Blueprint with no required state for additional plants
                 generic_plant: {
                   id: "generic_plant",
                   type: "coal_plant",
@@ -556,12 +508,8 @@ export const GridConnectivityValidation: Story = {
                 },
               },
             },
-            "player-2": {
-              name: "Player 2",
-              number: 2,
-              money: 1000,
-              powerSoldKWh: 0,
-              isHost: false,
+            [PLAYER_2_ID]: {
+              ...createPlayer(PLAYER_2_ID, "Player 2", 2, 1000),
               blueprintsById: {
                 generic_plant: {
                   id: "generic_plant",
@@ -573,71 +521,16 @@ export const GridConnectivityValidation: Story = {
               },
             },
           },
-          time: {
-            totalTicks: 0,
-            isPaused: false,
-          },
+          time: { totalTicks: 0, isPaused: false },
           auction: null,
-          // Add an existing power plant and power poles for Player 1
-          buildables: [
-            {
-              id: "existing-plant",
-              type: "coal_plant",
-              coordinates: { x: 10, z: 10 },
-              playerId: PLAYER_ID,
-              name: "Existing Power Plant",
-              powerGenerationKW: 1000,
-              pricePerKwh: 0.1,
-              startingPrice: 10,
-            },
-            createPowerPole({
-              id: "power-pole-1",
-              cornerCoordinates: {
-                hex: { x: 10, z: 10 },
-                position: CornerPosition.North,
-              },
-              playerId: PLAYER_ID,
-              connectedToIds: [],
-            }),
-            // Add a power plant for Player 2 in a different area
-            {
-              id: "player2-plant",
-              type: "coal_plant",
-              coordinates: { x: 20, z: 20 },
-              playerId: "player-2",
-              name: "Player 2 Power Plant",
-              powerGenerationKW: 1000,
-              pricePerKwh: 0.1,
-              startingPrice: 10,
-            },
-            createPowerPole({
-              id: "player2-pole",
-              cornerCoordinates: {
-                hex: { x: 20, z: 20 },
-                position: CornerPosition.North,
-              },
-              playerId: "player-2",
-              connectedToIds: [],
-            }),
-          ],
+          buildables,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
-          // These properties are in the game.machine.ts but not in the types
-          isDebug: false,
-          mapBuilder: {
-            isPaintbrushMode: false,
-            selectedTerrainType: null,
-            selectedPopulation: null,
-          },
           commodityMarket: initializeCommodityMarket(),
-        } as any, // Use type assertion to avoid TypeScript errors
-        private: {},
+        },
+        private: createEmptyPrivateContext(),
         value: "active",
       },
-    });
-
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
     });
 
     // Enable build mode for power poles to test grid connectivity validation
@@ -648,15 +541,7 @@ export const GridConnectivityValidation: Story = {
       },
     });
 
-    clientStore.send({ type: "setIsDebug", isDebug: false });
-
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
 
@@ -684,7 +569,7 @@ export const WithCommodityMarket: Story = {
       type: "coal_plant", // Using coal_plant type but with oil fuel
       name: "Oil Power Plant",
       coordinates: createHexCoordinates(10, 10),
-      playerId: "player-2",
+      playerId: PLAYER_2_ID,
       powerGenerationKW: 1500,
       pricePerKwh: 0.15,
       startingPrice: 18,
@@ -709,56 +594,136 @@ export const WithCommodityMarket: Story = {
       currentFuelStorage: 300,
     };
 
+    const buildables = [coalPlant, oilPlant, gasPlant];
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
-          id: "game-1",
+          id: "game-123",
           players: {
             [PLAYER_ID]: {
-              name: "Player 1",
-              number: 1,
-              money: 1500,
+              ...createPlayer(PLAYER_ID, "Player 1", 1, 1500, true),
               powerSoldKWh: 100,
-              isHost: true,
-              blueprintsById: {},
             },
-            "player-2": {
-              name: "Player 2",
-              number: 2,
-              money: 1000,
-              powerSoldKWh: 0,
-              isHost: false,
-              blueprintsById: {},
-            },
+            [PLAYER_2_ID]: createPlayer(PLAYER_2_ID, "Player 2", 2, 1000),
           },
-          time: {
-            totalTicks: 24, // Set to day 2
-            isPaused: false,
-          },
+          time: { totalTicks: 24, isPaused: false }, // Set to day 2
           auction: null,
-          buildables: [coalPlant, oilPlant, gasPlant],
+          buildables,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
         },
-        private: {},
+        private: createEmptyPrivateContext(),
         value: "active",
       },
     });
 
-    client.subscribe((snapshot) => {
-      action("game-state-change")(snapshot);
+    await mountGame(mount, client);
+  },
+};
+
+export const WithSurveys: Story = {
+  name: "With Surveys",
+  play: async ({ canvasElement, mount }) => {
+    // Create coordinates for surveyed and in-progress survey cells
+    const completedSurveyCoord1 = createHexCoordinates(5, 5);
+    const completedSurveyCoord2 = createHexCoordinates(6, 5);
+    const completedSurveyCoord3 = createHexCoordinates(7, 5);
+    const inProgressSurveyCoord = createHexCoordinates(8, 5);
+
+    // Current game tick
+    const currentTick = 30;
+
+    // Create survey results for the player
+    const surveyResultByHexCell: Record<string, SurveyResult> = {
+      // Completed survey with coal resource
+      [coordinatesToString(completedSurveyCoord1)]: {
+        surveyStartTick: currentTick - 15,
+        isComplete: true,
+        resource: {
+          resourceType: CommodityType.COAL,
+          resourceAmount: 120,
+        },
+      },
+      // Completed survey with oil resource
+      [coordinatesToString(completedSurveyCoord2)]: {
+        surveyStartTick: currentTick - 12,
+        isComplete: true,
+        resource: {
+          resourceType: CommodityType.OIL,
+          resourceAmount: 80,
+        },
+      },
+      // Completed survey with no resource
+      [coordinatesToString(completedSurveyCoord3)]: {
+        surveyStartTick: currentTick - 11,
+        isComplete: true,
+        resource: undefined,
+      },
+      // Survey in progress (5 ticks in, 50% complete)
+      [coordinatesToString(inProgressSurveyCoord)]: {
+        surveyStartTick: currentTick - 5,
+        isComplete: false,
+      },
+    };
+
+    // Create server-side resources (ground truth)
+    const hexCellResources = {
+      [coordinatesToString(completedSurveyCoord1)]: {
+        resourceType: CommodityType.COAL,
+        resourceAmount: 120,
+      },
+      [coordinatesToString(completedSurveyCoord2)]: {
+        resourceType: CommodityType.OIL,
+        resourceAmount: 80,
+      },
+      [coordinatesToString(completedSurveyCoord3)]: null, // No resource
+      [coordinatesToString(inProgressSurveyCoord)]: {
+        resourceType: CommodityType.GAS,
+        resourceAmount: 60,
+      },
+      // Add some undiscovered resources
+      [coordinatesToString(createHexCoordinates(9, 5))]: {
+        resourceType: CommodityType.URANIUM,
+        resourceAmount: 40,
+      },
+      [coordinatesToString(createHexCoordinates(10, 5))]: {
+        resourceType: CommodityType.COAL,
+        resourceAmount: 100,
+      },
+    };
+
+    // Create a custom game state for the survey story with private context
+    const client = createActorKitMockClient<GameMachine>({
+      initialSnapshot: {
+        public: {
+          id: "game-123",
+          players: {
+            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
+            [PLAYER_2_ID]: createPlayer(PLAYER_2_ID, "Player 2", 2, 100),
+          },
+          time: { totalTicks: currentTick, isPaused: false },
+          auction: null,
+          buildables: [],
+          hexGrid: hexGrid as HexGrid,
+          randomSeed: 123,
+          commodityMarket: initializeCommodityMarket(),
+        },
+        private: {
+          surveyResultByHexCell,
+          hexCellResources,
+        },
+        value: "active",
+      },
     });
 
-    // Set isDebug to false to hide debug UI
-    clientStore.send({ type: "setIsDebug", isDebug: false });
+    // Select a hex with a completed survey to show the survey results
+    clientStore.send({
+      type: "selectHex",
+      coordinates: completedSurveyCoord1,
+    });
 
-    await mount(
-      <AuthContext.Provider client={mockAuthClient}>
-        <GameContext.ProviderFromClient client={client}>
-          <Game />
-        </GameContext.ProviderFromClient>
-      </AuthContext.Provider>
-    );
+    await mountGame(mount, client);
   },
 };
