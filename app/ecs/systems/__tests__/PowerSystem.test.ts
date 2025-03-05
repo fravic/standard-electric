@@ -1,13 +1,13 @@
-import { HexGrid } from "../../HexGrid";
+import { HexGrid } from "../../../lib/HexGrid";
 import { PowerSystem } from "../PowerSystem";
 import {
   HexCoordinates,
   coordinatesToString,
-} from "../../coordinates/HexCoordinates";
-import { CornerPosition } from "../../coordinates/types";
-import { Population, TerrainType, HexCell } from "../../HexCell";
-import { createPowerPole } from "../../buildables/PowerPole";
-import { CommodityType } from "../../market/CommodityMarket";
+} from "../../../lib/coordinates/HexCoordinates";
+import { CornerPosition } from "../../../lib/coordinates/types";
+import { Population, TerrainType, HexCell } from "../../../lib/HexCell";
+import { createPowerPole } from "../../../lib/buildables/PowerPole";
+import { CommodityType } from "../../../lib/market/CommodityMarket";
 
 // Helper function to create a power pole at a corner
 const createPowerPoleAtCorner = (

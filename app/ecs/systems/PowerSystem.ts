@@ -2,17 +2,20 @@ import {
   coordinatesToString,
   equals,
   HexCoordinates,
-} from "../coordinates/HexCoordinates";
-import { HexCell, Population } from "../HexCell";
-import { Buildable } from "../buildables/schemas";
-import { isPowerPole, PowerPole } from "../buildables/PowerPole";
-import { isPowerPlant, isPowerPlantType } from "../buildables/PowerPlant";
-import { HexGrid } from "../HexGrid";
+} from "../../lib/coordinates/HexCoordinates";
+import { HexCell, Population } from "../../lib/HexCell";
+import { Buildable } from "../../lib/buildables/schemas";
+import { isPowerPole, PowerPole } from "../../lib/buildables/PowerPole";
+import {
+  isPowerPlant,
+  isPowerPlantType,
+} from "../../lib/buildables/PowerPlant";
+import { HexGrid } from "../../lib/HexGrid";
 import {
   cornerToString,
   getAdjacentHexes,
-} from "../coordinates/CornerCoordinates";
-import { findPossibleConnectionsForCoordinates } from "../buildables/PowerPole";
+} from "../../lib/coordinates/CornerCoordinates";
+import { findPossibleConnectionsForCoordinates } from "../../lib/buildables/PowerPole";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {

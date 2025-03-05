@@ -1,7 +1,7 @@
 import React from "react";
 import { UI_COLORS } from "@/lib/palette";
 import { Player } from "@/actor/game.types";
-import { formatPowerKWh } from "@/lib/power/formatPower";
+import { formatPowerKWh } from "@/lib/formatPower";
 import { Card } from "./Card";
 
 const POWER_SELL_GOAL_KWH = 1_000_000_000; // 1 TWh in kWh

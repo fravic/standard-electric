@@ -1,5 +1,5 @@
 import { HexGrid, getCell } from "../HexGrid";
-import { PowerSystem } from "../power/PowerSystem";
+import { PowerSystem } from "../../ecs/systems/PowerSystem";
 import { Buildable, PowerPlantBlueprint } from "./schemas";
 import { isPowerPlant } from "./PowerPlant";
 import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
