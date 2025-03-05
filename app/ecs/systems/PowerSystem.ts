@@ -1,8 +1,4 @@
-import {
-  coordinatesToString,
-  equals,
-  HexCoordinates,
-} from "../../lib/coordinates/HexCoordinates";
+import { equals, HexCoordinates } from "../../lib/coordinates/HexCoordinates";
 import { HexCell, Population } from "../../lib/HexCell";
 import { Buildable } from "../../lib/buildables/schemas";
 import { isPowerPole, PowerPole } from "../../lib/buildables/PowerPole";
@@ -11,11 +7,11 @@ import {
   isPowerPlantType,
 } from "../../lib/buildables/PowerPlant";
 import { HexGrid } from "../../lib/HexGrid";
-import {
-  cornerToString,
-  getAdjacentHexes,
-} from "../../lib/coordinates/CornerCoordinates";
+import { getAdjacentHexes } from "../../lib/coordinates/CornerCoordinates";
 import { findPossibleConnectionsForCoordinates } from "../../lib/buildables/PowerPole";
+import { System } from "./System";
+import { EntityWriteRegistry } from "../registry";
+import { HexGridComponent } from "../components";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -69,7 +65,7 @@ type Consumer = {
   connectedPlants: PowerPlantConnection[];
 };
 
-export class PowerSystem {
+export class PowerSystem extends System {
   private hexGrid: HexGrid;
   private buildables: Buildable[];
   private powerPolesById: Record<string, PowerPole> = {};
@@ -77,9 +73,12 @@ export class PowerSystem {
   private consumers: Consumer[] = [];
   private grids: Grid[] = [];
 
-  constructor(hexGrid: HexGrid, buildables: Buildable[]) {
-    this.hexGrid = hexGrid;
-    this.buildables = buildables;
+  constructor(registry: EntityWriteRegistry) {
+    super(registry);
+    this.hexGrid =
+      this.registry.getOnlyComponent<HexGridComponent>("HEX_GRID").hexGrid;
+    this.buildables =
+      this.registry.getAllComponentsOfType<Buildable>("BUILDABLE");
     this.initializePowerSystem();
   }
 

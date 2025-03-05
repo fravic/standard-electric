@@ -1,27 +1,21 @@
-import { EntityRegistry } from "../registry";
+import { EntityWriteRegistry } from "../registry";
 
 /**
  * Base System class
  *
  * Systems operate on entities with specific components to implement game logic.
+ * They are responsible for updating the state of the game, and thus are only
+ * implemented on the server.
  */
 export abstract class System {
-  constructor(protected registry: EntityRegistry) {}
+  protected registry: EntityWriteRegistry;
+
+  constructor(registry: EntityWriteRegistry) {
+    this.registry = registry;
+  }
 
   /**
-   * Update method to be implemented by each system
-   * Called each game tick/frame
+   * Perform the logic for a single game tick.
    */
-  abstract update(): void;
-
-  /**
-   * Optional initialization method
-   */
-  init?(): void;
-
-  /**
-   * Optional cleanup method
-   * Called when the system is removed from the game
-   */
-  cleanup?(): void;
+  abstract tick(): void;
 }

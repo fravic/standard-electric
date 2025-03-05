@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ComponentSchema } from "./components";
 
 /**
  * Base Entity Schema
@@ -7,17 +8,17 @@ import { z } from "zod";
  */
 export const EntitySchema = z.object({
   id: z.string(),
-  // Flag for entities that are in a "ghost" state (preview before placement)
-  isGhost: z.boolean().optional(),
+  componentsByType: z.record(z.string(), ComponentSchema),
 });
 
 export type Entity = z.infer<typeof EntitySchema>;
 
 /**
- * Create a new entity with a unique ID
+ * Create a new empty entity with a unique ID
  */
 export function createEntity(id: string): Entity {
   return {
     id,
+    componentsByType: {},
   };
 }
