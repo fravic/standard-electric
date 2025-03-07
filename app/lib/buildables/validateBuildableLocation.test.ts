@@ -290,7 +290,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(false);
@@ -321,7 +320,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(false);
@@ -354,7 +352,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(true);
@@ -389,7 +386,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world: emptyWorld,
         playerId: "player-3",
-        playerBlueprints: player3Blueprints,
       });
 
       expect(result.valid).toBe(true);
@@ -421,7 +417,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(false);
@@ -446,6 +441,9 @@ describe("validateBuildableLocation", () => {
         fuelStorage: {
           maxFuelStorage: 1000,
           currentFuelStorage: 500
+        },
+        requiredRegion: {
+          requiredRegionName: "California"
         }
       };
       
@@ -454,7 +452,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(false);
@@ -481,6 +478,9 @@ describe("validateBuildableLocation", () => {
         fuelStorage: {
           maxFuelStorage: 1000,
           currentFuelStorage: 500
+        },
+        requiredRegion: {
+          requiredRegionName: "California"
         }
       };
       
@@ -489,7 +489,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(true);
@@ -521,8 +520,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
-        // Skip survey check for this test
       });
 
       // The test now fails because the power plant is not connected to player-1's grid
@@ -559,7 +556,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-3", // Player 3 has no existing grid
-        playerBlueprints: player3Blueprints,
       });
 
       // The test now passes because the first power plant is always allowed
@@ -594,7 +590,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world: emptyWorld,
         playerId: "player-3",
-        playerBlueprints: player3Blueprints,
       });
 
       expect(result.valid).toBe(true);
@@ -630,7 +625,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
         surveyedHexCells,
       });
 
@@ -668,7 +662,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
         surveyedHexCells,
       });
 
@@ -703,7 +696,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
         surveyedHexCells,
       });
 
@@ -738,7 +730,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
         surveyedHexCells,
       });
 
@@ -768,7 +759,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(false);
@@ -798,7 +788,6 @@ describe("validateBuildableLocation", () => {
         grid,
         world,
         playerId: "player-1",
-        playerBlueprints: player1Blueprints,
       });
 
       expect(result.valid).toBe(false);

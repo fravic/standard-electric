@@ -6,7 +6,7 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { Buildable, PowerPlantBlueprint } from "../lib/buildables/schemas";
+import { PowerPlantBlueprint } from "../lib/buildables/schemas";
 import { HexGrid } from "../lib/HexGrid";
 import {
   GameClientEventSchema,
@@ -15,7 +15,6 @@ import {
 } from "./game.schemas";
 import { Env } from "../env";
 import { CommodityMarketState } from "../lib/market/CommodityMarket";
-import { HexCoordinates } from "../lib/coordinates/HexCoordinates";
 import { SurveyResult, HexCellResource } from "../lib/surveys";
 import { Entity } from "../ecs/entity";
 
@@ -25,7 +24,6 @@ export interface Player {
   money: number;
   powerSoldKWh: number;
   isHost: boolean;
-  blueprintsById: Record<string, PowerPlantBlueprint>;
 }
 
 export interface Auction {
@@ -56,7 +54,7 @@ interface GamePublicContext {
     totalTicks: number;
     isPaused: boolean;
   };
-  entities: Entity[];
+  entitiesById: Record<string, Entity>;
   hexGrid: HexGrid;
   auction: Auction | null;
   randomSeed: number;

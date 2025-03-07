@@ -18,14 +18,12 @@ export function validateBuildableLocation({
   grid,
   world,
   playerId,
-  playerBlueprints,
   surveyedHexCells,
 }: {
   buildable: Entity;
   grid: HexGrid;
   world: World<Entity>;
   playerId: string;
-  playerBlueprints: Record<string, PowerPlantBlueprint>;
   surveyedHexCells?: Set<string>; // Set of hex cell coordinates that have been surveyed
 }): { valid: boolean; reason?: string } {
   // First, check if the location is surveyed (if surveyedHexCells is provided)
@@ -92,15 +90,15 @@ export function validateBuildableLocation({
     }
 
     // Check if the region matches the required state (if specified)
-    const blueprint = playerBlueprints[buildable.id];
+    const requiredRegion = buildable.requiredRegion;
 
     if (
-      blueprint?.requiredState &&
-      cell.regionName !== blueprint.requiredState
+      requiredRegion &&
+      cell.regionName !== requiredRegion.requiredRegionName
     ) {
       return {
         valid: false,
-        reason: `This power plant must be placed in ${blueprint.requiredState}`,
+        reason: `This power plant must be placed in ${requiredRegion.requiredRegionName}`,
       };
     }
 

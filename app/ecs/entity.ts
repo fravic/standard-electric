@@ -48,6 +48,16 @@ export const OwnerComponentSchema = z.object({
 export type OwnerComponent = z.infer<typeof OwnerComponentSchema>;
 
 /**
+ * CostComponent
+ * Gives an entity a cost
+ */
+export const CostComponentSchema = z.object({
+  amount: z.number(),
+});
+
+export type CostComponent = z.infer<typeof CostComponentSchema>;
+
+/**
  * ConnectionsComponent
  * Gives an entity a list of entityIds that it is connected to
  */
@@ -88,6 +98,7 @@ export type FuelRequirementComponent = z.infer<
  * Gives an entity a current fuel storage amount
  */
 export const FuelStorageComponentSchema = z.object({
+  fuelType: z.nativeEnum(CommodityType).nullable().optional(),
   currentFuelStorage: z.number(),
   maxFuelStorage: z.number(),
 });
@@ -121,14 +132,13 @@ export type RequiredRegionComponent = z.infer<
  * Gives an entity a blueprint for a set of other components
  */
 export const BlueprintComponentSchema = z.object({
-  components: z.array(
-    z.union([
-      PowerGenerationComponentSchema,
-      FuelRequirementComponentSchema,
-      FuelStorageComponentSchema,
-      RequiredRegionComponentSchema,
-    ])
-  ),
+  buildsRemaining: z.number().optional(), // If null, infinite
+  components: z.object({
+    powerGeneration: PowerGenerationComponentSchema,
+    fuelRequirement: FuelRequirementComponentSchema,
+    fuelStorage: FuelStorageComponentSchema,
+    requiredRegion: RequiredRegionComponentSchema,
+  }),
 });
 
 export type BlueprintComponent = z.infer<typeof BlueprintComponentSchema>;
@@ -153,6 +163,7 @@ export const EntitySchema = z.object({
   blueprint: BlueprintComponentSchema.optional(),
   connections: ConnectionsComponentSchema.optional(),
   cornerPosition: CornerPositionComponentSchema.optional(),
+  cost: CostComponentSchema.optional(),
   fuelRequirement: FuelRequirementComponentSchema.optional(),
   fuelStorage: FuelStorageComponentSchema.optional(),
   hexPosition: HexPositionComponentSchema.optional(),
