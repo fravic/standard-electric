@@ -1,7 +1,6 @@
 import { assign, setup, spawnChild, stopChild } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
 import { produce, current } from "immer";
-import { World } from "miniplex";
 
 import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
@@ -25,9 +24,9 @@ import {
 } from "../lib/market/CommodityMarket";
 import { precomputeHexCellResources, SERVER_ONLY_ID, startSurvey, updateSurveys } from "../lib/surveys";
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
-import {Entity} from '@/ecs/entity';
 import { createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
-import { queryBlueprintsByIdAndOwnerId, queryPowerPlantByIdAndOwnerId } from "@/ecs/queries";
+import { With } from "miniplex";
+import { Entity } from "@/ecs/entity";
 
 export const gameMachine = setup({
   types: {
@@ -97,17 +96,16 @@ export const gameMachine = setup({
       const blueprintId = event.blueprintId;
       const playerPrivateContext = context.private[playerId];
 
-      const blueprintEntity = queryBlueprintsByIdAndOwnerId({
-        world: createWorldWithEntities(context.public.entitiesById),
-        blueprintId,
-        ownerId: playerId,
-      });
+      const blueprintEntity = context.public.entitiesById[blueprintId];
+      if (blueprintEntity.owner?.playerId !== playerId) {
+        throw new Error(`Player ${playerId} is not the owner of blueprint ${blueprintId}`);
+      }
 
       if (!blueprintEntity) {
         return false;
       }
 
-      const buildable = createEntityFromBlueprint(blueprintEntity);
+      const buildable = createEntityFromBlueprint(blueprintEntity as With<Entity, 'blueprint'>);
 
       if (!playerPrivateContext?.surveyResultByHexCell) {
         return false;
@@ -226,15 +224,10 @@ export const gameMachine = setup({
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
           if (event.type === "ADD_BUILDABLE") {
-            const world = createWorldWithEntities(context.public.entitiesById);
-            const blueprintEntity = queryBlueprintsByIdAndOwnerId({
-              world,
-              blueprintId: event.blueprintId,
-              ownerId: event.caller.id,
-            });
+            const blueprintEntity = context.public.entitiesById[event.blueprintId] as With<Entity, 'blueprint'>;
 
-            if (!blueprintEntity) {
-              throw new Error(`Blueprint not found with id ${event.blueprintId} and owner ${event.caller.id}`);
+            if (blueprintEntity.owner?.playerId !== event.caller.id) {
+              throw new Error(`Player ${event.caller.id} is not the owner of blueprint ${event.blueprintId}`);
             }
 
             // Check if player has enough money
@@ -383,13 +376,10 @@ export const gameMachine = setup({
             if (!player) return;
 
             // Find the specific power plant by ID
-            const world = createWorldWithEntities(draft.entitiesById);
-            const powerPlant = queryPowerPlantByIdAndOwnerId({
-              world,
-              powerPlantId: event.powerPlantId,
-              ownerId: playerId,
-            });
-
+            const powerPlant = context.public.entitiesById[event.powerPlantId];
+            if (powerPlant?.owner?.playerId !== playerId) {
+              throw new Error(`Player ${playerId} is not the owner of power plant ${event.powerPlantId}`);
+            }
             if (!powerPlant) return;
 
             // Use the new function to handle the purchase
@@ -433,12 +423,11 @@ export const gameMachine = setup({
           const { powerPlantId } = event;
 
           // Find the specific power plant by ID
-          const world = createWorldWithEntities(draft.entitiesById);
-          const powerPlant = queryPowerPlantByIdAndOwnerId({
-            world,
-            powerPlantId,
-            ownerId: playerId,
-          });
+          const powerPlant = context.public.entitiesById[powerPlantId] as With<Entity, 'owner'>;
+
+          if (powerPlant.owner?.playerId !== playerId) {
+            throw new Error(`Player ${playerId} is not the owner of power plant ${powerPlantId}`);
+          }
 
           if (!powerPlant) return;
 
