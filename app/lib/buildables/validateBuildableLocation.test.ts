@@ -2,18 +2,22 @@ import { validateBuildableLocation } from "./validateBuildableLocation";
 import { HexGrid } from "../HexGrid";
 import { CornerPosition } from "../coordinates/types";
 import { Population, TerrainType } from "../HexCell";
-import {
-  Buildable,
-  PowerPlant,
-  PowerPlantBlueprint,
-  PowerPole,
-} from "./schemas";
+import { PowerPlantBlueprint } from "./schemas";
 import {
   fromCubeCoordinates,
   coordinatesToString,
 } from "../coordinates/HexCoordinates";
+import { Entity } from "@/ecs/entity";
+import { World } from "miniplex";
 
 describe("validateBuildableLocation", () => {
+  let world: World<Entity>;
+
+  beforeEach(() => {
+    // Create a new Miniplex world for each test
+    world = new World<Entity>();
+  });
+
   // Create a grid with coordinates centered around q=0, r=0, s=0
   // Using cube coordinates to ensure proper adjacency
   const createGridCell = (
@@ -159,83 +163,132 @@ describe("validateBuildableLocation", () => {
     },
   };
 
-  // Create buildables
-  const buildables: Buildable[] = [
+  // Create entities for our tests
+  const setupEntities = () => {
     // Player 1's power plant at center (q=0, r=0, s=0)
-    {
+    const player1Plant: Entity = {
       id: "player1-plant",
-      type: "coal_plant",
-      coordinates: centerCoords,
-      playerId: "player-1",
-      name: "Player 1 Power Plant",
-      powerGenerationKW: 1000,
-      pricePerKwh: 0.1,
-      startingPrice: 10,
-    } as PowerPlant,
+      hexPosition: {
+        coordinates: centerCoords
+      },
+      owner: {
+        playerId: "player-1"
+      },
+      powerGeneration: {
+        powerGenerationKW: 1000,
+        pricePerKwh: 0.1
+      },
+      fuelStorage: {
+        maxFuelStorage: 1000,
+        currentFuelStorage: 500
+      }
+    };
 
     // Player 1's power pole at the north corner of the center hex
-    {
+    const player1PoleCenter: Entity = {
       id: "player1-pole-center",
-      type: "power_pole",
-      cornerCoordinates: {
-        hex: centerCoords,
-        position: CornerPosition.North,
+      cornerPosition: {
+        cornerCoordinates: {
+          hex: centerCoords,
+          position: CornerPosition.North
+        }
       },
-      playerId: "player-1",
-      connectedToIds: [],
-    } as PowerPole,
+      owner: {
+        playerId: "player-1"
+      },
+      connections: {
+        connectedToIds: []
+      }
+    };
 
     // Player 1's power pole at the south corner of the northwest hex
     // This is adjacent to the north corner of the center hex
-    {
+    const player1PoleNW: Entity = {
       id: "player1-pole-nw",
-      type: "power_pole",
-      cornerCoordinates: {
-        hex: nwCoords,
-        position: CornerPosition.South,
+      cornerPosition: {
+        cornerCoordinates: {
+          hex: nwCoords,
+          position: CornerPosition.South
+        }
       },
-      playerId: "player-1",
-      connectedToIds: ["player1-pole-center"],
-    } as PowerPole,
+      owner: {
+        playerId: "player-1"
+      },
+      connections: {
+        connectedToIds: ["player1-pole-center"]
+      }
+    };
 
     // Player 2's power plant in Texas
-    {
+    const player2Plant: Entity = {
       id: "player2-plant",
-      type: "coal_plant",
-      coordinates: texasCoords,
-      playerId: "player-2",
-      name: "Player 2 Power Plant",
-      powerGenerationKW: 1000,
-      pricePerKwh: 0.1,
-      startingPrice: 10,
-    } as PowerPlant,
+      hexPosition: {
+        coordinates: texasCoords
+      },
+      owner: {
+        playerId: "player-2"
+      },
+      powerGeneration: {
+        powerGenerationKW: 1000,
+        pricePerKwh: 0.1
+      },
+      fuelStorage: {
+        maxFuelStorage: 1000,
+        currentFuelStorage: 500
+      }
+    };
 
     // Player 2's power pole at the north corner of the Texas hex
-    {
+    const player2Pole: Entity = {
       id: "player2-pole",
-      type: "power_pole",
-      cornerCoordinates: {
-        hex: texasCoords,
-        position: CornerPosition.North,
+      cornerPosition: {
+        cornerCoordinates: {
+          hex: texasCoords,
+          position: CornerPosition.North
+        }
       },
-      playerId: "player-2",
-      connectedToIds: [],
-    } as PowerPole,
-  ];
+      owner: {
+        playerId: "player-2"
+      },
+      connections: {
+        connectedToIds: []
+      }
+    };
+
+    // Add all entities to the world
+    world.add(player1Plant);
+    world.add(player1PoleCenter);
+    world.add(player1PoleNW);
+    world.add(player2Plant);
+    world.add(player2Pole);
+
+    return [player1Plant, player1PoleCenter, player1PoleNW, player2Plant, player2Pole];
+  };
 
   describe("Power Pole Validation", () => {
     test("should reject power poles in cells with no region", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "new-pole",
-          type: "power_pole",
+      const entities = setupEntities();
+      
+      const newPole: Entity = {
+        id: "new-pole",
+        cornerPosition: {
           cornerCoordinates: {
             hex: noRegionCoords,
-            position: CornerPosition.North,
-          },
+            position: CornerPosition.North
+          }
         },
+        owner: {
+          playerId: "player-1"
+        },
+        connections: {
+          connectedToIds: []
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPole,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -245,17 +298,28 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should reject power poles not connected to player's grid", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "new-pole",
-          type: "power_pole",
+      const entities = setupEntities();
+      
+      const newPole: Entity = {
+        id: "new-pole",
+        cornerPosition: {
           cornerCoordinates: {
             hex: texasECoords,
-            position: CornerPosition.North,
-          },
+            position: CornerPosition.North
+          }
         },
+        owner: {
+          playerId: "player-1"
+        },
+        connections: {
+          connectedToIds: []
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPole,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -267,17 +331,28 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should allow power poles connected to player's existing poles", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "new-pole",
-          type: "power_pole",
+      const entities = setupEntities();
+      
+      const newPole: Entity = {
+        id: "new-pole",
+        cornerPosition: {
           cornerCoordinates: {
             hex: neCoords,
-            position: CornerPosition.South,
-          },
+            position: CornerPosition.South
+          }
         },
+        owner: {
+          playerId: "player-1"
+        },
+        connections: {
+          connectedToIds: []
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPole,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -288,17 +363,31 @@ describe("validateBuildableLocation", () => {
 
   describe("Power Plant Validation", () => {
     test("should allow first power plant in a valid region", () => {
-      // Empty buildables for player-3's first plant
-      const emptyBuildables: Buildable[] = [];
+      // Create a new world for player-3's first plant
+      const emptyWorld = new World<Entity>();
 
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: centerCoords,
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: centerCoords
         },
+        owner: {
+          playerId: "player-3"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: emptyBuildables,
+        world: emptyWorld,
         playerId: "player-3",
         playerBlueprints: player3Blueprints,
       });
@@ -307,14 +396,30 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should reject power plants in cells with no region", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: noRegionCoords,
+      const entities = setupEntities();
+      
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: noRegionCoords
         },
+        owner: {
+          playerId: "player-1"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -324,14 +429,30 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should reject power plants in regions that don't match required state", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "california_plant",
-          type: "coal_plant",
-          coordinates: texasCoords,
+      const entities = setupEntities();
+      
+      const newPlant: Entity = {
+        id: "california_plant",
+        hexPosition: {
+          coordinates: texasCoords
         },
+        owner: {
+          playerId: "player-1"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -343,14 +464,30 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should allow power plants in regions that match required state", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "california_plant",
-          type: "coal_plant",
-          coordinates: centerCoords,
+      const entities = setupEntities();
+      
+      const newPlant: Entity = {
+        id: "california_plant",
+        hexPosition: {
+          coordinates: centerCoords
         },
+        owner: {
+          playerId: "player-1"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -359,14 +496,30 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should allow power plants with no required state in any region", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: texasCoords,
+      const entities = setupEntities();
+      
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: texasCoords
         },
+        owner: {
+          playerId: "player-1"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
         // Skip survey check for this test
@@ -381,14 +534,30 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should reject power plants not connected to player's grid", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: texasECoords,
+      const entities = setupEntities();
+      
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: texasECoords
         },
+        owner: {
+          playerId: "player-3"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-3", // Player 3 has no existing grid
         playerBlueprints: player3Blueprints,
       });
@@ -399,19 +568,31 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should allow first power plant for a player", () => {
-      // Remove all player 3's buildables to ensure this is their first
-      const filteredBuildables = buildables.filter(
-        (b) => "playerId" in b && b.playerId !== "player-3"
-      );
+      // Create a new world for player-3's first plant
+      const emptyWorld = new World<Entity>();
 
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: texasECoords,
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: texasECoords
         },
+        owner: {
+          playerId: "player-3"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: filteredBuildables,
+        world: emptyWorld,
         playerId: "player-3",
         playerBlueprints: player3Blueprints,
       });
@@ -424,15 +605,30 @@ describe("validateBuildableLocation", () => {
     test("should reject buildables in unsurveyed locations when surveyedHexCells is provided", () => {
       // Create an empty set of surveyed cells
       const surveyedHexCells = new Set<string>();
+      const entities = setupEntities();
 
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: centerCoords,
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: centerCoords
         },
+        owner: {
+          playerId: "player-1"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
         surveyedHexCells,
@@ -447,15 +643,30 @@ describe("validateBuildableLocation", () => {
       const surveyedHexCells = new Set<string>([
         coordinatesToString(centerCoords),
       ]);
+      const entities = setupEntities();
 
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "generic_plant",
-          type: "coal_plant",
-          coordinates: centerCoords,
+      const newPlant: Entity = {
+        id: "generic_plant",
+        hexPosition: {
+          coordinates: centerCoords
         },
+        owner: {
+          playerId: "player-1"
+        },
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
+        },
+        fuelStorage: {
+          maxFuelStorage: 1000,
+          currentFuelStorage: 500
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPlant,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
         surveyedHexCells,
@@ -469,18 +680,28 @@ describe("validateBuildableLocation", () => {
       const surveyedHexCells = new Set<string>([
         coordinatesToString(centerCoords),
       ]);
+      const entities = setupEntities();
 
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "new-pole",
-          type: "power_pole",
+      const newPole: Entity = {
+        id: "new-pole",
+        cornerPosition: {
           cornerCoordinates: {
             hex: centerCoords,
-            position: CornerPosition.North,
-          },
+            position: CornerPosition.North
+          }
         },
+        owner: {
+          playerId: "player-1"
+        },
+        connections: {
+          connectedToIds: []
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPole,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
         surveyedHexCells,
@@ -494,18 +715,28 @@ describe("validateBuildableLocation", () => {
       const surveyedHexCells = new Set<string>([
         coordinatesToString(texasCoords),
       ]);
+      const entities = setupEntities();
 
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "new-pole",
-          type: "power_pole",
+      const newPole: Entity = {
+        id: "new-pole",
+        cornerPosition: {
           cornerCoordinates: {
             hex: centerCoords,
-            position: CornerPosition.North,
-          },
+            position: CornerPosition.North
+          }
         },
+        owner: {
+          playerId: "player-1"
+        },
+        connections: {
+          connectedToIds: []
+        }
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: newPole,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
         surveyedHexCells,
@@ -518,14 +749,24 @@ describe("validateBuildableLocation", () => {
 
   describe("Invalid Buildable Types", () => {
     test("should reject buildables with invalid type", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "invalid",
-          type: "invalid_type" as any,
-          coordinates: centerCoords,
+      const entities = setupEntities();
+      
+      // Create an entity without powerGeneration or cornerPosition
+      const invalidEntity: Entity = {
+        id: "invalid",
+        hexPosition: {
+          coordinates: centerCoords
         },
+        owner: {
+          playerId: "player-1"
+        }
+        // No powerGeneration or cornerPosition
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: invalidEntity,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });
@@ -537,14 +778,25 @@ describe("validateBuildableLocation", () => {
     });
 
     test("should reject buildables with missing coordinates", () => {
-      const result = validateBuildableLocation({
-        buildable: {
-          id: "missing-coords",
-          type: "coal_plant",
-          // No coordinates
+      const entities = setupEntities();
+      
+      // Create an entity with powerGeneration but no hexPosition
+      const invalidEntity: Entity = {
+        id: "missing-coords",
+        powerGeneration: {
+          powerGenerationKW: 1000,
+          pricePerKwh: 0.1
         },
+        owner: {
+          playerId: "player-1"
+        },
+        // No hexPosition
+      };
+      
+      const result = validateBuildableLocation({
+        buildable: invalidEntity,
         grid,
-        allBuildables: buildables,
+        world,
         playerId: "player-1",
         playerBlueprints: player1Blueprints,
       });

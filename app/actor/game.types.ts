@@ -17,6 +17,7 @@ import { Env } from "../env";
 import { CommodityMarketState } from "../lib/market/CommodityMarket";
 import { HexCoordinates } from "../lib/coordinates/HexCoordinates";
 import { SurveyResult, HexCellResource } from "../lib/surveys";
+import { Entity } from "../ecs/entity";
 
 export interface Player {
   name: string;
@@ -55,7 +56,7 @@ interface GamePublicContext {
     totalTicks: number;
     isPaused: boolean;
   };
-  buildables: Buildable[];
+  entities: Entity[];
   hexGrid: HexGrid;
   auction: Auction | null;
   randomSeed: number;

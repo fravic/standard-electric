@@ -1,18 +1,16 @@
 import {
-  coordinatesToString,
   equals,
   HexCoordinates,
 } from "../coordinates/HexCoordinates";
 import { HexCell, Population } from "../HexCell";
-import { Buildable } from "../buildables/schemas";
-import { isPowerPole, PowerPole } from "../buildables/PowerPole";
-import { isPowerPlant, isPowerPlantType } from "../buildables/PowerPlant";
 import { HexGrid } from "../HexGrid";
 import {
-  cornerToString,
   getAdjacentHexes,
+  cornersAdjacent,
 } from "../coordinates/CornerCoordinates";
-import { findPossibleConnectionsForCoordinates } from "../buildables/PowerPole";
+import { Entity } from "@/ecs/entity";
+import { World, With } from "miniplex";
+import { CornerCoordinates } from "../coordinates/types";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -31,6 +29,11 @@ type PowerSystemResult = {
   currentFuelStorageByPowerPlantId: Record<string, number>; // Power plant ID -> fuel storage level
 };
 
+// Define Miniplex types for power plants and power poles
+type PowerPlantEntity = With<Entity, 'powerGeneration' | 'hexPosition'>;
+type PowerPoleEntity = With<Entity, 'connections' | 'cornerPosition'>;
+
+// Type for our internal power plant representation
 type PowerPlant = {
   id: string;
   playerId: string;
@@ -68,45 +71,69 @@ type Consumer = {
 
 export class PowerSystem {
   private hexGrid: HexGrid;
-  private buildables: Buildable[];
-  private powerPolesById: Record<string, PowerPole> = {};
+  private world: World<Entity>;
+  private powerPlantEntities: PowerPlantEntity[] = [];
+  private powerPoleEntities: PowerPoleEntity[] = [];
+  private powerPolesById: Record<string, PowerPoleEntity> = {};
   private powerPlants: PowerPlant[] = [];
   private consumers: Consumer[] = [];
   private grids: Grid[] = [];
 
-  constructor(hexGrid: HexGrid, buildables: Buildable[]) {
+  constructor(hexGrid: HexGrid, world: World<Entity>) {
     this.hexGrid = hexGrid;
-    this.buildables = buildables;
+    this.world = world;
     this.initializePowerSystem();
   }
 
-  private initializePowerSystem() {
-    // Initialize power plants from coal plants
-    this.powerPlants = this.buildables.filter(isPowerPlant).map((plant) => ({
-      id: plant.id,
-      playerId: plant.playerId,
-      pricePerKwh: plant.pricePerKwh,
-      maxCapacity: plant.powerGenerationKW,
-      remainingCapacity: plant.powerGenerationKW,
-      gridId: plant.id, // Each plant starts in its own grid
-      coordinates: plant.coordinates,
-      fuelType: plant.fuelType || null,
-      fuelConsumptionPerKWh: plant.fuelConsumptionPerKWh || 0,
-      maxFuelStorage: plant.maxFuelStorage || 0,
-      currentFuelStorage: plant.currentFuelStorage || 0,
-    }));
+  /**
+   * Refreshes all entity queries and updates internal data structures
+   * @param initializeConsumers Whether to initialize consumers from populated hexes
+   */
+  private refreshEntityQueries(initializeConsumers: boolean = false) {
+    // Query for power plants with all required components
+    const powerPlantQuery = this.world.with('powerGeneration', 'hexPosition');
+    this.powerPlantEntities = powerPlantQuery.entities as PowerPlantEntity[];
+      
+    // Initialize power plants from entities with powerGeneration component
+    this.powerPlants = this.powerPlantEntities && this.powerPlantEntities.length > 0 ? 
+      this.powerPlantEntities.map((entity) => ({
+        id: entity.id,
+        playerId: entity.owner?.playerId || '',
+        pricePerKwh: entity.powerGeneration.pricePerKwh || 0,
+        maxCapacity: entity.powerGeneration.powerGenerationKW || 0,
+        remainingCapacity: entity.powerGeneration.powerGenerationKW || 0,
+        gridId: entity.id, // Each plant starts in its own grid
+        coordinates: entity.hexPosition.coordinates,
+        fuelType: entity.fuelRequirement?.fuelType || null,
+        fuelConsumptionPerKWh: entity.fuelRequirement?.fuelConsumptionPerKWh || 0,
+        maxFuelStorage: entity.fuelStorage?.maxFuelStorage || 0,
+        currentFuelStorage: entity.fuelStorage?.currentFuelStorage || 0,
+      })) : [];
 
+    // Query for power poles with connections and cornerPosition
+    const powerPoleQuery = this.world.with('connections', 'cornerPosition');
+    this.powerPoleEntities = powerPoleQuery.entities as PowerPoleEntity[];
+      
     // Initialize power poles
-    this.powerPolesById = this.buildables
-      .filter(isPowerPole)
-      .reduce((acc, pole) => {
+    this.powerPolesById = this.powerPoleEntities && this.powerPoleEntities.length > 0 ?
+      this.powerPoleEntities.reduce((acc, pole) => {
         acc[pole.id] = pole;
         return acc;
-      }, {} as Record<string, PowerPole>);
+      }, {} as Record<string, PowerPoleEntity>) : {};
 
     // Compile grids from connected power plants and poles
     this.grids = this.compileGrids();
 
+    // Initialize consumers from populated hexes if requested
+    if (initializeConsumers) {
+      this.initializeConsumers();
+    }
+  }
+  
+  /**
+   * Initializes consumers from populated hexes
+   */
+  private initializeConsumers() {
     // Find all populated cells that need power
     const cells = Object.values(this.hexGrid.cellsByHexCoordinates);
     this.consumers = cells
@@ -119,18 +146,32 @@ export class PowerSystem {
           .connectedPlants,
       }));
   }
+  
+  /**
+   * Initializes the power system by refreshing entity queries and setting up initial state
+   */
+  private initializePowerSystem() {
+    // Refresh entity queries and initialize consumers
+    this.refreshEntityQueries(true);
+  }
 
   // Find power plants connected to this hex
-  private findConnectedPowerPlants(coordinates: HexCoordinates): {
+  public findConnectedPowerPlants(coordinates: HexCoordinates): {
     connectedPlants: PowerPlantConnection[];
     connectedPoleIds: string[];
   } {
     const connectedPlants: PowerPlantConnection[] = [];
     const visitedPowerPoleIds = new Set<string>();
-
+    
+    // If no power poles exist, return empty results
+    if (!this.powerPoleEntities || this.powerPoleEntities.length === 0) {
+      return { connectedPlants, connectedPoleIds: [] };
+    }
+    
     // Start with the power poles at the starting hex
-    const startingPoles = this.buildables.filter(isPowerPole).filter((pole) => {
-      const adjacentHexes = getAdjacentHexes(pole.cornerCoordinates);
+    const startingPoles = this.powerPoleEntities.filter((pole) => {
+      if (!pole.cornerPosition || !pole.cornerPosition.cornerCoordinates) return false;
+      const adjacentHexes = getAdjacentHexes(pole.cornerPosition.cornerCoordinates);
       return adjacentHexes.some((hex) => equals(hex, coordinates));
     });
 
@@ -147,13 +188,20 @@ export class PowerSystem {
       visitedPowerPoleIds.add(currentVisit.powerPoleId);
 
       const currentPole = this.powerPolesById[currentVisit.powerPoleId];
-      const adjacentHexes = getAdjacentHexes(currentPole.cornerCoordinates);
+      
+      // Skip if pole doesn't exist or doesn't have required properties
+      if (!currentPole || !currentPole.cornerPosition || !currentPole.cornerPosition.cornerCoordinates) {
+        continue;
+      }
+      
+      const adjacentHexes = getAdjacentHexes(currentPole.cornerPosition.cornerCoordinates);
       const newPath = [...currentVisit.path, currentVisit.powerPoleId];
 
-      // Check for power plants at adjacent hexes
-      const plantsHere = this.powerPlants.filter((plant) =>
-        adjacentHexes.some((hex) => equals(hex, plant.coordinates))
-      );
+      // Check for power plants at adjacent hexes using our cached power plants
+      const plantsHere = this.powerPlants && this.powerPlants.length > 0 ? 
+        this.powerPlants.filter((plant) =>
+          adjacentHexes.some((hex) => equals(hex, plant.coordinates))
+        ) : [];
       plantsHere.forEach((plant) => {
         // Only add a plant if we haven't found it yet (keeping shortest path)
         if (!connectedPlants.some((c) => c.plantId === plant.id)) {
@@ -162,14 +210,16 @@ export class PowerSystem {
       });
 
       // Add connected poles to the queue
-      const connectedPoles = currentPole.connectedToIds;
+      const connectedPoles = currentPole.connections?.connectedToIds || [];
       // TODO: Currently, we don't create bi-directional connections, but the
       // connections should be bi-directional. So we need to find all power
       // poles that point at this one too.
       const allConnectedPoles = connectedPoles.concat(
-        Object.values(this.powerPolesById)
-          .filter((pole) => pole.connectedToIds.includes(currentPole.id))
-          .map((pole) => pole.id)
+        this.powerPoleEntities && this.powerPoleEntities.length > 0 ?
+          this.powerPoleEntities
+            .filter((pole) => pole.connections?.connectedToIds?.includes(currentPole.id))
+            .map((pole) => pole.id)
+          : []
       );
       allConnectedPoles.forEach((poleId) => {
         if (visitedPowerPoleIds.has(poleId)) return;
@@ -186,9 +236,14 @@ export class PowerSystem {
     };
   }
 
-  private compileGrids(): Grid[] {
+  public compileGrids(): Grid[] {
     const grids: Grid[] = [];
     const processedPlantIds = new Set<string>();
+
+    // If no power plants, return empty grids
+    if (!this.powerPlants || this.powerPlants.length === 0) {
+      return grids;
+    }
 
     // For each unprocessed power plant, find all connected power plants and poles
     for (const plant of this.powerPlants) {
@@ -230,7 +285,12 @@ export class PowerSystem {
     return grids;
   }
 
+
+  
   resolveOneHourOfPowerProduction(): PowerSystemResult {
+    // Refresh entity queries to ensure we have the latest data
+    this.refreshEntityQueries();
+    
     // Reset capacities and statuses
     this.powerPlants.forEach((plant) => {
       // Check if there's enough fuel for at least some power generation
@@ -408,29 +468,51 @@ export class PowerSystem {
   }
 
   /**
+   * Helper function to find possible connections for a corner coordinate with entities in the world
+   * @param cornerCoordinates The corner coordinates to check for possible connections
+   * @param playerId Optional player ID to filter connections by owner
+   * @returns Array of entity IDs that can connect to the given corner coordinates
+   */
+  findPossibleConnectionsWithWorld(
+    cornerCoordinates: CornerCoordinates,
+    playerId?: string
+  ): string[] {
+    const powerPolesQuery = this.world.with('connections', 'cornerPosition');
+    
+    const eligiblePoles = playerId 
+      ? powerPolesQuery.entities.filter(pole => pole.owner?.playerId === playerId)
+      : powerPolesQuery.entities;
+      
+    return eligiblePoles
+      .filter(pole => 
+        cornersAdjacent(cornerCoordinates, pole.cornerPosition!.cornerCoordinates)
+      )
+      .map(pole => pole.id);
+  }
+
+  /**
    * Validates if a new buildable can be placed at the specified location
    * based on connectivity to the player's existing grid.
    *
-   * @param buildableType The type of buildable (e.g., 'power_pole', 'coal_plant', etc.)
+   * @param buildableType The type of buildable ('powerPlant' or 'powerPole')
    * @param playerId The ID of the player placing the buildable
    * @param coordinates The hex coordinates for a power plant
    * @param cornerCoordinates The corner coordinates for a power pole
    * @returns An object indicating if the placement is valid and a reason if invalid
    */
   validateBuildablePlacement(
-    buildableType: Buildable["type"],
+    buildableType: 'powerPlant' | 'powerPole',
     playerId: string,
     coordinates?: HexCoordinates,
     cornerCoordinates?: { hex: HexCoordinates; position: number }
   ): { valid: boolean; reason?: string } {
     // Check if this is the player's first power plant (always allowed)
-    const playerBuildables = this.buildables.filter(
-      (b) => "playerId" in b && b.playerId === playerId
+    const playerHasPowerPlants = this.powerPlantEntities.some(
+      entity => entity.owner?.playerId === playerId
     );
-    const playerHasPowerPlants = playerBuildables.some(isPowerPlant);
 
     // First power plant is always allowed
-    if (isPowerPlantType(buildableType) && !playerHasPowerPlants) {
+    if (buildableType === 'powerPlant' && !playerHasPowerPlants) {
       return { valid: true };
     }
 
@@ -452,16 +534,16 @@ export class PowerSystem {
     }
 
     // For power poles, check if it's adjacent to the player's existing grid
-    if (buildableType === "power_pole" && cornerCoordinates) {
+    if (buildableType === 'powerPole' && cornerCoordinates) {
       // Get all power poles owned by the player
-      const playerPoles = Object.values(this.powerPolesById).filter(
-        (pole) => pole.playerId === playerId
+      const playerPoles = this.powerPoleEntities.filter(
+        (pole) => pole.owner?.playerId === playerId
       );
 
-      // Check if the new pole can connect to existing poles
-      const possibleConnections = findPossibleConnectionsForCoordinates(
+      // Check if the new pole can connect to existing poles using the World
+      const possibleConnections = this.findPossibleConnectionsWithWorld(
         cornerCoordinates,
-        playerPoles
+        playerId
       );
 
       // If connected to existing poles, it's valid
@@ -473,10 +555,12 @@ export class PowerSystem {
       const adjacentHexes = getAdjacentHexes(cornerCoordinates);
 
       // Check if any of the player's power plants are in the adjacent hexes
-      const isAdjacentToPlayerPlant = this.powerPlants.some(
-        (plant) =>
-          plant.playerId === playerId &&
-          adjacentHexes.some((hex) => equals(hex, plant.coordinates))
+      const playerPowerPlants = this.powerPlantEntities.filter(
+        entity => entity.owner?.playerId === playerId
+      );
+        
+      const isAdjacentToPlayerPlant = playerPowerPlants.some(
+        (entity) => adjacentHexes.some((hex) => equals(hex, entity.hexPosition.coordinates))
       );
 
       if (isAdjacentToPlayerPlant) {
@@ -491,7 +575,7 @@ export class PowerSystem {
     }
 
     // For power plants, check if it's adjacent to the player's existing grid
-    if (isPowerPlantType(buildableType) && coordinates) {
+    if (buildableType === 'powerPlant' && coordinates) {
       // Get all power poles in the player's grids
       const playerPoleIds = new Set<string>();
       playerGrids.forEach((grid) => {
@@ -499,10 +583,10 @@ export class PowerSystem {
       });
 
       // Check if any existing pole is adjacent to the new plant
-      const isConnected = Object.values(this.powerPolesById)
+      const isConnected = this.powerPoleEntities
         .filter((pole) => playerPoleIds.has(pole.id))
         .some((pole) => {
-          const poleHexes = getAdjacentHexes(pole.cornerCoordinates);
+          const poleHexes = getAdjacentHexes(pole.cornerPosition.cornerCoordinates);
           return poleHexes.some((hex) => equals(hex, coordinates));
         });
 

@@ -22,23 +22,11 @@ import {
 import { isPowerPlant } from "@/lib/buildables/PowerPlant";
 import {
   initializeCommodityMarket,
-  buyCommodity,
-  sellCommodity,
   buyFuelForPowerPlant,
   sellFuelFromPowerPlant,
 } from "../lib/market/CommodityMarket";
 import { PowerPlant } from "../lib/buildables/schemas";
-import {
-  coordinatesToString,
-  HexCoordinates,
-} from "../lib/coordinates/HexCoordinates";
-import { getAdjacentHexes } from "../lib/coordinates/CornerCoordinates";
-import {
-  SERVER_ONLY_ID,
-  precomputeHexCellResources,
-  updateSurveys,
-  startSurvey,
-} from "../lib/surveys";
+import { SERVER_ONLY_ID } from "../lib/surveys";
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 
 export const gameMachine = setup({
