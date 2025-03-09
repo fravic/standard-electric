@@ -12,6 +12,8 @@ import { Entity } from "@/ecs/entity";
 import { World, With } from "miniplex";
 import { CornerCoordinates } from "../../lib/coordinates/types";
 import { findPossibleConnectionsWithWorld } from "../../lib/buildables/findPossibleConnections";
+import { System, SystemContext, SystemResult } from "./System";
+import { Draft } from "immer";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -23,12 +25,22 @@ export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
   [Population.Megalopolis]: 200,
 };
 
-type PowerSystemResult = {
+/**
+ * Context required for the PowerSystem update method
+ */
+export interface PowerContext extends SystemContext {
+  hexGrid: HexGrid;
+}
+
+/**
+ * Result returned from the PowerSystem update method
+ */
+export interface PowerResult extends SystemResult {
   incomePerPlayer: Record<string, number>;
   powerSoldPerPlayerKWh: Record<string, number>;
   grids: Grid[];
   currentFuelStorageByPowerPlantId: Record<string, number>; // Power plant ID -> fuel storage level
-};
+}
 
 // Define Miniplex types for power plants and power poles
 type PowerPlantEntity = With<Entity, 'powerGeneration' | 'hexPosition'>;
@@ -70,9 +82,7 @@ type Consumer = {
   connectedPlants: PowerPlantConnection[];
 };
 
-export class PowerSystem {
-  private hexGrid: HexGrid;
-  private world: World<Entity>;
+export class PowerSystem implements System<PowerContext, PowerResult> {
   private powerPlantEntities: PowerPlantEntity[] = [];
   private powerPoleEntities: PowerPoleEntity[] = [];
   private powerPolesById: Record<string, PowerPoleEntity> = {};
@@ -80,19 +90,19 @@ export class PowerSystem {
   private consumers: Consumer[] = [];
   private grids: Grid[] = [];
 
-  constructor(hexGrid: HexGrid, world: World<Entity>) {
-    this.hexGrid = hexGrid;
-    this.world = world;
-    this.initializePowerSystem();
+  constructor() {
+    // No longer taking hexGrid and world in constructor as they'll be passed in update()
   }
 
   /**
    * Refreshes all entity queries and updates internal data structures
+   * @param world The current Miniplex world
+   * @param hexGrid The current hex grid
    * @param initializeConsumers Whether to initialize consumers from populated hexes
    */
-  private refreshEntityQueries(initializeConsumers: boolean = false) {
+  private refreshEntityQueries(world: World<Entity>, hexGrid: HexGrid, initializeConsumers: boolean = false) {
     // Query for power plants with all required components
-    const powerPlantQuery = this.world.with('powerGeneration', 'hexPosition');
+    const powerPlantQuery = world.with('powerGeneration', 'hexPosition');
     this.powerPlantEntities = powerPlantQuery.entities as PowerPlantEntity[];
       
     // Initialize power plants from entities with powerGeneration component
@@ -112,7 +122,7 @@ export class PowerSystem {
       })) : [];
 
     // Query for power poles with connections and cornerPosition
-    const powerPoleQuery = this.world.with('connections', 'cornerPosition');
+    const powerPoleQuery = world.with('connections', 'cornerPosition');
     this.powerPoleEntities = powerPoleQuery.entities as PowerPoleEntity[];
       
     // Initialize power poles
@@ -127,16 +137,17 @@ export class PowerSystem {
 
     // Initialize consumers from populated hexes if requested
     if (initializeConsumers) {
-      this.initializeConsumers();
+      this.initializeConsumers(hexGrid);
     }
   }
   
   /**
    * Initializes consumers from populated hexes
+   * @param hexGrid The current hex grid
    */
-  private initializeConsumers() {
+  private initializeConsumers(hexGrid: HexGrid) {
     // Find all populated cells that need power
-    const cells = Object.values(this.hexGrid.cellsByHexCoordinates);
+    const cells = Object.values(hexGrid.cellsByHexCoordinates);
     this.consumers = cells
       .filter((cell) => cell.population > Population.Unpopulated)
       .map((cell) => ({
@@ -150,10 +161,22 @@ export class PowerSystem {
   
   /**
    * Initializes the power system by refreshing entity queries and setting up initial state
+   * @param world The current Miniplex world
+   * @param hexGrid The current hex grid
    */
-  private initializePowerSystem() {
+  private initializePowerSystem(world: World<Entity>, hexGrid: HexGrid) {
     // Refresh entity queries and initialize consumers
-    this.refreshEntityQueries(true);
+    this.refreshEntityQueries(world, hexGrid, true);
+  }
+  
+  /**
+   * Public method to initialize the power system without running power production
+   * Useful for validation operations that just need system state but don't need to simulate power
+   * @param world The current Miniplex world
+   * @param context The power system context
+   */
+  public initialize(world: World<Entity>, context: PowerContext): void {
+    this.initializePowerSystem(world, context.hexGrid);
   }
 
   // Find power plants connected to this hex
@@ -288,9 +311,70 @@ export class PowerSystem {
 
 
   
-  resolveOneHourOfPowerProduction(): PowerSystemResult {
-    // Refresh entity queries to ensure we have the latest data
-    this.refreshEntityQueries();
+  /**
+   * Implements the System.update method
+   * Process one hour of power production based on the current world state
+   * @param world The current Miniplex world
+   * @param context The power system context
+   * @returns PowerResult with income, power sold, and grids
+   */
+  public update(world: World<Entity>, context: PowerContext): PowerResult {
+    // Initialize the power system with the provided world and hex grid
+    this.initializePowerSystem(world, context.hexGrid);
+    
+    // Now resolve the power production
+    return this.resolveOneHourOfPowerProduction();
+  }
+  
+  /**
+   * Implements the System.mutate method
+   * Performs mutations on entities based on the power system result
+   * @param entitiesDraft An Immer draft of the entities by ID
+   * @param result The result from the update method
+   * @param playersDraft Optional draft of player data to update income and power sold stats
+   */
+  public mutate(
+    entitiesDraft: Draft<Record<string, Entity>>,
+    result: PowerResult,
+    playersDraft?: Draft<Record<string, any>>
+  ): void {
+    // Update fuel storage levels for power plants
+    Object.entries(result.currentFuelStorageByPowerPlantId).forEach(([plantId, fuelLevel]) => {
+      if (!entitiesDraft[plantId] || !entitiesDraft[plantId].fuelStorage) return;
+      entitiesDraft[plantId].fuelStorage = {
+        ...entitiesDraft[plantId].fuelStorage,
+        currentFuelStorage: fuelLevel
+      };
+    });
+    
+    // Update player income and power sold if playersDraft is provided
+    if (playersDraft) {
+      Object.keys(result.incomePerPlayer).forEach((playerId) => {
+        if (!playersDraft[playerId]) return;
+        
+        const income = result.incomePerPlayer[playerId] ?? 0;
+        const powerSoldKWh = result.powerSoldPerPlayerKWh[playerId] ?? 0;
+        
+        console.log(
+          `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
+        );
+        
+        playersDraft[playerId].money += income;
+        playersDraft[playerId].powerSoldKWh += powerSoldKWh;
+      });
+    }
+  }
+  
+  /**
+   * Process one hour of power production
+   * Calculate power distribution, income, and fuel consumption
+   * @returns PowerResult with income, power sold, and grids
+   * @internal This method is kept public for testing and backward compatibility but should be
+   * considered internal API. Use update() instead for new code.
+   */
+  public resolveOneHourOfPowerProduction(): PowerResult {
+    // Entity queries have already been refreshed in update() method
+    // No need to call refreshEntityQueries() here
     
     // Reset capacities and statuses
     this.powerPlants.forEach((plant) => {
@@ -463,6 +547,7 @@ export class PowerSystem {
     });
 
     return {
+      success: true,
       incomePerPlayer,
       powerSoldPerPlayerKWh: powerSoldPerPlayer,
       grids: this.grids,
@@ -515,9 +600,11 @@ export class PowerSystem {
 
     // For power poles, check if it's adjacent to the player's existing grid
     if (buildableType === 'powerPole' && cornerCoordinates) {
-      // Check if the new pole can connect to existing poles using the World
+      // Check if the new pole can connect to existing poles
       const possibleConnections = findPossibleConnectionsWithWorld(
-        this.world,
+        {
+          with: () => ({ entities: this.powerPoleEntities })
+        } as any as World<Entity>, // Adapter pattern to use existing poles
         cornerCoordinates,
         playerId
       );

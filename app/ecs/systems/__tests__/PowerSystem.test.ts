@@ -85,6 +85,12 @@ describe("PowerSystem", () => {
     // Create a new Miniplex world for each test
     world = new World<Entity>();
   });
+  
+  // Helper to create PowerContext for testing
+  const createPowerContext = (time: number = 0) => ({
+    gameTime: time,
+    hexGrid
+  });
 
   describe("findConnectedPowerPlants", () => {
     it("should find a power plant connected through a single power pole with correct path", () => {
@@ -97,7 +103,9 @@ describe("PowerSystem", () => {
       world.add(plant);
       world.add(pole);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
       expect(connectedPlants).toEqual([{ plantId: plant.id, path: [pole.id] }]);
     });
@@ -120,7 +128,9 @@ describe("PowerSystem", () => {
       world.add(pole1);
       world.add(pole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
       expect(
         connectedPlants.sort((a, b) => a.plantId.localeCompare(b.plantId))
@@ -148,7 +158,9 @@ describe("PowerSystem", () => {
       world.add(pole1);
       world.add(pole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
       expect(connectedPlants).toEqual([
         { plantId: plant.id, path: [pole1.id, pole2.id] },
@@ -163,7 +175,9 @@ describe("PowerSystem", () => {
       // Add entity to the world
       world.add(plant);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
       expect(connectedPlants).toEqual([]);
     });
@@ -192,7 +206,9 @@ describe("PowerSystem", () => {
       world.add(southPole);
       world.add(westPole);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
       // Starting from the north hex, the shortest path should be through the north pole
       const { connectedPlants } =
@@ -211,7 +227,9 @@ describe("PowerSystem", () => {
       const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North);
       // Missing pole at hex2, breaking the connection
 
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       world.add(plant);
       world.add(pole1);
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
@@ -258,7 +276,9 @@ describe("PowerSystem", () => {
       world.add(pole5);
       world.add(pole6);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
       const { connectedPlants } =
         powerSystem["findConnectedPowerPlants"](startHex);
@@ -333,7 +353,9 @@ describe("PowerSystem", () => {
       world.add(rightPole1);
       world.add(rightPole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
       const { connectedPlants } =
         powerSystem["findConnectedPowerPlants"](startHex);
@@ -393,7 +415,9 @@ describe("PowerSystem", () => {
       world.add(southPole);
       world.add(westPole);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
       // Starting from the north hex, should find all poles in the network
       const { connectedPoleIds } =
@@ -432,7 +456,9 @@ describe("PowerSystem", () => {
       world.add(leftPole);
       world.add(rightPole);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
       const { connectedPoleIds } =
         powerSystem["findConnectedPowerPlants"](startHex);
@@ -463,7 +489,9 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
       const { connectedPoleIds } =
         powerSystem["findConnectedPowerPlants"](hex1);
@@ -479,7 +507,9 @@ describe("PowerSystem", () => {
       // Add entity to the world
       world.add(plant);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -500,7 +530,9 @@ describe("PowerSystem", () => {
       world.add(plant1);
       world.add(plant2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(2);
@@ -528,7 +560,9 @@ describe("PowerSystem", () => {
       world.add(pole1);
       world.add(pole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -582,7 +616,9 @@ describe("PowerSystem", () => {
       world.add(pole3);
       world.add(pole4);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -616,7 +652,9 @@ describe("PowerSystem", () => {
       world.add(pole1);
       world.add(pole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -694,9 +732,11 @@ describe("PowerSystem", () => {
       world.add(pole3);
       world.add(pole4);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const result = powerSystem.update(world, createPowerContext());
 
       // Should only use the cheap plant
       expect(result.incomePerPlayer).toEqual({
@@ -749,8 +789,10 @@ describe("PowerSystem", () => {
       world.add(pole3);
       world.add(pole4);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // Both grids should be in blackout
       expect(result.grids.every((g) => g.blackout)).toBe(true);
@@ -798,8 +840,10 @@ describe("PowerSystem", () => {
       world.add(pole3);
       world.add(pole4);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // Grid should be in blackout
       expect(result.grids[0].blackout).toBe(true);
@@ -867,8 +911,10 @@ describe("PowerSystem", () => {
       world.add(pole3);
       world.add(pole4);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // Grid 1 should work, Grid 2 should be in blackout
       const grid1 = result.grids.find((g) =>
@@ -947,9 +993,11 @@ describe("PowerSystem", () => {
       world.add(pole3);
       world.add(pole4);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
 
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const result = powerSystem.update(world, createPowerContext());
 
       // Should use cheaper plant first, then the more expensive one
       const grid1 = result.grids.find((g) =>
@@ -998,8 +1046,10 @@ describe("PowerSystem", () => {
       world.add(plant);
       world.add(pole);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // The plant should have consumed 0.1 fuel per kWh * 10 kWh = 1 fuel
       expect(result.currentFuelStorageByPowerPlantId[plant.id]).toBe(999);
@@ -1033,8 +1083,10 @@ describe("PowerSystem", () => {
       world.add(plant);
       world.add(pole);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // The plant should not have generated any power
       expect(result.powerSoldPerPlayerKWh["player1"] || 0).toBe(0);
@@ -1088,8 +1140,10 @@ describe("PowerSystem", () => {
       world.add(pole1);
       world.add(pole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // The plant should have consumed 0.1 fuel per kWh * (10 + 25) kWh = 3.5 fuel
       expect(result.currentFuelStorageByPowerPlantId[plant.id]).toBe(996.5);
@@ -1139,8 +1193,10 @@ describe("PowerSystem", () => {
       world.add(pole1);
       world.add(pole2);
       
-      const powerSystem = new PowerSystem(hexGrid, world);
-      const result = powerSystem.resolveOneHourOfPowerProduction();
+      const powerSystem = new PowerSystem();
+      // Initialize with world and hexGrid via initialize method
+      powerSystem.initialize(world, { gameTime: 0, hexGrid });
+      const result = powerSystem.update(world, createPowerContext());
 
       // Plant 1 should have consumed 0.1 fuel per kWh * 30 kWh = 3 fuel
       expect(result.currentFuelStorageByPowerPlantId[plant1.id]).toBe(1000);

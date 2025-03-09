@@ -178,36 +178,21 @@ export const gameMachine = setup({
 
           // TODO: Change how we update the draft here
 
-          // Calculate and distribute income for each player
-          const powerSystem = new PowerSystem(
-            current(draft.hexGrid),
-            world
-          );
-          const powerSystemResult =
-            powerSystem.resolveOneHourOfPowerProduction();
+          // Calculate and distribute income for each player using the System interface
+          const powerSystem = new PowerSystem();
+          
+          // Create the PowerContext object
+          const powerContext = {
+            gameTime: draft.time.totalTicks,
+            hexGrid: current(draft.hexGrid)
+          };
+          
+          // Use the update() method to get the power system results
+          const powerSystemResult = powerSystem.update(world, powerContext);
 
-          // Update player income and power sold
-          Object.keys(powerSystemResult.incomePerPlayer).forEach((playerId) => {
-            const income = powerSystemResult.incomePerPlayer[playerId] ?? 0;
-            const powerSoldKWh =
-              powerSystemResult.powerSoldPerPlayerKWh[playerId] ?? 0;
-            console.log(
-              `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
-            );
-            draft.players[playerId].money += income;
-            draft.players[playerId].powerSoldKWh += powerSoldKWh;
-          });
-
-          // Update fuel storage levels for power plants
-          Object.entries(
-            powerSystemResult.currentFuelStorageByPowerPlantId
-          ).forEach(([plantId, fuelLevel]) => {
-            if (!draft.entitiesById[plantId].fuelStorage) return;
-            draft.entitiesById[plantId].fuelStorage = {
-              ...draft.entitiesById[plantId].fuelStorage,
-              currentFuelStorage: fuelLevel
-            };
-          });
+          // Use the mutate() method to update both entity state and player stats
+          // Pass both entitiesById and players to the mutate method
+          powerSystem.mutate(draft.entitiesById, powerSystemResult, draft.players);
         }),
         private: produce(context.private, (draft) => {
           // Process all player's surveys
