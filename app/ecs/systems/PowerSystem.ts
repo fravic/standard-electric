@@ -329,13 +329,13 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
   /**
    * Implements the System.mutate method
    * Performs mutations on entities based on the power system result
-   * @param entitiesDraft An Immer draft of the entities by ID
    * @param result The result from the update method
+   * @param entitiesDraft An Immer draft of the entities by ID
    * @param playersDraft Optional draft of player data to update income and power sold stats
    */
   public mutate(
-    entitiesDraft: Draft<Record<string, Entity>>,
     result: PowerResult,
+    entitiesDraft: Draft<Record<string, Entity>>,
     playersDraft?: Draft<Record<string, any>>
   ): void {
     // Update fuel storage levels for power plants

@@ -227,36 +227,15 @@ describe("Game Machine", () => {
         blueprintId: nextBlueprintId
       }, "player-2", mockEnv, mockStorage));
       
-      // Player 1 passes
-      gameActor.send(createEvent({
-        type: "AUCTION_PASS_BID"
-      }, "player-1", mockEnv, mockStorage));
-      
-      // Check that player 2 won the blueprint
+      // Check that player 2 won the blueprint (automatically, since player 1 cannot take any more)
       const nextBiddingSnapshot = gameActor.getSnapshot();
       const nextPurchases = nextBiddingSnapshot.context.public.auction!.purchases;
       expect(nextPurchases.length).toBeGreaterThan(purchases.length);
       expect(nextPurchases[nextPurchases.length - 1].playerId).toEqual("player-2");
     }
     
-    // 11. Act - Continue until we reach the active state
-    // This might require passing on all remaining blueprints
-    let currentSnapshot = gameActor.getSnapshot();
-    while (typeof currentSnapshot.value === 'object' && 'auction' in currentSnapshot.value) {
-      if (currentSnapshot.value.auction === "initiatingBid") {
-        // Pass on the auction to move to the next blueprint or end the auction
-        gameActor.send(createEvent({
-          type: "PASS_AUCTION"
-        }, "player-1", mockEnv, mockStorage));
-        
-        gameActor.send(createEvent({
-          type: "PASS_AUCTION"
-        }, "player-2", mockEnv, mockStorage));
-      }
-      currentSnapshot = gameActor.getSnapshot();
-    }
-    
     // 12. Assert - Check that we're in the active state
+    let currentSnapshot = gameActor.getSnapshot();
     expect(currentSnapshot.value).toEqual("active");
     
     // 13. Act - Survey hex cells

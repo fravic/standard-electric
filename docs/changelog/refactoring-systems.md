@@ -168,16 +168,21 @@ Implementation plan:
 - ✅ Updated validateBuildableLocation.ts to work with the new PowerSystem
 - ✅ Made resolveOneHourOfPowerProduction() public for testing purposes (marked as internal API)
 
-### In Progress
+### Completed
 
 #### 3. AuctionSystem
-- 🔄 Planning extraction of auction logic from game.machine.ts
+- ✅ Created AuctionSystem class implementing the System interface
+- ✅ Extracted auction logic from game.machine.ts into individual methods
+- ✅ Created comprehensive test suite in AuctionSystem.test.ts
+- ✅ Fixed purchasing logic to ensure player money is only deducted once
+- ✅ Consolidated all auction functionality into AuctionSystem
+- ✅ Removed redundant auction.ts utility file
 
 ### Next Steps
 
-1. Create AuctionSystem implementation
-2. Update tests for AuctionSystem
-3. Implement SurveySystem, CommoditySystem, and BuildableSystem
+1. ✅ Integrate AuctionSystem into game.machine.ts
+2. Implement SurveySystem
+3. Implement CommoditySystem and BuildableSystem
 
 4. **Testing Strategy**
    - Write unit tests for each system in isolation

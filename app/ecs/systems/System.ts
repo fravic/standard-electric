@@ -43,13 +43,13 @@ export interface System<TContext extends SystemContext, TResult extends SystemRe
   
   /**
    * Performs mutations on entities within the system's scope
-   * @param entitiesDraft An Immer draft of the entities by ID
    * @param result The result from the update method
+   * @param entitiesDraft An Immer draft of the entities by ID
    * @param playersDraft Optional draft of player data to update player stats
    */
   mutate(
-    entitiesDraft: Draft<Record<string, Entity>>, 
     result: TResult,
+    entitiesDraft: Draft<Record<string, Entity>>, 
     playersDraft?: Draft<Record<string, any>>
   ): void;
 }

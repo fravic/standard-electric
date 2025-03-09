@@ -8,15 +8,8 @@ import hexGridData from "../../public/hexgrid.json";
 import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/ecs/systems/PowerSystem";
+import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
 import { Entity, EntitySchema } from "@/ecs/entity";
-import {
-  getNextInitiatorPlayerId,
-  getNextBidderPlayerId,
-  canPlayerAffordBid,
-  shouldEndBidding,
-  shouldEndAuction,
-  processBlueprintWinner,
-} from "@/lib/auction";
 import {
   initializeCommodityMarket,
   buyFuelForPowerPlant,
@@ -46,26 +39,33 @@ export const gameMachine = setup({
       if (!context.public.auction || !context.public.auction.currentBlueprint) {
         return false;
       }
-
-      const nextBidderId = getNextBidderPlayerId(
-        context.public.players,
-        context.public.auction,
-        context.public.time.totalTicks,
-        context.public.randomSeed
-      );
+      
+      const auctionSystem = new AuctionSystem();
+      const auctionContext = {
+        gameTime: context.public.time.totalTicks,
+        totalTicks: context.public.time.totalTicks,
+        players: context.public.players,
+        auction: context.public.auction,
+        randomSeed: context.public.randomSeed
+      };
+      
+      const nextBidderId = auctionSystem.getNextBidder(auctionContext);
       return nextBidderId === event.caller.id;
     },
     isCurrentInitiator: ({ context, event }) => {
       if (!context.public.auction) return false;
       const playerId = event.caller.id;
-      return (
-        getNextInitiatorPlayerId(
-          context.public.players,
-          context.public.auction,
-          context.public.time.totalTicks,
-          context.public.randomSeed
-        ) === playerId
-      );
+      
+      const auctionSystem = new AuctionSystem();
+      const auctionContext = {
+        gameTime: context.public.time.totalTicks,
+        totalTicks: context.public.time.totalTicks,
+        players: context.public.players,
+        auction: context.public.auction,
+        randomSeed: context.public.randomSeed
+      };
+      
+      return auctionSystem.getNextInitiator(auctionContext) === playerId;
     },
     canAffordBid: ({ context, event }) => {
       if (
@@ -78,14 +78,37 @@ export const gameMachine = setup({
 
       const player = context.public.players[event.caller.id];
       if (!player) return false;
-
-      return canPlayerAffordBid(player, event.amount);
+      
+      const auctionSystem = new AuctionSystem();
+      return player.money >= event.amount;
     },
     shouldEndBidding: ({ context }) => {
-      return shouldEndBidding(context.public.players, context.public.auction!);
+      if (!context.public.auction) return false;
+      
+      const auctionSystem = new AuctionSystem();
+      const auctionContext = {
+        gameTime: context.public.time.totalTicks,
+        totalTicks: context.public.time.totalTicks,
+        players: context.public.players,
+        auction: context.public.auction,
+        randomSeed: context.public.randomSeed
+      };
+      
+      return auctionSystem.shouldEndBidding(auctionContext);
     },
     shouldEndAuction: ({ context }) => {
-      return shouldEndAuction(context.public.players, context.public.auction!);
+      if (!context.public.auction) return false;
+      
+      const auctionSystem = new AuctionSystem();
+      const auctionContext = {
+        gameTime: context.public.time.totalTicks,
+        totalTicks: context.public.time.totalTicks,
+        players: context.public.players,
+        auction: context.public.auction,
+        randomSeed: context.public.randomSeed
+      };
+      
+      return auctionSystem.shouldEndAuction(auctionContext);
     },
     isValidBuildableLocation: ({ context, event }) => {
       if (event.type !== "ADD_BUILDABLE") {
@@ -176,8 +199,6 @@ export const gameMachine = setup({
           const world = createWorldWithEntities(current(draft.entitiesById));
           draft.time.totalTicks += 1;
 
-          // TODO: Change how we update the draft here
-
           // Calculate and distribute income for each player using the System interface
           const powerSystem = new PowerSystem();
           
@@ -192,7 +213,7 @@ export const gameMachine = setup({
 
           // Use the mutate() method to update both entity state and player stats
           // Pass both entitiesById and players to the mutate method
-          powerSystem.mutate(draft.entitiesById, powerSystemResult, draft.players);
+          powerSystem.mutate(powerSystemResult, draft.entitiesById, draft.players);
         }),
         private: produce(context.private, (draft) => {
           // Process all player's surveys
@@ -282,14 +303,14 @@ export const gameMachine = setup({
           return acc;
         }, {} as Record<string, Entity>);
         
-        draft.auction = {
-          currentBlueprint: null,
-          availableBlueprintIds: availableEntities.map(entity => entity.id),
-          purchases: [],
-          // No passing allowed on the first auction
-          isPassingAllowed: false,
-          passedPlayerIds: [],
-        };
+        // Use AuctionSystem to create a new auction
+        const auctionSystem = new AuctionSystem();
+        const blueprintIds = availableEntities.map(entity => entity.id);
+        const result = auctionSystem.startAuction(blueprintIds, false); // No passing allowed on the first auction
+        if (result.success && result.auction) {
+          draft.auction = result.auction;
+        }
+        
         draft.entitiesById = {
           ...draft.entitiesById,
           ...entitiesById
@@ -304,15 +325,19 @@ export const gameMachine = setup({
             const blueprint = draft.entitiesById[blueprintId];
             if (!blueprint) return;
 
-            draft.auction.currentBlueprint = {
+            // Use AuctionSystem to initiate a bid
+            const auctionSystem = new AuctionSystem();
+            const initialBidAmount = blueprint.cost?.amount || 0;
+            const result = auctionSystem.auctionInitiateBid(
+              draft.auction,
               blueprintId,
-              bids: [
-                {
-                  playerId: event.caller.id,
-                  amount: blueprint.cost?.amount || 0,
-                },
-              ],
-            };
+              event.caller.id,
+              initialBidAmount
+            );
+            
+            if (result.success && result.auction) {
+              draft.auction = result.auction;
+            }
           }
         }),
       })
@@ -321,7 +346,16 @@ export const gameMachine = setup({
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
           if (event.type === "PASS_AUCTION" && draft.auction) {
-            draft.auction.passedPlayerIds.push(event.caller.id);
+            // Use AuctionSystem to pass the auction
+            const auctionSystem = new AuctionSystem();
+            const result = auctionSystem.auctionPass(
+              draft.auction,
+              event.caller.id
+            );
+            
+            if (result.success && result.auction) {
+              draft.auction = result.auction;
+            }
           }
         }),
       })
@@ -330,11 +364,18 @@ export const gameMachine = setup({
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
           if (event.type === "AUCTION_PLACE_BID" && draft.auction) {
-            // Add bid to existing auction
-            draft.auction.currentBlueprint!.bids.push({
-              playerId: event.caller.id,
-              amount: event.amount,
-            });
+            // Use AuctionSystem to place a bid
+            const auctionSystem = new AuctionSystem();
+            const result = auctionSystem.auctionPlaceBid(
+              draft.auction,
+              event.caller.id,
+              event.amount,
+              context.public.players
+            );
+            
+            if (result.success && result.auction) {
+              draft.auction = result.auction;
+            }
           }
         }),
       })
@@ -346,33 +387,37 @@ export const gameMachine = setup({
             event.type === "AUCTION_PASS_BID" &&
             draft.auction?.currentBlueprint
           ) {
-            // Add pass bid to the current blueprint's bids
-            draft.auction.currentBlueprint.bids.push({
-              playerId: event.caller.id,
-              passed: true,
-            });
+            // Use AuctionSystem to pass a bid
+            const auctionSystem = new AuctionSystem();
+            const result = auctionSystem.auctionPassBid(
+              draft.auction,
+              event.caller.id
+            );
+            
+            if (result.success && result.auction) {
+              draft.auction = result.auction;
+            }
           }
         }),
       })
     ),
     endBidding: assign(({ context }) => ({
       public: produce(context.public, (draft) => {
-        const newAuctionState = processBlueprintWinner(
-          context.public.players,
-          context.public.auction!
+        const auctionSystem = new AuctionSystem();
+        
+        // Use AuctionSystem to end bidding
+        const result = auctionSystem.endBidding(
+          context.public.auction!,
+          context.public.players
         );
-        if (!newAuctionState) return;
-
-        // Update player money and blueprints
-        const purchase =
-          newAuctionState.purchases[newAuctionState.purchases.length - 1];
-        draft.players[purchase.playerId].money -= purchase.price;
-        draft.entitiesById[purchase.blueprintId].owner = {
-          playerId: purchase.playerId,
-        };
+        
+        if (!result.success || !result.auction) return;
 
         // Update auction state
-        draft.auction = newAuctionState;
+        draft.auction = result.auction;
+
+        // Use the mutate method to update entities and player stats
+        auctionSystem.mutate(result, draft.entitiesById, draft.players);
       }),
     })),
     // Commodity Market
