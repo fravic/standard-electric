@@ -65,4 +65,5 @@ export const GameServiceEventSchema = z.discriminatedUnion("type", [
 
 export const GameInputSchema = z.object({
   id: z.string(),
+  randomSeed: z.number(),
 });

@@ -210,7 +210,6 @@ export function precomputeHexCellResources(
 
       // If no resource type was selected (no resources configured for this terrain), skip
       if (!resourceType) {
-        resources[coordString] = null;
         return;
       }
 
@@ -219,7 +218,6 @@ export function precomputeHexCellResources(
 
       // If no configuration exists for this resource type, skip
       if (!resourceConfig) {
-        resources[coordString] = null;
         return;
       }
 
@@ -233,8 +231,6 @@ export function precomputeHexCellResources(
         resourceType,
         resourceAmount,
       };
-    } else {
-      resources[coordString] = null; // No resources on this cell
     }
   });
 

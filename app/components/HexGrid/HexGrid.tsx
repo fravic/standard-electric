@@ -1,5 +1,4 @@
 import React from "react";
-import { nanoid } from "nanoid";
 
 import { useSelector } from "@xstate/store/react";
 import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";

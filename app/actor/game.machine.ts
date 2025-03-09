@@ -131,6 +131,10 @@ export const gameMachine = setup({
         surveyedHexCells,
       });
 
+      if (!validation.valid) {
+        console.error("Invalid buildable location:", validation.reason);
+      }
+
       return validation.valid;
     },
   },
@@ -538,7 +542,7 @@ export const gameMachine = setup({
       entitiesById: {},
       hexGrid: HexGridSchema.parse(hexGridData),
       auction: null,
-      randomSeed: Math.floor(Math.random() * 1000000),
+      randomSeed: input.randomSeed ?? Math.floor(Math.random() * 1000000),
       commodityMarket: initializeCommodityMarket(),
     },
     private: {},
