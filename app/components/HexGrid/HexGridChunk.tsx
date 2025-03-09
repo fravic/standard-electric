@@ -28,6 +28,7 @@ import { With } from "miniplex";
 import { Entity } from "@/ecs/entity";
 import { useWorld } from "../WorldContext";
 import { createEntityFromBlueprint } from "@/ecs/factories";
+import { findPossibleConnectionsWithWorld } from "@/lib/buildables/findPossibleConnections";
 
 interface HexGridChunkProps {
   chunk: {
@@ -129,6 +130,13 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       ghostEntity = createEntityFromBlueprint(buildingBlueprint, {
         cornerPosition: {
           cornerCoordinates: nearestCorner,
+        },
+        connections: {
+          connectedToIds: findPossibleConnectionsWithWorld(
+            world,
+            nearestCorner,
+            userId!
+          ),
         },
       });
     } else {

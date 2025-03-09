@@ -26,6 +26,7 @@ import { precomputeHexCellResources, SERVER_ONLY_ID, startSurvey, updateSurveys 
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
 import { With } from "miniplex";
+import { findPossibleConnectionsWithWorld } from "@/lib/buildables/findPossibleConnections";
 
 export const gameMachine = setup({
   types: {
@@ -228,6 +229,7 @@ export const gameMachine = setup({
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
           if (event.type === "ADD_BUILDABLE") {
+            const world = createWorldWithEntities(draft.entitiesById);
             const blueprintEntity = context.public.entitiesById[event.blueprintId] as With<Entity, 'blueprint'>;
             if (blueprintEntity.owner?.playerId !== event.caller.id) {
               throw new Error(`Player ${event.caller.id} is not the owner of blueprint ${event.blueprintId}`);
@@ -246,7 +248,10 @@ export const gameMachine = setup({
 
             // Deduct cost and create buildable
             draft.players[event.caller.id].money -= cost;
-            const entity = createEntityFromBlueprint(blueprintEntity, event.options);
+            const entity = createEntityFromBlueprint(blueprintEntity, {
+              ...event.options,
+              connections: blueprintEntity.blueprint.components.connections ? { ...event.options.connections, connectedToIds: findPossibleConnectionsWithWorld(world, event.options.cornerPosition!.cornerCoordinates, event.caller.id) } : undefined
+            });
             draft.entitiesById[entity.id] = entity;
 
             if (blueprintEntity.blueprint.buildsRemaining) {

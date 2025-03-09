@@ -515,11 +515,6 @@ export class PowerSystem {
 
     // For power poles, check if it's adjacent to the player's existing grid
     if (buildableType === 'powerPole' && cornerCoordinates) {
-      // Get all power poles owned by the player
-      const playerPoles = this.powerPoleEntities.filter(
-        (pole) => pole.owner?.playerId === playerId
-      );
-
       // Check if the new pole can connect to existing poles using the World
       const possibleConnections = findPossibleConnectionsWithWorld(
         this.world,

@@ -18,6 +18,9 @@ export function createWorldWithEntities(entitiesById: Record<string, Entity>) {
 export const AdditionalBlueprintOptionsSchema = z.object({
   cornerPosition: CornerPositionComponentSchema.optional(),
   hexPosition: HexPositionComponentSchema.optional(),
+  connections: z.object({
+    connectedToIds: z.array(z.string()),
+  }).optional(),
 });
 
 export type AdditionalBlueprintOptions = z.infer<typeof AdditionalBlueprintOptionsSchema>;
