@@ -13,6 +13,7 @@ import { GameClientEventSchema } from "@/actor/game.schemas";
 import { AuthContext } from "@/auth.context";
 import { initializeCommodityMarket } from "@/lib/market/CommodityMarket";
 import hexGrid from "@/../public/hexgrid.json";
+import { WorldContextProvider } from "@/components/WorldContext";
 
 type GameClientEvent = z.infer<typeof GameClientEventSchema>;
 
@@ -129,7 +130,9 @@ export default function MapEditor() {
   return (
     <MapEditorContext.Provider value={mapEditorContext}>
       <GameContext.ProviderFromClient client={client}>
-        <Game />
+        <WorldContextProvider>
+          <Game />
+        </WorldContextProvider>
       </GameContext.ProviderFromClient>
     </MapEditorContext.Provider>
   );
