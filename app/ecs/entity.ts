@@ -73,7 +73,7 @@ export type ConnectionsComponent = z.infer<typeof ConnectionsComponentSchema>;
  */
 export const PowerGenerationComponentSchema = z.object({
   powerGenerationKW: z.number(),
-  pricePerKwh: z.number(),
+  pricePerKWh: z.number(),
 });
 
 export type PowerGenerationComponent = z.infer<

@@ -18,6 +18,7 @@ const createPowerPoleAtCorner = (
 ): Entity => {
   return {
     id: `pole-${hex.x}-${hex.z}-${position}`,
+    name: "Power Pole",
     cornerPosition: {
       cornerCoordinates: { hex, position }
     },
@@ -35,7 +36,7 @@ const createPowerPlantAtHex = (
   coordinates: HexCoordinates,
   playerId: string = "player1",
   powerGenerationKW: number = 100,
-  pricePerKwh: number = 0.1,
+  pricePerKWh: number = 0.1,
   fuelType: CommodityType | null = CommodityType.COAL,
   fuelConsumptionPerKWh: number = 0.1,
   maxFuelStorage: number = 1000,
@@ -43,6 +44,7 @@ const createPowerPlantAtHex = (
 ): Entity => {
   const entity: Entity = {
     id: `plant-${coordinates.x}-${coordinates.z}`,
+    name: "Power Plant",
     hexPosition: {
       coordinates
     },
@@ -51,7 +53,7 @@ const createPowerPlantAtHex = (
     },
     powerGeneration: {
       powerGenerationKW,
-      pricePerKwh
+      pricePerKWh
     },
     fuelStorage: {
       maxFuelStorage,

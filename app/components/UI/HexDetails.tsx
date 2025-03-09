@@ -176,7 +176,7 @@ const EntityDetails: React.FC = () => {
 
           <div style={styles.infoRow}>
             <span style={styles.label}>Price per kWh:</span>
-            <span>${entity.powerGeneration.pricePerKwh.toFixed(2)}</span>
+            <span>${entity.powerGeneration.pricePerKWh.toFixed(2)}</span>
           </div>
         </>
       )}

@@ -2,7 +2,6 @@ import { validateBuildableLocation } from "./validateBuildableLocation";
 import { HexGrid } from "../HexGrid";
 import { CornerPosition } from "../coordinates/types";
 import { Population, TerrainType } from "../HexCell";
-import { PowerPlantBlueprint } from "./schemas";
 import {
   fromCubeCoordinates,
   coordinatesToString,
@@ -132,42 +131,12 @@ describe("validateBuildableLocation", () => {
     cellsByHexCoordinates,
   };
 
-  // Create player blueprints
-  const player1Blueprints: Record<string, PowerPlantBlueprint> = {
-    // Blueprint with California as required state
-    california_plant: {
-      id: "california_plant",
-      type: "coal_plant",
-      name: "California Power Plant",
-      powerGenerationKW: 2000,
-      startingPrice: 20,
-      requiredState: "California",
-    },
-    // Blueprint with no required state
-    generic_plant: {
-      id: "generic_plant",
-      type: "coal_plant",
-      name: "Generic Power Plant",
-      powerGenerationKW: 1000,
-      startingPrice: 10,
-    },
-  };
-
-  const player3Blueprints: Record<string, PowerPlantBlueprint> = {
-    generic_plant: {
-      id: "generic_plant",
-      type: "coal_plant",
-      name: "Generic Power Plant",
-      powerGenerationKW: 1000,
-      startingPrice: 10,
-    },
-  };
-
   // Create entities for our tests
   const setupEntities = () => {
     // Player 1's power plant at center (q=0, r=0, s=0)
     const player1Plant: Entity = {
       id: "player1-plant",
+      name: "Player 1 Power Plant",
       hexPosition: {
         coordinates: centerCoords
       },
@@ -176,7 +145,7 @@ describe("validateBuildableLocation", () => {
       },
       powerGeneration: {
         powerGenerationKW: 1000,
-        pricePerKwh: 0.1
+        pricePerKWh: 0.1
       },
       fuelStorage: {
         maxFuelStorage: 1000,
@@ -187,6 +156,7 @@ describe("validateBuildableLocation", () => {
     // Player 1's power pole at the north corner of the center hex
     const player1PoleCenter: Entity = {
       id: "player1-pole-center",
+      name: "Player 1 Power Pole",
       cornerPosition: {
         cornerCoordinates: {
           hex: centerCoords,
@@ -205,6 +175,7 @@ describe("validateBuildableLocation", () => {
     // This is adjacent to the north corner of the center hex
     const player1PoleNW: Entity = {
       id: "player1-pole-nw",
+      name: "Player 1 NW Power Pole",
       cornerPosition: {
         cornerCoordinates: {
           hex: nwCoords,
@@ -222,6 +193,7 @@ describe("validateBuildableLocation", () => {
     // Player 2's power plant in Texas
     const player2Plant: Entity = {
       id: "player2-plant",
+      name: "Player 2 Power Plant",
       hexPosition: {
         coordinates: texasCoords
       },
@@ -230,7 +202,7 @@ describe("validateBuildableLocation", () => {
       },
       powerGeneration: {
         powerGenerationKW: 1000,
-        pricePerKwh: 0.1
+        pricePerKWh: 0.1
       },
       fuelStorage: {
         maxFuelStorage: 1000,
@@ -241,6 +213,7 @@ describe("validateBuildableLocation", () => {
     // Player 2's power pole at the north corner of the Texas hex
     const player2Pole: Entity = {
       id: "player2-pole",
+      name: "Player 2 Power Pole",
       cornerPosition: {
         cornerCoordinates: {
           hex: texasCoords,
@@ -271,6 +244,7 @@ describe("validateBuildableLocation", () => {
       
       const newPole: Entity = {
         id: "new-pole",
+        name: "New Power Pole",
         cornerPosition: {
           cornerCoordinates: {
             hex: noRegionCoords,
@@ -301,6 +275,7 @@ describe("validateBuildableLocation", () => {
       
       const newPole: Entity = {
         id: "new-pole",
+        name: "New Power Pole",
         cornerPosition: {
           cornerCoordinates: {
             hex: texasECoords,
@@ -333,6 +308,7 @@ describe("validateBuildableLocation", () => {
       
       const newPole: Entity = {
         id: "new-pole",
+        name: "New Power Pole",
         cornerPosition: {
           cornerCoordinates: {
             hex: neCoords,
@@ -365,6 +341,7 @@ describe("validateBuildableLocation", () => {
 
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "New Power Plant",
         hexPosition: {
           coordinates: centerCoords
         },
@@ -373,7 +350,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -396,6 +373,7 @@ describe("validateBuildableLocation", () => {
       
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "Generic Power Plant",
         hexPosition: {
           coordinates: noRegionCoords
         },
@@ -404,7 +382,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -428,6 +406,7 @@ describe("validateBuildableLocation", () => {
       
       const newPlant: Entity = {
         id: "california_plant",
+        name: "California Power Plant",
         hexPosition: {
           coordinates: texasCoords
         },
@@ -436,7 +415,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -465,6 +444,7 @@ describe("validateBuildableLocation", () => {
       
       const newPlant: Entity = {
         id: "california_plant",
+        name: "California Power Plant",
         hexPosition: {
           coordinates: centerCoords
         },
@@ -473,7 +453,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -499,6 +479,7 @@ describe("validateBuildableLocation", () => {
       
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "Generic Power Plant",
         hexPosition: {
           coordinates: texasCoords
         },
@@ -507,7 +488,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -535,6 +516,7 @@ describe("validateBuildableLocation", () => {
       
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "Generic Power Plant",
         hexPosition: {
           coordinates: texasECoords
         },
@@ -543,7 +525,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -569,6 +551,7 @@ describe("validateBuildableLocation", () => {
 
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "Generic Power Plant",
         hexPosition: {
           coordinates: texasECoords
         },
@@ -577,7 +560,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -604,6 +587,7 @@ describe("validateBuildableLocation", () => {
 
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "Generic Power Plant",
         hexPosition: {
           coordinates: centerCoords
         },
@@ -612,7 +596,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -641,6 +625,7 @@ describe("validateBuildableLocation", () => {
 
       const newPlant: Entity = {
         id: "generic_plant",
+        name: "Generic Power Plant",
         hexPosition: {
           coordinates: centerCoords
         },
@@ -649,7 +634,7 @@ describe("validateBuildableLocation", () => {
         },
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         fuelStorage: {
           maxFuelStorage: 1000,
@@ -677,6 +662,7 @@ describe("validateBuildableLocation", () => {
 
       const newPole: Entity = {
         id: "new-pole",
+        name: "New Power Pole",
         cornerPosition: {
           cornerCoordinates: {
             hex: centerCoords,
@@ -711,6 +697,7 @@ describe("validateBuildableLocation", () => {
 
       const newPole: Entity = {
         id: "new-pole",
+        name: "New Power Pole",
         cornerPosition: {
           cornerCoordinates: {
             hex: centerCoords,
@@ -745,6 +732,7 @@ describe("validateBuildableLocation", () => {
       // Create an entity without powerGeneration or cornerPosition
       const invalidEntity: Entity = {
         id: "invalid",
+        name: "Invalid Entity",
         hexPosition: {
           coordinates: centerCoords
         },
@@ -773,9 +761,10 @@ describe("validateBuildableLocation", () => {
       // Create an entity with powerGeneration but no hexPosition
       const invalidEntity: Entity = {
         id: "missing-coords",
+        name: "Missing Coordinates Entity",
         powerGeneration: {
           powerGenerationKW: 1000,
-          pricePerKwh: 0.1
+          pricePerKWh: 0.1
         },
         owner: {
           playerId: "player-1"

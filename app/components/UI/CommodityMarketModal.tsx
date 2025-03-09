@@ -127,8 +127,12 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
   const marketRates = getMarketRates(commodityMarket);
   const world = useWorld();
   const activeFuelTypes = useMemo(() => {
-    const entities = world.with("fuelRequirement", "fuelStorage");
-    const fuelTypeSet = new Set([...entities].flatMap((entity) => [entity.fuelRequirement?.fuelType, entity.fuelStorage?.fuelType].filter(Boolean)));
+    const fuelReqEntities = [...world.with("fuelRequirement")];
+    const fuelStorageEntities = [...world.with("fuelStorage")];
+    const fuelTypeSet = new Set(
+      fuelReqEntities.map(e => e.fuelRequirement?.fuelType).filter(Boolean)
+        .concat(fuelStorageEntities.map(e => e.fuelStorage?.fuelType).filter(Boolean))
+      );
     return Array.from(fuelTypeSet) as CommodityType[];
   }, [world]);
 

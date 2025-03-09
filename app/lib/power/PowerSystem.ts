@@ -38,7 +38,7 @@ type PowerPoleEntity = With<Entity, 'connections' | 'cornerPosition'>;
 type PowerPlant = {
   id: string;
   playerId: string;
-  pricePerKwh: number;
+  pricePerKWh: number;
   maxCapacity: number;
   remainingCapacity: number;
   gridId: string;
@@ -100,7 +100,7 @@ export class PowerSystem {
       this.powerPlantEntities.map((entity) => ({
         id: entity.id,
         playerId: entity.owner?.playerId || '',
-        pricePerKwh: entity.powerGeneration.pricePerKwh || 0,
+        pricePerKWh: entity.powerGeneration.pricePerKWh || 0,
         maxCapacity: entity.powerGeneration.powerGenerationKW || 0,
         remainingCapacity: entity.powerGeneration.powerGenerationKW || 0,
         gridId: entity.id, // Each plant starts in its own grid
@@ -409,7 +409,7 @@ export class PowerSystem {
         .map(({ plant }) => plant);
 
       // Sort plants by price ascending
-      availablePlants.sort((a, b) => a.pricePerKwh - b.pricePerKwh);
+      availablePlants.sort((a, b) => a.pricePerKWh - b.pricePerKWh);
 
       // Allocate power from each available plant until demand is met
       let remainingDemand = consumer.demandKwh;
@@ -433,7 +433,7 @@ export class PowerSystem {
         powerSoldPerPlayer[plant.playerId] =
           (powerSoldPerPlayer[plant.playerId] || 0) + supply;
         incomePerPlayer[plant.playerId] =
-          (incomePerPlayer[plant.playerId] || 0) + supply * plant.pricePerKwh;
+          (incomePerPlayer[plant.playerId] || 0) + supply * plant.pricePerKWh;
       }
     }
 
