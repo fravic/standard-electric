@@ -1,11 +1,11 @@
-import { validateBuildableLocation } from "./validateBuildableLocation";
-import { HexGrid } from "../HexGrid";
-import { CornerPosition } from "../coordinates/types";
-import { Population, TerrainType } from "../HexCell";
+import { validateBuildableLocation } from "../validateBuildableLocation";
+import { HexGrid } from "../../HexGrid";
+import { CornerPosition } from "../../coordinates/types";
+import { Population, TerrainType } from "../../HexCell";
 import {
   fromCubeCoordinates,
   coordinatesToString,
-} from "../coordinates/HexCoordinates";
+} from "../../coordinates/HexCoordinates";
 import { Entity } from "@/ecs/entity";
 import { World } from "miniplex";
 

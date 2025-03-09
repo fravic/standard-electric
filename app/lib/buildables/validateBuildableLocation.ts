@@ -1,5 +1,5 @@
 import { HexGrid, getCell } from "../HexGrid";
-import { PowerSystem } from "../power/PowerSystem";
+import { PowerSystem } from "../../ecs/systems/PowerSystem";
 import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
 import {
   coordinatesToString,

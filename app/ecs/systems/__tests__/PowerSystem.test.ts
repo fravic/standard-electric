@@ -1,12 +1,12 @@
-import { HexGrid } from "../../HexGrid";
+import { HexGrid } from "../../../lib/HexGrid";
 import { PowerSystem } from "../PowerSystem";
 import {
   HexCoordinates,
   coordinatesToString,
-} from "../../coordinates/HexCoordinates";
-import { CornerPosition } from "../../coordinates/types";
-import { HexCell, Population, TerrainType } from "../../HexCell";
-import { CommodityType } from "../../market/CommodityMarket";
+} from "../../../lib/coordinates/HexCoordinates";
+import { CornerPosition } from "../../../lib/coordinates/types";
+import { HexCell, Population, TerrainType } from "../../../lib/HexCell";
+import { CommodityType } from "../../../lib/market/CommodityMarket";
 import { World } from "miniplex";
 import { Entity } from "@/ecs/entity";
 

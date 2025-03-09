@@ -1,17 +1,17 @@
 import {
   equals,
   HexCoordinates,
-} from "../coordinates/HexCoordinates";
-import { HexCell, Population } from "../HexCell";
-import { HexGrid } from "../HexGrid";
+} from "../../lib/coordinates/HexCoordinates";
+import { HexCell, Population } from "../../lib/HexCell";
+import { HexGrid } from "../../lib/HexGrid";
 import {
   getAdjacentHexes,
   cornersAdjacent,
-} from "../coordinates/CornerCoordinates";
+} from "../../lib/coordinates/CornerCoordinates";
 import { Entity } from "@/ecs/entity";
 import { World, With } from "miniplex";
-import { CornerCoordinates } from "../coordinates/types";
-import { findPossibleConnectionsWithWorld } from "../buildables/findPossibleConnections";
+import { CornerCoordinates } from "../../lib/coordinates/types";
+import { findPossibleConnectionsWithWorld } from "../../lib/buildables/findPossibleConnections";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {

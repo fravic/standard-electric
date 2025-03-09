@@ -7,7 +7,7 @@ import { GameContext, GameEvent, GameInput } from "./game.types";
 import hexGridData from "../../public/hexgrid.json";
 import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
 import { gameTimerActor } from "./gameTimerActor";
-import { PowerSystem } from "@/lib/power/PowerSystem";
+import { PowerSystem } from "@/ecs/systems/PowerSystem";
 import { Entity, EntitySchema } from "@/ecs/entity";
 import {
   getNextInitiatorPlayerId,
