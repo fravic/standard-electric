@@ -10,7 +10,7 @@ import { CommodityType } from "@/lib/market/CommodityMarket";
  * Gives an entity a renderable component name that can be used to render it
  */
 export const RenderableComponentSchema = z.object({
-  renderableComponentName: z.string(),
+  renderableComponentName: z.enum(["PowerPole", "PowerPlant"]),
 });
 
 export type RenderableComponent = z.infer<typeof RenderableComponentSchema>;
@@ -132,12 +132,16 @@ export type RequiredRegionComponent = z.infer<
  * Gives an entity a blueprint for a set of other components
  */
 export const BlueprintComponentSchema = z.object({
-  buildsRemaining: z.number().optional(), // If null, infinite
+  name: z.string(),
+  buildsRemaining: z.number().optional(), // If undefined, infinite
+  allowedPosition: z.enum(["corner", "hex"]),
   components: z.object({
-    powerGeneration: PowerGenerationComponentSchema,
-    fuelRequirement: FuelRequirementComponentSchema,
-    fuelStorage: FuelStorageComponentSchema,
-    requiredRegion: RequiredRegionComponentSchema,
+    connections: ConnectionsComponentSchema.optional(),
+    fuelRequirement: FuelRequirementComponentSchema.optional(),
+    fuelStorage: FuelStorageComponentSchema.optional(),
+    powerGeneration: PowerGenerationComponentSchema.optional(),
+    renderable: RenderableComponentSchema.optional(),
+    requiredRegion: RequiredRegionComponentSchema.optional(),
   }),
 });
 
@@ -148,7 +152,7 @@ export type BlueprintComponent = z.infer<typeof BlueprintComponentSchema>;
  * Ghosts are entities that have not yet been built/confirmed.
  */
 export const IsGhostComponentSchema = z.object({
-  isGhost: z.boolean(),
+  isGhost: z.literal(true),
 });
 
 export type IsGhostComponent = z.infer<typeof IsGhostComponentSchema>;
@@ -159,6 +163,7 @@ export type IsGhostComponent = z.infer<typeof IsGhostComponentSchema>;
  */
 export const EntitySchema = z.object({
   id: z.string(),
+  name: z.string(),
   auctionable: AuctionableComponentSchema.optional(),
   blueprint: BlueprintComponentSchema.optional(),
   connections: ConnectionsComponentSchema.optional(),

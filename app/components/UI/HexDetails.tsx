@@ -4,13 +4,13 @@ import { Button } from "./Button";
 import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
-import { Buildable, PowerPlant } from "@/lib/buildables/schemas";
 import { CommodityType, getMarketRates } from "@/lib/market/CommodityMarket";
-import { isPowerPlant } from "@/lib/buildables/PowerPlant";
 import { clientStore } from "@/lib/clientState";
 import { coordinatesToString, equals } from "@/lib/coordinates/HexCoordinates";
 import { useSelector } from "@xstate/store/react";
 import { hasActiveSurvey, SURVEY_DURATION_TICKS } from "@/lib/surveys";
+import { useWorld } from "../WorldContext";
+import { entityAtHexCoordinate } from "@/ecs/queries";
 
 const styles = {
   container: {
@@ -91,17 +91,17 @@ const styles = {
   },
 };
 
-// PowerPlantDetails component to display power plant specific information
-const PowerPlantDetails: React.FC = () => {
+const EntityDetails: React.FC = () => {
   // Always call all hooks at the top level, regardless of conditions
   const selectedHexCoordinates = useSelector(
     clientStore,
     (state) => state.context.selectedHexCoordinates
   );
 
-  const buildables = GameContext.useSelector(
-    (state) => state.public.buildables ?? []
+  const entitiesById = GameContext.useSelector(
+    (state) => state.public.entitiesById
   );
+  const world = useWorld();
 
   const userId = AuthContext.useSelector((state) => state.userId);
   const { commodityMarket, players } = GameContext.useSelector(
@@ -109,36 +109,27 @@ const PowerPlantDetails: React.FC = () => {
   );
   const sendGameEvent = GameContext.useSend();
 
-  // Find the buildable at the selected coordinates
-  const buildable = selectedHexCoordinates
-    ? buildables.find(
-        (b) => b.coordinates && equals(b.coordinates, selectedHexCoordinates)
-      )
-    : undefined;
+  // Find the entity at the selected coordinates (assume only one for now)
+  const entity = useMemo(() => {
+    if (!selectedHexCoordinates) return undefined;
+    return entityAtHexCoordinate(world, selectedHexCoordinates);
+  }, [selectedHexCoordinates, world]);
 
-  // Early return with null rendering if conditions aren't met
-  if (!buildable || !isPowerPlant(buildable)) {
+  if (!entity) {
     return null;
   }
-
-  const powerPlant = buildable as PowerPlant;
-
-  if (!powerPlant.playerId) {
-    return null;
-  }
-
-  const isOwner = powerPlant.playerId === userId;
+  const isOwner = entity.owner?.playerId === userId;
   const player = userId ? players[userId] : undefined;
 
   // Calculate fuel percentage with null checks
-  const maxFuelStorage = powerPlant.maxFuelStorage || 0;
-  const currentFuelStorage = powerPlant.currentFuelStorage || 0;
+  const maxFuelStorage = entity.fuelStorage?.maxFuelStorage || 0;
+  const currentFuelStorage = entity.fuelStorage?.currentFuelStorage || 0;
   const fuelPercentage =
     maxFuelStorage > 0 ? (currentFuelStorage / maxFuelStorage) * 100 : 0;
 
   // Get market rates for this fuel type
   const marketRates = getMarketRates(commodityMarket);
-  const fuelType = powerPlant.fuelType as CommodityType;
+  const fuelType = entity.fuelRequirement?.fuelType as CommodityType;
   const fuelRates = fuelType ? marketRates[fuelType] : null;
 
   const handleBuyFuel = () => {
@@ -148,7 +139,7 @@ const PowerPlantDetails: React.FC = () => {
       type: "BUY_COMMODITY",
       fuelType,
       units: 1,
-      powerPlantId: powerPlant.id,
+      powerPlantId: entity.id,
     });
   };
 
@@ -159,7 +150,7 @@ const PowerPlantDetails: React.FC = () => {
       type: "SELL_COMMODITY",
       fuelType,
       units: 1,
-      powerPlantId: powerPlant.id,
+      powerPlantId: entity.id,
     });
   };
 
@@ -176,20 +167,26 @@ const PowerPlantDetails: React.FC = () => {
 
   return (
     <>
-      <div style={styles.infoRow}>
-        <span style={styles.label}>Power Generation:</span>
-        <span>{powerPlant.powerGenerationKW} kW</span>
-      </div>
+      {entity.powerGeneration && (
+        <>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Power Generation:</span>
+            <span>{entity.powerGeneration.powerGenerationKW} kW</span>
+          </div>
 
-      <div style={styles.infoRow}>
-        <span style={styles.label}>Price per kWh:</span>
-        <span>${powerPlant.pricePerKwh.toFixed(2)}</span>
-      </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Price per kWh:</span>
+            <span>${entity.powerGeneration.pricePerKwh.toFixed(2)}</span>
+          </div>
+        </>
+      )}
 
-      <div style={styles.infoRow}>
-        <span style={styles.label}>Owner:</span>
-        <span>{players[powerPlant.playerId]?.name || "Unknown"}</span>
-      </div>
+      {entity.owner && (
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Owner:</span>
+          <span>{players[entity.owner.playerId].name}</span>
+        </div>
+      )}
 
       {fuelType && (
         <div style={styles.fuelSection}>
@@ -221,9 +218,10 @@ const PowerPlantDetails: React.FC = () => {
             />
           </div>
 
+
           <div style={styles.infoRow}>
             <span style={styles.label}>Consumption Rate:</span>
-            <span>{powerPlant.fuelConsumptionPerKWh} per kWh</span>
+            <span>{entity.fuelRequirement!.fuelConsumptionPerKWh} per kWh</span>
           </div>
 
           {isOwner && (
@@ -370,8 +368,8 @@ export const HexDetails: React.FC = () => {
     (state) => state.context.selectedHexCoordinates
   );
 
-  const buildables = GameContext.useSelector(
-    (state) => state.public.buildables ?? []
+  const entitiesById = GameContext.useSelector(
+    (state) => state.public.entitiesById
   );
 
   // Early return if no hex is selected
@@ -386,16 +384,16 @@ export const HexDetails: React.FC = () => {
     });
   };
 
-  // Find the buildable at the selected coordinates
-  const buildable = buildables.find(
-    (b) => b.coordinates && equals(b.coordinates, selectedHexCoordinates)
-  );
+  const world = useWorld();
 
-  // Get the title based on the buildable type
-  let title = "Selected Hex";
-  if (buildable && isPowerPlant(buildable) && (buildable as PowerPlant).name) {
-    title = (buildable as PowerPlant).name;
-  }
+  // Find the entity at the selected coordinates (assume only one for now)
+  const entity = useMemo(() => {
+    if (!selectedHexCoordinates) return undefined;
+    return entityAtHexCoordinate(world, selectedHexCoordinates);
+  }, [selectedHexCoordinates, world]);
+
+  // Get the title based on the entity type
+  const title = entity ? entity.name : "Selected Hex";
 
   return (
     <Card style={styles.container}>
@@ -404,18 +402,13 @@ export const HexDetails: React.FC = () => {
         <Button onClick={handleClose}>Close</Button>
       </div>
 
-      <PowerPlantDetails />
+      <EntityDetails />
 
-      {/* If no power plant is found, show survey details */}
-      {!buildable && (
-        <>
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Coordinates:</span>
-            <span>{coordinatesToString(selectedHexCoordinates)}</span>
-          </div>
-          <SurveyDetails />
-        </>
-      )}
+      <div style={styles.infoRow}>
+        <span style={styles.label}>Coordinates:</span>
+        <span>{coordinatesToString(selectedHexCoordinates)}</span>
+      </div>
+      <SurveyDetails />
     </Card>
   );
 };

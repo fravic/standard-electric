@@ -11,6 +11,7 @@ import {
 import { Entity } from "@/ecs/entity";
 import { World, With } from "miniplex";
 import { CornerCoordinates } from "../coordinates/types";
+import { findPossibleConnectionsWithWorld } from "../buildables/findPossibleConnections";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -468,29 +469,6 @@ export class PowerSystem {
   }
 
   /**
-   * Helper function to find possible connections for a corner coordinate with entities in the world
-   * @param cornerCoordinates The corner coordinates to check for possible connections
-   * @param playerId Optional player ID to filter connections by owner
-   * @returns Array of entity IDs that can connect to the given corner coordinates
-   */
-  findPossibleConnectionsWithWorld(
-    cornerCoordinates: CornerCoordinates,
-    playerId?: string
-  ): string[] {
-    const powerPolesQuery = this.world.with('connections', 'cornerPosition');
-    
-    const eligiblePoles = playerId 
-      ? powerPolesQuery.entities.filter(pole => pole.owner?.playerId === playerId)
-      : powerPolesQuery.entities;
-      
-    return eligiblePoles
-      .filter(pole => 
-        cornersAdjacent(cornerCoordinates, pole.cornerPosition!.cornerCoordinates)
-      )
-      .map(pole => pole.id);
-  }
-
-  /**
    * Validates if a new buildable can be placed at the specified location
    * based on connectivity to the player's existing grid.
    *
@@ -541,7 +519,8 @@ export class PowerSystem {
       );
 
       // Check if the new pole can connect to existing poles using the World
-      const possibleConnections = this.findPossibleConnectionsWithWorld(
+      const possibleConnections = findPossibleConnectionsWithWorld(
+        this.world,
         cornerCoordinates,
         playerId
       );

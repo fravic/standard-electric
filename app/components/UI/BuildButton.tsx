@@ -9,7 +9,7 @@ interface BuildButtonProps {
   price?: number;
   details?: {
     powerGenerationKW?: number;
-    requiredState?: string;
+    requiredRegion?: string;
   };
   variant?: "place" | "bid";
   style?: React.CSSProperties;
@@ -45,7 +45,7 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
         {details && (
           <div style={{ fontSize: "12px", opacity: 0.8 }}>
             {details.powerGenerationKW && `${details.powerGenerationKW}kW`}
-            {details.requiredState && ` • ${details.requiredState}`}
+            {details.requiredRegion && ` • ${details.requiredRegion}`}
           </div>
         )}
       </div>

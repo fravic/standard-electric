@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { CommodityType } from "@/lib/market/CommodityMarket";
 import { HexCoordinatesSchema } from "@/lib/coordinates/types";
-import { EntitySchema } from "@/ecs/entity";
+import { AdditionalBlueprintOptionsSchema } from "@/ecs/factories";
 
 export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
@@ -14,6 +14,7 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("ADD_BUILDABLE"),
     blueprintId: z.string(),
+    options: AdditionalBlueprintOptionsSchema,
   }),
   z.object({
     type: z.literal("TICK"),

@@ -1,10 +1,8 @@
 import { HexGrid, getCell } from "../HexGrid";
 import { PowerSystem } from "../power/PowerSystem";
-import { PowerPlantBlueprint } from "./schemas";
 import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
 import {
   coordinatesToString,
-  HexCoordinates,
 } from "../coordinates/HexCoordinates";
 import { World } from "miniplex";
 import { Entity } from "@/ecs/entity";

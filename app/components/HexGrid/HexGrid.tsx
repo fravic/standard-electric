@@ -1,4 +1,6 @@
 import React from "react";
+import { nanoid } from "nanoid";
+
 import { useSelector } from "@xstate/store/react";
 import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { HexGridChunk } from "./HexGridChunk";
@@ -6,8 +8,8 @@ import { GameContext } from "@/actor/game.context";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { CornerCoordinates } from "@/lib/coordinates/CornerCoordinates";
 import { clientStore } from "@/lib/clientState";
-import { nanoid } from "nanoid";
-import { isPowerPlantType } from "@/lib/buildables/PowerPlant";
+import { AdditionalBlueprintOptions } from "@/ecs/factories";
+
 interface HexGridProps {}
 
 export function HexGrid({}: HexGridProps) {
@@ -26,25 +28,19 @@ export function HexGrid({}: HexGridProps) {
     coordinates: HexCoordinates,
     nearestCorner: CornerCoordinates | null
   ) => {
-    if (buildMode && buildMode.type === "power_pole") {
-      if (nearestCorner) {
-        sendGameEvent({
-          type: "ADD_BUILDABLE",
-          buildable: {
-            id: nanoid(),
-            type: "power_pole",
-            cornerCoordinates: nearestCorner,
-          },
-        });
-      }
-    } else if (buildMode && isPowerPlantType(buildMode.type)) {
-      sendGameEvent({
-        type: "ADD_BUILDABLE",
-        buildable: {
-          id: buildMode.blueprintId,
-          type: buildMode.type,
+    if (buildMode) {
+      const options: AdditionalBlueprintOptions = {
+        cornerPosition: nearestCorner ? {
+          cornerCoordinates: nearestCorner
+        } : undefined,
+        hexPosition: {
           coordinates,
         },
+      };
+      sendGameEvent({
+        type: "ADD_BUILDABLE",
+        blueprintId: buildMode.blueprintId,
+        options,
       });
     } else {
       clientStore.send({ type: "selectHex", coordinates });

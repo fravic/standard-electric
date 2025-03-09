@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card } from "./Card";
 import { Button } from "./Button";
 import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { CommodityType, getMarketRates } from "@/lib/market/CommodityMarket";
-import { PowerPlant } from "@/lib/buildables/schemas";
-import { isPowerPlant } from "@/lib/buildables/PowerPlant";
+import { useWorld } from "../WorldContext";
 
 interface CommodityMarketModalProps {
   onClose: () => void;
@@ -122,26 +121,16 @@ const getCommodityIcon = (type: CommodityType) => {
 export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
   onClose,
 }) => {
-  const { commodityMarket, buildables } = GameContext.useSelector(
+  const { commodityMarket } = GameContext.useSelector(
     (state) => state.public
   );
-
-  // Get market rates for all commodities
   const marketRates = getMarketRates(commodityMarket);
-
-  // Find all fuel types used by power plants on the map
-  const activeFuelTypes = new Set<CommodityType>();
-  buildables.forEach((buildable) => {
-    if (isPowerPlant(buildable)) {
-      const powerPlant = buildable as PowerPlant;
-      if (powerPlant.fuelType) {
-        activeFuelTypes.add(powerPlant.fuelType as CommodityType);
-      }
-    }
-  });
-
-  // Convert to array for rendering
-  const activeFuelTypesArray = Array.from(activeFuelTypes);
+  const world = useWorld();
+  const activeFuelTypes = useMemo(() => {
+    const entities = world.with("fuelRequirement", "fuelStorage");
+    const fuelTypeSet = new Set([...entities].flatMap((entity) => [entity.fuelRequirement?.fuelType, entity.fuelStorage?.fuelType].filter(Boolean)));
+    return Array.from(fuelTypeSet) as CommodityType[];
+  }, [world]);
 
   return (
     <div style={styles.overlay}>
@@ -151,7 +140,7 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
           <Button onClick={onClose}>Close</Button>
         </div>
 
-        {activeFuelTypesArray.length > 0 ? (
+        {activeFuelTypes.length > 0 ? (
           <table style={styles.table}>
             <thead>
               <tr>
@@ -162,7 +151,7 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
               </tr>
             </thead>
             <tbody>
-              {activeFuelTypesArray.map((fuelType) => {
+              {activeFuelTypes.map((fuelType) => {
                 const rates = marketRates[fuelType];
                 const commodity = commodityMarket.commodities[fuelType];
                 const config = commodity.config;

@@ -24,7 +24,7 @@ import {
 } from "../lib/market/CommodityMarket";
 import { precomputeHexCellResources, SERVER_ONLY_ID, startSurvey, updateSurveys } from "../lib/surveys";
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
-import { createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
+import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
 import { With } from "miniplex";
 import { Entity } from "@/ecs/entity";
 
@@ -105,7 +105,7 @@ export const gameMachine = setup({
         return false;
       }
 
-      const buildable = createEntityFromBlueprint(blueprintEntity as With<Entity, 'blueprint'>);
+      const buildable = createEntityFromBlueprint(blueprintEntity as With<Entity, 'blueprint'>, event.options);
 
       if (!playerPrivateContext?.surveyResultByHexCell) {
         return false;
@@ -154,6 +154,11 @@ export const gameMachine = setup({
               powerSoldKWh: 0,
               isHost: Object.keys(draft.players).length === 0,
             };
+            // Create default blueprints for each player
+            const defaultBlueprints = createDefaultBlueprintsForPlayer(playerId);
+            defaultBlueprints.forEach(blueprint => {
+              draft.entitiesById[blueprint.id] = blueprint;
+            });
           }),
           private: updatedPrivate,
         };
@@ -243,7 +248,7 @@ export const gameMachine = setup({
 
             // Deduct cost and create buildable
             draft.players[event.caller.id].money -= cost;
-            const entity = createEntityFromBlueprint(blueprintEntity);
+            const entity = createEntityFromBlueprint(blueprintEntity, event.options);
             draft.entitiesById[entity.id] = entity;
 
             if (blueprintEntity.blueprint.buildsRemaining) {

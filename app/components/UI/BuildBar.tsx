@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { UI_COLORS } from "@/lib/palette";
-import { BUILDABLE_COSTS } from "@/lib/buildables/costs";
-import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 import { useSelector } from "@xstate/store/react";
 import { Player } from "@/actor/game.types";
 import { BuildButton } from "./BuildButton";
+import { useWorld } from "../WorldContext";
+import { AuthContext } from "@/auth.context";
 
 interface BuildBarProps {
   player: Player;
@@ -15,32 +16,20 @@ export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
     clientStore,
     (state) => state.context.buildMode
   );
-  const canAffordPowerPole = player.money >= BUILDABLE_COSTS.power_pole;
+
+  const world = useWorld();
+  const userId = AuthContext.useSelector((state) => state.userId);
+  const blueprintEntities = useMemo(() => {
+    return [...world.with("blueprint", "owner").where((blueprint) =>
+      blueprint.owner?.playerId === userId
+    )];
+  }, [world, userId]);
 
   const handleBlueprintClick = (blueprintId: string) => {
-    if (
-      isPowerPlantBuildMode(buildMode) &&
-      buildMode.blueprintId === blueprintId
-    ) {
-      clientStore.send({ type: "setBuildMode", mode: null });
-    } else {
-      const blueprint = player.blueprintsById[blueprintId]!;
-      clientStore.send({
-        type: "setBuildMode",
-        mode: { type: blueprint.type, blueprintId },
-      });
-    }
-  };
-
-  const handlePowerPoleClick = () => {
-    if (buildMode?.type === "power_pole") {
-      clientStore.send({ type: "setBuildMode", mode: null });
-    } else if (canAffordPowerPole) {
-      clientStore.send({
-        type: "setBuildMode",
-        mode: { type: "power_pole" },
-      });
-    }
+    clientStore.send({
+      type: "setBuildMode",
+      mode: { blueprintId },
+    });
   };
 
   return (
@@ -57,27 +46,18 @@ export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
         marginBottom: "10px",
       }}
     >
-      <BuildButton
-        name="Power Pole"
-        price={BUILDABLE_COSTS.power_pole}
-        onClick={handlePowerPoleClick}
-        disabled={!canAffordPowerPole && buildMode?.type !== "power_pole"}
-        isActive={buildMode?.type === "power_pole"}
-      />
-
-      {Object.entries(player.blueprintsById).map(([id, blueprint]) => (
+      {blueprintEntities.map((blueprintEntity) => (
         <BuildButton
-          key={id}
-          name={blueprint.name}
+          key={blueprintEntity.id}
+          name={blueprintEntity.blueprint.name}
           details={{
-            powerGenerationKW: blueprint.powerGenerationKW,
-            requiredState: blueprint.requiredState,
+            powerGenerationKW: blueprintEntity.blueprint.components.powerGeneration?.powerGenerationKW,
+            requiredRegion: blueprintEntity.blueprint.components.requiredRegion?.requiredRegionName,
           }}
-          onClick={() => handleBlueprintClick(id)}
+          onClick={() => handleBlueprintClick(blueprintEntity.id)}
           isActive={Boolean(
             buildMode &&
-              isPowerPlantBuildMode(buildMode) &&
-              buildMode.blueprintId === id
+              buildMode.blueprintId === blueprintEntity.id
           )}
         />
       ))}

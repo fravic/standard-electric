@@ -14,7 +14,6 @@ import {
 
 import hexGrid from "@/../public/hexgrid.json";
 import { CornerPosition } from "@/lib/coordinates/types";
-import { createPowerPole } from "@/lib/buildables/PowerPole";
 import { clientStore } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { AuthClient } from "@open-game-collective/auth-kit/client";
@@ -22,9 +21,8 @@ import {
   coordinatesToString,
   createHexCoordinates,
 } from "@/lib/coordinates/HexCoordinates";
-import { PowerPlant } from "@/lib/buildables/schemas";
 import { GamePrivateContext } from "@/actor/game.types";
-import { SURVEY_DURATION_TICKS, SurveyResult } from "@/lib/surveys";
+import { SurveyResult } from "@/lib/surveys";
 
 const meta: Meta<typeof Game> = {
   component: Game,
@@ -125,20 +123,10 @@ export const Blank: Story = {
           players: {
             [PLAYER_ID]: {
               ...createPlayer(PLAYER_ID, "Player 1", 1, 10, true),
-              blueprintsById: {
-                coal_plant_small: {
-                  id: "coal_plant_small",
-                  type: "coal_plant",
-                  name: "Small Coal Plant",
-                  powerGenerationKW: 1000,
-                  startingPrice: 10,
-                },
-              },
             },
           },
           time: { totalTicks: 0, isPaused: false },
           auction: null,
-          buildables: [],
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
