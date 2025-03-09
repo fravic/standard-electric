@@ -18,7 +18,6 @@ import { clientStore } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { AuthClient } from "@open-game-collective/auth-kit/client";
 import { WorldContextProvider } from "@/components/WorldContext";
-import { PowerPlantBlueprint } from "@/lib/buildables/schemas";
 import {
   coordinatesToString,
   createHexCoordinates,
@@ -27,6 +26,7 @@ import { GamePrivateContext } from "@/actor/game.types";
 import { SurveyResult } from "@/lib/surveys";
 import { Entity } from "@/ecs/entity";
 import { createPowerPole, createPowerPlant, createPowerPlantBlueprint, createWorldWithEntities, createPowerPoleBlueprint } from "@/ecs/factories";
+import powerPlantBlueprints from "@/../public/powerPlantBlueprints.json";
 
 const meta: Meta<typeof Game> = {
   component: Game,
@@ -288,33 +288,11 @@ export const Auction: Story = {
     });
     largeCoalPlant.requiredRegion = { requiredRegionName: "Texas" };
     
-    // Create matching PowerPlantBlueprint objects for the auction
-    const smallCoalPlantBlueprint: PowerPlantBlueprint = {
-      id: "coal_plant_small",
-      type: "coal_plant",
-      name: "Small Coal Plant",
-      powerGenerationKW: 1000,
-      startingPrice: 10
-    };
-    
-    const mediumCoalPlantBlueprint: PowerPlantBlueprint = {
-      id: "coal_plant_medium",
-      type: "coal_plant",
-      name: "Medium Coal Plant",
-      powerGenerationKW: 2000,
-      startingPrice: 18,
-      requiredState: "California"
-    };
-    
-    const largeCoalPlantBlueprint: PowerPlantBlueprint = {
-      id: "coal_plant_large",
-      type: "coal_plant",
-      name: "Large Coal Plant",
-      powerGenerationKW: 3000,
-      startingPrice: 25,
-      requiredState: "Texas"
-    };
-    
+    // Use the entities from the powerPlantBlueprints.json file for the auction
+    const smallCoalPlantBlueprint = powerPlantBlueprints[0];
+    const mediumCoalPlantBlueprint = powerPlantBlueprints[1];
+    const largeCoalPlantBlueprint = powerPlantBlueprints[2];
+
     const entities: Record<string, Entity> = {
       [smallCoalPlant.id]: smallCoalPlant,
       [mediumCoalPlant.id]: mediumCoalPlant,
@@ -322,7 +300,7 @@ export const Auction: Story = {
     };
     
     const auction = {
-      availableBlueprints: [smallCoalPlantBlueprint, mediumCoalPlantBlueprint, largeCoalPlantBlueprint],
+      availableBlueprintIds: [smallCoalPlantBlueprint.id, mediumCoalPlantBlueprint.id, largeCoalPlantBlueprint.id],
       currentBlueprint: null,
       purchases: [],
       passedPlayerIds: [],
@@ -380,32 +358,10 @@ export const AuctionWithCurrentBlueprint: Story = {
     });
     largeCoalPlant.requiredRegion = { requiredRegionName: "Texas" };
     
-    // Create matching PowerPlantBlueprint objects for the auction
-    const smallCoalPlantBlueprint: PowerPlantBlueprint = {
-      id: "coal_plant_small",
-      type: "coal_plant",
-      name: "Small Coal Plant",
-      powerGenerationKW: 1000,
-      startingPrice: 10
-    };
-    
-    const mediumCoalPlantBlueprint: PowerPlantBlueprint = {
-      id: "coal_plant_medium",
-      type: "coal_plant",
-      name: "Medium Coal Plant",
-      powerGenerationKW: 2000,
-      startingPrice: 18,
-      requiredState: "California"
-    };
-    
-    const largeCoalPlantBlueprint: PowerPlantBlueprint = {
-      id: "coal_plant_large",
-      type: "coal_plant",
-      name: "Large Coal Plant",
-      powerGenerationKW: 3000,
-      startingPrice: 25,
-      requiredState: "Texas"
-    };
+    // Use the entities from the powerPlantBlueprints.json file for the auction
+    const smallCoalPlantBlueprint = powerPlantBlueprints[0];
+    const mediumCoalPlantBlueprint = powerPlantBlueprints[1];
+    const largeCoalPlantBlueprint = powerPlantBlueprints[2];
     
     const entities: Record<string, Entity> = {
       [smallCoalPlant.id]: smallCoalPlant,
@@ -414,9 +370,9 @@ export const AuctionWithCurrentBlueprint: Story = {
     };
     
     const auction = {
-      availableBlueprints: [mediumCoalPlantBlueprint, largeCoalPlantBlueprint],
+      availableBlueprintIds: [mediumCoalPlantBlueprint.id, largeCoalPlantBlueprint.id],
       currentBlueprint: {
-        blueprint: smallCoalPlantBlueprint,
+        blueprintId: smallCoalPlantBlueprint.id,
         bids: [
           {
             playerId: PLAYER_ID,

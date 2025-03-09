@@ -29,6 +29,7 @@ export function createEntityFromBlueprint(
   return {
     ...blueprintEntity.blueprint.components,
     ...options,
+    owner: blueprintEntity.owner,
     name: blueprintEntity.blueprint.name,
     id: nanoid(),
   };

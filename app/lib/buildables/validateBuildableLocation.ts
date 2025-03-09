@@ -49,6 +49,7 @@ export function validateBuildableLocation({
   // Next, check region requirements
 
   // For power poles, check if the corner is in a valid region
+  // Note: This currently assumes that entities on corners are always power poles
   if (buildable.cornerPosition?.cornerCoordinates) {
     const hexCell = getCell(grid, buildable.cornerPosition.cornerCoordinates.hex);
     if (!hexCell?.regionName) {

@@ -37,7 +37,7 @@ type PowerPoleEntity = With<Entity, 'connections' | 'cornerPosition'>;
 // Type for our internal power plant representation
 type PowerPlant = {
   id: string;
-  playerId: string;
+  playerId: string | null;
   pricePerKWh: number;
   maxCapacity: number;
   remainingCapacity: number;
@@ -99,7 +99,7 @@ export class PowerSystem {
     this.powerPlants = this.powerPlantEntities && this.powerPlantEntities.length > 0 ? 
       this.powerPlantEntities.map((entity) => ({
         id: entity.id,
-        playerId: entity.owner?.playerId || '',
+        playerId: entity.owner?.playerId || null,
         pricePerKWh: entity.powerGeneration.pricePerKWh || 0,
         maxCapacity: entity.powerGeneration.powerGenerationKW || 0,
         remainingCapacity: entity.powerGeneration.powerGenerationKW || 0,
@@ -430,10 +430,12 @@ export class PowerSystem {
         grid.usedCapacity += supply;
 
         // Track power sold and income
-        powerSoldPerPlayer[plant.playerId] =
-          (powerSoldPerPlayer[plant.playerId] || 0) + supply;
-        incomePerPlayer[plant.playerId] =
-          (incomePerPlayer[plant.playerId] || 0) + supply * plant.pricePerKWh;
+        if (plant.playerId) {
+          powerSoldPerPlayer[plant.playerId] =
+            (powerSoldPerPlayer[plant.playerId] || 0) + supply;
+          incomePerPlayer[plant.playerId] =
+            (incomePerPlayer[plant.playerId] || 0) + supply * plant.pricePerKWh;
+        }
       }
     }
 

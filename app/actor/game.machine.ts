@@ -8,7 +8,7 @@ import hexGridData from "../../public/hexgrid.json";
 import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/lib/power/PowerSystem";
-import { PowerPlantBlueprintsSchema } from "@/lib/buildables/schemas";
+import { Entity, EntitySchema } from "@/ecs/entity";
 import {
   getNextInitiatorPlayerId,
   getNextBidderPlayerId,
@@ -26,7 +26,6 @@ import { precomputeHexCellResources, SERVER_ONLY_ID, startSurvey, updateSurveys 
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
 import { With } from "miniplex";
-import { Entity } from "@/ecs/entity";
 
 export const gameMachine = setup({
   types: {
@@ -230,7 +229,6 @@ export const gameMachine = setup({
         public: produce(context.public, (draft) => {
           if (event.type === "ADD_BUILDABLE") {
             const blueprintEntity = context.public.entitiesById[event.blueprintId] as With<Entity, 'blueprint'>;
-
             if (blueprintEntity.owner?.playerId !== event.caller.id) {
               throw new Error(`Player ${event.caller.id} is not the owner of blueprint ${event.blueprintId}`);
             }
@@ -274,21 +272,33 @@ export const gameMachine = setup({
     startAuction: assign(({ context }: { context: GameContext }) => ({
       public: produce(context.public, (draft) => {
         // TODO: Should set up a different set of blueprints each auction. Only one auction for now.
-        const powerPlantBlueprints = PowerPlantBlueprintsSchema.parse(
-          powerPlantBlueprintsData.blueprints
+        // Parse the entities from the JSON file using the EntitySchema
+        const powerPlantEntities = (powerPlantBlueprintsData as any[]).map(blueprint => 
+          EntitySchema.parse(blueprint)
         );
-        const availableBlueprints = Object.values(powerPlantBlueprints).slice(
+        const availableEntities = powerPlantEntities.slice(
           0,
           // First auction has at least one blueprint per player
           Math.max(Object.keys(context.public.players).length, 3)
         );
+        
+        // Store the entities in entitiesById
+        const entitiesById = availableEntities.reduce((acc, entity) => {
+          acc[entity.id] = entity;
+          return acc;
+        }, {} as Record<string, Entity>);
+        
         draft.auction = {
           currentBlueprint: null,
-          availableBlueprints,
+          availableBlueprintIds: availableEntities.map(entity => entity.id),
           purchases: [],
           // No passing allowed on the first auction
           isPassingAllowed: false,
           passedPlayerIds: [],
+        };
+        draft.entitiesById = {
+          ...draft.entitiesById,
+          ...entitiesById
         };
       }),
     })),
@@ -296,17 +306,16 @@ export const gameMachine = setup({
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
           if (event.type === "INITIATE_BID" && draft.auction) {
-            const blueprint = draft.auction.availableBlueprints.find(
-              (b) => b.id === event.blueprintId
-            );
+            const blueprintId = event.blueprintId;
+            const blueprint = draft.entitiesById[blueprintId];
             if (!blueprint) return;
 
             draft.auction.currentBlueprint = {
-              blueprint,
+              blueprintId,
               bids: [
                 {
                   playerId: event.caller.id,
-                  amount: blueprint.startingPrice,
+                  amount: blueprint.cost?.amount || 0,
                 },
               ],
             };
@@ -364,7 +373,9 @@ export const gameMachine = setup({
         const purchase =
           newAuctionState.purchases[newAuctionState.purchases.length - 1];
         draft.players[purchase.playerId].money -= purchase.price;
-        delete draft.entitiesById[purchase.blueprintId];
+        draft.entitiesById[purchase.blueprintId].owner = {
+          playerId: purchase.playerId,
+        };
 
         // Update auction state
         draft.auction = newAuctionState;

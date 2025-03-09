@@ -150,6 +150,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       playerId: userId!,
       surveyedHexCells,
     });
+    console.log(validation);
     if (!validation.valid) {
       return null;
     }

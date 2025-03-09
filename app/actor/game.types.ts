@@ -6,7 +6,7 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { PowerPlantBlueprint } from "../lib/buildables/schemas";
+import { BlueprintComponent } from "../ecs/entity";
 import { HexGrid } from "../lib/HexGrid";
 import {
   GameClientEventSchema,
@@ -26,10 +26,12 @@ export interface Player {
   isHost: boolean;
 }
 
+// No longer need AuctionBlueprint interface as we'll use Entity directly
+
 export interface Auction {
-  availableBlueprints: PowerPlantBlueprint[];
+  availableBlueprintIds: string[];
   currentBlueprint: null | {
-    blueprint: PowerPlantBlueprint;
+    blueprintId: string;
     bids: {
       playerId: string;
       amount?: number;

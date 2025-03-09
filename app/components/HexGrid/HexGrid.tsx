@@ -19,6 +19,7 @@ export function HexGrid({}: HexGridProps) {
     clientStore,
     (state) => state.context.buildMode
   );
+  const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
   const sendGameEvent = GameContext.useSend();
 
   const chunkCountX = Math.ceil(hexGrid.width / HexMetrics.chunkSizeX);
@@ -29,13 +30,17 @@ export function HexGrid({}: HexGridProps) {
     nearestCorner: CornerCoordinates | null
   ) => {
     if (buildMode) {
+      const blueprintEntity = entitiesById[buildMode.blueprintId];
+      if (!blueprintEntity) {
+        throw new Error(`Blueprint ${buildMode.blueprintId} not found`);
+      }
       const options: AdditionalBlueprintOptions = {
-        cornerPosition: nearestCorner ? {
+        cornerPosition: blueprintEntity.blueprint?.allowedPosition === "corner" && nearestCorner? {
           cornerCoordinates: nearestCorner
         } : undefined,
-        hexPosition: {
+        hexPosition: blueprintEntity.blueprint?.allowedPosition === "hex" ? {
           coordinates,
-        },
+        } : undefined,
       };
       sendGameEvent({
         type: "ADD_BUILDABLE",
