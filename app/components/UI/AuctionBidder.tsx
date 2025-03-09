@@ -43,6 +43,7 @@ export function AuctionBidder({
     totalTicks,
     randomSeed
   );
+  const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
 
   return (
     <div
@@ -103,7 +104,7 @@ export function AuctionBidder({
                   ? "(Passed)"
                   : purchase
                   ? `(Bought ${
-                      players[playerId].blueprintsById[purchase.blueprintId]
+                      entitiesById[purchase.blueprintId]
                         ?.name ?? "Unknown Plant"
                     })`
                   : ""}

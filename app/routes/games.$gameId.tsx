@@ -1,7 +1,7 @@
 import { GameProvider } from "@/actor/game.context";
 import type { GameMachine } from "@/actor/game.machine";
-import { AuthContext } from "@/auth.context";
 import { Game } from "@/components/Game";
+import { WorldContextProvider } from "@/components/WorldContext";
 import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, useParams } from "@remix-run/react";
 import { createAccessToken, createActorFetch } from "actor-kit/server";
@@ -45,7 +45,9 @@ export default function GameRoute() {
       checksum={payload.checksum}
       initialSnapshot={payload.snapshot as any}
     >
-      <Game />
+      <WorldContextProvider>
+        <Game />
+      </WorldContextProvider>
     </GameProvider>
   );
 }

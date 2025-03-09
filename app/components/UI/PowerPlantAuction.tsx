@@ -10,7 +10,7 @@ import { getNextBidderPlayerId, getNextInitiatorPlayerId } from "@/lib/auction";
 
 export function PowerPlantAuction() {
   const userId = AuthContext.useSelector((state) => state.userId);
-  const { auction, players, time, randomSeed } = GameContext.useSelector(
+  const { auction, players, time, randomSeed, entitiesById } = GameContext.useSelector(
     (state) => state.public
   );
   const sendGameEvent = GameContext.useSend();
@@ -37,9 +37,10 @@ export function PowerPlantAuction() {
   const currentBid = auction.currentBlueprint?.bids
     .filter((bid) => !bid.passed)
     .reduce((max, bid) => Math.max(max, bid.amount || 0), 0);
+  const currentBlueprint = auction.currentBlueprint ? entitiesById[auction.currentBlueprint.blueprintId] : null;
   const minimumBid = currentBid
     ? currentBid + 1
-    : auction.currentBlueprint?.blueprint.startingPrice;
+    : currentBlueprint?.cost?.amount;
   const canAffordBid =
     minimumBid && currentPlayer ? currentPlayer.money >= minimumBid : false;
 
@@ -85,13 +86,13 @@ export function PowerPlantAuction() {
             </h3>
             <BuildButton
               variant="bid"
-              name={auction.currentBlueprint.blueprint.name}
+              name={currentBlueprint?.name || ''}
               details={{
                 powerGenerationKW:
-                  auction.currentBlueprint.blueprint.powerGenerationKW,
-                requiredState: auction.currentBlueprint.blueprint.requiredState,
+                  currentBlueprint?.blueprint?.components?.powerGeneration?.powerGenerationKW || 0,
+                requiredRegion: currentBlueprint?.blueprint?.components?.requiredRegion?.requiredRegionName,
               }}
-              price={minimumBid}
+              price={minimumBid || 0}
               disabled={true}
               onClick={() => {}}
               style={{
@@ -185,29 +186,33 @@ export function PowerPlantAuction() {
           >
             Available Power Plants
           </h3>
-          {auction.availableBlueprints.map((blueprint) => (
+          {auction.availableBlueprintIds.map((blueprintId) => {
+            const blueprint = entitiesById[blueprintId];
+            if (!blueprint) return null;
+            return (
             <BuildButton
-              key={blueprint.id}
+              key={blueprintId}
               variant="bid"
-              name={blueprint.name}
+              name={blueprint.name || ''}
               details={{
-                powerGenerationKW: blueprint.powerGenerationKW,
-                requiredState: blueprint.requiredState,
+                powerGenerationKW: blueprint.blueprint?.components?.powerGeneration?.powerGenerationKW || 0,
+                requiredRegion: blueprint.blueprint?.components?.requiredRegion?.requiredRegionName,
               }}
-              price={blueprint.startingPrice}
+              price={blueprint.cost?.amount || 0}
               disabled={
                 !isCurrentInitiator ||
                 auction.currentBlueprint !== null ||
-                (currentPlayer?.money ?? 0) < blueprint.startingPrice
+                (currentPlayer?.money ?? 0) < (blueprint.cost?.amount || 0)
               }
               onClick={() =>
                 sendGameEvent({
                   type: "INITIATE_BID",
-                  blueprintId: blueprint.id,
+                  blueprintId: blueprintId,
                 })
               }
             />
-          ))}
+            );
+          })}
           {isCurrentInitiator &&
             !auction.currentBlueprint &&
             auction.isPassingAllowed && (

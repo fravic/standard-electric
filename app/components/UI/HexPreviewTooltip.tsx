@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "@xstate/store/react";
 import { TerrainType, Population } from "../../lib/HexCell";
 import { GameContext } from "@/actor/game.context";
@@ -6,7 +6,8 @@ import * as HexGridService from "@/lib/HexGrid";
 import * as HexCoordinatesService from "@/lib/coordinates/HexCoordinates";
 import { clientStore } from "@/lib/clientState";
 import { Card } from "./Card";
-import { isBuilt } from "@/lib/buildables/Buildable";
+import { useWorld } from "../WorldContext";
+import { entityAtHexCoordinate } from "@/ecs/queries";
 
 const styles = {
   container: {
@@ -37,9 +38,11 @@ export function HexPreviewTooltip() {
     (state) => state.context.hoveringHexCoordinates
   );
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
-  const buildables = GameContext.useSelector(
-    (state) => state.public.buildables
-  );
+  const world = useWorld();
+  const entity = useMemo(() => {
+    if (!hoveringHexCoordinates) return undefined;
+    return entityAtHexCoordinate(world, hoveringHexCoordinates);
+  }, [hoveringHexCoordinates, world]);
   const players = GameContext.useSelector((state) => state.public.players);
 
   useEffect(() => {
@@ -77,12 +80,6 @@ export function HexPreviewTooltip() {
     return null;
   }
 
-  const powerPlant = buildables.find(
-    (b) =>
-      b.coordinates &&
-      HexCoordinatesService.equals(b.coordinates, hoveringHexCoordinates)
-  );
-
   return (
     <div
       style={{
@@ -106,18 +103,18 @@ export function HexPreviewTooltip() {
           <span style={styles.label}>Population: </span>
           {Population[cell.population] || "Unpopulated"}
         </div>
-        {powerPlant && isBuilt(powerPlant) && (
+        {entity && !entity.isGhost && (
           <div style={styles.section}>
             <div>
-              <span style={styles.label}>Power Plant: </span>
-              {powerPlant.type === "coal_plant"
-                ? "Coal Plant"
-                : powerPlant.type}
+              <span style={styles.label}>Entity: </span>
+              {entity.name}
             </div>
-            <div>
-              <span style={styles.label}>Owner: </span>
-              {players[powerPlant.playerId]?.name || "Unknown"}
-            </div>
+            {entity.owner && (
+              <div>
+                <span style={styles.label}>Owner: </span>
+                {players[entity.owner?.playerId || ""]?.name || "Unknown"}
+              </div>
+            )}
           </div>
         )}
       </Card>

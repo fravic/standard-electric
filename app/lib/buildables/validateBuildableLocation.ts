@@ -1,12 +1,11 @@
 import { HexGrid, getCell } from "../HexGrid";
-import { PowerSystem } from "../power/PowerSystem";
-import { Buildable, PowerPlantBlueprint } from "./schemas";
-import { isPowerPlant } from "./PowerPlant";
+import { PowerSystem } from "../../ecs/systems/PowerSystem";
 import { getAdjacentHexes } from "../coordinates/CornerCoordinates";
 import {
   coordinatesToString,
-  HexCoordinates,
 } from "../coordinates/HexCoordinates";
+import { World } from "miniplex";
+import { Entity } from "@/ecs/entity";
 
 /**
  * Validates if a buildable can be placed at the specified location
@@ -15,33 +14,28 @@ import {
 export function validateBuildableLocation({
   buildable,
   grid,
-  allBuildables,
+  world,
   playerId,
-  playerBlueprints,
   surveyedHexCells,
 }: {
-  buildable: Pick<
-    Buildable,
-    "type" | "coordinates" | "cornerCoordinates" | "id"
-  >;
+  buildable: Entity;
   grid: HexGrid;
-  allBuildables: Buildable[];
+  world: World<Entity>;
   playerId: string;
-  playerBlueprints: Record<string, PowerPlantBlueprint>;
   surveyedHexCells?: Set<string>; // Set of hex cell coordinates that have been surveyed
 }): { valid: boolean; reason?: string } {
   // First, check if the location is surveyed (if surveyedHexCells is provided)
   if (surveyedHexCells) {
-    if (buildable.coordinates) {
+    if (buildable.hexPosition?.coordinates) {
       // For buildables placed on hex cells (like power plants)
-      const coordString = coordinatesToString(buildable.coordinates);
+      const coordString = coordinatesToString(buildable.hexPosition.coordinates);
       if (!surveyedHexCells.has(coordString)) {
         return { valid: false, reason: "This location has not been surveyed" };
       }
-    } else if (buildable.cornerCoordinates) {
+    } else if (buildable.cornerPosition?.cornerCoordinates) {
       // For buildables placed on corners (like power poles)
       // Check if any of the adjacent hexes are surveyed
-      const adjacentHexes = getAdjacentHexes(buildable.cornerCoordinates);
+      const adjacentHexes = getAdjacentHexes(buildable.cornerPosition.cornerCoordinates);
       const anySurveyed = adjacentHexes.some((hex) =>
         surveyedHexCells.has(coordinatesToString(hex))
       );
@@ -55,19 +49,20 @@ export function validateBuildableLocation({
   // Next, check region requirements
 
   // For power poles, check if the corner is in a valid region
-  if (buildable.type === "power_pole" && buildable.cornerCoordinates) {
-    const hexCell = getCell(grid, buildable.cornerCoordinates.hex);
+  // Note: This currently assumes that entities on corners are always power poles
+  if (buildable.cornerPosition?.cornerCoordinates) {
+    const hexCell = getCell(grid, buildable.cornerPosition.cornerCoordinates.hex);
     if (!hexCell?.regionName) {
       return { valid: false, reason: "Power poles must be placed in a region" };
     }
 
     // Now check grid connectivity
-    const powerSystem = new PowerSystem(grid, allBuildables);
+    const powerSystem = new PowerSystem(grid, world);
     const connectivityValidation = powerSystem.validateBuildablePlacement(
-      "power_pole",
+      "powerPole",
       playerId,
       undefined,
-      buildable.cornerCoordinates
+      buildable.cornerPosition.cornerCoordinates
     );
 
     if (!connectivityValidation.valid) {
@@ -78,8 +73,8 @@ export function validateBuildableLocation({
   }
 
   // For power plants, check if the hex is in a valid region and matches the required state
-  if (isPowerPlant(buildable) && buildable.coordinates) {
-    const cell = getCell(grid, buildable.coordinates);
+  if (buildable.hexPosition?.coordinates && buildable.powerGeneration) {
+    const cell = getCell(grid, buildable.hexPosition.coordinates);
 
     // Check if cell exists and has a region
     if (!cell) {
@@ -94,24 +89,24 @@ export function validateBuildableLocation({
     }
 
     // Check if the region matches the required state (if specified)
-    const blueprint = playerBlueprints[buildable.id];
+    const requiredRegion = buildable.requiredRegion;
 
     if (
-      blueprint?.requiredState &&
-      cell.regionName !== blueprint.requiredState
+      requiredRegion &&
+      cell.regionName !== requiredRegion.requiredRegionName
     ) {
       return {
         valid: false,
-        reason: `This power plant must be placed in ${blueprint.requiredState}`,
+        reason: `This power plant must be placed in ${requiredRegion.requiredRegionName}`,
       };
     }
 
     // Now check grid connectivity
-    const powerSystem = new PowerSystem(grid, allBuildables);
+    const powerSystem = new PowerSystem(grid, world);
     const connectivityValidation = powerSystem.validateBuildablePlacement(
-      buildable.type,
+      "powerPlant",
       playerId,
-      buildable.coordinates,
+      buildable.hexPosition.coordinates,
       undefined
     );
 

@@ -13,6 +13,7 @@ import { GameClientEventSchema } from "@/actor/game.schemas";
 import { AuthContext } from "@/auth.context";
 import { initializeCommodityMarket } from "@/lib/market/CommodityMarket";
 import hexGrid from "@/../public/hexgrid.json";
+import { WorldContextProvider } from "@/components/WorldContext";
 
 type GameClientEvent = z.infer<typeof GameClientEventSchema>;
 
@@ -62,7 +63,6 @@ export default function MapEditor() {
             name: "Map Editor",
             money: 1000,
             powerSoldKWh: 0,
-            blueprintsById: {},
             isHost: true,
             number: 0,
           },
@@ -71,13 +71,16 @@ export default function MapEditor() {
           totalTicks: 0,
           isPaused: true,
         },
-        buildables: [],
+        entitiesById: {},
         hexGrid: hexGrid as HexGrid,
         auction: null,
         randomSeed: 0,
         commodityMarket: initializeCommodityMarket(),
       },
-      private: {},
+      private: {
+        surveyResultByHexCell: {},
+        hexCellResources: {},
+      },
       value: "active",
     },
   });
@@ -127,7 +130,9 @@ export default function MapEditor() {
   return (
     <MapEditorContext.Provider value={mapEditorContext}>
       <GameContext.ProviderFromClient client={client}>
-        <Game />
+        <WorldContextProvider>
+          <Game />
+        </WorldContextProvider>
       </GameContext.ProviderFromClient>
     </MapEditorContext.Provider>
   );

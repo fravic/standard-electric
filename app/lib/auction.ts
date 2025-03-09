@@ -1,5 +1,4 @@
-import { Player } from "@/actor/game.types";
-import { Auction } from "@/actor/game.types";
+import { Player, Auction } from "@/actor/game.types";
 import seedrandom from "seedrandom";
 
 /**
@@ -177,21 +176,21 @@ export function processBlueprintWinner(
 
   if (!winningBid || !winningBid.amount) return null;
 
-  const blueprint = auction.currentBlueprint.blueprint;
+  const blueprintId = auction.currentBlueprint.blueprintId;
   const winner = players[winningBid.playerId];
 
   // Create new auction state
   return {
     ...auction,
     currentBlueprint: null,
-    availableBlueprints: auction.availableBlueprints.filter(
-      (b) => b.id !== blueprint.id
+    availableBlueprintIds: auction.availableBlueprintIds.filter(
+      (id) => id !== blueprintId
     ),
     purchases: [
       ...auction.purchases,
       {
         playerId: winningBid.playerId,
-        blueprintId: blueprint.id,
+        blueprintId: blueprintId,
         price: winningBid.amount,
       },
     ],

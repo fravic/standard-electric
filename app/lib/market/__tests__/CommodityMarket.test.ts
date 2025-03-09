@@ -10,6 +10,7 @@ import {
   buyFuelForPowerPlant,
   sellFuelFromPowerPlant,
 } from "../CommodityMarket";
+import { Entity } from "@/ecs/entity";
 
 describe("CommodityMarket", () => {
   let market: CommodityMarketState;
@@ -196,10 +197,17 @@ describe("CommodityMarket", () => {
 
   describe("buyFuelForPowerPlant", () => {
     it("should successfully buy fuel when all conditions are met", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        maxFuelStorage: 100,
-        currentFuelStorage: 0,
+      const powerPlant: Entity = {
+        id: "test-power-plant-1",
+        fuelRequirement: {
+          fuelType: CommodityType.COAL,
+          fuelConsumptionPerKWh: 0.5
+        },
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          maxFuelStorage: 100,
+          currentFuelStorage: 0,
+        }
       };
       const playerMoney = 1000;
       const units = 5;
@@ -227,10 +235,17 @@ describe("CommodityMarket", () => {
     });
 
     it("should fail when there is no available storage", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        maxFuelStorage: 50,
-        currentFuelStorage: 50, // Full storage
+      const powerPlant: Entity = {
+        id: "test-power-plant-2",
+        fuelRequirement: {
+          fuelType: CommodityType.COAL,
+          fuelConsumptionPerKWh: 0.5
+        },
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          maxFuelStorage: 50,
+          currentFuelStorage: 50, // Full storage
+        }
       };
       const playerMoney = 1000;
       const units = 5;
@@ -250,10 +265,17 @@ describe("CommodityMarket", () => {
     });
 
     it("should fail when player doesn't have enough money", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        maxFuelStorage: 100,
-        currentFuelStorage: 0,
+      const powerPlant: Entity = {
+        id: "test-power-plant-3",
+        fuelRequirement: {
+          fuelType: CommodityType.COAL,
+          fuelConsumptionPerKWh: 0.5
+        },
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          maxFuelStorage: 100,
+          currentFuelStorage: 0,
+        }
       };
       const playerMoney = 0;
       const units = 5;
@@ -273,10 +295,17 @@ describe("CommodityMarket", () => {
     });
 
     it("should limit fuel added based on available storage", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        maxFuelStorage: 50,
-        currentFuelStorage: 30, // Only 20 units of storage left
+      const powerPlant: Entity = {
+        id: "test-power-plant-4",
+        fuelRequirement: {
+          fuelType: CommodityType.COAL,
+          fuelConsumptionPerKWh: 0.5
+        },
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          maxFuelStorage: 50,
+          currentFuelStorage: 30, // Only 20 units of storage left
+        }
       };
       const playerMoney = 1000;
       const units = 5; // Trying to buy 5 units (50 fuel)
@@ -297,10 +326,17 @@ describe("CommodityMarket", () => {
     });
 
     it("should fail when power plant fuel type doesn't match", () => {
-      const powerPlant = {
-        fuelType: CommodityType.OIL,
-        maxFuelStorage: 100,
-        currentFuelStorage: 0,
+      const powerPlant: Entity = {
+        id: "test-power-plant-5",
+        fuelRequirement: {
+          fuelType: CommodityType.OIL,
+          fuelConsumptionPerKWh: 0.5
+        },
+        fuelStorage: {
+          fuelType: CommodityType.OIL,
+          maxFuelStorage: 100,
+          currentFuelStorage: 0,
+        }
       };
       const playerMoney = 1000;
       const units = 5;
@@ -322,9 +358,13 @@ describe("CommodityMarket", () => {
 
   describe("sellFuelFromPowerPlant", () => {
     it("should successfully sell fuel when all conditions are met", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        currentFuelStorage: 100,
+      const powerPlant: Entity = {
+        id: "test-power-plant-6",
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          currentFuelStorage: 100,
+          maxFuelStorage: 200
+        }
       };
       const units = 5;
 
@@ -350,9 +390,13 @@ describe("CommodityMarket", () => {
     });
 
     it("should fail when there is no available fuel", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        currentFuelStorage: 0,
+      const powerPlant: Entity = {
+        id: "test-power-plant-7",
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          currentFuelStorage: 0,
+          maxFuelStorage: 100
+        }
       };
       const units = 5;
 
@@ -370,9 +414,13 @@ describe("CommodityMarket", () => {
     });
 
     it("should adjust units sold based on available fuel", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        currentFuelStorage: 25, // Only enough for 2.5 units of coal (10 per unit)
+      const powerPlant: Entity = {
+        id: "test-power-plant-8",
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          currentFuelStorage: 25, // Only enough for 2.5 units of coal (10 per unit)
+          maxFuelStorage: 100
+        }
       };
       const units = 5; // Trying to sell 5 units
 
@@ -391,9 +439,13 @@ describe("CommodityMarket", () => {
     });
 
     it("should fail when available fuel is less than one unit", () => {
-      const powerPlant = {
-        fuelType: CommodityType.COAL,
-        currentFuelStorage: 5, // Less than one unit of coal (10 per unit)
+      const powerPlant: Entity = {
+        id: "test-power-plant-9",
+        fuelStorage: {
+          fuelType: CommodityType.COAL,
+          currentFuelStorage: 5, // Less than one unit of coal (10 per unit)
+          maxFuelStorage: 100
+        }
       };
       const units = 1;
 
@@ -411,9 +463,13 @@ describe("CommodityMarket", () => {
     });
 
     it("should fail when power plant fuel type doesn't match", () => {
-      const powerPlant = {
-        fuelType: CommodityType.OIL,
-        currentFuelStorage: 100,
+      const powerPlant: Entity = {
+        id: "test-power-plant-10",
+        fuelStorage: {
+          fuelType: CommodityType.OIL,
+          currentFuelStorage: 100,
+          maxFuelStorage: 200
+        }
       };
       const units = 5;
 

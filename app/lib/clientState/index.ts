@@ -1,21 +1,10 @@
 import { createStore } from "@xstate/store";
 import { HexCoordinates } from "../coordinates/HexCoordinates";
 import { Population, TerrainType } from "../HexCell";
-import { PowerPlantType } from "../buildables/schemas";
-import { isPowerPlantType } from "../buildables/PowerPlant";
 
-type BuildMode =
-  | null
-  | { type: "power_pole" }
-  | { type: PowerPlantType; blueprintId: string };
-
-export function isPowerPlantBuildMode(
-  buildMode: BuildMode
-): buildMode is { type: PowerPlantType; blueprintId: string } {
-  return Boolean(
-    buildMode && isPowerPlantType(buildMode.type) && "blueprintId" in buildMode
-  );
-}
+type BuildMode = {
+  blueprintId: string;
+};
 
 interface MapBuilder {
   isPaintbrushMode: boolean;
@@ -26,7 +15,7 @@ interface MapBuilder {
 interface ClientState {
   isDebug: boolean;
   mapBuilder: MapBuilder;
-  buildMode: BuildMode;
+  buildMode: BuildMode | null;
   hoverLocation: {
     worldPoint: [number, number, number];
   } | null;
@@ -77,7 +66,7 @@ export const clientStore = createStore({
         selectedPopulation: event.population,
       },
     }),
-    setBuildMode: (context, event: { mode: BuildMode }) => ({
+    setBuildMode: (context, event: { mode: BuildMode | null }) => ({
       buildMode: event.mode,
     }),
     setHoverLocation: (

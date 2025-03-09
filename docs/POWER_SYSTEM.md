@@ -84,7 +84,7 @@ The power system operates in two main phases:
 type PowerPlant = {
   id: string;
   playerId: string;
-  pricePerKwh: number;
+  pricePerKWh: number;
   maxCapacity: number;
   remainingCapacity: number;
   gridId: string;

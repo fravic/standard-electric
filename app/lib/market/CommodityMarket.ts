@@ -1,3 +1,4 @@
+import { Entity } from "@/ecs/entity";
 import { produce } from "immer";
 
 export enum CommodityType {
@@ -212,11 +213,7 @@ export function buyFuelForPowerPlant({
   playerMoney,
 }: {
   market: CommodityMarketState;
-  powerPlant: {
-    fuelType?: CommodityType | null;
-    maxFuelStorage?: number;
-    currentFuelStorage?: number;
-  };
+  powerPlant: Entity;
   fuelType: CommodityType;
   units: number;
   playerMoney: number;
@@ -227,7 +224,7 @@ export function buyFuelForPowerPlant({
   success: boolean;
 } {
   // Check if the power plant can use this fuel type
-  if (powerPlant.fuelType !== fuelType) {
+  if (powerPlant.fuelRequirement?.fuelType !== fuelType) {
     return {
       updatedMarket: market,
       actualCost: 0,
@@ -237,8 +234,8 @@ export function buyFuelForPowerPlant({
   }
 
   // Calculate available space in the fuel storage
-  const maxStorage = powerPlant.maxFuelStorage || 0;
-  const currentStorage = powerPlant.currentFuelStorage || 0;
+  const maxStorage = powerPlant.fuelStorage?.maxFuelStorage || 0;
+  const currentStorage = powerPlant.fuelStorage?.currentFuelStorage || 0;
   const availableStorage = maxStorage - currentStorage;
 
   // If there's no storage available, return early
@@ -302,10 +299,7 @@ export function sellFuelFromPowerPlant({
   units,
 }: {
   market: CommodityMarketState;
-  powerPlant: {
-    fuelType?: CommodityType | null;
-    currentFuelStorage?: number;
-  };
+  powerPlant: Entity;
   fuelType: CommodityType;
   units: number;
 }): {
@@ -315,7 +309,7 @@ export function sellFuelFromPowerPlant({
   success: boolean;
 } {
   // Check if the power plant can use this fuel type
-  if (powerPlant.fuelType !== fuelType) {
+  if (!powerPlant.fuelStorage || powerPlant.fuelStorage.fuelType !== fuelType) {
     return {
       updatedMarket: market,
       totalProfit: 0,
@@ -324,7 +318,7 @@ export function sellFuelFromPowerPlant({
     };
   }
 
-  const availableFuel = powerPlant.currentFuelStorage || 0;
+  const availableFuel = powerPlant.fuelStorage.currentFuelStorage || 0;
 
   // Calculate how much fuel would be sold
   const unitSize = market.commodities[fuelType].config.unitSize;

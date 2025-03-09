@@ -1,4 +1,6 @@
 import React from "react";
+import { nanoid } from "nanoid";
+
 import { useSelector } from "@xstate/store/react";
 import { HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { HexGridChunk } from "./HexGridChunk";
@@ -6,8 +8,8 @@ import { GameContext } from "@/actor/game.context";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { CornerCoordinates } from "@/lib/coordinates/CornerCoordinates";
 import { clientStore } from "@/lib/clientState";
-import { nanoid } from "nanoid";
-import { isPowerPlantType } from "@/lib/buildables/PowerPlant";
+import { AdditionalBlueprintOptions } from "@/ecs/factories";
+
 interface HexGridProps {}
 
 export function HexGrid({}: HexGridProps) {
@@ -17,6 +19,7 @@ export function HexGrid({}: HexGridProps) {
     clientStore,
     (state) => state.context.buildMode
   );
+  const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
   const sendGameEvent = GameContext.useSend();
 
   const chunkCountX = Math.ceil(hexGrid.width / HexMetrics.chunkSizeX);
@@ -26,25 +29,23 @@ export function HexGrid({}: HexGridProps) {
     coordinates: HexCoordinates,
     nearestCorner: CornerCoordinates | null
   ) => {
-    if (buildMode && buildMode.type === "power_pole") {
-      if (nearestCorner) {
-        sendGameEvent({
-          type: "ADD_BUILDABLE",
-          buildable: {
-            id: nanoid(),
-            type: "power_pole",
-            cornerCoordinates: nearestCorner,
-          },
-        });
+    if (buildMode) {
+      const blueprintEntity = entitiesById[buildMode.blueprintId];
+      if (!blueprintEntity) {
+        throw new Error(`Blueprint ${buildMode.blueprintId} not found`);
       }
-    } else if (buildMode && isPowerPlantType(buildMode.type)) {
+      const options: AdditionalBlueprintOptions = {
+        cornerPosition: blueprintEntity.blueprint?.allowedPosition === "corner" && nearestCorner? {
+          cornerCoordinates: nearestCorner
+        } : undefined,
+        hexPosition: blueprintEntity.blueprint?.allowedPosition === "hex" ? {
+          coordinates,
+        } : undefined,
+      };
       sendGameEvent({
         type: "ADD_BUILDABLE",
-        buildable: {
-          id: buildMode.blueprintId,
-          type: buildMode.type,
-          coordinates,
-        },
+        blueprintId: buildMode.blueprintId,
+        options,
       });
     } else {
       clientStore.send({ type: "selectHex", coordinates });

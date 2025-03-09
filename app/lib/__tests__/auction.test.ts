@@ -17,7 +17,6 @@ describe("auction", () => {
       money: 100,
       powerSoldKWh: 0,
       isHost: true,
-      blueprintsById: {},
     },
     player2: {
       name: "Player 2",
@@ -25,7 +24,6 @@ describe("auction", () => {
       money: 100,
       powerSoldKWh: 1000,
       isHost: false,
-      blueprintsById: {},
     },
     player3: {
       name: "Player 3",
@@ -33,12 +31,11 @@ describe("auction", () => {
       money: 100,
       powerSoldKWh: 500,
       isHost: false,
-      blueprintsById: {},
     },
   };
 
   const mockAuction: Auction = {
-    availableBlueprints: [],
+    availableBlueprintIds: [],
     currentBlueprint: null,
     purchases: [],
     passedPlayerIds: [],
@@ -150,13 +147,7 @@ describe("auction", () => {
       const auctionWithBlueprint: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: "test",
           bids: [],
         },
       };
@@ -173,13 +164,7 @@ describe("auction", () => {
       const auctionWithBids: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: "test",
           bids: [{ playerId: "player1", amount: 10 }],
         },
       };
@@ -196,13 +181,7 @@ describe("auction", () => {
       const auctionWithPurchase: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: 'test',
           bids: [{ playerId: "player1", amount: 10 }],
         },
         purchases: [{ playerId: "player3", blueprintId: "other", price: 10 }],
@@ -220,13 +199,7 @@ describe("auction", () => {
       const auctionWithBids: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: "test",
           bids: [
             { playerId: "player1", amount: 10 },
             { playerId: "player3", amount: 11 },
@@ -270,13 +243,7 @@ describe("auction", () => {
       const auctionWithBids: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: "test",
           bids: [
             { playerId: "player1", amount: 10 },
             { playerId: "player2", passed: true },
@@ -291,13 +258,7 @@ describe("auction", () => {
       const auctionWithBids: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: "test",
           bids: [
             { playerId: "player1", amount: 10 },
             { playerId: "player2", amount: 12 },
@@ -342,13 +303,7 @@ describe("auction", () => {
       const auctionWithNoBids: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: "test",
           bids: [
             { playerId: "player1", passed: true },
             { playerId: "player2", passed: true },
@@ -362,13 +317,7 @@ describe("auction", () => {
       const auctionWithBids: Auction = {
         ...mockAuction,
         currentBlueprint: {
-          blueprint: {
-            id: "test",
-            type: "coal_plant",
-            name: "Test Plant",
-            powerGenerationKW: 1000,
-            startingPrice: 10,
-          },
+          blueprintId: 'test',
           bids: [
             { playerId: "player1", amount: 10 },
             { playerId: "player2", amount: 15 },
@@ -386,7 +335,7 @@ describe("auction", () => {
         blueprintId: "test",
         price: 15,
       });
-      expect(result!.availableBlueprints).toHaveLength(0);
+      expect(result!.availableBlueprintIds).toHaveLength(0);
     });
   });
 });

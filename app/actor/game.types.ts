@@ -6,7 +6,7 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { Buildable, PowerPlantBlueprint } from "../lib/buildables/schemas";
+import { BlueprintComponent } from "../ecs/entity";
 import { HexGrid } from "../lib/HexGrid";
 import {
   GameClientEventSchema,
@@ -15,8 +15,8 @@ import {
 } from "./game.schemas";
 import { Env } from "../env";
 import { CommodityMarketState } from "../lib/market/CommodityMarket";
-import { HexCoordinates } from "../lib/coordinates/HexCoordinates";
 import { SurveyResult, HexCellResource } from "../lib/surveys";
+import { Entity } from "../ecs/entity";
 
 export interface Player {
   name: string;
@@ -24,13 +24,14 @@ export interface Player {
   money: number;
   powerSoldKWh: number;
   isHost: boolean;
-  blueprintsById: Record<string, PowerPlantBlueprint>;
 }
 
+// No longer need AuctionBlueprint interface as we'll use Entity directly
+
 export interface Auction {
-  availableBlueprints: PowerPlantBlueprint[];
+  availableBlueprintIds: string[];
   currentBlueprint: null | {
-    blueprint: PowerPlantBlueprint;
+    blueprintId: string;
     bids: {
       playerId: string;
       amount?: number;
@@ -55,7 +56,7 @@ interface GamePublicContext {
     totalTicks: number;
     isPaused: boolean;
   };
-  buildables: Buildable[];
+  entitiesById: Record<string, Entity>;
   hexGrid: HexGrid;
   auction: Auction | null;
   randomSeed: number;

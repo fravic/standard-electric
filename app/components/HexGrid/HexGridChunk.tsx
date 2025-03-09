@@ -9,12 +9,6 @@ import { HexGridTerrain } from "./HexGridTerrain";
 import { HexGridWater } from "./HexGridWater";
 import { HexGrid, getCell } from "@/lib/HexGrid";
 import { GameContext } from "@/actor/game.context";
-import { GamePrivateContext } from "@/actor/game.types";
-import {
-  PowerPole,
-  createPowerPole,
-  findPossibleConnectionsForCoordinates,
-} from "@/lib/buildables/PowerPole";
 import {
   createHexCoordinates,
   equals,
@@ -22,15 +16,19 @@ import {
   getNearestCornerInChunk,
 } from "@/lib/coordinates/HexCoordinates";
 
-import { Buildable } from "../Buildable";
-import { PowerLines } from "../PowerSystem/PowerLines";
+import { EntityRenderable } from "../EntityRenderable";
 import { HexMetrics } from "@/lib/HexMetrics";
-import { clientStore, isPowerPlantBuildMode } from "@/lib/clientState";
+import { clientStore } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 import { useMapEditor } from "@/routes/mapEditor";
 import { validateBuildableLocation } from "@/lib/buildables/validateBuildableLocation";
 import { SurveyProgressIndicator } from "./SurveyProgressIndicator";
+import { With } from "miniplex";
+import { Entity } from "@/ecs/entity";
+import { useWorld } from "../WorldContext";
+import { createEntityFromBlueprint } from "@/ecs/factories";
+import { findPossibleConnectionsWithWorld } from "@/lib/buildables/findPossibleConnections";
 
 interface HexGridChunkProps {
   chunk: {
@@ -88,11 +86,12 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     clientStore,
     (state) => state.context.hoveringHexCoordinates
   );
-  const buildables = GameContext.useSelector(
-    (state) => state.public.buildables ?? []
+  const entitiesById = GameContext.useSelector(
+    (state) => state.public.entitiesById
   );
+  const world = useWorld();
 
-  const validCoordinates = useMemo(() => {
+  const coordinatesInChunk = useMemo(() => {
     const coordinates: HexCoordinates[] = [];
     for (let z = chunk.zStart; z < chunk.zStart + HexMetrics.chunkSizeZ; z++) {
       for (
@@ -106,8 +105,13 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return coordinates;
   }, [chunk]);
 
+  const buildingBlueprint = useMemo(() => {
+    if (!buildMode || !player) return null;
+    return entitiesById[buildMode.blueprintId] as With<Entity, 'blueprint'>;
+  }, [buildMode, entitiesById, player]);
+
   const ghostBuildable = useMemo(() => {
-    if (!hoverLocation || !buildMode || !player) return null;
+    if (!hoverLocation) return null;
 
     const point = new THREE.Vector3(
       hoverLocation.worldPoint[0],
@@ -115,91 +119,54 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       hoverLocation.worldPoint[2]
     );
 
-    if (buildMode.type === "power_pole") {
-      const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
-      if (nearestCorner) {
-        const ghostPoleData = {
-          id: "ghost",
-          type: "power_pole" as const,
+    if (!buildingBlueprint) return null;
+
+    let ghostEntity: Entity;
+    if (buildingBlueprint.blueprint.allowedPosition === "corner") {
+      const nearestCorner = getNearestCornerInChunk(point, coordinatesInChunk);
+      if (!nearestCorner) {
+        return null;
+      }
+      ghostEntity = createEntityFromBlueprint(buildingBlueprint, {
+        cornerPosition: {
           cornerCoordinates: nearestCorner,
-        };
-
-        const validation = validateBuildableLocation({
-          buildable: ghostPoleData,
-          grid,
-          allBuildables: gameState.public.buildables,
-          playerId: userId!,
-          playerBlueprints: player.blueprintsById,
-          surveyedHexCells,
-        });
-
-        if (!validation.valid) {
-          return null;
-        }
-
-        const otherPoles = buildables.filter(
-          (b): b is PowerPole => b.type === "power_pole"
-        );
-
-        const ghostPole = createPowerPole({
-          id: "ghost",
-          cornerCoordinates: nearestCorner,
-          playerId: userId!,
-          connectedToIds: findPossibleConnectionsForCoordinates(
+        },
+        connections: {
+          connectedToIds: findPossibleConnectionsWithWorld(
+            world,
             nearestCorner,
-            otherPoles
+            userId!
           ),
-          isGhost: true,
-        });
-        return ghostPole;
-      }
-    }
-
-    if (buildMode && isPowerPlantBuildMode(buildMode)) {
+        },
+      });
+    } else {
       const coords = fromWorldPoint([point.x, point.y, point.z]);
-      const isValidCoord = validCoordinates.some((c) => equals(c, coords));
-      const blueprint = player.blueprintsById[buildMode.blueprintId];
-
-      if (isValidCoord && blueprint) {
-        const ghostBuildableData = {
-          id: buildMode.blueprintId,
-          type: "coal_plant" as const,
-          coordinates: coords,
-        };
-
-        const validation = validateBuildableLocation({
-          buildable: ghostBuildableData,
-          grid,
-          allBuildables: gameState.public.buildables,
-          playerId: userId!,
-          playerBlueprints: player.blueprintsById,
-          surveyedHexCells,
-        });
-
-        if (!validation.valid) {
-          return null;
-        }
-
-        return {
-          id: "ghost",
-          type: "coal_plant" as const,
-          coordinates: coords,
-          playerId: userId!,
-          isGhost: true,
-          name: blueprint.name,
-          powerGenerationKW: blueprint.powerGenerationKW,
-          pricePerKwh: 0.1,
-          startingPrice: blueprint.startingPrice,
-          requiredState: blueprint.requiredState,
-        };
+      if (!coordinatesInChunk.some(c => equals(c, coords))) {
+        return null;
       }
+      ghostEntity = createEntityFromBlueprint(buildingBlueprint, {
+        hexPosition: {
+          coordinates: coords,
+        },
+      });
+    }
+  
+    const validation = validateBuildableLocation({
+      buildable: ghostEntity,
+      grid,
+      world,
+      playerId: userId!,
+      surveyedHexCells,
+    });
+    console.log(validation);
+    if (!validation.valid) {
+      return null;
     }
 
-    return null;
+    return ghostEntity;
   }, [
     buildMode,
-    validCoordinates,
-    buildables,
+    coordinatesInChunk,
     hoverLocation,
     player,
     userId,
@@ -212,7 +179,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     (event: ThreeEvent<PointerEvent>) => {
       const point = event.point;
       const coords = fromWorldPoint([point.x, point.y, point.z]);
-      const isValidCoord = validCoordinates.some((c) => equals(c, coords));
+      const isValidCoord = coordinatesInChunk.some((c) => equals(c, coords));
 
       clientStore.send({
         type: "setHoverLocation",
@@ -226,7 +193,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         });
       }
     },
-    [validCoordinates]
+    [coordinatesInChunk]
   );
 
   const handlePointerLeave = useCallback(() => {
@@ -240,15 +207,15 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     (event: ThreeEvent<MouseEvent>) => {
       const point = event.point.clone();
       const coords = fromWorldPoint([point.x, point.y, point.z]);
-      const isValidCoord = validCoordinates.some((c) => equals(c, coords));
+      const isValidCoord = coordinatesInChunk.some((c) => equals(c, coords));
 
       if (!isValidCoord) return;
 
-      const nearestCorner = getNearestCornerInChunk(point, validCoordinates);
+      const nearestCorner = getNearestCornerInChunk(point, coordinatesInChunk);
 
       onCellClick(coords, nearestCorner);
     },
-    [buildMode, validCoordinates, onCellClick]
+    [coordinatesInChunk, onCellClick]
   );
 
   const { updateHexPopulation, updateHexTerrain } = useMapEditor();
@@ -266,10 +233,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   );
 
   const cells = useMemo(() => {
-    return validCoordinates
+    return coordinatesInChunk
       .map((coordinates: HexCoordinates) => getCell(grid, coordinates))
       .filter((cell): cell is HexCell => cell !== null);
-  }, [grid, validCoordinates]);
+  }, [grid, coordinatesInChunk]);
 
   // Get cells to highlight based on hovering state
   const highlightedCells = useMemo(() => {
@@ -283,30 +250,24 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
   // Get cells to highlight based on required state for power plant build mode
   const requiredStateHighlightedCells = useMemo(() => {
-    if (!buildMode || !isPowerPlantBuildMode(buildMode) || !player) return [];
+    const requiredRegion = buildingBlueprint?.blueprint.components.requiredRegion;
+    if (!requiredRegion) return [];
 
-    const blueprint = player.blueprintsById[buildMode.blueprintId];
-    if (!blueprint || !blueprint.requiredState) return [];
+    return cells.filter((cell) => cell.regionName === requiredRegion.requiredRegionName);
+  }, [cells, buildingBlueprint]);
 
-    return cells.filter((cell) => cell.regionName === blueprint.requiredState);
-  }, [cells, buildMode, player]);
-
-  // Filter buildables in this chunk
-  const chunkBuildables = useMemo(() => {
-    return buildables.filter((buildable) => {
-      if (buildable.coordinates) {
-        return validCoordinates.some((coord) =>
-          equals(coord, buildable.coordinates as HexCoordinates)
-        );
-      }
-      if (buildable.cornerCoordinates) {
-        return validCoordinates.some((coord) =>
-          equals(buildable.cornerCoordinates!.hex as HexCoordinates, coord)
-        );
-      }
-      return false;
+  // Get renderable entities in this chunk
+  const chunkEntities = useMemo(() => {
+    const hexCoordEntities = world.with("hexPosition", "renderable").where((entity) => {
+      return coordinatesInChunk.some((coord) => equals(coord, entity.hexPosition.coordinates));
     });
-  }, [buildables, validCoordinates]);
+    const cornerCoordEntities = world.with("cornerPosition", "renderable").where((entity) => {
+      return coordinatesInChunk.some((coord) =>
+        equals(coord, entity.cornerPosition.cornerCoordinates!.hex as HexCoordinates)
+      );
+    });
+    return [...hexCoordEntities, ...cornerCoordEntities];
+  }, [coordinatesInChunk, world]);
 
   return (
     <group>
@@ -335,11 +296,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           height={0.1}
         />
       )}
-      <PowerLines chunkCells={cells.map((cell: HexCell) => cell.coordinates)} />
-      {chunkBuildables.map((buildable) => (
-        <Buildable key={buildable.id} buildable={buildable} />
+      {chunkEntities.map((entity) => (
+        <EntityRenderable key={entity.id} entity={entity} />
       ))}
-      {ghostBuildable && <Buildable buildable={ghostBuildable} />}
+      {ghostBuildable && <EntityRenderable entity={ghostBuildable} />}
       <SurveyProgressIndicator
         cells={cells}
         surveyResultByHexCell={surveyResultByHexCell}

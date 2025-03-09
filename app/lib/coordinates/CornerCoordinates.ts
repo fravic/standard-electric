@@ -63,7 +63,7 @@ export function toHexAndDirection(corner: CornerCoordinates): {
   return { hex: corner.hex, direction };
 }
 
-export function getCornerWorldPoint(
+export function cornerToWorldPoint(
   corner: CornerCoordinates
 ): [number, number, number] {
   const worldPoint = toWorldPoint(corner.hex);

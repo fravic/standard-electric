@@ -56,8 +56,7 @@ export const GameUI: React.FC = () => {
   const dayNumber = Math.floor(totalTicks / HOURS_PER_DAY) + 1;
   const isLobby = GameContext.useMatches("lobby");
   const isAuction = GameContext.useMatches("auction");
-
-  // Get selected hex coordinates from client state
+  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
   const selectedHexCoordinates = useSelector(
     clientStore,
     (state) => state.context.selectedHexCoordinates
@@ -94,7 +93,7 @@ export const GameUI: React.FC = () => {
           </div>
           <TerrainPaintUI />
           <HexPreviewTooltip />
-          <HexDetails />
+          {!isDebug && <HexDetails />}
         </>
       )}
       {isAuction && <PowerPlantAuction />}

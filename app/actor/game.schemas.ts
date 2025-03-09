@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { BuildableSchema } from "@/lib/buildables/Buildable";
 import { CommodityType } from "@/lib/market/CommodityMarket";
 import { HexCoordinatesSchema } from "@/lib/coordinates/types";
+import { AdditionalBlueprintOptionsSchema } from "@/ecs/factories";
 
 export const GameClientEventSchema = z.discriminatedUnion("type", [
   z.object({
@@ -13,12 +13,8 @@ export const GameClientEventSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("ADD_BUILDABLE"),
-    buildable: BuildableSchema.pick({
-      type: true,
-      coordinates: true,
-      cornerCoordinates: true,
-      id: true,
-    }),
+    blueprintId: z.string(),
+    options: AdditionalBlueprintOptionsSchema,
   }),
   z.object({
     type: z.literal("TICK"),
