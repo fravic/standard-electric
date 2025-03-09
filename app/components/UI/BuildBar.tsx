@@ -26,11 +26,22 @@ export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
   }, [world, userId]);
 
   const handleBlueprintClick = (blueprintId: string) => {
-    clientStore.send({
-      type: "setBuildMode",
-      mode: { blueprintId },
-    });
+    if (buildMode && buildMode.blueprintId === blueprintId) {
+      clientStore.send({
+        type: "setBuildMode",
+        mode: null,
+      });
+    } else {
+      clientStore.send({
+        type: "setBuildMode",
+        mode: { blueprintId },
+      });
+    }
   };
+
+  if (!blueprintEntities.length) {
+    return null;
+  }
 
   return (
     <div

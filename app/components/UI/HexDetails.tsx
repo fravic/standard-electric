@@ -98,9 +98,6 @@ const EntityDetails: React.FC = () => {
     (state) => state.context.selectedHexCoordinates
   );
 
-  const entitiesById = GameContext.useSelector(
-    (state) => state.public.entitiesById
-  );
   const world = useWorld();
 
   const userId = AuthContext.useSelector((state) => state.userId);
@@ -368,15 +365,6 @@ export const HexDetails: React.FC = () => {
     (state) => state.context.selectedHexCoordinates
   );
 
-  const entitiesById = GameContext.useSelector(
-    (state) => state.public.entitiesById
-  );
-
-  // Early return if no hex is selected
-  if (!selectedHexCoordinates) {
-    return null;
-  }
-
   const handleClose = () => {
     clientStore.send({
       type: "selectHex",
@@ -391,6 +379,10 @@ export const HexDetails: React.FC = () => {
     if (!selectedHexCoordinates) return undefined;
     return entityAtHexCoordinate(world, selectedHexCoordinates);
   }, [selectedHexCoordinates, world]);
+
+  if (!selectedHexCoordinates) {
+    return null;
+  }
 
   // Get the title based on the entity type
   const title = entity ? entity.name : "Selected Hex";

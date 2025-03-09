@@ -66,7 +66,7 @@ export const clientStore = createStore({
         selectedPopulation: event.population,
       },
     }),
-    setBuildMode: (context, event: { mode: BuildMode }) => ({
+    setBuildMode: (context, event: { mode: BuildMode | null }) => ({
       buildMode: event.mode,
     }),
     setHoverLocation: (
