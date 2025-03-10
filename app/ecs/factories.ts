@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Entity, CornerPositionComponentSchema, HexPositionComponentSchema } from "./entity";
 import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
 import { CommodityType } from "@/lib/market/CommodityMarket";
+import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 
 export function createWorldWithEntities(publicEntitiesById: Record<string, Entity>, privateEntitiesById: Record<string, Entity>) {
   const world = new World<Entity>();
@@ -180,5 +181,33 @@ export function createPowerPlantBlueprint(options: {
     auctionable: {
       startingPrice: options.startingPrice,
     }
+  };
+}
+
+export function createSurvey(options: {
+  id?: string;
+  hexCoordinates: HexCoordinates;
+  surveyStartTick: number;
+  isComplete: boolean;
+  playerId: string;
+  resource?: {
+    resourceType: CommodityType;
+    resourceAmount: number;
+  };
+}): Entity {
+  return {
+    id: options.id || nanoid(),
+    name: `Survey for ${coordinatesToString(options.hexCoordinates)}`,
+    hexPosition: {  
+      coordinates: options.hexCoordinates,
+    },
+    surveyResult: {
+      surveyStartTick: options.surveyStartTick, 
+      isComplete: options.isComplete,
+      resource: options.resource,
+    },
+    owner: {
+      playerId: options.playerId,
+    },
   };
 }

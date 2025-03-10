@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
@@ -6,7 +6,7 @@ import { BuildButton } from "./BuildButton";
 import { AuctionBidder } from "./AuctionBidder";
 import { Button } from "./Button";
 import { Card } from "./Card";
-import { getNextBidderPlayerId, getNextInitiatorPlayerId } from "@/lib/auction";
+import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
 
 export function PowerPlantAuction() {
   const userId = AuthContext.useSelector((state) => state.userId);
@@ -14,22 +14,25 @@ export function PowerPlantAuction() {
     (state) => state.public
   );
   const sendGameEvent = GameContext.useSend();
+  const auctionSystem = useMemo(() => {
+    return new AuctionSystem();
+  }, [])
 
   if (!auction) return null;
 
-  const currentBidderId = getNextBidderPlayerId(
+  const currentBidderId = auctionSystem.getNextBidder({
     players,
     auction,
-    time.totalTicks,
+    totalTicks: time.totalTicks,
     randomSeed
-  );
+  });
   const isCurrentBidder = currentBidderId === userId;
-  const currentInitiatorId = getNextInitiatorPlayerId(
+  const currentInitiatorId = auctionSystem.getNextInitiator({
     players,
     auction,
-    time.totalTicks,
+    totalTicks: time.totalTicks,
     randomSeed
-  );
+  });
   const isCurrentInitiator = currentInitiatorId === userId;
   const currentPlayer = userId ? players[userId] : undefined;
 

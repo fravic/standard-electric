@@ -402,9 +402,8 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * In case of a tie, players are ordered randomly using a seeded random number generator.
    * @private
    */
-  private getBidderPriorityOrder(
+  public getBidderPriorityOrder(
     players: Record<string, Player>,
-    auction: Auction,
     totalTicks: number,
     randomSeed: number
   ): string[] {
@@ -441,7 +440,6 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
   ): string | undefined {
     const bidderOrder = this.getBidderPriorityOrder(
       players,
-      auction,
       totalTicks,
       randomSeed
     );
@@ -472,7 +470,6 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
 
     const bidderOrder = this.getBidderPriorityOrder(
       players,
-      auction,
       totalTicks,
       randomSeed
     );

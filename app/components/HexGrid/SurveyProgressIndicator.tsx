@@ -1,22 +1,18 @@
 import React, { useMemo } from "react";
-import * as THREE from "three";
 import { Billboard, Text } from "@react-three/drei";
 import { HexCell, getCenterPoint } from "@/lib/HexCell";
 import {
   coordinatesToString,
   HexCoordinates,
 } from "@/lib/coordinates/HexCoordinates";
-import {
-  SurveyResult,
-  isSurveyComplete,
-  SURVEY_DURATION_TICKS,
-} from "@/lib/surveys";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { UI_COLORS } from "@/lib/palette";
+import { SurveyResultComponent } from "@/ecs/entity";
+import { SURVEY_DURATION_TICKS, SurveySystem } from "@/ecs/systems/SurveySystem";
 
 interface SurveyProgressIndicatorProps {
   cells: HexCell[];
-  surveyResultByHexCell: Record<string, SurveyResult>;
+  surveyResultByHexCell: Record<string, SurveyResultComponent>;
   currentTick: number;
 }
 
@@ -31,7 +27,7 @@ export const SurveyProgressIndicator: React.FC<
       const coordString = coordinatesToString(cell.coordinates);
       const survey = surveyResultByHexCell[coordString];
 
-      if (survey && !isSurveyComplete(survey.surveyStartTick, currentTick)) {
+      if (survey && !SurveySystem.isSurveyComplete(survey.surveyStartTick, currentTick)) {
         // Calculate progress (0 to 1)
         const elapsedTicks = currentTick - survey.surveyStartTick;
         const progress = Math.min(elapsedTicks / SURVEY_DURATION_TICKS, 1);

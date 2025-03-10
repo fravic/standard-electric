@@ -7,7 +7,6 @@ import {
   coordinatesToString,
 } from "./coordinates/HexCoordinates";
 import { TERRAIN_COLORS } from "@/lib/palette";
-import { SurveyResult } from "./surveys";
 
 export enum TerrainType {
   Forest = "Forest",
@@ -97,14 +96,9 @@ export function getColor(cell: HexCell): Color {
  */
 export function getColorWithExplorationStatus(
   cell: HexCell,
-  surveyResultByHexCell: Record<string, SurveyResult> | undefined
+  hasBeenSurveyed: boolean
 ): Color {
   const baseColor = getColor(cell);
-
-  // Check if this cell has been surveyed
-  const coordString = coordinatesToString(cell.coordinates);
-  const hasBeenSurveyed =
-    surveyResultByHexCell?.[coordString]?.isComplete === true;
 
   // If not surveyed, darken the color
   if (!hasBeenSurveyed) {

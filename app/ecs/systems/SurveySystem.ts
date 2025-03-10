@@ -10,6 +10,7 @@ import { CommodityType } from "@/lib/market/CommodityMarket";
 import { HexCoordinates, coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { HexGrid, getCells } from "@/lib/HexGrid";
 import { TerrainType } from "@/lib/HexCell";
+import { createSurvey } from "../factories";
 
 /**
  * Context for the SurveySystem
@@ -248,7 +249,7 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    * @param currentTick The current game tick
    * @returns True if the survey is complete
    */
-  public isSurveyComplete(
+  public static isSurveyComplete(
     surveyStartTick: number,
     currentTick: number
   ): boolean {
@@ -273,8 +274,9 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    * Checks if a player has an active survey
    * @returns True if the player has an active survey
    */
-  public hasActiveSurvey(): boolean {
-    const incompleteSurvey = this.world!.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true).first;
+  public static hasActiveSurvey(world: World<Entity>): boolean {
+    const incompleteSurvey = world.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true).first;
+    console.log({incompleteSurvey})
     return Boolean(incompleteSurvey);
   }
   
@@ -289,28 +291,19 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
     currentTick: number
   ): SurveySystemResult {
     // Check if player already has an active survey
-    if (this.hasActiveSurvey()) {
+    if (SurveySystem.hasActiveSurvey(this.world!)) {
       return { success: false };
     }
 
     // Create a new survey
-    const coordString = coordinatesToString(coordinates);
-    
     return {
-      surveyToCreate: {
+      surveyToCreate: createSurvey({
         id: nanoid(),
-        name: `Survey for ${coordString}`,
-        hexPosition: {
-          coordinates,
-        },
-        surveyResult: {
-          surveyStartTick: currentTick,
-          isComplete: false,
-        },
-        owner: {
-          playerId: this.context!.playerId,
-        },
-      },
+        hexCoordinates: coordinates,
+        surveyStartTick: currentTick,
+        isComplete: false,
+        playerId: this.context!.playerId,
+      }),
       success: true,
     };
   }

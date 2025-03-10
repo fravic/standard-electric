@@ -1,12 +1,8 @@
-import React from "react";
+import React, {useMemo} from "react";
 import { UI_COLORS } from "@/lib/palette";
 import { Player, Auction } from "@/actor/game.types";
-import {
-  getBidderPriorityOrder,
-  getNextBidderPlayerId,
-  getNextInitiatorPlayerId,
-} from "@/lib/auction";
 import { GameContext } from "@/actor/game.context";
+import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
 
 interface AuctionBidderProps {
   players: Record<string, Player>;
@@ -21,9 +17,12 @@ export function AuctionBidder({
   totalTicks,
   randomSeed,
 }: AuctionBidderProps) {
-  const bidderOrder = getBidderPriorityOrder(
+  const auctionSystem = useMemo(() => {
+    return new AuctionSystem();
+  }, [])
+
+  const bidderOrder = auctionSystem.getBidderPriorityOrder(
     players,
-    auction,
     totalTicks,
     randomSeed
   );
@@ -31,18 +30,18 @@ export function AuctionBidder({
   // Ensure these arrays exist with defaults
   const passedPlayerIds = auction.passedPlayerIds ?? [];
   const purchases = auction.purchases ?? [];
-  const currentBidderId = getNextBidderPlayerId(
+  const currentBidderId = auctionSystem.getNextBidder({
     players,
     auction,
     totalTicks,
     randomSeed
-  );
-  const currentInitiatorId = getNextInitiatorPlayerId(
+  });
+  const currentInitiatorId = auctionSystem.getNextInitiator({
     players,
     auction,
     totalTicks,
     randomSeed
-  );
+  });
   const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
 
   return (

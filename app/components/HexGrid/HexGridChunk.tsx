@@ -10,6 +10,7 @@ import { HexGridWater } from "./HexGridWater";
 import { HexGrid, getCell } from "@/lib/HexGrid";
 import { GameContext } from "@/actor/game.context";
 import {
+  coordinatesToString,
   createHexCoordinates,
   equals,
   fromWorldPoint,
@@ -25,7 +26,7 @@ import { useMapEditor } from "@/routes/mapEditor";
 import { validateBuildableLocation } from "@/lib/buildables/validateBuildableLocation";
 import { SurveyProgressIndicator } from "./SurveyProgressIndicator";
 import { With } from "miniplex";
-import { Entity } from "@/ecs/entity";
+import { Entity, SurveyResultComponent } from "@/ecs/entity";
 import { useWorld } from "../WorldContext";
 import { createEntityFromBlueprint } from "@/ecs/factories";
 import { findPossibleConnectionsWithWorld } from "@/lib/buildables/findPossibleConnections";
@@ -54,17 +55,23 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     (state) => state.public.players[userId!]
   );
   const gameState = GameContext.useSelector((state) => state);
+  const world = useWorld();
 
   // Get current player's survey data and game time
   const currentTick = gameState.public.time.totalTicks;
   const surveyResultByHexCell = useMemo(() => {
     if (!userId) return {};
-    // Access the survey results directly from the private context
-    return gameState.private.surveyResultByHexCell || {};
-  }, [gameState.private]);
+    const surveyResults = world.with("surveyResult");
+    let surveyResultsByHexCell: Record<string, SurveyResultComponent> = {};
+    for (const survey of surveyResults) {
+      const coordString = coordinatesToString(survey.hexPosition!.coordinates);
+      surveyResultsByHexCell[coordString] = survey.surveyResult;
+    }
+    return surveyResultsByHexCell;
+  }, [world]);
 
   // Create a set of surveyed hex cells
-  const surveyedHexCells = useMemo(() => {
+  const surveyedHexCoords = useMemo(() => {
     const surveyed = new Set<string>();
     Object.entries(surveyResultByHexCell).forEach(([coordString, survey]) => {
       if (survey?.isComplete) {
@@ -89,7 +96,6 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const entitiesById = GameContext.useSelector(
     (state) => state.public.entitiesById
   );
-  const world = useWorld();
 
   const coordinatesInChunk = useMemo(() => {
     const coordinates: HexCoordinates[] = [];
@@ -156,7 +162,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       grid,
       world,
       playerId: userId!,
-      surveyedHexCells,
+      surveyedHexCells: surveyedHexCoords,
     });
     console.log(validation);
     if (!validation.valid) {
@@ -172,7 +178,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     userId,
     grid,
     gameState,
-    surveyedHexCells,
+    surveyedHexCoords,
   ]);
 
   const handleHover = useCallback(
@@ -278,6 +284,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         onHover={handleHover}
         onPointerLeave={handlePointerLeave}
         debug={debug}
+        surveyedHexCoords={surveyedHexCoords}
       />
       <HexGridWater cells={cells} grid={grid} />
       {highlightedCells.length > 0 && (

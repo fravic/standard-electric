@@ -8,7 +8,7 @@ import { CommodityType, getMarketRates } from "@/lib/market/CommodityMarket";
 import { clientStore } from "@/lib/clientState";
 import { coordinatesToString, equals } from "@/lib/coordinates/HexCoordinates";
 import { useSelector } from "@xstate/store/react";
-import { hasActiveSurvey, SURVEY_DURATION_TICKS } from "@/lib/surveys";
+import { SURVEY_DURATION_TICKS, SurveySystem } from "@/ecs/systems/SurveySystem";
 import { useWorld } from "../WorldContext";
 import { entityAtHexCoordinate } from "@/ecs/queries";
 
@@ -256,25 +256,19 @@ const SurveyDetails: React.FC = () => {
   const currentTick = gameState.public.time.totalTicks;
 
   // Get the survey data for the selected hex
-  const surveyData = useMemo(() => {
-    if (!userId || !selectedHexCoordinates) return null;
-    const playerSurveys = gameState.private.surveyResultByHexCell;
-    if (!playerSurveys) return null;
-    const coordString = coordinatesToString(selectedHexCoordinates);
-    return playerSurveys[coordString] || null;
-  }, [userId, selectedHexCoordinates, gameState.private]);
+  const world = useWorld();
+  const surveyResults = world.with("surveyResult");
+  const surveyResultForCell = surveyResults.where((ent) => Boolean(selectedHexCoordinates) && equals(ent.hexPosition!.coordinates, selectedHexCoordinates!)).first;
 
   // Check if player has any active survey
   const hasActiveSurveyInProgress = useMemo(() => {
     if (!userId) return false;
-    const playerSurveys = gameState.private.surveyResultByHexCell;
-    if (!playerSurveys) return false;
-    return hasActiveSurvey(playerSurveys, currentTick);
+    return SurveySystem.hasActiveSurvey(world);
   }, [userId, currentTick, gameState.private]);
 
   // Handle starting a new survey
   const canSurvey =
-    selectedHexCoordinates && !hasActiveSurveyInProgress && !surveyData;
+    selectedHexCoordinates && !hasActiveSurveyInProgress && !surveyResultForCell;
   const handleStartSurvey = () => {
     if (!canSurvey) return;
 
@@ -285,7 +279,7 @@ const SurveyDetails: React.FC = () => {
   };
 
   // If no survey data and no active survey, show the survey button
-  if (!surveyData && !hasActiveSurveyInProgress) {
+  if (canSurvey) {
     return (
       <div style={styles.buttonContainer}>
         <Button onClick={handleStartSurvey} fullWidth disabled={!canSurvey}>
@@ -296,9 +290,9 @@ const SurveyDetails: React.FC = () => {
   }
 
   // If survey is in progress but not complete
-  if (surveyData && !surveyData.isComplete) {
+  if (surveyResultForCell && !SurveySystem.isSurveyComplete(surveyResultForCell.surveyResult.surveyStartTick, currentTick)) {
     const progress = Math.min(
-      ((currentTick - surveyData.surveyStartTick) / SURVEY_DURATION_TICKS) *
+      ((currentTick - surveyResultForCell.surveyResult.surveyStartTick) / SURVEY_DURATION_TICKS) *
         100,
       100
     );
@@ -321,9 +315,9 @@ const SurveyDetails: React.FC = () => {
   }
 
   // If survey is complete and resources were found
-  if (surveyData?.isComplete && surveyData?.resource) {
-    const resource = surveyData.resource;
-
+  const resource = surveyResultForCell?.surveyResult.resource;
+  const isComplete = surveyResultForCell?.surveyResult.isComplete;
+  if (isComplete && resource) {
     return (
       <div style={styles.resourceSection}>
         <h3 style={styles.resourceTitle}>Survey Results</h3>
@@ -342,7 +336,7 @@ const SurveyDetails: React.FC = () => {
   }
 
   // If survey is complete but no resources were found
-  if (surveyData?.isComplete) {
+  if (isComplete) {
     return (
       <div style={styles.resourceSection}>
         <h3 style={styles.resourceTitle}>Survey Results</h3>

@@ -13,7 +13,6 @@ import {
 import {
   HexCell,
   Population,
-  getColor,
   getColorWithExplorationStatus,
   getCenterPoint,
   isUnderwater,
@@ -23,9 +22,6 @@ import { HexMetrics } from "@/lib/HexMetrics";
 import { clientStore } from "@/lib/clientState";
 import { CityLabel } from "./CityLabel";
 import { HexGridDecorations } from "./HexGridDecorations";
-import { GameContext } from "@/actor/game.context";
-import { AuthContext } from "@/auth.context";
-import { SurveyResult } from "@/lib/surveys";
 
 interface HexGridTerrainProps {
   cells: HexCell[];
@@ -37,6 +33,7 @@ interface HexGridTerrainProps {
     updates: Partial<HexCell>
   ) => void;
   debug?: boolean;
+  surveyedHexCoords: Set<string>;
 }
 
 export const HexGridTerrain = React.memo(function HexGridTerrain({
@@ -46,6 +43,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   onPointerLeave,
   onUpdateCell,
   debug = false,
+  surveyedHexCoords,
 }: HexGridTerrainProps) {
   const isPaintbrushMode = useSelector(
     clientStore,
@@ -59,12 +57,6 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     clientStore,
     (state) => state.context.mapBuilder.selectedPopulation
   );
-
-  const userId = AuthContext.useSelector((state) => state.userId);
-  const surveyResults = GameContext.useSelector((state) => {
-    if (!userId) return undefined;
-    return state.private.surveyResultByHexCell;
-  });
 
   const debouncedOnHover = useMemo(
     () => debounce(onHover, 50, { maxWait: 50 }),
@@ -130,7 +122,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     cells.forEach((cell) => {
       const center = getCenterPoint(cell);
       // Use the new function to get color with exploration status
-      const color = getColorWithExplorationStatus(cell, surveyResults);
+      const color = getColorWithExplorationStatus(cell, surveyedHexCoords.has(coordinatesToString(cell.coordinates)));
       for (let d = 0; d < 6; d++) {
         if (!isUnderwater(cell)) {
           hexMesh.addTriangle(
@@ -156,7 +148,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     terrainGeometry.computeVertexNormals();
 
     return { terrainGeometry };
-  }, [cells, surveyResults]);
+  }, [cells, surveyedHexCoords]);
 
   return (
     <>

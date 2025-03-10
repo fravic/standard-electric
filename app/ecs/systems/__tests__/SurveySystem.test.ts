@@ -129,7 +129,7 @@ describe("SurveySystem", () => {
       const startTick = 5;
       const currentTick = startTick + SURVEY_DURATION_TICKS;
       
-      const result = surveySystem.isSurveyComplete(startTick, currentTick);
+      const result = SurveySystem.isSurveyComplete(startTick, currentTick);
       
       expect(result).toBe(true);
     });
@@ -138,7 +138,7 @@ describe("SurveySystem", () => {
       const startTick = 5;
       const currentTick = startTick + SURVEY_DURATION_TICKS - 1;
       
-      const result = surveySystem.isSurveyComplete(startTick, currentTick);
+      const result = SurveySystem.isSurveyComplete(startTick, currentTick);
       
       expect(result).toBe(false);
     });
@@ -149,7 +149,7 @@ describe("SurveySystem", () => {
       const surveyCoord = { x: 0, z: 0 };
       world.add(createSurveyEntity("survey1", surveyCoord, testContext.currentTick - 2));
       
-      const result = surveySystem.hasActiveSurvey();
+      const result = SurveySystem.hasActiveSurvey(world);
       
       expect(result).toBe(true);
     });
@@ -158,13 +158,13 @@ describe("SurveySystem", () => {
       const surveyCoord = { x: 0, z: 0 };
       world.add(createSurveyEntity("survey1", surveyCoord, testContext.currentTick - 5, true));
       
-      const result = surveySystem.hasActiveSurvey();
+      const result = SurveySystem.hasActiveSurvey(world);
       
       expect(result).toBe(false);
     });
 
     it("should return false when no surveys exist", () => {
-      const result = surveySystem.hasActiveSurvey();
+      const result = SurveySystem.hasActiveSurvey(world);
       
       expect(result).toBe(false);
     });

@@ -15,7 +15,7 @@ export function WorldContextProvider({ children }: WorldContextProviderProps) {
   const privateEntitiesById = GameContext.useSelector((state) => state.private.entitiesById);
   
   const world = useMemo(() => {
-    return createWorldWithEntities(entitiesById, privateEntitiesById);
+    return createWorldWithEntities(entitiesById, privateEntitiesById ?? {});
   }, [entitiesById, privateEntitiesById]);
   
   return (

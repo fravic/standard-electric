@@ -2,7 +2,9 @@ import { action } from "@storybook/addon-actions";
 import type { Meta, StoryObj } from "@storybook/react";
 import { withActorKit } from "actor-kit/storybook";
 import { createActorKitMockClient } from "actor-kit/test";
+import { nanoid } from "nanoid";
 
+import { createSurvey } from "@/ecs/factories";
 import { GameContext } from "@/actor/game.context";
 import { GameMachine } from "@/actor/game.machine";
 import { Game } from "@/components/Game";
@@ -23,7 +25,6 @@ import {
   createHexCoordinates,
 } from "@/lib/coordinates/HexCoordinates";
 import { GamePrivateContext } from "@/actor/game.types";
-import { SurveyResult } from "@/lib/surveys";
 import { Entity } from "@/ecs/entity";
 import { createPowerPole, createPowerPlant, createPowerPlantBlueprint, createWorldWithEntities, createPowerPoleBlueprint } from "@/ecs/factories";
 import powerPlantBlueprints from "@/../public/powerPlantBlueprints.json";
@@ -676,37 +677,45 @@ export const WithSurveys: Story = {
     const currentTick = 30;
 
     // Create survey results for the player
-    const surveyResultByHexCell: Record<string, SurveyResult> = {
-      // Completed survey with coal resource
-      [coordinatesToString(completedSurveyCoord1)]: {
+    const surveyResultEntities: Entity[] = [
+      createSurvey({
+        id: nanoid(), 
+        hexCoordinates: completedSurveyCoord1,
         surveyStartTick: currentTick - 15,
         isComplete: true,
+        playerId: PLAYER_ID,
         resource: {
           resourceType: CommodityType.COAL,
           resourceAmount: 120,
         },
-      },
-      // Completed survey with oil resource
-      [coordinatesToString(completedSurveyCoord2)]: {
+      }),
+      createSurvey({
+        id: nanoid(), 
+        hexCoordinates: completedSurveyCoord2,
         surveyStartTick: currentTick - 12,
         isComplete: true,
+        playerId: PLAYER_ID,
         resource: {
           resourceType: CommodityType.OIL,
           resourceAmount: 80,
         },
-      },
-      // Completed survey with no resource
-      [coordinatesToString(completedSurveyCoord3)]: {
+      }),
+      createSurvey({
+        id: nanoid(), 
+        hexCoordinates: completedSurveyCoord3,
         surveyStartTick: currentTick - 11,
         isComplete: true,
         resource: undefined,
-      },
-      // Survey in progress (5 ticks in, 50% complete)
-      [coordinatesToString(inProgressSurveyCoord)]: {
-        surveyStartTick: currentTick - 5,
+        playerId: PLAYER_ID,
+      }),
+      createSurvey({
+        id: nanoid(), 
+        hexCoordinates: inProgressSurveyCoord,
+        surveyStartTick: currentTick - 1,
         isComplete: false,
-      },
-    };
+        playerId: PLAYER_ID,
+      }),
+    ]
 
     // Create server-side resources (ground truth)
     const hexCellResources = {
@@ -718,7 +727,6 @@ export const WithSurveys: Story = {
         resourceType: CommodityType.OIL,
         resourceAmount: 80,
       },
-      [coordinatesToString(completedSurveyCoord3)]: null, // No resource
       [coordinatesToString(inProgressSurveyCoord)]: {
         resourceType: CommodityType.GAS,
         resourceAmount: 60,
@@ -751,8 +759,11 @@ export const WithSurveys: Story = {
           commodityMarket: initializeCommodityMarket(),
         },
         private: {
-          hexCellResources: {},
-          entitiesById: {},
+          hexCellResources,
+          entitiesById: surveyResultEntities.reduce((acc, entity) => {
+            acc[entity.id] = entity;
+            return acc;
+          }, {} as Record<string, Entity>),
         },
         value: "active",
       },
