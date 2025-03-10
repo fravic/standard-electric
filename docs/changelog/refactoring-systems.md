@@ -186,11 +186,31 @@ Implementation plan:
 - ✅ Created comprehensive test suite in SurveySystem.test.ts
 - ✅ Implemented precomputation of resources with deterministic outcomes
 - ✅ Added support for managing surveys for multiple players
+- ✅ Converted isSurveyComplete and hasActiveSurvey to static methods for easier access
+- ✅ Created factory function for survey entities to ensure consistency
+- ✅ Migrated UI components to use the new SurveySystem approach
+- ✅ Updated SurveySystem to use entities directly rather than the previous surveyResultByHexCell data structure
+
+### System Interface Updates
+
+#### Mutate Method Signature
+- ✅ Updated `mutate` method signature to receive the entire game context instead of just entities
+- ✅ This allows systems to modify both public and private game state in a consistent way
+- ✅ Updated system implementations to use the new signature
+- ✅ Modified game.machine.ts to pass the full context to system.mutate()
+
+```typescript
+// Before
+mutate(draft: Draft<Record<string, Entity>>, result: TResult): void;
+
+// After
+mutate(draft: Draft<GameContext>, result: TResult): void;
+```
 
 ### Next Steps
 
 1. ✅ Integrate AuctionSystem into game.machine.ts
-2. Integrate SurveySystem into game.machine.ts
+2. ✅ Integrate SurveySystem into game.machine.ts
 3. Implement CommoditySystem and BuildableSystem
 
 4. **Testing Strategy**
@@ -294,8 +314,10 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     return { success: false };
   }
   
-  mutate(draft: Draft<Record<string, Entity>>, result: AuctionResult): void {
-    // Any entity-specific mutations would go here
+  mutate(draft: Draft<GameContext>, result: AuctionResult): void {
+    // Can now modify both public and private game state
+    // Update entities in draft.public.entitiesById or draft.private[playerId].entitiesById
+    // Update other game state as needed
   }
 }
 
@@ -323,13 +345,11 @@ auctionInitiateBid: assign(
           draft.auction = result.auction;
         }
         
-        // Let the system handle entity mutations
-        auctionSystem.mutate(draft.entitiesById, result);
+        // Let the system handle all mutations to the game context
+        auctionSystem.mutate(draft, result);
         
-        // Handle any additional state changes from the result
-        if (result.purchase) {
-          draft.players[result.purchase.playerId].money -= result.purchase.price;
-        }
+        // System.mutate now handles all state changes directly
+        // No need for additional state change logic here
       })
     };
   }
@@ -390,15 +410,17 @@ interface BuildableResult extends SystemResult {
 
 ```typescript
 interface SurveyContext extends SystemContext {
-  event: GameEvent; // Keep this generic, handle specific event types in implementation
-  playerSurveys: Record<string, Record<string, SurveyResult>>;
-  hexGrid: HexGrid;
+  playerId: string;
+  currentTick: number;
   randomSeed: number;
+  hexGrid: HexGrid;
 }
 
-interface SurveyResult extends SystemResult {
-  updatedSurveys: Record<string, Record<string, SurveyResult>>;
-  precomputedResources?: Record<string, ResourceData>;
+interface SurveySystemResult extends SystemResult {
+  completedSurveyIds?: string[];
+  surveyToCreate?: Entity;
+  hexCellResources?: Record<string, HexCellResource>;
+
 }
 ```
 
