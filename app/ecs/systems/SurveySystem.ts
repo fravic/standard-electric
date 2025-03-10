@@ -16,7 +16,6 @@ export interface SurveyContext extends SystemContext {
   currentTick: number;
   hexGrid: HexGrid;
   randomSeed: number;
-  gameTime: number;
   surveyResultsByPlayerId: Record<string, Record<string, SurveyResult>>;
   precomputedResources?: Record<string, HexCellResource | undefined>;
 }

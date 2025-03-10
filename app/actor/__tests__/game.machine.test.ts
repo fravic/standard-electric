@@ -168,7 +168,7 @@ describe("Game Machine", () => {
     });
     
     // Check that the auction state is initialized
-    expect(auctionSnapshot.context.public.auction).toBeDefined();
+    expect(auctionSnapshot.context.public.auction).toBeTruthy();
     
     // Get the first available blueprint from the auction
     const availableBlueprintIds = auctionSnapshot.context.public.auction!.availableBlueprintIds;
@@ -186,7 +186,7 @@ describe("Game Machine", () => {
     expect(bidInitiatedSnapshot.value).toEqual({
       auction: "biddingOnBlueprint"
     });
-    expect(bidInitiatedSnapshot.context.public.auction!.currentBlueprint).toBeDefined();
+    expect(bidInitiatedSnapshot.context.public.auction!.currentBlueprint).toBeTruthy();
     expect(bidInitiatedSnapshot.context.public.auction!.currentBlueprint!.blueprintId).toEqual(blueprintId);
     
     // 7. Act - Player 2 places a bid

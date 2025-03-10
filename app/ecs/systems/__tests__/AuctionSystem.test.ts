@@ -1,25 +1,12 @@
 import { World } from "miniplex";
 import { Entity } from "../../entity";
-import { AuctionSystem, AuctionResult } from "../AuctionSystem";
+import { AuctionSystem, AuctionResult, AuctionContext } from "../AuctionSystem";
 import { Player, Auction, GameInput } from "@/actor/game.types";
 import { createDefaultContext } from "@/actor/createDefaultContext";
 
 describe("AuctionSystem", () => {
   let world: World<Entity>;
   let auctionSystem: AuctionSystem;
-  
-  // Sample blueprint entities
-  const blueprint1: Entity = {
-    id: "blueprint1",
-    name: "Coal Power Plant",
-    cost: { amount: 1000 },
-  };
-  
-  const blueprint2: Entity = {
-    id: "blueprint2",
-    name: "Solar Power Plant",
-    cost: { amount: 1500 },
-  };
   
   // Player IDs for reference in tests
   const PLAYER1_ID = "player1";
@@ -51,22 +38,26 @@ describe("AuctionSystem", () => {
     },
   };
 
+  const defaultAuctionContext: AuctionContext = {
+    players,
+    auction: null,
+    totalTicks: 0,
+    randomSeed: 0
+  }
+
   beforeEach(() => {
     world = new World<Entity>();
-    world.add(blueprint1);
-    world.add(blueprint2);
     auctionSystem = new AuctionSystem();
   });
 
   describe("startAuction", () => {
     it("should create a new auction with provided blueprint IDs", () => {
-      const blueprintIds = [blueprint1.id, blueprint2.id];
-      const result = auctionSystem.startAuction(blueprintIds);
+      const result = auctionSystem.startAuction(defaultAuctionContext, true);
       
       expect(result.success).toBe(true);
       expect(result.auction).toEqual({
         currentBlueprint: null,
-        availableBlueprintIds: blueprintIds,
+        availableBlueprintIds: ["coal_plant_small", "coal_plant_medium", "coal_plant_large"],
         purchases: [],
         isPassingAllowed: true,
         passedPlayerIds: [],
@@ -74,8 +65,7 @@ describe("AuctionSystem", () => {
     });
 
     it("should set isPassingAllowed to false when specified", () => {
-      const blueprintIds = [blueprint1.id, blueprint2.id];
-      const result = auctionSystem.startAuction(blueprintIds, false);
+      const result = auctionSystem.startAuction(defaultAuctionContext, false);
       
       expect(result.success).toBe(true);
       expect(result.auction?.isPassingAllowed).toBe(false);
@@ -84,10 +74,10 @@ describe("AuctionSystem", () => {
 
   describe("auctionInitiateBid", () => {
     it("should initiate bidding on a blueprint", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
       const result = auctionSystem.auctionInitiateBid(
         startResult.auction!,
-        blueprint1.id,
+        "coal_plant_small",
         PLAYER1_ID,
         1000
       );
@@ -96,7 +86,7 @@ describe("AuctionSystem", () => {
       expect(result.auction).toEqual({
         ...startResult.auction,
         currentBlueprint: {
-          blueprintId: blueprint1.id,
+          blueprintId: "coal_plant_small",
           bids: [
             {
               playerId: PLAYER1_ID,
@@ -108,10 +98,10 @@ describe("AuctionSystem", () => {
     });
 
     it("should return failure if blueprint is not available", () => {
-      const startResult = auctionSystem.startAuction([blueprint2.id]);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
       const result = auctionSystem.auctionInitiateBid(
         startResult.auction!,
-        blueprint1.id,
+        "inexistant_blueprint_id",
         "player1",
         1000
       );
@@ -123,7 +113,7 @@ describe("AuctionSystem", () => {
 
   describe("auctionPass", () => {
     it("should add player to passedPlayerIds", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
       const result = auctionSystem.auctionPass(startResult.auction!, PLAYER1_ID);
       
       expect(result.success).toBe(true);
@@ -131,7 +121,7 @@ describe("AuctionSystem", () => {
     });
 
     it("should return failure if passing is not allowed", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id], false);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, false);
       const result = auctionSystem.auctionPass(startResult.auction!, PLAYER1_ID);
       
       expect(result.success).toBe(false);
@@ -141,8 +131,8 @@ describe("AuctionSystem", () => {
 
   describe("auctionPlaceBid", () => {
     it("should add a bid to the current blueprint", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       
       const result = auctionSystem.auctionPlaceBid(
         initResult.auction!,
@@ -165,8 +155,8 @@ describe("AuctionSystem", () => {
     });
 
     it("should return failure if player cannot afford the bid", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       
       const result = auctionSystem.auctionPlaceBid(
         initResult.auction!,
@@ -182,8 +172,8 @@ describe("AuctionSystem", () => {
 
   describe("auctionPassBid", () => {
     it("should add a passed bid to the current blueprint", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       
       const result = auctionSystem.auctionPassBid(initResult.auction!, PLAYER2_ID);
       
@@ -203,8 +193,8 @@ describe("AuctionSystem", () => {
 
   describe("endBidding", () => {
     it("should process the winner and update auction state", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       const placeBidResult = auctionSystem.auctionPlaceBid(initResult.auction!, PLAYER2_ID, 1100, players);
       
       const result = auctionSystem.endBidding(placeBidResult.auction!, players);
@@ -212,11 +202,11 @@ describe("AuctionSystem", () => {
       expect(result.success).toBe(true);
       expect(result.auction).not.toBeNull();
       expect(result.auction?.currentBlueprint).toBeNull();
-      expect(result.auction?.availableBlueprintIds).not.toContain(blueprint1.id);
+      expect(result.auction?.availableBlueprintIds).not.toContain("coal_plant_small");
       expect(result.auction?.purchases).toEqual([
         {
           playerId: PLAYER2_ID,
-          blueprintId: blueprint1.id,
+          blueprintId: "coal_plant_small",
           price: 1100,
         },
       ]);
@@ -225,8 +215,8 @@ describe("AuctionSystem", () => {
 
   describe("shouldEndBidding", () => {
     it("should return true when only one player is left bidding", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       const pass1Result = auctionSystem.auctionPassBid(initResult.auction!, PLAYER2_ID);
       const pass2Result = auctionSystem.auctionPassBid(pass1Result.auction!, PLAYER3_ID);
       
@@ -243,10 +233,10 @@ describe("AuctionSystem", () => {
 
   describe("shouldEndAuction", () => {
     it("should return true when all players have passed or purchased", () => {
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
       
       // Player1 buys blueprint1
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       const endResult = auctionSystem.endBidding(initResult.auction!, players);
       
       // Other players pass
@@ -267,8 +257,8 @@ describe("AuctionSystem", () => {
   describe("mutate", () => {
     it("should update entity owners based on auction purchases", () => {
       // Set up auction with a purchase
-      const startResult = auctionSystem.startAuction([blueprint1.id, blueprint2.id]);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
+      const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
+      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
       const endResult = auctionSystem.endBidding(initResult.auction!, players);
       
       // Create draft game context
@@ -277,19 +267,19 @@ describe("AuctionSystem", () => {
           players: { ...players },
           time: { totalTicks: 0, isPaused: false },
           entitiesById: {
-            [blueprint1.id]: { ...blueprint1 },
-            [blueprint2.id]: { ...blueprint2 },
           },
           auction: endResult.auction,
           commodityMarket: { },
         },
       });
       
-      // Call mutate with the result from endBidding
+      // Call mutate with the results
+      auctionSystem.mutate(startResult, contextDraft);
+      auctionSystem.mutate(initResult, contextDraft);
       auctionSystem.mutate(endResult, contextDraft);
       
       // Check that the entity owner was updated
-      expect(contextDraft.public.entitiesById[blueprint1.id].owner).toEqual({
+      expect(contextDraft.public.entitiesById["coal_plant_small"].owner).toEqual({
         playerId: PLAYER1_ID,
       });
       
@@ -297,7 +287,7 @@ describe("AuctionSystem", () => {
       expect(contextDraft.public.players[PLAYER1_ID].money).toBe(4000); // 5000 - 1000
       
       // Check that other entity was not modified
-      expect(contextDraft.public.entitiesById[blueprint2.id].owner).toBeUndefined();
+      expect(contextDraft.public.entitiesById["coal_plant_medium"].owner).toBeUndefined();
     });
   });
 });

@@ -8,7 +8,6 @@ import { GameContext } from "@/actor/game.types";
  */
 export interface SystemContext {
   // Common base properties all contexts should have
-  gameTime: number;
 }
 
 /**

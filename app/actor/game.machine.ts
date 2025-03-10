@@ -5,7 +5,6 @@ import { produce, current } from "immer";
 import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
 import hexGridData from "../../public/hexgrid.json";
-import powerPlantBlueprintsData from "../../public/powerPlantBlueprints.json";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/ecs/systems/PowerSystem";
 import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
@@ -88,7 +87,6 @@ export const gameMachine = setup({
       
       const auctionSystem = new AuctionSystem();
       const auctionContext = {
-        gameTime: context.public.time.totalTicks,
         totalTicks: context.public.time.totalTicks,
         players: context.public.players,
         auction: context.public.auction,
@@ -102,7 +100,6 @@ export const gameMachine = setup({
       
       const auctionSystem = new AuctionSystem();
       const auctionContext = {
-        gameTime: context.public.time.totalTicks,
         totalTicks: context.public.time.totalTicks,
         players: context.public.players,
         auction: context.public.auction,
@@ -223,7 +220,6 @@ export const gameMachine = setup({
         // Create the SurveyContext object
         const surveyContext: SurveyContext = {
           currentTick: contextDraft.public.time.totalTicks, // Use the updated tick value
-          gameTime: contextDraft.public.time.totalTicks,
           hexGrid: contextDraft.public.hexGrid,
           randomSeed: contextDraft.public.randomSeed,
           surveyResultsByPlayerId: Object.entries(contextDraft.private).reduce((acc, [playerId, privateContext]) => {
@@ -301,122 +297,81 @@ export const gameMachine = setup({
     ),
 
     // Auctions
-    startAuction: assign(({ context }: { context: GameContext }) => ({
-      public: produce(context.public, (draft) => {
-        // TODO: Should set up a different set of blueprints each auction. Only one auction for now.
-        // Parse the entities from the JSON file using the EntitySchema
-        const powerPlantEntities = (powerPlantBlueprintsData as any[]).map(blueprint => 
-          EntitySchema.parse(blueprint)
-        );
-        const availableEntities = powerPlantEntities.slice(
-          0,
-          // First auction has at least one blueprint per player
-          Math.max(Object.keys(context.public.players).length, 3)
-        );
-        
-        // Store the entities in entitiesById
-        const entitiesById = availableEntities.reduce((acc, entity) => {
-          acc[entity.id] = entity;
-          return acc;
-        }, {} as Record<string, Entity>);
-        
-        // Use AuctionSystem to create a new auction
-        const auctionSystem = new AuctionSystem();
-        const blueprintIds = availableEntities.map(entity => entity.id);
-        const result = auctionSystem.startAuction(blueprintIds, false); // No passing allowed on the first auction
-        if (result.success && result.auction) {
-          draft.auction = result.auction;
-        }
-        
-        draft.entitiesById = {
-          ...draft.entitiesById,
-          ...entitiesById
-        };
-      }),
+    startAuction: assign(({ context }: { context: GameContext }) => produce(context, (draft) => {    
+      const auctionSystem = new AuctionSystem();
+      const auctionContext = {
+        totalTicks: context.public.time.totalTicks,
+        players: context.public.players,
+        auction: context.public.auction,
+        randomSeed: context.public.randomSeed
+      };
+      const result = auctionSystem.startAuction(auctionContext, false); // No passing allowed on the first auction
+      auctionSystem.mutate(result, draft);
     })),
     auctionInitiateBid: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-        public: produce(context.public, (draft) => {
-          if (event.type === "INITIATE_BID" && draft.auction) {
-            const blueprintId = event.blueprintId;
-            const blueprint = draft.entitiesById[blueprintId];
-            if (!blueprint) return;
+      ({ context, event }: { context: GameContext; event: GameEvent }) => produce(context, (draft) => {
+        if (event.type === "INITIATE_BID" && draft.public.auction) {
+          const blueprintId = event.blueprintId;
+          const blueprint = draft.public.entitiesById[blueprintId];
+          if (!blueprint) return;
 
-            // Use AuctionSystem to initiate a bid
-            const auctionSystem = new AuctionSystem();
-            const initialBidAmount = blueprint.cost?.amount || 0;
-            const result = auctionSystem.auctionInitiateBid(
-              draft.auction,
-              blueprintId,
-              event.caller.id,
-              initialBidAmount
-            );
-            
-            if (result.success && result.auction) {
-              draft.auction = result.auction;
-            }
-          }
-        }),
-      })
+          // Use AuctionSystem to initiate a bid
+          const auctionSystem = new AuctionSystem();
+          const initialBidAmount = blueprint.cost?.amount || 0;
+          const result = auctionSystem.auctionInitiateBid(
+            draft.public.auction,
+            blueprintId,
+            event.caller.id,
+            initialBidAmount
+          );
+          auctionSystem.mutate(result, draft);
+        }
+      }),
     ),
     auctionPass: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-        public: produce(context.public, (draft) => {
-          if (event.type === "PASS_AUCTION" && draft.auction) {
-            // Use AuctionSystem to pass the auction
-            const auctionSystem = new AuctionSystem();
-            const result = auctionSystem.auctionPass(
-              draft.auction,
-              event.caller.id
-            );
-            
-            if (result.success && result.auction) {
-              draft.auction = result.auction;
-            }
-          }
-        }),
-      })
+      ({ context, event }: { context: GameContext; event: GameEvent }) => produce(context, (draft) => {
+        if (event.type === "PASS_AUCTION" && draft.public.auction) {
+          // Use AuctionSystem to pass the auction
+          const auctionSystem = new AuctionSystem();
+          const result = auctionSystem.auctionPass(
+            draft.public.auction,
+            event.caller.id
+          );
+          auctionSystem.mutate(result, draft);
+        }
+      }),
     ),
     auctionPlaceBid: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-        public: produce(context.public, (draft) => {
-          if (event.type === "AUCTION_PLACE_BID" && draft.auction) {
-            // Use AuctionSystem to place a bid
-            const auctionSystem = new AuctionSystem();
-            const result = auctionSystem.auctionPlaceBid(
-              draft.auction,
-              event.caller.id,
-              event.amount,
-              context.public.players
-            );
-            
-            if (result.success && result.auction) {
-              draft.auction = result.auction;
-            }
-          }
-        }),
-      })
+      ({ context, event }: { context: GameContext; event: GameEvent }) => produce(context, (draft) => {
+        if (event.type === "AUCTION_PLACE_BID" && draft.public.auction) {
+          // Use AuctionSystem to place a bid
+          const auctionSystem = new AuctionSystem();
+          const result = auctionSystem.auctionPlaceBid(
+            draft.public.auction,
+            event.caller.id,
+            event.amount,
+            context.public.players
+          );
+          
+          auctionSystem.mutate(result, draft);
+        }
+      }),
     ),
     auctionPassBid: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-        public: produce(context.public, (draft) => {
-          if (
-            event.type === "AUCTION_PASS_BID" &&
-            draft.auction?.currentBlueprint
-          ) {
-            // Use AuctionSystem to pass a bid
-            const auctionSystem = new AuctionSystem();
-            const result = auctionSystem.auctionPassBid(
-              draft.auction,
-              event.caller.id
-            );
-            
-            if (result.success && result.auction) {
-              draft.auction = result.auction;
-            }
-          }
-        }),
-      })
+      ({ context, event }: { context: GameContext; event: GameEvent }) => produce(context, (draft) => {
+        if (
+          event.type === "AUCTION_PASS_BID" &&
+          draft.public.auction?.currentBlueprint
+        ) {
+          // Use AuctionSystem to pass a bid
+          const auctionSystem = new AuctionSystem();
+          const result = auctionSystem.auctionPassBid(
+            draft.public.auction,
+            event.caller.id
+          );
+          auctionSystem.mutate(result, draft);
+        }
+      }),
     ),
     endBidding: assign(({ context }) => {
       return produce(context, (contextDraft) => {
@@ -437,6 +392,7 @@ export const gameMachine = setup({
         auctionSystem.mutate(result, contextDraft);
       });
     }),
+
     // Commodity Market
     buyCommodity: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => {
@@ -531,6 +487,8 @@ export const gameMachine = setup({
         }),
       };
     }),
+
+    // Surveys
     surveyHexTile: assign(({ context, event }) => {
       if (event.type !== "SURVEY_HEX_TILE") return context;
       return {
@@ -561,7 +519,6 @@ export const gameMachine = setup({
           // Create a context with just this player's surveys
           const surveyContext: import("@/ecs/systems/SurveySystem").SurveyContext = {
             currentTick: context.public.time.totalTicks,
-            gameTime: context.public.time.totalTicks,
             hexGrid: context.public.hexGrid,
             randomSeed: context.public.randomSeed,
             surveyResultsByPlayerId: {
@@ -591,7 +548,6 @@ export const gameMachine = setup({
           // Initialize SurveySystem with the context
           const surveyContext: import("@/ecs/systems/SurveySystem").SurveyContext = {
             currentTick: context.public.time.totalTicks,
-            gameTime: context.public.time.totalTicks,
             hexGrid: context.public.hexGrid,
             randomSeed: context.public.randomSeed,
             surveyResultsByPlayerId: {} as Record<string, Record<string, import("@/ecs/systems/SurveySystem").SurveyResult>>

@@ -1,9 +1,11 @@
 import { World } from "miniplex";
 import { Draft } from "immer";
-import { Player, Auction, GameContext } from "@/actor/game.types";
-import { Entity } from "../entity";
-import { System, SystemContext, SystemResult } from "./System";
 import seedrandom from "seedrandom";
+
+import { Player, Auction, GameContext } from "@/actor/game.types";
+import { Entity, EntitySchema } from "../entity";
+import { System, SystemContext, SystemResult } from "./System";
+import powerPlantBlueprintsData from "../../../public/powerPlantBlueprints.json";
 
 /**
  * Context for the AuctionSystem
@@ -20,11 +22,12 @@ export interface AuctionContext extends SystemContext {
  */
 export interface AuctionResult extends SystemResult {
   auction: Auction | null;
-  purchasesToProcess: Array<{
+  purchasesToProcess?: Array<{
     playerId: string;
     blueprintId: string;
     price: number;
   }>;
+  entitiesToAdd?: Entity[];
 }
 
 /**
@@ -38,7 +41,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * @param context AuctionContext needed for initialization
    */
   public initialize(world: World<Entity>, context: AuctionContext): void {
-    // Nothing specific needed for initialization
+    // No initialization needed
   }
 
   /**
@@ -53,7 +56,6 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     return {
       success: true,
       auction: context.auction,
-      purchasesToProcess: []
     };
   }
 
@@ -66,12 +68,24 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * @returns A new Auction object
    */
   public startAuction(
-    availableBlueprintIds: string[],
+    auctionContext: AuctionContext,
     allowPassing: boolean = true
   ): AuctionResult {
+    // TODO: Should set up a different set of blueprints each auction. Only one auction for now.
+    // Parse the entities from the JSON file using the EntitySchema
+    const powerPlantEntities = (powerPlantBlueprintsData as any[]).map(blueprint => 
+      EntitySchema.parse(blueprint)
+    );
+    const availableEntities = powerPlantEntities.slice(
+      0,
+      // First auction has at least one blueprint per player
+      Math.max(Object.keys(auctionContext.players).length, 3)
+    );
+    const blueprintIds = availableEntities.map(entity => entity.id);
+
     const auction = {
       currentBlueprint: null,
-      availableBlueprintIds,
+      availableBlueprintIds: blueprintIds,
       purchases: [],
       isPassingAllowed: allowPassing,
       passedPlayerIds: [],
@@ -80,7 +94,8 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     return {
       success: true,
       auction,
-      purchasesToProcess: []
+      purchasesToProcess: [],
+      entitiesToAdd: availableEntities
     };
   }
 
@@ -347,10 +362,16 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     result: AuctionResult,
     contextDraft: Draft<GameContext>
   ): void {
-    if (!result.success || !result.purchasesToProcess.length) return;
-    
+    // Update the auction state in the public context
+    if (result.auction) {
+      contextDraft.public.auction = result.auction;
+    } else if (contextDraft.public.auction) {
+      // If the auction is null in the result but exists in the context, end it
+      contextDraft.public.auction = null;
+    }
+
     // Process each purchase
-    result.purchasesToProcess.forEach(purchase => {
+    result.purchasesToProcess?.forEach(purchase => {
       const { playerId, blueprintId, price } = purchase;
       
       // Update player money in public context
@@ -368,14 +389,11 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
         }
       }
     });
-    
-    // Update the auction state in the public context
-    if (result.auction) {
-      contextDraft.public.auction = result.auction;
-    } else if (contextDraft.public.auction) {
-      // If the auction is null in the result but exists in the context, end it
-      contextDraft.public.auction = null;
-    }
+
+    // Process each entity to add
+    result.entitiesToAdd?.forEach(entity => {
+      contextDraft.public.entitiesById[entity.id] = entity;
+    });
   }
   
   /**
