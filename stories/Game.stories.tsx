@@ -74,7 +74,7 @@ const createPlayer = (
 // Create a default empty private context
 const createEmptyPrivateContext = (): GamePrivateContext => {
   return {
-    surveyResultByHexCell: {},
+    entitiesById: {},
   };
 };
 
@@ -122,7 +122,7 @@ export const Blank: Story = {
   play: async ({ canvasElement, mount }) => {
     // Create the client with empty entities
     const entities: Record<string, Entity> = {};
-    const world = createWorldWithEntities(entities);
+    const world = createWorldWithEntities(entities, {});
     
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
@@ -751,8 +751,8 @@ export const WithSurveys: Story = {
           commodityMarket: initializeCommodityMarket(),
         },
         private: {
-          surveyResultByHexCell,
-          hexCellResources,
+          hexCellResources: {},
+          entitiesById: {},
         },
         value: "active",
       },

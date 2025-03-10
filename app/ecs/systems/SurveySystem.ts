@@ -1,5 +1,8 @@
 import { World } from "miniplex";
 import { Draft } from "immer";
+import { nanoid } from "nanoid";
+import seedrandom from "seedrandom";
+
 import { Entity } from "../entity";
 import { System, SystemContext, SystemResult } from "./System";
 import { GameContext } from "@/actor/game.types";
@@ -7,7 +10,6 @@ import { CommodityType } from "@/lib/market/CommodityMarket";
 import { HexCoordinates, coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { HexGrid, getCells } from "@/lib/HexGrid";
 import { TerrainType } from "@/lib/HexCell";
-import seedrandom from "seedrandom";
 
 /**
  * Context for the SurveySystem
@@ -16,17 +18,14 @@ export interface SurveyContext extends SystemContext {
   currentTick: number;
   hexGrid: HexGrid;
   randomSeed: number;
-  surveyResultsByPlayerId: Record<string, Record<string, SurveyResult>>;
-  precomputedResources?: Record<string, HexCellResource | undefined>;
+  precomputedResources?: Record<string, HexCellResource>;
+  playerId: string;
 }
 
-/**
- * Result of the SurveySystem operations
- */
-export interface SurveyResult extends SystemResult {
-  surveyStartTick: number;
-  isComplete?: boolean;
-  resource?: HexCellResource;
+export interface SurveySystemResult extends SystemResult {
+  hexCellResources?: Record<string, HexCellResource>;
+  surveyIdsToComplete?: string[];
+  surveyToCreate?: Entity;
 }
 
 /**
@@ -173,47 +172,38 @@ export const RESOURCE_CONFIG: Record<TerrainType, ResourceConfig> = {
  * Handles survey logic for resources
  * Implements the System interface for standardized system integration
  */
-export class SurveySystem implements System<SurveyContext, Record<string, Record<string, SurveyResult>> & SystemResult> {
+export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
+  private world: World<Entity> | null = null;
+  private context: SurveyContext | null = null;
+
   /**
-   * Initializes the system with the world and context
+   * Initializes the system with the world and context. Since surveys are private, this operates on a private world.
    * @param world The current Miniplex world
    * @param context SurveyContext needed for initialization
    */
   public initialize(world: World<Entity>, context: SurveyContext): void {
-    // Precompute resources if they don't exist
-    if (!context.precomputedResources) {
-      context.precomputedResources = this.precomputeHexCellResources(
-        context.hexGrid,
-        context.randomSeed
-      );
-    }
+    this.world = world;
+    this.context = context;
   }
 
   /**
-   * Updates the survey state based on the current context
+   * Updates the survey state in the context of *one* player
    * @param world The current Miniplex world
    * @param context SurveyContext needed for the update
    * @returns Updated survey results
    */
-  public update(
-    world: World<Entity>,
-    context: SurveyContext
-  ): Record<string, Record<string, SurveyResult>> & SystemResult & { precomputedResources?: Record<string, HexCellResource | undefined> } {
-    const updatedSurveyResults = {} as Record<string, Record<string, SurveyResult>> & SystemResult & { precomputedResources?: Record<string, HexCellResource | undefined> };
-    
-    // Include precomputed resources in the result
-    updatedSurveyResults.precomputedResources = context.precomputedResources;
-    
-    // Update surveys for each player
-    for (const [playerId, surveyResults] of Object.entries(context.surveyResultsByPlayerId)) {
-      updatedSurveyResults[playerId] = this.updateSurveys(
-        surveyResults,
-        context.currentTick,
-        context.precomputedResources || {}
-      );
+  public update(world: World<Entity>, context: SurveyContext): SurveySystemResult {
+    const incompleteSurveys = world.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true);
+    const surveyIdsToComplete: string[] = [];
+    for (const survey of incompleteSurveys) {
+      if (!survey.surveyResult.isComplete && context.currentTick - survey.surveyResult.surveyStartTick >= SURVEY_DURATION_TICKS) {
+        surveyIdsToComplete.push(survey.id);
+      }
     }
-    
-    return updatedSurveyResults;
+    return {
+      surveyIdsToComplete,
+      success: true,
+    };
   }
 
   /**
@@ -222,49 +212,32 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
    * @param contextDraft An Immer draft of the entire game context
    */
   public mutate(
-    result: Record<string, Record<string, SurveyResult>>,
+    result: SurveySystemResult,
     contextDraft: Draft<GameContext>
   ): void {
-    if (!result) return;
-    
-    // Update each player's survey results in the public context
-    Object.entries(result).forEach(([playerId, surveyResults]) => {
-      // Skip the success property and precomputedResources
-      if (playerId === 'success' || playerId === 'precomputedResources') return;
-      
-      // Skip the SERVER_ONLY_ID player
-      if (playerId === SERVER_ONLY_ID) return;
-      
-      // Update the player's survey results in private context
-      if (contextDraft.private[playerId]) {
-        contextDraft.private[playerId].surveyResultByHexCell = surveyResults;
-      }
-    });
-    
-    // If we have precomputed resources in the result, update the private context
-    if ('precomputedResources' in result && result.precomputedResources) {
-      // Ensure the server-only context exists
+    for (const surveyId of result.surveyIdsToComplete ?? []) {
+      const surveyEnt = contextDraft.private[this.context!.playerId].entitiesById[surveyId];
+      const hexCoord = surveyEnt.hexPosition?.coordinates;
+      surveyEnt.surveyResult = {
+        surveyStartTick: surveyEnt.surveyResult!.surveyStartTick,
+        isComplete: true,
+        resource: this.context!.precomputedResources![coordinatesToString(hexCoord!)],
+      };
+    }
+
+    const surveyToCreate = result.surveyToCreate;
+    if (surveyToCreate) {
+      contextDraft.private[this.context!.playerId].entitiesById[surveyToCreate.id] = surveyToCreate;
+    }
+
+    const hexCellResources = result.hexCellResources;
+    if (hexCellResources) {
       if (!contextDraft.private[SERVER_ONLY_ID]) {
-        contextDraft.private[SERVER_ONLY_ID] = { surveyResultByHexCell: {}, hexCellResources: {} };
+        contextDraft.private[SERVER_ONLY_ID] = {
+          entitiesById: {},
+          hexCellResources: {},
+        };
       }
-      
-      // Convert any undefined values to null for type compatibility
-      const hexCellResources: Record<string, HexCellResource> = {};
-      
-      // Ensure we're working with the correct HexCellResource type
-      Object.entries(result.precomputedResources).forEach(([key, value]) => {
-        if (value === undefined) {
-          return;
-        } else if ('resourceType' in value && 'resourceAmount' in value) {
-          // This is a valid HexCellResource
-          hexCellResources[key] = value as HexCellResource;
-        } else if (value.resource) {
-          // Handle case where value is a SurveyResult with a resource field
-          hexCellResources[key] = value.resource;
-        }
-      });
-      
-      // Update the private context with the hex cell resources
       contextDraft.private[SERVER_ONLY_ID].hexCellResources = hexCellResources;
     }
   }
@@ -298,99 +271,63 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
 
   /**
    * Checks if a player has an active survey
-   * @param surveyResultByHexCell The player's survey results
-   * @param currentTick The current game tick
    * @returns True if the player has an active survey
    */
-  public hasActiveSurvey(
-    surveyResultByHexCell: Record<string, SurveyResult>,
-    currentTick: number
-  ): boolean {
-    return Object.values(surveyResultByHexCell).some(
-      (result) => !result.isComplete && !this.isSurveyComplete(result.surveyStartTick, currentTick)
-    );
+  public hasActiveSurvey(): boolean {
+    const incompleteSurvey = this.world!.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true).first;
+    return Boolean(incompleteSurvey);
   }
-
-  /**
-   * Updates surveys based on the current tick
-   * @param surveyResultByHexCell The survey results to update
-   * @param currentTick The current game tick
-   * @param precomputedResources The precomputed resources for all hex cells
-   * @returns Updated survey results
-   */
-  public updateSurveys(
-    surveyResultByHexCell: Record<string, SurveyResult>,
-    currentTick: number,
-    precomputedResources: Record<string, HexCellResource | undefined>
-  ): Record<string, SurveyResult> {
-    const result = { ...surveyResultByHexCell };
-
-    // Update each survey
-    for (const [coordString, surveyResult] of Object.entries(result)) {
-      // Skip already completed surveys
-      if (surveyResult.isComplete) continue;
-
-      // Check if the survey is now complete
-      if (this.isSurveyComplete(surveyResult.surveyStartTick, currentTick)) {
-        // Mark as complete and add the resource information
-        result[coordString] = {
-          ...surveyResult,
-          isComplete: true,
-          resource: precomputedResources[coordString],
-        };
-      }
-    }
-
-    return result;
-  }
-
+  
   /**
    * Starts a new survey if the player doesn't already have an active survey
-   * @param surveyResultByHexCell The player's current survey results
    * @param coordinates The coordinates to survey
    * @param currentTick The current game tick
    * @returns Updated survey results, or null if a new survey couldn't be started
    */
   public startSurvey(
-    surveyResultByHexCell: Record<string, SurveyResult>,
     coordinates: HexCoordinates,
     currentTick: number
-  ): Record<string, SurveyResult> {
+  ): SurveySystemResult {
     // Check if player already has an active survey
-    if (this.hasActiveSurvey(surveyResultByHexCell, currentTick)) {
-      return surveyResultByHexCell;
+    if (this.hasActiveSurvey()) {
+      return { success: false };
     }
 
     // Create a new survey
     const coordString = coordinatesToString(coordinates);
     
     return {
-      ...surveyResultByHexCell,
-      [coordString]: {
-        surveyStartTick: currentTick,
-        success: true,
+      surveyToCreate: {
+        id: nanoid(),
+        name: `Survey for ${coordString}`,
+        hexPosition: {
+          coordinates,
+        },
+        surveyResult: {
+          surveyStartTick: currentTick,
+          isComplete: false,
+        },
+        owner: {
+          playerId: this.context!.playerId,
+        },
       },
+      success: true,
     };
   }
 
   /**
    * Precomputes resources for all hex cells in the grid
-   * @param hexGrid The hex grid to precompute resources for
-   * @param randomSeed Seed for random number generation
    * @returns Map of hex cell coordinates to resources
    */
-  public precomputeHexCellResources(
-    hexGrid: HexGrid,
-    randomSeed: number
-  ): Record<string, HexCellResource | undefined> {
+  public precomputeHexCellResources(): SurveySystemResult {
     // Initialize random number generator with seed
-    const rng = seedrandom(String(randomSeed));
+    const rng = seedrandom(String(this.context!.randomSeed));
     
     // Get all cells from the grid
-    const cells = getCells(hexGrid);
+    const cells = getCells(this.context!.hexGrid);
     
     // Initialize result map
-    const result: Record<string, HexCellResource | undefined> = {};
+    const result: Record<string, HexCellResource> = {};
     
     // Process each cell
     for (const cell of cells) {
@@ -399,7 +336,6 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
       
       // Skip if terrain type is not defined
       if (terrainType === undefined) {
-        result[coordString] = undefined;
         continue;
       }
       
@@ -408,7 +344,6 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
       
       // Check if we should generate a resource (based on probability)
       if (rng() > resourceConfig.resourceProbability) {
-        result[coordString] = undefined;
         continue;
       }
       
@@ -421,7 +356,6 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
       
       // If there are no resource types with weight, skip
       if (totalWeight <= 0) {
-        result[coordString] = undefined;
         continue;
       }
       
@@ -442,7 +376,6 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
       
       // If no resource type was selected, skip
       if (selectedResourceType === undefined) {
-        result[coordString] = undefined;
         continue;
       }
       
@@ -450,7 +383,6 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
       const resourceAmountConfig = resourceConfig.resources[selectedResourceType]?.amount;
       
       if (!resourceAmountConfig) {
-        result[coordString] = undefined;
         continue;
       }
       
@@ -466,6 +398,6 @@ export class SurveySystem implements System<SurveyContext, Record<string, Record
       };
     }
     
-    return result;
+    return { hexCellResources: result, surveyIdsToComplete: [], success: true };
   }
 }

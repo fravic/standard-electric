@@ -59,7 +59,7 @@ export function validateBuildableLocation({
     // Now check grid connectivity
     const powerSystem = new PowerSystem();
     // Just initialize without running power production
-    powerSystem.initialize(world, { gameTime: 0, hexGrid: grid });
+    powerSystem.initialize(world, { hexGrid: grid });
     const connectivityValidation = powerSystem.validateBuildablePlacement(
       "powerPole",
       playerId,
@@ -106,7 +106,7 @@ export function validateBuildableLocation({
     // Now check grid connectivity
     const powerSystem = new PowerSystem();
     // Just initialize without running power production
-    powerSystem.initialize(world, { gameTime: 0, hexGrid: grid });
+    powerSystem.initialize(world, { hexGrid: grid });
     const connectivityValidation = powerSystem.validateBuildablePlacement(
       "powerPlant",
       playerId,

@@ -262,7 +262,7 @@ describe("Game Machine", () => {
     
     // 15. Act - Build power plants on the surveyed cells
     // Find a power plant blueprint owned by player 1
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById);
+    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
     const player1Blueprint = powerPlantBlueprintsForPlayer(world, "player-1").first;
     const player1PowerPlantBlueprintId = player1Blueprint!.id;
       
@@ -278,7 +278,7 @@ describe("Game Machine", () => {
     }, "player-1", mockEnv, mockStorage));
     
     // Find a power plant blueprint owned by player 2
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById);
+    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
     const player2Blueprint = powerPlantBlueprintsForPlayer(world, "player-2").first;
       const player2PowerPlantBlueprintId = player2Blueprint!.id;
       
@@ -295,7 +295,7 @@ describe("Game Machine", () => {
     
     // 16. Act - Build power poles
     // Find power pole blueprints
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById);
+    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
     const player1PoleBlueprint = powerPoleBlueprintsForPlayer(world, "player-1").first;
     const player1PoleBlueprintId = player1PoleBlueprint!.id;
     
@@ -331,7 +331,7 @@ describe("Game Machine", () => {
     currentSnapshot = gameActor.getSnapshot();
     
     // Verify that power poles were built
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById);
+    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
     const builtPowerPoles = powerPoles(world);
     expect(builtPowerPoles.entities.length).toBeGreaterThan(0);
   
@@ -342,9 +342,11 @@ describe("Game Machine", () => {
     // Use snapshot assertions with scrubbed entity IDs
     // This will detect any unintended changes to the game state in future tests
     const scrubbedPublic = scrubEntityIds(omit(finalSnapshot.context.public, 'hexGrid'));
-    const scrubbedPrivate = scrubEntityIds(finalSnapshot.context.private);
+    const scrubbedPrivatePlayer1 = scrubEntityIds(finalSnapshot.context.private['player-1']);
+    const scrubbedPrivatePlayer2 = scrubEntityIds(finalSnapshot.context.private['player-2']);
     
     expect(scrubbedPublic).toMatchSnapshot();
-    expect(scrubbedPrivate).toMatchSnapshot();
+    expect(scrubbedPrivatePlayer1).toMatchSnapshot();
+    expect(scrubbedPrivatePlayer2).toMatchSnapshot();
   });
 });

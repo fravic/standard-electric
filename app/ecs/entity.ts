@@ -148,6 +148,21 @@ export const BlueprintComponentSchema = z.object({
 export type BlueprintComponent = z.infer<typeof BlueprintComponentSchema>;
 
 /**
+ * SurveyResult
+ * Contains the result of a survey operation
+ */
+export const SurveyResultComponentSchema = z.object({
+  surveyStartTick: z.number(),
+  isComplete: z.boolean().optional(),
+  resource: z.object({
+    resourceType: z.nativeEnum(CommodityType),
+    resourceAmount: z.number(),
+  }).optional(),
+});
+
+export type SurveyResultComponent = z.infer<typeof SurveyResultComponentSchema>;
+
+/**
  * IsGhostComponent
  * Ghosts are entities that have not yet been built/confirmed.
  */
@@ -176,6 +191,7 @@ export const EntitySchema = z.object({
   powerGeneration: PowerGenerationComponentSchema.optional(),
   renderable: RenderableComponentSchema.optional(),
   requiredRegion: RequiredRegionComponentSchema.optional(),
+  surveyResult: SurveyResultComponentSchema.optional(),
   isGhost: IsGhostComponentSchema.optional(),
 });
 

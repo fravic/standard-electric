@@ -6,9 +6,10 @@ import { Entity, CornerPositionComponentSchema, HexPositionComponentSchema } fro
 import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
 import { CommodityType } from "@/lib/market/CommodityMarket";
 
-export function createWorldWithEntities(entitiesById: Record<string, Entity>) {
+export function createWorldWithEntities(publicEntitiesById: Record<string, Entity>, privateEntitiesById: Record<string, Entity>) {
   const world = new World<Entity>();
-  Object.values(entitiesById).forEach(entity => world.add(entity));
+  Object.values(publicEntitiesById).forEach(entity => world.add(entity));
+  Object.values(privateEntitiesById).forEach(entity => world.add(entity));
   return world;
 }
 

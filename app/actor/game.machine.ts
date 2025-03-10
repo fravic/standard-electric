@@ -15,7 +15,7 @@ import {
   sellFuelFromPowerPlant,
 } from "../lib/market/CommodityMarket";
 import { SERVER_ONLY_ID } from "../lib/surveys";
-import { SurveySystem, SurveyContext, SurveyResult, HexCellResource } from "@/ecs/systems/SurveySystem";
+import { SurveySystem, SurveyContext, HexCellResource } from "@/ecs/systems/SurveySystem";
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
 import { With } from "miniplex";
@@ -128,28 +128,13 @@ export const gameMachine = setup({
 
       const buildable = createEntityFromBlueprint(blueprintEntity as With<Entity, 'blueprint'>, event.options);
 
-      if (!playerPrivateContext?.surveyResultByHexCell) {
-        return false;
-      }
-
-      // Create a set of surveyed hex cells
-      const surveyedHexCells = new Set<string>();
-      Object.entries(playerPrivateContext.surveyResultByHexCell).forEach(
-        ([coordString, survey]) => {
-          if (survey?.isComplete) {
-            surveyedHexCells.add(coordString);
-          }
-        }
-      );
-
       // Check if the location is valid according to validateBuildableLocation
-      const world = createWorldWithEntities(context.public.entitiesById);
+      const world = createWorldWithEntities(context.public.entitiesById, playerPrivateContext.entitiesById);
       const validation = validateBuildableLocation({
         buildable,
         grid: context.public.hexGrid,
         world,
         playerId,
-        surveyedHexCells,
       });
 
       if (!validation.valid) {
@@ -167,8 +152,7 @@ export const gameMachine = setup({
         const playerId = event.caller.id;
 
         // Initialize private context for the player
-        const updatedPrivate = { ...context.private };
-        updatedPrivate[playerId] = { surveyResultByHexCell: {} };
+        const updatedPrivate = { ...context.private, [playerId]: { entitiesById: {} } };
 
         return {
           public: produce(context.public, (draft) => {
@@ -197,7 +181,7 @@ export const gameMachine = setup({
         contextDraft.public.time.totalTicks += 1;
         
         // Create a new Miniplex world from the entities
-        const publicWorld = createWorldWithEntities(current(contextDraft.public.entitiesById));
+        const publicWorld = createWorldWithEntities(contextDraft.public.entitiesById, {});
 
         // Power system update and mutate
         const powerSystem = new PowerSystem();
@@ -214,45 +198,28 @@ export const gameMachine = setup({
         // Use the mutate() method to update the game context
         powerSystem.mutate(powerSystemResult, contextDraft);
 
-        // Process all player's surveys using the SurveySystem
-        const surveySystem = new SurveySystem();
-        
-        // Create the SurveyContext object
-        const surveyContext: SurveyContext = {
-          currentTick: contextDraft.public.time.totalTicks, // Use the updated tick value
-          hexGrid: contextDraft.public.hexGrid,
-          randomSeed: contextDraft.public.randomSeed,
-          surveyResultsByPlayerId: Object.entries(contextDraft.private).reduce((acc, [playerId, privateContext]) => {
-            if (privateContext.surveyResultByHexCell) {
-              acc[playerId] = current(privateContext.surveyResultByHexCell);
-            }
-            return acc;
-          }, {} as Record<string, Record<string, SurveyResult>>),
-          precomputedResources: contextDraft.private[SERVER_ONLY_ID]?.hexCellResources || {}
-        };
-        
-        // Add all player survey results to the context
-        Object.keys(contextDraft.private).forEach((playerId) => {
-          if (playerId === SERVER_ONLY_ID) return;
-          if (contextDraft.private[playerId]?.surveyResultByHexCell) {
-            surveyContext.surveyResultsByPlayerId[playerId] = JSON.parse(
-              JSON.stringify(contextDraft.private[playerId].surveyResultByHexCell)
-            );
-          }
+        // Process each player's surveys
+        Object.keys(context.public.players).forEach((playerId) => {
+          const privateWorld = createWorldWithEntities(contextDraft.public.entitiesById, contextDraft.private[playerId].entitiesById);
+          const surveySystem = new SurveySystem();
+          const surveyContext: SurveyContext = {
+            playerId,
+            currentTick: contextDraft.public.time.totalTicks, // Use the updated tick value
+            hexGrid: contextDraft.public.hexGrid,
+            randomSeed: contextDraft.public.randomSeed,
+            precomputedResources: contextDraft.private[SERVER_ONLY_ID]?.hexCellResources || {}
+          };
+          surveySystem.initialize(privateWorld, surveyContext);
+          const surveyResult = surveySystem.update(privateWorld, surveyContext);
+          surveySystem.mutate(surveyResult, contextDraft);
         });
-        
-        // Use the update() method to get the survey results
-        const surveyResults = surveySystem.update(publicWorld, surveyContext);
-        
-        // Use the mutate method to update the context
-        surveySystem.mutate(surveyResults, contextDraft);
       });
     }),
     addBuildable: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => ({
         public: produce(context.public, (draft) => {
           if (event.type === "ADD_BUILDABLE") {
-            const world = createWorldWithEntities(draft.entitiesById);
+            const world = createWorldWithEntities(draft.entitiesById, context.private[event.caller.id].entitiesById);
             const blueprintEntity = context.public.entitiesById[event.blueprintId] as With<Entity, 'blueprint'>;
             if (blueprintEntity.owner?.playerId !== event.caller.id) {
               throw new Error(`Player ${event.caller.id} is not the owner of blueprint ${event.blueprintId}`);
@@ -491,86 +458,45 @@ export const gameMachine = setup({
     // Surveys
     surveyHexTile: assign(({ context, event }) => {
       if (event.type !== "SURVEY_HEX_TILE") return context;
-      return {
-        private: produce(context.private, (draft) => {
+      return produce(context, (contextDraft) => {
           const playerId = event.caller.id;
-
-          // Initialize private context for this player if it doesn't exist
-          if (!draft[playerId]) {
-            draft[playerId] = { surveyResultByHexCell: {} };
-          }
 
           // Use SurveySystem to start a new survey
           const surveySystem = new SurveySystem();
-          const world = createWorldWithEntities(context.public.entitiesById);
-          
-          // Create a copy of player surveys to avoid type issues
-          const playerSurveys = JSON.parse(JSON.stringify(draft[playerId].surveyResultByHexCell)) as Record<string, import("@/ecs/systems/SurveySystem").SurveyResult>;
-          
-          // Ensure hexCellResources uses undefined instead of null
-          const hexCellResources = context.private[SERVER_ONLY_ID]?.hexCellResources || {};
-          const typeSafeResources: Record<string, import("@/ecs/systems/SurveySystem").HexCellResource | undefined> = {};
-          
-          // Convert any null values to undefined for type safety
-          Object.entries(hexCellResources).forEach(([key, value]) => {
-            typeSafeResources[key] = value === null ? undefined : value;
-          });
-          
-          // Create a context with just this player's surveys
-          const surveyContext: import("@/ecs/systems/SurveySystem").SurveyContext = {
+          const world = createWorldWithEntities(context.public.entitiesById, context.private[playerId].entitiesById);
+          const surveyContext: SurveyContext = {
+            playerId,
             currentTick: context.public.time.totalTicks,
             hexGrid: context.public.hexGrid,
             randomSeed: context.public.randomSeed,
-            surveyResultsByPlayerId: {
-              [playerId]: playerSurveys
-            },
-            precomputedResources: typeSafeResources
+            precomputedResources: context.private[SERVER_ONLY_ID]?.hexCellResources || {}
           };
-          
-          // Use startSurvey method
+          surveySystem.initialize(world, surveyContext);
           const result = surveySystem.startSurvey(
-            playerSurveys,
             event.coordinates,
             surveyContext.currentTick
           );
-          
-          draft[playerId].surveyResultByHexCell = result;
-        }),
-      };
+          surveySystem.mutate(result, contextDraft);
+        });
     }),
     precomputeResources: assign(({ context }) => {
       // Precompute resources for all hex cells using SurveySystem
-      return {
-        private: produce(context.private, (draft) => {
+      return produce(context, (contextDraft) => {
           const surveySystem = new SurveySystem();
-          const world = createWorldWithEntities(context.public.entitiesById);
+          const world = createWorldWithEntities(context.public.entitiesById, {});
           
           // Initialize SurveySystem with the context
-          const surveyContext: import("@/ecs/systems/SurveySystem").SurveyContext = {
+          const surveyContext: SurveyContext = {
+            playerId: SERVER_ONLY_ID,
             currentTick: context.public.time.totalTicks,
             hexGrid: context.public.hexGrid,
             randomSeed: context.public.randomSeed,
-            surveyResultsByPlayerId: {} as Record<string, Record<string, import("@/ecs/systems/SurveySystem").SurveyResult>>
+            precomputedResources: {}
           };
-          
-          // Initialize to precompute resources
           surveySystem.initialize(world, surveyContext);
-          
-          // If precomputedResources is available, convert undefined to null for compatibility
-          let hexCellResources = {};
-          if (surveyContext.precomputedResources) {
-            hexCellResources = Object.entries(surveyContext.precomputedResources).reduce((acc, [key, value]) => {
-              acc[key] = value === undefined ? null : value;
-              return acc;
-            }, {} as Record<string, import("@/ecs/systems/SurveySystem").HexCellResource | null>);
-          }
-          
-          draft[SERVER_ONLY_ID] = {
-            surveyResultByHexCell: {},
-            hexCellResources,
-          };
-        }),
-      };
+          const result = surveySystem.precomputeHexCellResources();
+          surveySystem.mutate(result, contextDraft);
+        });
     }),
   },
 }).createMachine({

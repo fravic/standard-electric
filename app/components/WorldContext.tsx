@@ -12,10 +12,11 @@ export interface WorldContextProviderProps {
 
 export function WorldContextProvider({ children }: WorldContextProviderProps) {
   const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
+  const privateEntitiesById = GameContext.useSelector((state) => state.private.entitiesById);
   
   const world = useMemo(() => {
-    return createWorldWithEntities(entitiesById);
-  }, [entitiesById]);
+    return createWorldWithEntities(entitiesById, privateEntitiesById);
+  }, [entitiesById, privateEntitiesById]);
   
   return (
     <WorldContext.Provider value={world}>
