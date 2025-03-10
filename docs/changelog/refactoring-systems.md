@@ -178,10 +178,19 @@ Implementation plan:
 - ✅ Consolidated all auction functionality into AuctionSystem
 - ✅ Removed redundant auction.ts utility file
 
+### Completed
+
+#### 4. SurveySystem
+- ✅ Created SurveySystem class implementing the System interface
+- ✅ Extracted survey logic from surveys.ts into individual methods
+- ✅ Created comprehensive test suite in SurveySystem.test.ts
+- ✅ Implemented precomputation of resources with deterministic outcomes
+- ✅ Added support for managing surveys for multiple players
+
 ### Next Steps
 
 1. ✅ Integrate AuctionSystem into game.machine.ts
-2. Implement SurveySystem
+2. Integrate SurveySystem into game.machine.ts
 3. Implement CommoditySystem and BuildableSystem
 
 4. **Testing Strategy**

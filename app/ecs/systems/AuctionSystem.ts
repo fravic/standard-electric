@@ -1,6 +1,6 @@
 import { World } from "miniplex";
 import { Draft } from "immer";
-import { Player, Auction } from "@/actor/game.types";
+import { Player, Auction, GameContext } from "@/actor/game.types";
 import { Entity } from "../entity";
 import { System, SystemContext, SystemResult } from "./System";
 import seedrandom from "seedrandom";
@@ -57,36 +57,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     };
   }
 
-  /**
-   * Performs mutations on entities based on the auction result
-   * @param result The result from the update method
-   * @param entitiesDraft An Immer draft of the entities by ID
-   * @param playersDraft Optional draft of player data to update player stats
-   */
-  public mutate(
-    result: AuctionResult,
-    entitiesDraft: Draft<Record<string, Entity>>,
-    playersDraft?: Draft<Record<string, Player>>
-  ): void {
-    // Skip if no player drafts available
-    if (!playersDraft) return;
-
-    // Only process the specific purchases that are part of this result
-    // This ensures we don't double-process purchases across multiple actions
-    for (const purchase of result.purchasesToProcess) {
-      // Update entity owner if the entity exists
-      if (entitiesDraft[purchase.blueprintId]) {
-        entitiesDraft[purchase.blueprintId].owner = {
-          playerId: purchase.playerId,
-        };
-      }
-      
-      // Deduct player money
-      if (playersDraft[purchase.playerId]) {
-        playersDraft[purchase.playerId].money -= purchase.price;
-      }
-    }
-  }
+  // Old mutate method removed to implement the new System interface
 
   /**
    * Start a new auction with the provided blueprints
@@ -364,6 +335,47 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     if (!context.auction) return false;
     
     return this.shouldEndAuctionInternal(context.players, context.auction);
+  }
+  
+  /**
+   * Implements the System.mutate method
+   * Performs mutations on the game context based on the auction result
+   * @param result The result from the update method
+   * @param contextDraft An Immer draft of the entire game context
+   */
+  public mutate(
+    result: AuctionResult,
+    contextDraft: Draft<GameContext>
+  ): void {
+    if (!result.success || !result.purchasesToProcess.length) return;
+    
+    // Process each purchase
+    result.purchasesToProcess.forEach(purchase => {
+      const { playerId, blueprintId, price } = purchase;
+      
+      // Update player money in public context
+      if (contextDraft.public.players[playerId]) {
+        contextDraft.public.players[playerId].money -= price;
+      }
+      
+      // Add blueprint to player inventory
+      if (contextDraft.public.entitiesById[blueprintId]) {
+        const blueprint = contextDraft.public.entitiesById[blueprintId];
+        
+        // Set the owner of the blueprint to the player
+        if (blueprint) {
+          blueprint.owner = { playerId };
+        }
+      }
+    });
+    
+    // Update the auction state in the public context
+    if (result.auction) {
+      contextDraft.public.auction = result.auction;
+    } else if (contextDraft.public.auction) {
+      // If the auction is null in the result but exists in the context, end it
+      contextDraft.public.auction = null;
+    }
   }
   
   /**

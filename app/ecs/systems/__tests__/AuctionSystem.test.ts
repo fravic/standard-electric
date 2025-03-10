@@ -1,7 +1,8 @@
 import { World } from "miniplex";
 import { Entity } from "../../entity";
 import { AuctionSystem, AuctionResult } from "../AuctionSystem";
-import { Player, Auction } from "@/actor/game.types";
+import { Player, Auction, GameInput } from "@/actor/game.types";
+import { createDefaultContext } from "@/actor/createDefaultContext";
 
 describe("AuctionSystem", () => {
   let world: World<Entity>;
@@ -270,24 +271,33 @@ describe("AuctionSystem", () => {
       const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, blueprint1.id, PLAYER1_ID, 1000);
       const endResult = auctionSystem.endBidding(initResult.auction!, players);
       
-      // Create draft entities and players
-      const entitiesDraft = {
-        [blueprint1.id]: { ...blueprint1 },
-        [blueprint2.id]: { ...blueprint2 },
-      };
-      
-      const playersDraft = { ...players };
+      // Create draft game context
+      const contextDraft = createDefaultContext({id: 'test-game', randomSeed: 123} as GameInput, {
+        public: { 
+          players: { ...players },
+          time: { totalTicks: 0, isPaused: false },
+          entitiesById: {
+            [blueprint1.id]: { ...blueprint1 },
+            [blueprint2.id]: { ...blueprint2 },
+          },
+          auction: endResult.auction,
+          commodityMarket: { },
+        },
+      });
       
       // Call mutate with the result from endBidding
-      auctionSystem.mutate(endResult, entitiesDraft, playersDraft);
+      auctionSystem.mutate(endResult, contextDraft);
       
       // Check that the entity owner was updated
-      expect(entitiesDraft[blueprint1.id].owner).toEqual({
+      expect(contextDraft.public.entitiesById[blueprint1.id].owner).toEqual({
         playerId: PLAYER1_ID,
       });
       
+      // Check that player money was deducted
+      expect(contextDraft.public.players[PLAYER1_ID].money).toBe(4000); // 5000 - 1000
+      
       // Check that other entity was not modified
-      expect(entitiesDraft[blueprint2.id].owner).toBeUndefined();
+      expect(contextDraft.public.entitiesById[blueprint2.id].owner).toBeUndefined();
     });
   });
 });

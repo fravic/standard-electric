@@ -1,6 +1,7 @@
 import { World } from "miniplex";
 import { Draft } from "immer";
 import { Entity } from "../entity";
+import { GameContext } from "@/actor/game.types";
 
 /**
  * Base type for system-specific context
@@ -42,14 +43,12 @@ export interface System<TContext extends SystemContext, TResult extends SystemRe
   update(world: World<Entity>, context: TContext): TResult;
   
   /**
-   * Performs mutations on entities within the system's scope
+   * Performs mutations on the game context within the system's scope
    * @param result The result from the update method
-   * @param entitiesDraft An Immer draft of the entities by ID
-   * @param playersDraft Optional draft of player data to update player stats
+   * @param contextDraft An Immer draft of the entire game context
    */
   mutate(
     result: TResult,
-    entitiesDraft: Draft<Record<string, Entity>>, 
-    playersDraft?: Draft<Record<string, any>>
+    contextDraft: Draft<GameContext>
   ): void;
 }

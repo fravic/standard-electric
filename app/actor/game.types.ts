@@ -65,7 +65,7 @@ interface GamePublicContext {
 
 export type GamePrivateContext = {
   surveyResultByHexCell: Record<string, SurveyResult>; // Key is hex coordinates string
-  hexCellResources?: Record<string, HexCellResource | null>; // Only used by SERVER_ONLY_ID
+  hexCellResources?: Record<string, HexCellResource>; // Only used by SERVER_ONLY_ID
 };
 
 export type GameContext = {

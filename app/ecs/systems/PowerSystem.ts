@@ -14,6 +14,7 @@ import { CornerCoordinates } from "../../lib/coordinates/types";
 import { findPossibleConnectionsWithWorld } from "../../lib/buildables/findPossibleConnections";
 import { System, SystemContext, SystemResult } from "./System";
 import { Draft } from "immer";
+import { GameContext } from "@/actor/game.types";
 
 // Power consumption rates (kW) for different population levels
 export const POWER_CONSUMPTION_RATES_KW: Record<Population, number> = {
@@ -328,41 +329,41 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
   
   /**
    * Implements the System.mutate method
-   * Performs mutations on entities based on the power system result
+   * Performs mutations on the game context based on the power system result
    * @param result The result from the update method
-   * @param entitiesDraft An Immer draft of the entities by ID
-   * @param playersDraft Optional draft of player data to update income and power sold stats
+   * @param contextDraft An Immer draft of the entire game context
    */
   public mutate(
     result: PowerResult,
-    entitiesDraft: Draft<Record<string, Entity>>,
-    playersDraft?: Draft<Record<string, any>>
+    contextDraft: Draft<GameContext>
   ): void {
-    // Update fuel storage levels for power plants
+    if (!result.success) return;
+    
+    // Update fuel storage levels for power plants in the entities
     Object.entries(result.currentFuelStorageByPowerPlantId).forEach(([plantId, fuelLevel]) => {
-      if (!entitiesDraft[plantId] || !entitiesDraft[plantId].fuelStorage) return;
-      entitiesDraft[plantId].fuelStorage = {
-        ...entitiesDraft[plantId].fuelStorage,
+      const entity = contextDraft.public?.entitiesById?.[plantId];
+      if (!entity || !entity.fuelStorage) return;
+      
+      entity.fuelStorage = {
+        ...entity.fuelStorage,
         currentFuelStorage: fuelLevel
       };
     });
     
-    // Update player income and power sold if playersDraft is provided
-    if (playersDraft) {
-      Object.keys(result.incomePerPlayer).forEach((playerId) => {
-        if (!playersDraft[playerId]) return;
-        
-        const income = result.incomePerPlayer[playerId] ?? 0;
-        const powerSoldKWh = result.powerSoldPerPlayerKWh[playerId] ?? 0;
-        
-        console.log(
-          `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
-        );
-        
-        playersDraft[playerId].money += income;
-        playersDraft[playerId].powerSoldKWh += powerSoldKWh;
-      });
-    }
+    // Update player income and power sold in the public context
+    Object.keys(result.incomePerPlayer).forEach((playerId) => {
+      if (!contextDraft.public.players?.[playerId]) return;
+      
+      const income = result.incomePerPlayer[playerId] ?? 0;
+      const powerSoldKWh = result.powerSoldPerPlayerKWh[playerId] ?? 0;
+      
+      console.log(
+        `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
+      );
+      
+      contextDraft.public.players[playerId].money += income;
+      contextDraft.public.players[playerId].powerSoldKWh += powerSoldKWh;
+    });
   }
   
   /**
