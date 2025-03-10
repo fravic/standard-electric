@@ -10,10 +10,10 @@ import {
   SERVER_ONLY_ID
 } from "../SurveySystem";
 import { GameContext } from "@/actor/game.types";
-import { CommodityType } from "@/lib/market/CommodityMarket";
 import { HexCoordinates, coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { HexGrid } from "@/lib/HexGrid";
 import { HexCell, TerrainType, Population } from "@/lib/HexCell";
+import { CommodityType } from "@/lib/types";
 
 describe("SurveySystem", () => {
   let world: World<Entity>;

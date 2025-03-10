@@ -102,21 +102,18 @@ Implementation plan:
 - Implement methods for starting and updating surveys
 - Create tests for SurveySystem
 
-### 4. CommoditySystem
+### Completed
 
-Current issues:
-- Commodity market logic is handled in actions within game.machine.ts
-- Entity mutations for fuel storage are mixed with market logic
+#### 5. CommoditySystem
+- ✅ Created CommoditySystem class implementing the System interface
+- ✅ Extracted commodity market logic from game.machine.ts into individual methods
+- ✅ Implemented buyCommodity and sellCommodity operations that leverage existing market code
+- ✅ Created CommodityContext and CommoditySystemResult interfaces for type safety
+- ✅ Updated game.machine.ts to use the new CommoditySystem for all market operations
+- ✅ Integrated with existing functions in lib/market/CommodityMarket.ts
+- ✅ Implemented unified mutate method to handle state changes for both operations
 
-Implementation plan:
-- Create CommoditySystem class that implements the System interface
-- Extract the following functions from game.machine.ts:
-  - buyCommodity
-  - sellCommodity
-- Integrate with existing market code in lib/market/CommodityMarket.ts
-- Write tests for CommoditySystem
-
-### 5. BuildableSystem
+### 6. BuildableSystem
 
 Current issues:
 - Buildable creation logic is contained in the addBuildable action
@@ -151,7 +148,7 @@ Implementation plan:
 
 ## Implementation Progress
 
-### Completed
+### Completed Systems
 
 #### 1. System Interface
 - ✅ Created the `System.ts` interface with generic type parameters for context and result
@@ -168,8 +165,6 @@ Implementation plan:
 - ✅ Updated validateBuildableLocation.ts to work with the new PowerSystem
 - ✅ Made resolveOneHourOfPowerProduction() public for testing purposes (marked as internal API)
 
-### Completed
-
 #### 3. AuctionSystem
 - ✅ Created AuctionSystem class implementing the System interface
 - ✅ Extracted auction logic from game.machine.ts into individual methods
@@ -177,8 +172,6 @@ Implementation plan:
 - ✅ Fixed purchasing logic to ensure player money is only deducted once
 - ✅ Consolidated all auction functionality into AuctionSystem
 - ✅ Removed redundant auction.ts utility file
-
-### Completed
 
 #### 4. SurveySystem
 - ✅ Created SurveySystem class implementing the System interface
@@ -428,17 +421,20 @@ interface SurveySystemResult extends SystemResult {
 
 ```typescript
 interface CommodityContext extends SystemContext {
-  event: GameEvent; // Keep this generic, handle specific event types in implementation
-  players: Record<string, Player>;
-  market: CommodityMarket;
+  playerId: string;
+  market: CommodityMarketState;
+  playerMoney: number;
+  operationType: 'buy' | 'sell';
+  powerPlantId: string;
+  fuelType: CommodityType;
+  units: number;
 }
 
-interface CommodityResult extends SystemResult {
-  actualCost?: number;
-  actualFuelAdded?: number;
-  totalProfit?: number;
-  actualFuelRemoved?: number;
-  updatedMarket: CommodityMarket;
+interface CommoditySystemResult extends SystemResult {
+  updatedMarket?: CommodityMarketState;
+  powerPlantId?: string;
+  fuelDelta?: number; // Positive for buying, negative for selling
+  moneyDelta?: number; // Negative for buying, positive for selling
 }
 ```
 
@@ -454,18 +450,18 @@ interface CommodityResult extends SystemResult {
 
 ### In Progress
 
-- [ ] Update game.machine.ts to use the refactored PowerSystem
+- [x] Update game.machine.ts to use the refactored PowerSystem
+- [x] Implement AuctionSystem
+- [x] Implement SurveySystem
+- [x] Implement CommoditySystem
 - [ ] Implement BuildableSystem
-- [ ] Implement AuctionSystem
-- [ ] Implement SurveySystem
-- [ ] Implement CommoditySystem
 
 ## Timeline
 
-1. **Week 1**: Define the System interface and refactor PowerSystem
-2. **Week 2**: Implement BuildableSystem and update related functions
-3. **Week 3**: Implement AuctionSystem and associated tests
-4. **Week 4**: Implement SurveySystem and CommoditySystem
+1. **Week 1**: ✅ Define the System interface and refactor PowerSystem
+2. **Week 3**: ✅ Implement AuctionSystem and associated tests
+3. **Week 4**: ✅ Implement SurveySystem and CommoditySystem
+4. **Next**: Implement BuildableSystem and update related functions
 
 ## Conclusion
 

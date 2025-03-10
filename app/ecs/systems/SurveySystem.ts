@@ -6,7 +6,7 @@ import seedrandom from "seedrandom";
 import { Entity } from "../entity";
 import { System, SystemContext, SystemResult } from "./System";
 import { GameContext } from "@/actor/game.types";
-import { CommodityType } from "@/lib/market/CommodityMarket";
+import { CommodityType } from "@/lib/types";
 import { HexCoordinates, coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { HexGrid, getCells } from "@/lib/HexGrid";
 import { TerrainType } from "@/lib/HexCell";
@@ -276,7 +276,6 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    */
   public static hasActiveSurvey(world: World<Entity>): boolean {
     const incompleteSurvey = world.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true).first;
-    console.log({incompleteSurvey})
     return Boolean(incompleteSurvey);
   }
   

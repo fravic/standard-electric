@@ -3,7 +3,7 @@ import {
   HexCoordinatesSchema,
   CornerCoordinatesSchema,
 } from "@/lib/coordinates/types";
-import { CommodityType } from "@/lib/market/CommodityMarket";
+import { CommodityType } from "@/lib/types";
 
 /**
  * RenderableComponent

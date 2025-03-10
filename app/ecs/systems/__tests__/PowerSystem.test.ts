@@ -6,9 +6,9 @@ import {
 } from "../../../lib/coordinates/HexCoordinates";
 import { CornerPosition } from "../../../lib/coordinates/types";
 import { HexCell, Population, TerrainType } from "../../../lib/HexCell";
-import { CommodityType } from "../../../lib/market/CommodityMarket";
 import { World } from "miniplex";
 import { Entity } from "@/ecs/entity";
+import { CommodityType } from "@/lib/types";
 
 // Helper function to create a power pole entity at a corner
 const createPowerPoleAtCorner = (

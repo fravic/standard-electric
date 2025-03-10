@@ -1,10 +1,10 @@
 import { merge } from "lodash";
 
 import { HexGridSchema } from "@/lib/HexGrid";
-import { initializeCommodityMarket } from "@/lib/market/CommodityMarket";
 import { GameContext, GameInput, Player, GamePrivateContext } from "./game.types";
 import { Entity } from "@/ecs/entity";
 import hexGridData from "../../public/hexgrid.json";
+import { initializeCommodityMarket } from "@/ecs/systems/CommoditySystem";
 
 type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: DeepPartial<T[P]>;

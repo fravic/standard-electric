@@ -9,6 +9,7 @@ import { AdditionalBlueprintOptions, createWorldWithEntities } from "../../ecs/f
 import { omit, cloneDeep } from "lodash";
 import { powerPlantBlueprintsForPlayer, powerPoleBlueprintsForPlayer, powerPoles } from "@/ecs/queries";
 import { Entity } from "@/ecs/entity";
+import { CommodityType } from "@/lib/types";
 
 /**
  * Helper function to scrub entity IDs for consistent snapshots
@@ -339,11 +340,68 @@ describe("Game Machine", () => {
     const finalSnapshot = gameActor.getSnapshot();
     expect(finalSnapshot.value).toEqual("active");
     
+    // 18. Act - Buy and sell commodities
+    // Find power plants owned by player 1 and player 2
+    world = createWorldWithEntities(finalSnapshot.context.public.entitiesById, {});
+    const player1PowerPlants = world.entities.filter(e => 
+      e.renderable?.renderableComponentName === "PowerPlant" && e.owner?.playerId === 'player-1');
+    const player2PowerPlants = world.entities.filter(e => 
+      e.renderable?.renderableComponentName === "PowerPlant" && e.owner?.playerId === 'player-2');
+    
+    expect(player1PowerPlants.length).toBeGreaterThan(0);
+    expect(player2PowerPlants.length).toBeGreaterThan(0);
+    
+    const player1PowerPlantId = player1PowerPlants[0].id;
+    const player2PowerPlantId = player2PowerPlants[0].id;
+    
+    // Player 1 buys coal
+    gameActor.send(createEvent({
+      type: "BUY_COMMODITY",
+      powerPlantId: player1PowerPlantId,
+      fuelType: CommodityType.COAL,
+      units: 2
+    }, "player-1", mockEnv, mockStorage));
+    
+    // Player 2 buys coal
+    gameActor.send(createEvent({
+      type: "BUY_COMMODITY",
+      powerPlantId: player2PowerPlantId,
+      fuelType: CommodityType.COAL,
+      units: 1
+    }, "player-2", mockEnv, mockStorage));
+    
+    // Get snapshot after purchases
+    const afterPurchaseSnapshot = gameActor.getSnapshot();
+    
+    // Verify fuel was added to power plants
+    const player1PowerPlantAfterPurchase = afterPurchaseSnapshot.context.public.entitiesById[player1PowerPlantId];
+    const player2PowerPlantAfterPurchase = afterPurchaseSnapshot.context.public.entitiesById[player2PowerPlantId];
+    
+    expect(player1PowerPlantAfterPurchase.fuelStorage?.currentFuelStorage).toBeGreaterThan(0);
+    expect(player2PowerPlantAfterPurchase.fuelStorage?.currentFuelStorage).toBeGreaterThan(0);
+    
+    // Player 1 sells some coal
+    gameActor.send(createEvent({
+      type: "SELL_COMMODITY",
+      powerPlantId: player1PowerPlantId,
+      fuelType: CommodityType.COAL,
+      units: 1
+    }, "player-1", mockEnv, mockStorage));
+    
+    // Get snapshot after sale
+    const afterSaleSnapshot = gameActor.getSnapshot();
+    
+    // Verify fuel was removed from player 1's power plant
+    const player1PowerPlantAfterSale = afterSaleSnapshot.context.public.entitiesById[player1PowerPlantId];
+    
+    expect(player1PowerPlantAfterSale.fuelStorage?.currentFuelStorage)
+      .toBeLessThan(player1PowerPlantAfterPurchase.fuelStorage?.currentFuelStorage || 0);
+    
     // Use snapshot assertions with scrubbed entity IDs
     // This will detect any unintended changes to the game state in future tests
-    const scrubbedPublic = scrubEntityIds(omit(finalSnapshot.context.public, 'hexGrid'));
-    const scrubbedPrivatePlayer1 = scrubEntityIds(finalSnapshot.context.private['player-1']);
-    const scrubbedPrivatePlayer2 = scrubEntityIds(finalSnapshot.context.private['player-2']);
+    const scrubbedPublic = scrubEntityIds(omit(afterSaleSnapshot.context.public, 'hexGrid'));
+    const scrubbedPrivatePlayer1 = scrubEntityIds(afterSaleSnapshot.context.private['player-1']);
+    const scrubbedPrivatePlayer2 = scrubEntityIds(afterSaleSnapshot.context.private['player-2']);
     
     expect(scrubbedPublic).toMatchSnapshot();
     expect(scrubbedPrivatePlayer1).toMatchSnapshot();

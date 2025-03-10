@@ -33,7 +33,7 @@ exports[`Game Machine should allow players to join, start the game, and perform 
           "tradingFee": 0.3,
           "unitSize": 10,
         },
-        "currentExchangeRate": 10,
+        "currentExchangeRate": 10.4,
       },
       "gas": {
         "config": {
@@ -215,7 +215,7 @@ exports[`Game Machine should allow players to join, start the game, and perform 
         "fuelType": "coal",
       },
       "fuelStorage": {
-        "currentFuelStorage": 0,
+        "currentFuelStorage": 10,
         "fuelType": "coal",
         "maxFuelStorage": 1000,
       },
@@ -245,7 +245,7 @@ exports[`Game Machine should allow players to join, start the game, and perform 
         "fuelType": "coal",
       },
       "fuelStorage": {
-        "currentFuelStorage": 0,
+        "currentFuelStorage": 10,
         "fuelType": "coal",
         "maxFuelStorage": 1800,
       },
@@ -322,14 +322,14 @@ exports[`Game Machine should allow players to join, start the game, and perform 
   "players": {
     "player-1": {
       "isHost": true,
-      "money": 60,
+      "money": 41.42,
       "name": "Player 1",
       "number": 1,
       "powerSoldKWh": 0,
     },
     "player-2": {
       "isHost": false,
-      "money": 64,
+      "money": 50.48,
       "name": "Player 2",
       "number": 2,
       "powerSoldKWh": 0,

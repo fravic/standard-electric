@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { Entity, CornerPositionComponentSchema, HexPositionComponentSchema } from "./entity";
 import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
-import { CommodityType } from "@/lib/market/CommodityMarket";
+import { CommodityType } from "@/lib/types";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 
 export function createWorldWithEntities(publicEntitiesById: Record<string, Entity>, privateEntitiesById: Record<string, Entity>) {
@@ -122,7 +122,7 @@ export function createPowerPlant(options: {
     owner: {
       playerId: options.playerId,
     },
-    ...(options.maxFuelStorage && options.currentFuelStorage ? { fuelStorage: {
+    ...(options.maxFuelStorage !== undefined && options.currentFuelStorage !== undefined ? { fuelStorage: {
       fuelType: options.fuelType,
       maxFuelStorage: options.maxFuelStorage,
       currentFuelStorage: options.currentFuelStorage,

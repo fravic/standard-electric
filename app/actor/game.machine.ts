@@ -13,7 +13,9 @@ import {
   initializeCommodityMarket,
   buyFuelForPowerPlant,
   sellFuelFromPowerPlant,
+  CommodityType,
 } from "../lib/market/CommodityMarket";
+import { CommoditySystem, CommodityContext } from "@/ecs/systems/CommoditySystem";
 import { SurveySystem, SurveyContext, HexCellResource, SERVER_ONLY_ID } from "@/ecs/systems/SurveySystem";
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
@@ -363,95 +365,81 @@ export const gameMachine = setup({
     buyCommodity: assign(
       ({ context, event }: { context: GameContext; event: GameEvent }) => {
         if (event.type !== "BUY_COMMODITY") return context;
-        return {
-          public: produce(context.public, (draft) => {
-            const playerId = event.caller.id;
-            const player = context.public.players[playerId];
-            if (!player) return;
+        return produce(context, (contextDraft) => {
+          const playerId = event.caller.id;
+          const player = context.public.players[playerId];
+          if (!player) return;
 
-            // Find the specific power plant by ID
-            const powerPlant = context.public.entitiesById[event.powerPlantId];
-            if (powerPlant?.owner?.playerId !== playerId) {
-              throw new Error(`Player ${playerId} is not the owner of power plant ${event.powerPlantId}`);
-            }
-            if (!powerPlant) return;
+          // Find the specific power plant by ID
+          const powerPlant = context.public.entitiesById[event.powerPlantId];
+          if (powerPlant?.owner?.playerId !== playerId) {
+            throw new Error(`Player ${playerId} is not the owner of power plant ${event.powerPlantId}`);
+          }
+          if (!powerPlant) return;
 
-            // Use the new function to handle the purchase
-            const result = buyFuelForPowerPlant({
-              market: context.public.commodityMarket,
-              powerPlant,
-              fuelType: event.fuelType,
-              units: event.units,
-              playerMoney: player.money,
-            });
+          // Use CommoditySystem to handle the purchase
+          const commoditySystem = new CommoditySystem();
+          const world = createWorldWithEntities(context.public.entitiesById, {});
+          
+          const commodityContext: CommodityContext = {
+            playerId,
+            market: context.public.commodityMarket,
+          };
+          
+          commoditySystem.initialize(world, commodityContext);
+          const result = commoditySystem.buyCommodity(
+            context.public.commodityMarket,
+            event.powerPlantId,
+            event.fuelType,
+            event.units,
+            player.money
+          );
 
-            // If the purchase wasn't successful, return early
-            if (!result.success) return;
-
-            // Update player's money
-            draft.players[playerId].money -= result.actualCost;
-
-            // Update power plant's fuel storage
-            if (powerPlant.fuelStorage) {
-              draft.entitiesById[powerPlant.id] = {
-                ...draft.entitiesById[powerPlant.id],
-                fuelStorage: {
-                  ...powerPlant.fuelStorage,
-                  currentFuelStorage: (powerPlant.fuelStorage.currentFuelStorage || 0) + result.actualFuelAdded,
-                },
-              };
-            }
-
-            // Update market state
-            draft.commodityMarket = result.updatedMarket;
-          }),
-        };
+          // If the operation was successful, let the system handle the mutations
+          if (result.success) {
+            commoditySystem.mutate(result, contextDraft);
+          }
+        });
       }
     ),
 
-    sellCommodity: assign(({ context, event }) => {
+    sellCommodity: assign(({ context, event }: { context: GameContext; event: GameEvent }) => {
       if (event.type !== "SELL_COMMODITY") return context;
-      return {
-        public: produce(context.public, (draft) => {
-          const playerId = event.caller.id;
-          const { powerPlantId } = event;
+      return produce(context, (contextDraft) => {
+        const playerId = event.caller.id;
+        const { powerPlantId } = event;
 
-          // Find the specific power plant by ID
-          const powerPlant = context.public.entitiesById[powerPlantId] as With<Entity, 'owner'>;
+        // Find the specific power plant by ID
+        const powerPlant = context.public.entitiesById[powerPlantId] as With<Entity, 'owner'>;
 
-          if (powerPlant.owner?.playerId !== playerId) {
-            throw new Error(`Player ${playerId} is not the owner of power plant ${powerPlantId}`);
-          }
+        if (powerPlant.owner?.playerId !== playerId) {
+          throw new Error(`Player ${playerId} is not the owner of power plant ${powerPlantId}`);
+        }
 
-          if (!powerPlant) return;
+        if (!powerPlant) return;
 
-          // Use the new function to handle the sale
-          const result = sellFuelFromPowerPlant({
-            market: context.public.commodityMarket,
-            powerPlant,
-            fuelType: event.fuelType,
-            units: event.units,
-          });
-
-          // If the sale wasn't successful, return early
-          if (!result.success) return;
-
-          // Update power plant's fuel storage
-          if (powerPlant.fuelStorage) {
-            draft.entitiesById[powerPlant.id] = {
-              ...draft.entitiesById[powerPlant.id],
-              fuelStorage: {
-                ...powerPlant.fuelStorage,
-                currentFuelStorage: (powerPlant.fuelStorage.currentFuelStorage || 0) - result.actualFuelRemoved,
-              },
-            };
-          }
-
-          // Update player's money and market state
-          draft.players[playerId].money += result.totalProfit;
-          draft.commodityMarket = result.updatedMarket;
-        }),
-      };
+        // Use CommoditySystem to handle the sale
+        const commoditySystem = new CommoditySystem();
+        const world = createWorldWithEntities(context.public.entitiesById, {});
+        
+        const commodityContext: CommodityContext = {
+          playerId,
+          market: context.public.commodityMarket,
+        };
+        
+        commoditySystem.initialize(world, commodityContext);
+        const result = commoditySystem.sellCommodity(
+          context.public.commodityMarket,
+          event.powerPlantId,
+          event.fuelType,
+          event.units
+        );
+      
+        // If the operation was successful, let the system handle the mutations
+        if (result.success) {
+          commoditySystem.mutate(result, contextDraft);
+        }
+      });
     }),
 
     // Surveys

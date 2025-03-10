@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CommodityType } from "@/lib/market/CommodityMarket";
+import { CommodityType } from "@/lib/types";
 import { HexCoordinatesSchema } from "@/lib/coordinates/types";
 import { AdditionalBlueprintOptionsSchema } from "@/ecs/factories";
 
