@@ -14,8 +14,7 @@ import {
   buyFuelForPowerPlant,
   sellFuelFromPowerPlant,
 } from "../lib/market/CommodityMarket";
-import { SERVER_ONLY_ID } from "../lib/surveys";
-import { SurveySystem, SurveyContext, HexCellResource } from "@/ecs/systems/SurveySystem";
+import { SurveySystem, SurveyContext, HexCellResource, SERVER_ONLY_ID } from "@/ecs/systems/SurveySystem";
 import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
 import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
 import { With } from "miniplex";

@@ -15,8 +15,8 @@ import {
 } from "./game.schemas";
 import { Env } from "../env";
 import { CommodityMarketState } from "../lib/market/CommodityMarket";
-import { SurveyResult, HexCellResource } from "../lib/surveys";
 import { Entity } from "../ecs/entity";
+import { HexCellResource } from "@/ecs/systems/SurveySystem";
 
 export interface Player {
   name: string;
