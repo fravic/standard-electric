@@ -38,7 +38,10 @@ export interface SystemResult {
  * TContext extends the base SystemContext with system-specific properties
  * TResult extends the base SystemResult with system-specific properties
  */
-export interface System<TContext extends SystemContext, TResult extends SystemResult> {
+export interface System<
+  TContext extends SystemContext,
+  TResult extends SystemResult
+> {
   /**
    * Updates the system state based on the current world state
    * @param world The current Miniplex world
@@ -46,7 +49,7 @@ export interface System<TContext extends SystemContext, TResult extends SystemRe
    * @returns System-specific result object
    */
   update(world: World<Entity>, context: TContext): TResult;
-  
+
   /**
    * Performs mutations on entities within the system's scope
    * @param draft An Immer draft of the entities by ID
@@ -61,11 +64,13 @@ export interface System<TContext extends SystemContext, TResult extends SystemRe
 ### 1. PowerSystem (Update Existing)
 
 Current issues:
+
 - PowerSystem doesn't follow a standard interface
 - Entity mutations are still done in game.machine.ts
 - PowerSystem contains both computation and mutation logic
 
 Changes needed:
+
 - Modify PowerSystem to implement the System interface
 - Move fuel storage updates from game.machine.ts to PowerSystem.mutate()
 - Ensure tests continue to pass
@@ -73,10 +78,12 @@ Changes needed:
 ### 2. AuctionSystem
 
 Current issues:
+
 - Auction logic is scattered across multiple actions in game.machine.ts
 - Auction state changes are directly mutating the game context
 
 Implementation plan:
+
 - Create AuctionSystem class that implements the System interface
 - Extract the following functions from game.machine.ts:
   - startAuction
@@ -90,10 +97,12 @@ Implementation plan:
 ### 3. SurveySystem
 
 Current issues:
+
 - Survey logic is mixed with state machine code
 - Survey updates happen directly in the game.machine.ts
 
 Implementation plan:
+
 - Create SurveySystem class that implements the System interface
 - Extract the following functions from game.machine.ts:
   - surveyHexTile
@@ -105,6 +114,7 @@ Implementation plan:
 ### Completed
 
 #### 5. CommoditySystem
+
 - ✅ Created CommoditySystem class implementing the System interface
 - ✅ Extracted commodity market logic from game.machine.ts into individual methods
 - ✅ Implemented buyCommodity and sellCommodity operations that leverage existing market code
@@ -116,10 +126,12 @@ Implementation plan:
 ### 6. BuildableSystem
 
 Current issues:
+
 - Buildable creation logic is contained in the addBuildable action
 - Validation is separated from creation logic
 
 Implementation plan:
+
 - Create BuildableSystem class that implements the System interface
 - Extract functionality from:
   - addBuildable
@@ -130,10 +142,12 @@ Implementation plan:
 ## Implementation Approach
 
 1. **Create Base System Interface**
+
    - Define a standard interface all systems will implement
    - Add utility functions for working with systems
 
 2. **Implement Systems One by One**
+
    - Begin with PowerSystem to establish the pattern
    - For each system:
      - Create the system class
@@ -151,11 +165,13 @@ Implementation plan:
 ### Completed Systems
 
 #### 1. System Interface
+
 - ✅ Created the `System.ts` interface with generic type parameters for context and result
 - ✅ Defined base `SystemContext` and `SystemResult` interfaces
 - ✅ Added `update()` and `mutate()` methods to ensure consistency across systems
 
 #### 2. PowerSystem
+
 - ✅ Refactored PowerSystem to implement the new System interface
 - ✅ Created PowerContext and PowerResult types
 - ✅ Implemented update() method to process power production
@@ -166,6 +182,7 @@ Implementation plan:
 - ✅ Made resolveOneHourOfPowerProduction() public for testing purposes (marked as internal API)
 
 #### 3. AuctionSystem
+
 - ✅ Created AuctionSystem class implementing the System interface
 - ✅ Extracted auction logic from game.machine.ts into individual methods
 - ✅ Created comprehensive test suite in AuctionSystem.test.ts
@@ -174,6 +191,7 @@ Implementation plan:
 - ✅ Removed redundant auction.ts utility file
 
 #### 4. SurveySystem
+
 - ✅ Created SurveySystem class implementing the System interface
 - ✅ Extracted survey logic from surveys.ts into individual methods
 - ✅ Created comprehensive test suite in SurveySystem.test.ts
@@ -184,9 +202,30 @@ Implementation plan:
 - ✅ Migrated UI components to use the new SurveySystem approach
 - ✅ Updated SurveySystem to use entities directly rather than the previous surveyResultByHexCell data structure
 
+#### 5. CommoditySystem
+
+- ✅ Created CommoditySystem class implementing the System interface
+- ✅ Extracted commodity market logic from game.machine.ts into individual methods
+- ✅ Implemented buyCommodity and sellCommodity operations that leverage existing market code
+- ✅ Created CommodityContext and CommoditySystemResult interfaces for type safety
+- ✅ Updated game.machine.ts to use the new CommoditySystem for all market operations
+- ✅ Integrated with existing functions in lib/market/CommodityMarket.ts
+- ✅ Implemented unified mutate method to handle state changes for both operations
+
+#### 6. BuildableSystem
+
+- ✅ Created BuildableSystem class implementing the System interface
+- ✅ Extracted buildable creation logic from addBuildable action
+- ✅ Implemented validation logic from isValidBuildableLocation
+- ✅ Created comprehensive test suite in BuildableSystem.test.ts
+- ✅ Integrated with existing blueprint functionality
+- ✅ Updated game.machine.ts to use the BuildableSystem for all buildable operations
+- ✅ Implemented consistent validation and creation methods for all buildable types
+
 ### System Interface Updates
 
 #### Mutate Method Signature
+
 - ✅ Updated `mutate` method signature to receive the entire game context instead of just entities
 - ✅ This allows systems to modify both public and private game state in a consistent way
 - ✅ Updated system implementations to use the new signature
@@ -202,14 +241,7 @@ mutate(draft: Draft<GameContext>, result: TResult): void;
 
 ### Next Steps
 
-1. ✅ Integrate AuctionSystem into game.machine.ts
-2. ✅ Integrate SurveySystem into game.machine.ts
-3. Implement CommoditySystem and BuildableSystem
-
-4. **Testing Strategy**
-   - Write unit tests for each system in isolation
-   - Use the existing e2e tests to verify integration
-   - Ensure no functionality changes during refactoring
+✅ All systems have been successfully refactored and integrated into the game machine.
 
 ## Example Refactoring Pattern
 
@@ -243,7 +275,7 @@ auctionInitiateBid: assign(
       }
     }),
   })
-)
+);
 
 // After refactoring
 // In AuctionSystem.ts
@@ -266,10 +298,15 @@ interface AuctionResult extends SystemResult {
 }
 
 export class AuctionSystem implements System<AuctionContext, AuctionResult> {
-  initiateBid(auction: AuctionState, blueprintId: string, playerId: string, entities: Record<string, Entity>): AuctionResult {
+  initiateBid(
+    auction: AuctionState,
+    blueprintId: string,
+    playerId: string,
+    entities: Record<string, Entity>
+  ): AuctionResult {
     const blueprint = entities[blueprintId];
     if (!blueprint || !auction) return { success: false };
-    
+
     return {
       success: true,
       auction: {
@@ -282,31 +319,34 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
               amount: blueprint.cost?.amount || 0,
             },
           ],
-        }
-      }
+        },
+      },
     };
   }
-  
+
   // ... other auction methods
-  
+
   update(world: World<Entity>, context: AuctionContext): AuctionResult {
     const { auction, event, gameTime } = context;
-    
+
     // Handle specific event types by checking event.type and casting as needed
     if (event.type === "INITIATE_BID") {
       // Use type guards to safely access event properties
-      const initiateBidEvent = event as GameEvent & { blueprintId: string; caller: { id: string } };
+      const initiateBidEvent = event as GameEvent & {
+        blueprintId: string;
+        caller: { id: string };
+      };
       return this.initiateBid(
-        auction, 
-        initiateBidEvent.blueprintId, 
-        initiateBidEvent.caller.id, 
+        auction,
+        initiateBidEvent.blueprintId,
+        initiateBidEvent.caller.id,
         world.entities
       );
     }
     // ... handle other event types
     return { success: false };
   }
-  
+
   mutate(draft: Draft<GameContext>, result: AuctionResult): void {
     // Can now modify both public and private game state
     // Update entities in draft.public.entitiesById or draft.private[playerId].entitiesById
@@ -319,34 +359,34 @@ auctionInitiateBid: assign(
   ({ context, event }: { context: GameContext; event: GameEvent }) => {
     const auctionSystem = new AuctionSystem();
     const world = createWorldWithEntities(context.public.entitiesById);
-    
+
     // Create a properly typed context object for the auction system
     const auctionContext: AuctionContext = {
       auction: context.public.auction!,
       event,
       players: context.public.players,
-      gameTime: context.public.time.totalTicks
+      gameTime: context.public.time.totalTicks,
     };
-    
+
     const result = auctionSystem.update(world, auctionContext);
-    
+
     if (!result.success) return context;
-    
+
     return {
       public: produce(context.public, (draft) => {
         if (result.auction) {
           draft.auction = result.auction;
         }
-        
+
         // Let the system handle all mutations to the game context
         auctionSystem.mutate(draft, result);
-        
+
         // System.mutate now handles all state changes directly
         // No need for additional state change logic here
-      })
+      }),
     };
   }
-)
+);
 ```
 
 ## System-Specific Types
@@ -413,7 +453,6 @@ interface SurveySystemResult extends SystemResult {
   completedSurveyIds?: string[];
   surveyToCreate?: Entity;
   hexCellResources?: Record<string, HexCellResource>;
-
 }
 ```
 
@@ -424,7 +463,7 @@ interface CommodityContext extends SystemContext {
   playerId: string;
   market: CommodityMarketState;
   playerMoney: number;
-  operationType: 'buy' | 'sell';
+  operationType: "buy" | "sell";
   powerPlantId: string;
   fuelType: CommodityType;
   units: number;
@@ -447,24 +486,21 @@ interface CommoditySystemResult extends SystemResult {
   - Implemented `update()` method that takes world and context and returns a PowerResult
   - Implemented `mutate()` method that updates entity state based on power calculation results
   - Reorganized internal methods to work with the new interface
-
-### In Progress
-
 - [x] Update game.machine.ts to use the refactored PowerSystem
 - [x] Implement AuctionSystem
 - [x] Implement SurveySystem
 - [x] Implement CommoditySystem
-- [ ] Implement BuildableSystem
+- [x] Implement BuildableSystem
 
 ## Timeline
 
 1. **Week 1**: ✅ Define the System interface and refactor PowerSystem
 2. **Week 3**: ✅ Implement AuctionSystem and associated tests
 3. **Week 4**: ✅ Implement SurveySystem and CommoditySystem
-4. **Next**: Implement BuildableSystem and update related functions
+4. **Week 5**: ✅ Implement BuildableSystem and update related functions
 
 ## Conclusion
 
-This refactoring plan provides a clear path to extracting complex game logic from game.machine.ts into more easily testable and maintainable system classes. By following a consistent System interface pattern, we can ensure that our ECS architecture is unified and that entity mutations are properly encapsulated within their relevant systems.
+All refactoring steps for all five systems (PowerSystem, AuctionSystem, SurveySystem, CommoditySystem, and BuildableSystem) have been successfully completed. This refactoring has resulted in a cleaner, more maintainable codebase with better separation of concerns, making it easier to test individual components and extend the game's functionality in the future.
 
-The end result will be a cleaner, more maintainable codebase with better separation of concerns, making it easier to test individual components and extend the game's functionality in the future.
+The ECS architecture is now fully implemented with a consistent System interface pattern, ensuring that entity mutations are properly encapsulated within their relevant systems. All systems follow the same pattern, making it easier for developers to understand and extend the game's functionality.
