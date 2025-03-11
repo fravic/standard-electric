@@ -154,6 +154,7 @@ export function createPowerPlantBlueprint(options: {
   fuelType?: CommodityType;
   fuelConsumptionPerKWh?: number;
   pricePerKWh?: number;
+  requiredRegionName?: string;
 }): With<Entity, 'blueprint'> {
   return {
     id: options.id || nanoid(),
@@ -173,6 +174,7 @@ export function createPowerPlantBlueprint(options: {
           fuelType: options.fuelType || null,
           fuelConsumptionPerKWh: options.fuelConsumptionPerKWh || 0,
         },
+        requiredRegion: options.requiredRegionName ? { requiredRegionName: options.requiredRegionName } : undefined,
       }
     },
     owner: {

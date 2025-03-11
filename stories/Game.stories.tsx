@@ -9,10 +9,8 @@ import { GameContext } from "@/actor/game.context";
 import { GameMachine } from "@/actor/game.machine";
 import { Game } from "@/components/Game";
 import { HexGrid } from "@/lib/HexGrid";
-import {
-  initializeCommodityMarket,
-  CommodityType,
-} from "@/lib/market/CommodityMarket";
+import { initializeCommodityMarket } from "@/ecs/systems/CommoditySystem";
+import { CommodityType } from "@/lib/types";
 
 import hexGrid from "@/../public/hexgrid.json";
 import { CornerPosition } from "@/lib/coordinates/types";
@@ -267,6 +265,7 @@ export const Auction: Story = {
       id: "coal_plant_small",
       name: "Small Coal Plant",
       playerId: SERVER_ONLY_ID,
+      pricePerKWh: 0.05,
       powerGenerationKW: 1000,
       startingPrice: 10,
     });
@@ -276,18 +275,20 @@ export const Auction: Story = {
       name: "Medium Coal Plant",
       playerId: SERVER_ONLY_ID,
       powerGenerationKW: 2000,
+      pricePerKWh: 0.05,
       startingPrice: 18,
+      requiredRegionName: "California",
     });
-    mediumCoalPlant.requiredRegion = { requiredRegionName: "California" };
     
     const largeCoalPlant = createPowerPlantBlueprint({
       id: "coal_plant_large",
       name: "Large Coal Plant",
       playerId: SERVER_ONLY_ID,
       powerGenerationKW: 3000,
+      pricePerKWh: 0.05,
       startingPrice: 25,
+      requiredRegionName: "Texas",
     });
-    largeCoalPlant.requiredRegion = { requiredRegionName: "Texas" };
     
     // Use the entities from the powerPlantBlueprints.json file for the auction
     const smallCoalPlantBlueprint = powerPlantBlueprints[0];
@@ -338,6 +339,7 @@ export const AuctionWithCurrentBlueprint: Story = {
       name: "Small Coal Plant",
       playerId: SERVER_ONLY_ID,
       powerGenerationKW: 1000,
+      pricePerKWh: 0.05,
       startingPrice: 10,
     });
     
@@ -346,18 +348,20 @@ export const AuctionWithCurrentBlueprint: Story = {
       name: "Medium Coal Plant",
       playerId: SERVER_ONLY_ID,
       powerGenerationKW: 2000,
+      pricePerKWh: 0.05,
       startingPrice: 18,
+      requiredRegionName: "California",
     });
-    mediumCoalPlant.requiredRegion = { requiredRegionName: "California" };
     
     const largeCoalPlant = createPowerPlantBlueprint({
       id: "coal_plant_large",
       name: "Large Coal Plant",
       playerId: SERVER_ONLY_ID,
       powerGenerationKW: 3000,
+      pricePerKWh: 0.05,
       startingPrice: 25,
+      requiredRegionName: "Texas",
     });
-    largeCoalPlant.requiredRegion = { requiredRegionName: "Texas" };
     
     // Use the entities from the powerPlantBlueprints.json file for the auction
     const smallCoalPlantBlueprint = powerPlantBlueprints[0];
@@ -433,8 +437,8 @@ export const BuildablePlacementInCalifornia: Story = {
       playerId: PLAYER_ID,
       powerGenerationKW: 2000,
       startingPrice: 20,
+      requiredRegionName: "California",
     });
-    californiaPlant.requiredRegion = { requiredRegionName: "California" };
     
     const genericPlant = createPowerPlantBlueprint({
       id: "generic_plant",

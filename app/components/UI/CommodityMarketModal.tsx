@@ -3,8 +3,10 @@ import { Card } from "./Card";
 import { Button } from "./Button";
 import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
-import { CommodityType, getMarketRates } from "@/lib/market/CommodityMarket";
+import { CommodityType } from "@/lib/types";
 import { useWorld } from "../WorldContext";
+import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
+import { AuthContext } from "@/auth.context";
 
 interface CommodityMarketModalProps {
   onClose: () => void;
@@ -124,8 +126,13 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
   const { commodityMarket } = GameContext.useSelector(
     (state) => state.public
   );
-  const marketRates = getMarketRates(commodityMarket);
   const world = useWorld();
+  const userId = AuthContext.useSelector((state) => state.userId);
+  const marketRates = useMemo(() => {
+    const commoditySystem = new CommoditySystem();
+    commoditySystem.initialize(world, { playerId: userId!, market: commodityMarket });
+    return commoditySystem.getMarketRates(commodityMarket);
+  }, [world, userId, commodityMarket]);
   const activeFuelTypes = useMemo(() => {
     const fuelReqEntities = [...world.with("fuelRequirement")];
     const fuelStorageEntities = [...world.with("fuelStorage")];

@@ -11,9 +11,9 @@ import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { TerrainType, Population } from "@/lib/HexCell";
 import { GameClientEventSchema } from "@/actor/game.schemas";
 import { AuthContext } from "@/auth.context";
-import { initializeCommodityMarket } from "@/lib/market/CommodityMarket";
 import hexGrid from "@/../public/hexgrid.json";
 import { WorldContextProvider } from "@/components/WorldContext";
+import { initializeCommodityMarket } from "@/ecs/systems/CommoditySystem";
 
 type GameClientEvent = z.infer<typeof GameClientEventSchema>;
 
@@ -78,8 +78,8 @@ export default function MapEditor() {
         commodityMarket: initializeCommodityMarket(),
       },
       private: {
-        surveyResultByHexCell: {},
         hexCellResources: {},
+        entitiesById: {},
       },
       value: "active",
     },

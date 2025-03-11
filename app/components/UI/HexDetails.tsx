@@ -4,13 +4,14 @@ import { Button } from "./Button";
 import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
-import { CommodityType, getMarketRates } from "@/lib/market/CommodityMarket";
 import { clientStore } from "@/lib/clientState";
 import { coordinatesToString, equals } from "@/lib/coordinates/HexCoordinates";
 import { useSelector } from "@xstate/store/react";
 import { SURVEY_DURATION_TICKS, SurveySystem } from "@/ecs/systems/SurveySystem";
 import { useWorld } from "../WorldContext";
 import { entityAtHexCoordinate } from "@/ecs/queries";
+import { CommodityType } from "@/lib/types";
+import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
 
 const styles = {
   container: {
@@ -125,7 +126,11 @@ const EntityDetails: React.FC = () => {
     maxFuelStorage > 0 ? (currentFuelStorage / maxFuelStorage) * 100 : 0;
 
   // Get market rates for this fuel type
-  const marketRates = getMarketRates(commodityMarket);
+  const marketRates = useMemo(() => {
+    const commoditySystem = new CommoditySystem();
+    commoditySystem.initialize(world, { playerId: userId!, market: commodityMarket });
+    return commoditySystem.getMarketRates(commodityMarket);
+  }, [world, userId, commodityMarket]);
   const fuelType = entity.fuelRequirement?.fuelType as CommodityType;
   const fuelRates = fuelType ? marketRates[fuelType] : null;
 

@@ -23,13 +23,13 @@ import { clientStore } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 import { useMapEditor } from "@/routes/mapEditor";
-import { validateBuildableLocation } from "@/lib/buildables/validateBuildableLocation";
 import { SurveyProgressIndicator } from "./SurveyProgressIndicator";
 import { With } from "miniplex";
 import { Entity, SurveyResultComponent } from "@/ecs/entity";
 import { useWorld } from "../WorldContext";
 import { createEntityFromBlueprint } from "@/ecs/factories";
 import { findPossibleConnectionsWithWorld } from "@/lib/buildables/findPossibleConnections";
+import { BuildableSystem } from "@/ecs/systems/BuildableSystem";
 
 interface HexGridChunkProps {
   chunk: {
@@ -156,15 +156,15 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         },
       });
     }
-  
-    const validation = validateBuildableLocation({
-      buildable: ghostEntity,
-      grid,
-      world,
+
+    const isValidLocation = BuildableSystem.isValidBuildableLocation(world, {
+      hexGrid: grid,
+      playerMoney: player.money,
       playerId: userId!,
       surveyedHexCells: surveyedHexCoords,
-    });
-    if (!validation.valid) {
+    }, buildingBlueprint.id, ghostEntity);
+
+    if (!isValidLocation) {
       return null;
     }
 
@@ -257,7 +257,6 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   const requiredStateHighlightedCells = useMemo(() => {
     const requiredRegion = buildingBlueprint?.blueprint.components.requiredRegion;
     if (!requiredRegion) return [];
-
     return cells.filter((cell) => cell.regionName === requiredRegion.requiredRegionName);
   }, [cells, buildingBlueprint]);
 

@@ -2,26 +2,17 @@ import { assign, setup, spawnChild, stopChild } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
 import { produce, current } from "immer";
 
-import { HexGridSchema } from "../lib/HexGrid";
 import { GameContext, GameEvent, GameInput } from "./game.types";
-import hexGridData from "../../public/hexgrid.json";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/ecs/systems/PowerSystem";
 import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
-import { Entity, EntitySchema } from "@/ecs/entity";
-import {
-  initializeCommodityMarket,
-  buyFuelForPowerPlant,
-  sellFuelFromPowerPlant,
-  CommodityType,
-} from "../lib/market/CommodityMarket";
+import { Entity } from "@/ecs/entity";
 import { CommoditySystem, CommodityContext } from "@/ecs/systems/CommoditySystem";
 import { SurveySystem, SurveyContext, HexCellResource, SERVER_ONLY_ID } from "@/ecs/systems/SurveySystem";
-import { validateBuildableLocation } from "../lib/buildables/validateBuildableLocation";
-import { createDefaultBlueprintsForPlayer, createEntityFromBlueprint, createWorldWithEntities } from "@/ecs/factories";
+import { createDefaultBlueprintsForPlayer, createWorldWithEntities } from "@/ecs/factories";
 import { With } from "miniplex";
-import { findPossibleConnectionsWithWorld } from "@/lib/buildables/findPossibleConnections";
 import { createDefaultContext } from "./createDefaultContext";
+import { BuildableSystem } from "@/ecs/systems/BuildableSystem";
 
 export const gameMachine = setup({
   types: {
@@ -119,30 +110,25 @@ export const gameMachine = setup({
       const playerPrivateContext = context.private[playerId];
 
       const blueprintEntity = context.public.entitiesById[blueprintId];
+      if (!blueprintEntity) {
+        return false;
+      }
+      
       if (blueprintEntity.owner?.playerId !== playerId) {
         throw new Error(`Player ${playerId} is not the owner of blueprint ${blueprintId}`);
       }
 
-      if (!blueprintEntity) {
-        return false;
-      }
-
-      const buildable = createEntityFromBlueprint(blueprintEntity as With<Entity, 'blueprint'>, event.options);
-
-      // Check if the location is valid according to validateBuildableLocation
       const world = createWorldWithEntities(context.public.entitiesById, playerPrivateContext.entitiesById);
-      const validation = validateBuildableLocation({
-        buildable,
-        grid: context.public.hexGrid,
+      return BuildableSystem.isValidBuildableLocation(
         world,
-        playerId,
-      });
-
-      if (!validation.valid) {
-        console.error("Invalid buildable location:", validation.reason);
-      }
-
-      return validation.valid;
+        {
+          playerId,
+          hexGrid: context.public.hexGrid,
+          playerMoney: context.public.players[playerId].money
+        },
+        blueprintId,
+        event.options
+      );
     },
   },
   actions: {
@@ -217,50 +203,27 @@ export const gameMachine = setup({
       });
     }),
     addBuildable: assign(
-      ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-        public: produce(context.public, (draft) => {
-          if (event.type === "ADD_BUILDABLE") {
-            const world = createWorldWithEntities(draft.entitiesById, context.private[event.caller.id].entitiesById);
-            const blueprintEntity = context.public.entitiesById[event.blueprintId] as With<Entity, 'blueprint'>;
-            if (blueprintEntity.owner?.playerId !== event.caller.id) {
-              throw new Error(`Player ${event.caller.id} is not the owner of blueprint ${event.blueprintId}`);
-            }
-
-            // Check if player has enough money
-            const cost = blueprintEntity.cost?.amount ?? 0;
-            if (draft.players[event.caller.id].money < cost) {
-              console.log("Not enough money to build! ", {
-                playerId: event.caller.id,
-                cost,
-                money: draft.players[event.caller.id].money,
-              });
-              return;
-            }
-
-            // Deduct cost and create buildable
-            draft.players[event.caller.id].money -= cost;
-            const entity = createEntityFromBlueprint(blueprintEntity, {
-              ...event.options,
-              connections: blueprintEntity.blueprint.components.connections ? { ...event.options.connections, connectedToIds: findPossibleConnectionsWithWorld(world, event.options.cornerPosition!.cornerCoordinates, event.caller.id) } : undefined
-            });
-            draft.entitiesById[entity.id] = entity;
-
-            if (blueprintEntity.blueprint.buildsRemaining) {
-              const buildsRemaining = blueprintEntity.blueprint.buildsRemaining - 1;
-              if (buildsRemaining <= 0) {
-                delete draft.entitiesById[blueprintEntity.id];
-              } else {
-                draft.entitiesById[blueprintEntity.id] = {
-                  ...draft.entitiesById[blueprintEntity.id],
-                  blueprint: {
-                    ...blueprintEntity.blueprint,
-                    buildsRemaining,
-                  },
-                };
-              }
-            }
+      ({ context, event }: { context: GameContext; event: GameEvent }) => produce(context, (contextDraft) => {
+        if (event.type === "ADD_BUILDABLE") {
+          const playerId = event.caller.id;
+          const blueprintId = event.blueprintId;
+          const world = createWorldWithEntities(
+            contextDraft.public.entitiesById, 
+            contextDraft.private[playerId].entitiesById
+          );
+          const buildableSystem = new BuildableSystem();
+          buildableSystem.initialize(world, {
+            playerId,
+            hexGrid: contextDraft.public.hexGrid,
+            playerMoney: contextDraft.public.players[playerId].money
+          });
+          const result = buildableSystem.createBuildable(blueprintId, event.options);
+          if (result.success) {
+            buildableSystem.mutate(result, contextDraft);
+          } else {
+            console.error("Failed to create buildable:", result.reason);
           }
-        }),
+        }
       })
     ),
 

@@ -198,14 +198,14 @@ export function PowerPlantAuction() {
               variant="bid"
               name={blueprint.name || ''}
               details={{
-                powerGenerationKW: blueprint.blueprint?.components?.powerGeneration?.powerGenerationKW || 0,
+                powerGenerationKW: blueprint.blueprint?.components?.powerGeneration?.powerGenerationKW,
                 requiredRegion: blueprint.blueprint?.components?.requiredRegion?.requiredRegionName,
               }}
-              price={blueprint.cost?.amount || 0}
+              price={blueprint.auctionable?.startingPrice || 0}
               disabled={
                 !isCurrentInitiator ||
                 auction.currentBlueprint !== null ||
-                (currentPlayer?.money ?? 0) < (blueprint.cost?.amount || 0)
+                (currentPlayer?.money ?? 0) < (blueprint.auctionable?.startingPrice || 0)
               }
               onClick={() =>
                 sendGameEvent({
