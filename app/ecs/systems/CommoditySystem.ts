@@ -94,23 +94,19 @@ export function initializeCommodityMarket(): CommodityMarketState {
   return {
     commodities: {
       [CommodityType.COAL]: {
-        currentExchangeRate:
-          DEFAULT_COMMODITY_CONFIGS[CommodityType.COAL].baseExchangeRate,
+        currentExchangeRate: DEFAULT_COMMODITY_CONFIGS[CommodityType.COAL].baseExchangeRate,
         config: DEFAULT_COMMODITY_CONFIGS[CommodityType.COAL],
       },
       [CommodityType.OIL]: {
-        currentExchangeRate:
-          DEFAULT_COMMODITY_CONFIGS[CommodityType.OIL].baseExchangeRate,
+        currentExchangeRate: DEFAULT_COMMODITY_CONFIGS[CommodityType.OIL].baseExchangeRate,
         config: DEFAULT_COMMODITY_CONFIGS[CommodityType.OIL],
       },
       [CommodityType.GAS]: {
-        currentExchangeRate:
-          DEFAULT_COMMODITY_CONFIGS[CommodityType.GAS].baseExchangeRate,
+        currentExchangeRate: DEFAULT_COMMODITY_CONFIGS[CommodityType.GAS].baseExchangeRate,
         config: DEFAULT_COMMODITY_CONFIGS[CommodityType.GAS],
       },
       [CommodityType.URANIUM]: {
-        currentExchangeRate:
-          DEFAULT_COMMODITY_CONFIGS[CommodityType.URANIUM].baseExchangeRate,
+        currentExchangeRate: DEFAULT_COMMODITY_CONFIGS[CommodityType.URANIUM].baseExchangeRate,
         config: DEFAULT_COMMODITY_CONFIGS[CommodityType.URANIUM],
       },
     },
@@ -183,10 +179,8 @@ export class CommoditySystem implements System<CommodityContext, CommoditySystem
     Object.entries(market.commodities).forEach(([type, commodity]) => {
       const fuelType = type as CommodityType;
       rates[fuelType] = {
-        buyPrice:
-          commodity.currentExchangeRate * (1 + commodity.config.tradingFee),
-        sellPrice:
-          commodity.currentExchangeRate * (1 - commodity.config.tradingFee),
+        buyPrice: commodity.currentExchangeRate * (1 + commodity.config.tradingFee),
+        sellPrice: commodity.currentExchangeRate * (1 - commodity.config.tradingFee),
         unitSize: commodity.config.unitSize,
       };
     });
@@ -209,11 +203,13 @@ export class CommoditySystem implements System<CommodityContext, CommoditySystem
     }
 
     // Find the power plant entity
-    const powerPlant = powerPlantsForPlayer(this.world, this.context!.playerId).where(entity => entity.id === powerPlantId).first;
+    const powerPlant = powerPlantsForPlayer(this.world, this.context!.playerId).where(
+      (entity) => entity.id === powerPlantId
+    ).first;
     if (!powerPlant) {
       return { success: false };
     }
-    
+
     // Check if the power plant can store this fuel type
     if (powerPlant.fuelStorage?.fuelType !== fuelType) {
       return { success: false };
@@ -283,11 +279,11 @@ export class CommoditySystem implements System<CommodityContext, CommoditySystem
     }
 
     // Find the power plant entity
-    const powerPlant = this.world.entities.find(entity => entity.id === powerPlantId);
+    const powerPlant = this.world.entities.find((entity) => entity.id === powerPlantId);
     if (!powerPlant) {
       return { success: false };
     }
-    
+
     // Check if the power plant has this fuel type
     if (!powerPlant.fuelStorage || powerPlant.fuelStorage.fuelType !== fuelType) {
       return { success: false };
@@ -367,7 +363,10 @@ export class CommoditySystem implements System<CommodityContext, CommoditySystem
       const powerPlant = contextDraft.public.entitiesById[powerPlantId];
       if (powerPlant) {
         // If fuelStorage doesn't exist, initialize it
-        const existingFuelStorage = powerPlant.fuelStorage || { maxFuelStorage: 100, currentFuelStorage: 0 };
+        const existingFuelStorage = powerPlant.fuelStorage || {
+          maxFuelStorage: 100,
+          currentFuelStorage: 0,
+        };
         contextDraft.public.entitiesById[powerPlantId] = {
           ...contextDraft.public.entitiesById[powerPlantId],
           fuelStorage: {

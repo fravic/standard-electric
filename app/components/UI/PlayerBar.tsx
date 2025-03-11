@@ -45,12 +45,8 @@ interface PlayerBarProps {
   isCurrentPlayer?: boolean;
 }
 
-export const PlayerBar: React.FC<PlayerBarProps> = ({
-  player,
-  isCurrentPlayer,
-}) => {
-  const powerProgress =
-    Math.min(player.powerSoldKWh / POWER_SELL_GOAL_KWH, 1) * 100;
+export const PlayerBar: React.FC<PlayerBarProps> = ({ player, isCurrentPlayer }) => {
+  const powerProgress = Math.min(player.powerSoldKWh / POWER_SELL_GOAL_KWH, 1) * 100;
 
   return (
     <Card
@@ -71,9 +67,7 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
               width: `${powerProgress}%`,
             }}
           />
-          <div style={styles.progressText}>
-            {formatPowerKWh(player.powerSoldKWh)}
-          </div>
+          <div style={styles.progressText}>{formatPowerKWh(player.powerSoldKWh)}</div>
         </div>
       </div>
     </Card>

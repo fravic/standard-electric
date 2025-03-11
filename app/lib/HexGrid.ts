@@ -1,10 +1,7 @@
 import { z } from "zod";
 
 import { HexCell, HexCellSchema } from "./HexCell";
-import {
-  coordinatesToString,
-  HexCoordinates,
-} from "./coordinates/HexCoordinates";
+import { coordinatesToString, HexCoordinates } from "./coordinates/HexCoordinates";
 import { HexMetrics } from "./HexMetrics";
 
 export const HexGridSchema = z.object({
@@ -27,12 +24,7 @@ export function getCells(grid: HexGrid): HexCell[] {
   return Object.values(grid.cellsByHexCoordinates);
 }
 
-export function addCell(
-  grid: HexGrid,
-  cell: HexCell,
-  x: number,
-  z: number
-): void {
+export function addCell(grid: HexGrid, cell: HexCell, x: number, z: number): void {
   grid.cellsByHexCoordinates[cell.coordinates.toString()] = cell;
 
   const chunkX = Math.floor(x / HexMetrics.chunkSizeX);
@@ -41,9 +33,6 @@ export function addCell(
   const localZ = z - chunkZ * HexMetrics.chunkSizeZ;
 }
 
-export function getCell(
-  grid: HexGrid,
-  coordinates: HexCoordinates
-): HexCell | null {
+export function getCell(grid: HexGrid, coordinates: HexCoordinates): HexCell | null {
   return grid.cellsByHexCoordinates[coordinatesToString(coordinates)] || null;
 }

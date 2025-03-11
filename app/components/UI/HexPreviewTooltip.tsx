@@ -91,8 +91,7 @@ export function HexPreviewTooltip() {
       <Card variant="dark">
         <div>
           <span style={styles.label}>
-            {cell.regionName}{" "}
-            {HexCoordinatesService.coordinatesToString(hoveringHexCoordinates)}
+            {cell.regionName} {HexCoordinatesService.coordinatesToString(hoveringHexCoordinates)}
           </span>
         </div>
         <div>

@@ -26,13 +26,7 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
   style,
 }) => {
   return (
-    <Button
-      onClick={onClick}
-      disabled={disabled}
-      isActive={isActive}
-      fullWidth
-      style={style}
-    >
+    <Button onClick={onClick} disabled={disabled} isActive={isActive} fullWidth style={style}>
       <div
         style={{
           display: "flex",
@@ -52,10 +46,10 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
       {isActive
         ? "Cancel"
         : price
-        ? `${variant === "bid" ? "Bid" : "Place"} ($${price})`
-        : variant === "bid"
-        ? "Bid"
-        : "Place"}
+          ? `${variant === "bid" ? "Bid" : "Place"} ($${price})`
+          : variant === "bid"
+            ? "Bid"
+            : "Place"}
     </Button>
   );
 };

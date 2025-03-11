@@ -37,10 +37,7 @@ interface HexGridChunkProps {
     zStart: number;
   };
   grid: HexGrid;
-  onCellClick: (
-    coordinates: HexCoordinates,
-    nearestCorner: CornerCoordinates | null
-  ) => void;
+  onCellClick: (coordinates: HexCoordinates, nearestCorner: CornerCoordinates | null) => void;
   debug?: boolean;
 }
 
@@ -51,9 +48,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   debug = false,
 }: HexGridChunkProps) {
   const userId = AuthContext.useSelector((state) => state.userId);
-  const player = GameContext.useSelector(
-    (state) => state.public.players[userId!]
-  );
+  const player = GameContext.useSelector((state) => state.public.players[userId!]);
   const gameState = GameContext.useSelector((state) => state);
   const world = useWorld();
 
@@ -81,30 +76,18 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return surveyed;
   }, [surveyResultByHexCell]);
 
-  const buildMode = useSelector(
-    clientStore,
-    (state) => state.context.buildMode
-  );
-  const hoverLocation = useSelector(
-    clientStore,
-    (state) => state.context.hoverLocation
-  );
+  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
+  const hoverLocation = useSelector(clientStore, (state) => state.context.hoverLocation);
   const hoveringHexCoordinates = useSelector(
     clientStore,
     (state) => state.context.hoveringHexCoordinates
   );
-  const entitiesById = GameContext.useSelector(
-    (state) => state.public.entitiesById
-  );
+  const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
 
   const coordinatesInChunk = useMemo(() => {
     const coordinates: HexCoordinates[] = [];
     for (let z = chunk.zStart; z < chunk.zStart + HexMetrics.chunkSizeZ; z++) {
-      for (
-        let x = chunk.xStart;
-        x < chunk.xStart + HexMetrics.chunkSizeX;
-        x++
-      ) {
+      for (let x = chunk.xStart; x < chunk.xStart + HexMetrics.chunkSizeX; x++) {
         coordinates.push(createHexCoordinates(x, z));
       }
     }
@@ -113,7 +96,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
   const buildingBlueprint = useMemo(() => {
     if (!buildMode || !player) return null;
-    return entitiesById[buildMode.blueprintId] as With<Entity, 'blueprint'>;
+    return entitiesById[buildMode.blueprintId] as With<Entity, "blueprint">;
   }, [buildMode, entitiesById, player]);
 
   const ghostBuildable = useMemo(() => {
@@ -138,16 +121,12 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           cornerCoordinates: nearestCorner,
         },
         connections: {
-          connectedToIds: findPossibleConnectionsWithWorld(
-            world,
-            nearestCorner,
-            userId!
-          ),
+          connectedToIds: findPossibleConnectionsWithWorld(world, nearestCorner, userId!),
         },
       });
     } else {
       const coords = fromWorldPoint([point.x, point.y, point.z]);
-      if (!coordinatesInChunk.some(c => equals(c, coords))) {
+      if (!coordinatesInChunk.some((c) => equals(c, coords))) {
         return null;
       }
       ghostEntity = createEntityFromBlueprint(buildingBlueprint, {
@@ -157,12 +136,17 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       });
     }
 
-    const isValidLocation = BuildableSystem.isValidBuildableLocation(world, {
-      hexGrid: grid,
-      playerMoney: player.money,
-      playerId: userId!,
-      surveyedHexCells: surveyedHexCoords,
-    }, buildingBlueprint.id, ghostEntity);
+    const isValidLocation = BuildableSystem.isValidBuildableLocation(
+      world,
+      {
+        hexGrid: grid,
+        playerMoney: player.money,
+        playerId: userId!,
+        surveyedHexCells: surveyedHexCoords,
+      },
+      buildingBlueprint.id,
+      ghostEntity
+    );
 
     if (!isValidLocation) {
       return null;
@@ -225,17 +209,14 @@ export const HexGridChunk = React.memo(function HexGridChunk({
 
   const { updateHexPopulation, updateHexTerrain } = useMapEditor();
 
-  const handleCellUpdate = useCallback(
-    (coordinates: HexCoordinates, updates: Partial<HexCell>) => {
-      if (updates.terrainType !== undefined) {
-        updateHexTerrain(coordinates, updates.terrainType);
-      }
-      if (updates.population !== undefined) {
-        updateHexPopulation(coordinates, updates.population);
-      }
-    },
-    []
-  );
+  const handleCellUpdate = useCallback((coordinates: HexCoordinates, updates: Partial<HexCell>) => {
+    if (updates.terrainType !== undefined) {
+      updateHexTerrain(coordinates, updates.terrainType);
+    }
+    if (updates.population !== undefined) {
+      updateHexPopulation(coordinates, updates.population);
+    }
+  }, []);
 
   const cells = useMemo(() => {
     return coordinatesInChunk

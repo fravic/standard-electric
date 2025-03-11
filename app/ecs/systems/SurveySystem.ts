@@ -194,10 +194,15 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    * @returns Updated survey results
    */
   public update(world: World<Entity>, context: SurveyContext): SurveySystemResult {
-    const incompleteSurveys = world.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true);
+    const incompleteSurveys = world
+      .with("surveyResult")
+      .where((entity) => entity.surveyResult?.isComplete !== true);
     const surveyIdsToComplete: string[] = [];
     for (const survey of incompleteSurveys) {
-      if (!survey.surveyResult.isComplete && context.currentTick - survey.surveyResult.surveyStartTick >= SURVEY_DURATION_TICKS) {
+      if (
+        !survey.surveyResult.isComplete &&
+        context.currentTick - survey.surveyResult.surveyStartTick >= SURVEY_DURATION_TICKS
+      ) {
         surveyIdsToComplete.push(survey.id);
       }
     }
@@ -212,10 +217,7 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    * @param result The result from the update method
    * @param contextDraft An Immer draft of the entire game context
    */
-  public mutate(
-    result: SurveySystemResult,
-    contextDraft: Draft<GameContext>
-  ): void {
+  public mutate(result: SurveySystemResult, contextDraft: Draft<GameContext>): void {
     for (const surveyId of result.surveyIdsToComplete ?? []) {
       const surveyEnt = contextDraft.private[this.context!.playerId].entitiesById[surveyId];
       const hexCoord = surveyEnt.hexPosition?.coordinates;
@@ -249,10 +251,7 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    * @param currentTick The current game tick
    * @returns True if the survey is complete
    */
-  public static isSurveyComplete(
-    surveyStartTick: number,
-    currentTick: number
-  ): boolean {
+  public static isSurveyComplete(surveyStartTick: number, currentTick: number): boolean {
     return currentTick >= surveyStartTick + SURVEY_DURATION_TICKS;
   }
 
@@ -275,20 +274,19 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
    * @returns True if the player has an active survey
    */
   public static hasActiveSurvey(world: World<Entity>): boolean {
-    const incompleteSurvey = world.with("surveyResult").where((entity) => entity.surveyResult?.isComplete !== true).first;
+    const incompleteSurvey = world
+      .with("surveyResult")
+      .where((entity) => entity.surveyResult?.isComplete !== true).first;
     return Boolean(incompleteSurvey);
   }
-  
+
   /**
    * Starts a new survey if the player doesn't already have an active survey
    * @param coordinates The coordinates to survey
    * @param currentTick The current game tick
    * @returns Updated survey results, or null if a new survey couldn't be started
    */
-  public startSurvey(
-    coordinates: HexCoordinates,
-    currentTick: number
-  ): SurveySystemResult {
+  public startSurvey(coordinates: HexCoordinates, currentTick: number): SurveySystemResult {
     // Check if player already has an active survey
     if (SurveySystem.hasActiveSurvey(this.world!)) {
       return { success: false };
@@ -314,82 +312,82 @@ export class SurveySystem implements System<SurveyContext, SurveySystemResult> {
   public precomputeHexCellResources(): SurveySystemResult {
     // Initialize random number generator with seed
     const rng = seedrandom(String(this.context!.randomSeed));
-    
+
     // Get all cells from the grid
     const cells = getCells(this.context!.hexGrid);
-    
+
     // Initialize result map
     const result: Record<string, HexCellResource> = {};
-    
+
     // Process each cell
     for (const cell of cells) {
       const coordString = coordinatesToString(cell.coordinates);
       const terrainType = cell.terrainType;
-      
+
       // Skip if terrain type is not defined
       if (terrainType === undefined) {
         continue;
       }
-      
+
       // Get resource config for this terrain type
       const resourceConfig = RESOURCE_CONFIG[terrainType];
-      
+
       // Check if we should generate a resource (based on probability)
       if (rng() > resourceConfig.resourceProbability) {
         continue;
       }
-      
+
       // Calculate total weight of all resource types
       const resourceEntries = Object.entries(resourceConfig.resources);
       const totalWeight = resourceEntries.reduce(
         (sum, [, config]) => sum + (config?.weight || 0),
         0
       );
-      
+
       // If there are no resource types with weight, skip
       if (totalWeight <= 0) {
         continue;
       }
-      
+
       // Pick a random resource type based on weights
       let randomValue = rng() * totalWeight;
       let selectedResourceType: CommodityType | undefined = undefined;
-      
+
       for (const [type, config] of resourceEntries) {
         if (!config) continue;
-        
+
         randomValue -= config.weight;
-        
+
         if (randomValue <= 0) {
           selectedResourceType = type as CommodityType;
           break;
         }
       }
-      
+
       // If no resource type was selected, skip
       if (selectedResourceType === undefined) {
         continue;
       }
-      
+
       // Get resource amount config
       const resourceAmountConfig = resourceConfig.resources[selectedResourceType]?.amount;
-      
+
       if (!resourceAmountConfig) {
         continue;
       }
-      
+
       // Generate random amount within range
       const min = resourceAmountConfig.min;
       const max = resourceAmountConfig.max;
       const amount = Math.floor(rng() * (max - min + 1)) + min;
-      
+
       // Create resource
       result[coordString] = {
         resourceType: selectedResourceType,
         resourceAmount: amount,
       };
     }
-    
+
     return { hexCellResources: result, surveyIdsToComplete: [], success: true };
   }
 }

@@ -45,9 +45,7 @@ const WAYPOINTS = [
 
 function getWaypoint(hour: number) {
   // Find the last waypoint that occurred before or at the current hour
-  const currentWaypoint = [...WAYPOINTS]
-    .reverse()
-    .find((waypoint) => hour >= waypoint.hour);
+  const currentWaypoint = [...WAYPOINTS].reverse().find((waypoint) => hour >= waypoint.hour);
 
   // If we're past the last waypoint, return the first waypoint
   return currentWaypoint ?? WAYPOINTS[0];
@@ -81,10 +79,7 @@ export function Lighting() {
 
   return (
     <>
-      <animated.ambientLight
-        intensity={springStyles.intensity}
-        color={springStyles.lightColor}
-      />
+      <animated.ambientLight intensity={springStyles.intensity} color={springStyles.lightColor} />
     </>
   );
 }

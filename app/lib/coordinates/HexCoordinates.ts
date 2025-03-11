@@ -1,10 +1,6 @@
 import { HexDirection, HexMetrics } from "../HexMetrics";
 import * as THREE from "three";
-import {
-  HexCoordinates,
-  HexCoordinatesSchema,
-  CornerCoordinates,
-} from "./types";
+import { HexCoordinates, HexCoordinatesSchema, CornerCoordinates } from "./types";
 import * as CornerCoordinatesService from "./CornerCoordinates";
 
 export { HexCoordinatesSchema };
@@ -27,19 +23,13 @@ export function getS(coordinates: HexCoordinates): number {
   return -getQ(coordinates) - getR(coordinates);
 }
 
-export function fromCubeCoordinates(
-  q: number,
-  r: number,
-  s: number
-): HexCoordinates {
+export function fromCubeCoordinates(q: number, r: number, s: number): HexCoordinates {
   const x = q + (r - (r & 1)) / 2;
   const z = r;
   return createHexCoordinates(x, z);
 }
 
-export function fromWorldPoint(
-  position: [number, number, number]
-): HexCoordinates {
+export function fromWorldPoint(position: [number, number, number]): HexCoordinates {
   // Convert from world point (ignoring y elevation) to hex cube coordinates
   let q = position[0] / (HexMetrics.innerRadius * 2);
   let r = position[2] / (HexMetrics.outerRadius * 1.5);
@@ -68,9 +58,7 @@ export function fromWorldPoint(
   return fromCubeCoordinates(iQ, iR, iS);
 }
 
-export function toWorldPoint(
-  coordinates: HexCoordinates
-): [number, number, number] {
+export function toWorldPoint(coordinates: HexCoordinates): [number, number, number] {
   const q = getQ(coordinates);
   const r = getR(coordinates);
   const x = (q + r * 0.5) * (HexMetrics.innerRadius * 2);
@@ -78,10 +66,7 @@ export function toWorldPoint(
   return [x, 0, z];
 }
 
-export function getNeighbor(
-  coordinates: HexCoordinates,
-  direction: HexDirection
-): HexCoordinates {
+export function getNeighbor(coordinates: HexCoordinates, direction: HexDirection): HexCoordinates {
   if (direction < 0) {
     direction = direction + 6;
   }
@@ -146,10 +131,7 @@ export function getNearestCornerInChunk(
     }
 
     if (nearestDirection !== null) {
-      return CornerCoordinatesService.fromHexAndDirection(
-        cell,
-        nearestDirection
-      );
+      return CornerCoordinatesService.fromHexAndDirection(cell, nearestDirection);
     }
   }
   return null;

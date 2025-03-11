@@ -9,22 +9,8 @@ export class HexMesh {
 
   addTriangle(v1: Vertex, v2: Vertex, v3: Vertex, color: Color) {
     const baseVertexIndex = this.vertices.length / 3;
-    this.vertices.push(
-      v1[0],
-      v1[1],
-      v1[2],
-      v2[0],
-      v2[1],
-      v2[2],
-      v3[0],
-      v3[1],
-      v3[2]
-    );
-    this.indices.push(
-      baseVertexIndex,
-      baseVertexIndex + 1,
-      baseVertexIndex + 2
-    );
+    this.vertices.push(v1[0], v1[1], v1[2], v2[0], v2[1], v2[2], v3[0], v3[1], v3[2]);
+    this.indices.push(baseVertexIndex, baseVertexIndex + 1, baseVertexIndex + 2);
     this.colors.push(
       color.r,
       color.g,

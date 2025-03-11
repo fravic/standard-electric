@@ -1,10 +1,6 @@
 import { createMachineServer } from "actor-kit/worker";
 import { gameMachine } from "./game.machine";
-import {
-  GameServiceEventSchema,
-  GameInputSchema,
-  GameClientEventSchema,
-} from "./game.schemas";
+import { GameServiceEventSchema, GameInputSchema, GameClientEventSchema } from "./game.schemas";
 
 export const GameServer = createMachineServer({
   machine: gameMachine,

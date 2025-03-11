@@ -4,9 +4,7 @@ import invariant from "tiny-invariant";
 export function getCookie(request: Request, name: string): string | undefined {
   const cookieHeader = request.headers.get("Cookie");
   if (cookieHeader) {
-    const cookies = cookieHeader
-      .split(";")
-      .map((cookie) => cookie.trim().split("="));
+    const cookies = cookieHeader.split(";").map((cookie) => cookie.trim().split("="));
     const cookie = cookies.find(([key]) => key === name);
     return cookie ? cookie[1] : undefined;
   }
@@ -29,13 +27,7 @@ export async function createSessionToken({
     .sign(new TextEncoder().encode(secret));
 }
 
-export async function createRefreshToken({
-  userId,
-  secret,
-}: {
-  userId: string;
-  secret: string;
-}) {
+export async function createRefreshToken({ userId, secret }: { userId: string; secret: string }) {
   return await new SignJWT({ userId })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("360d")
@@ -58,13 +50,7 @@ export async function createNewUserSession({ secret }: { secret: string }) {
   return { userId, sessionId, sessionToken, refreshToken };
 }
 
-export async function verifyOneTimeToken({
-  token,
-  secret,
-}: {
-  token: string;
-  secret: string;
-}) {
+export async function verifyOneTimeToken({ token, secret }: { token: string; secret: string }) {
   try {
     const verified = await jwtVerify(token, new TextEncoder().encode(secret));
     invariant(verified.payload.userId, "Missing userId in token payload");
@@ -75,13 +61,7 @@ export async function verifyOneTimeToken({
   }
 }
 
-export async function verifySessionToken({
-  token,
-  secret,
-}: {
-  token: string;
-  secret: string;
-}) {
+export async function verifySessionToken({ token, secret }: { token: string; secret: string }) {
   try {
     const verified = await jwtVerify(token, new TextEncoder().encode(secret));
     invariant(verified.payload.userId, "Missing userId in token payload");
@@ -93,13 +73,7 @@ export async function verifySessionToken({
   }
 }
 
-export async function verifyRefreshToken({
-  token,
-  secret,
-}: {
-  token: string;
-  secret: string;
-}) {
+export async function verifyRefreshToken({ token, secret }: { token: string; secret: string }) {
   try {
     const verified = await jwtVerify(token, new TextEncoder().encode(secret));
     invariant(verified.payload.userId, "Invalid refresh token");
@@ -143,11 +117,7 @@ export async function getUserIdByEmail(email: string, kv: KVNamespace) {
   return await kv.get(`email:${email}`);
 }
 
-export async function linkEmailToUser(
-  email: string,
-  userId: string,
-  kv: KVNamespace
-) {
+export async function linkEmailToUser(email: string, userId: string, kv: KVNamespace) {
   await kv.put(`email:${email}`, userId);
 }
 

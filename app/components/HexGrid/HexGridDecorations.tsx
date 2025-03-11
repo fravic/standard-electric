@@ -1,12 +1,7 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 import seedrandom from "seedrandom";
-import {
-  HexCell,
-  Population,
-  TerrainType,
-  getCenterPoint,
-} from "@/lib/HexCell";
+import { HexCell, Population, TerrainType, getCenterPoint } from "@/lib/HexCell";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { Vertex } from "@/lib/types";
 import { GameContext } from "@/actor/game.context";
@@ -35,10 +30,7 @@ function getRandomPositionInHex(
 }
 
 // Tree component using basic shapes
-const Tree: React.FC<{ position: THREE.Vector3; seed: number }> = ({
-  position,
-  seed,
-}) => {
+const Tree: React.FC<{ position: THREE.Vector3; seed: number }> = ({ position, seed }) => {
   // Use seed to generate consistent height
   const rng = seedrandom(`${seed}`);
   const treeHeight = 0.2 + rng() * 0.2;
@@ -116,13 +108,10 @@ const Building: React.FC<{
   const windowCols = 2;
   const windowMargin = textureSize * 0.15;
   const windowWidth = (textureSize - windowMargin * 3) / windowCols;
-  const windowHeight =
-    (textureSize - windowMargin * (windowRows + 1)) / windowRows;
+  const windowHeight = (textureSize - windowMargin * (windowRows + 1)) / windowRows;
 
   // Draw windows
-  ctx.fillStyle = isNight
-    ? BUILDING_COLORS.WINDOW_NIGHT
-    : BUILDING_COLORS.WINDOW_DAY;
+  ctx.fillStyle = isNight ? BUILDING_COLORS.WINDOW_NIGHT : BUILDING_COLORS.WINDOW_DAY;
   for (let row = 0; row < windowRows; row++) {
     for (let col = 0; col < windowCols; col++) {
       const windowRng = seedrandom(`${seed}-window-${row}-${col}`);
@@ -175,21 +164,12 @@ export const HexGridDecorations = React.memo(function HexGridDecorations({
       // Add trees for forest terrain
       if (cell.terrainType === TerrainType.Forest) {
         // Use a seeded random for consistent number of trees
-        const forestRng = seedrandom(
-          `forest-${cell.coordinates.x}-${cell.coordinates.z}`
-        );
+        const forestRng = seedrandom(`forest-${cell.coordinates.x}-${cell.coordinates.z}`);
         const numTrees = 5 + Math.floor(forestRng() * 5); // 5-9 trees per forest hex
         for (let i = 0; i < numTrees; i++) {
           // Create a unique but consistent seed for this tree
-          const treeSeed = parseInt(
-            `${cell.coordinates.x}${cell.coordinates.z}${i}`,
-            10
-          );
-          const treePos = getRandomPositionInHex(
-            center,
-            HexMetrics.outerRadius * 0.6,
-            treeSeed
-          );
+          const treeSeed = parseInt(`${cell.coordinates.x}${cell.coordinates.z}${i}`, 10);
+          const treePos = getRandomPositionInHex(center, HexMetrics.outerRadius * 0.6, treeSeed);
           items.push(
             <Tree
               key={`tree-${cell.coordinates.x}-${cell.coordinates.z}-${i}`}
@@ -202,16 +182,10 @@ export const HexGridDecorations = React.memo(function HexGridDecorations({
 
       // Add buildings based on population
       if (cell.population > Population.Unpopulated) {
-        const numBuildings = Math.max(
-          1,
-          Math.floor(Math.log2(cell.population + 1) * 2)
-        );
+        const numBuildings = Math.max(1, Math.floor(Math.log2(cell.population + 1) * 2));
         for (let i = 0; i < numBuildings; i++) {
           // Create a unique but consistent seed for this building
-          const buildingSeed = parseInt(
-            `${cell.coordinates.x}${cell.coordinates.z}${i}`,
-            10
-          );
+          const buildingSeed = parseInt(`${cell.coordinates.x}${cell.coordinates.z}${i}`, 10);
           const buildingPos = getRandomPositionInHex(
             center,
             HexMetrics.outerRadius * 0.5,

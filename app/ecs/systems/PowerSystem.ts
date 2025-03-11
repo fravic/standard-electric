@@ -1,13 +1,7 @@
-import {
-  equals,
-  HexCoordinates,
-} from "../../lib/coordinates/HexCoordinates";
+import { equals, HexCoordinates } from "../../lib/coordinates/HexCoordinates";
 import { HexCell, Population } from "../../lib/HexCell";
 import { HexGrid } from "../../lib/HexGrid";
-import {
-  getAdjacentHexes,
-  cornersAdjacent,
-} from "../../lib/coordinates/CornerCoordinates";
+import { getAdjacentHexes, cornersAdjacent } from "../../lib/coordinates/CornerCoordinates";
 import { Entity } from "@/ecs/entity";
 import { World, With } from "miniplex";
 import { CornerCoordinates } from "../../lib/coordinates/types";
@@ -44,8 +38,8 @@ export interface PowerResult extends SystemResult {
 }
 
 // Define Miniplex types for power plants and power poles
-type PowerPlantEntity = With<Entity, 'powerGeneration' | 'hexPosition'>;
-type PowerPoleEntity = With<Entity, 'connections' | 'cornerPosition'>;
+type PowerPlantEntity = With<Entity, "powerGeneration" | "hexPosition">;
+type PowerPoleEntity = With<Entity, "connections" | "cornerPosition">;
 
 // Type for our internal power plant representation
 type PowerPlant = {
@@ -101,37 +95,48 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
    * @param hexGrid The current hex grid
    * @param initializeConsumers Whether to initialize consumers from populated hexes
    */
-  private refreshEntityQueries(world: World<Entity>, hexGrid: HexGrid, initializeConsumers: boolean = false) {
+  private refreshEntityQueries(
+    world: World<Entity>,
+    hexGrid: HexGrid,
+    initializeConsumers: boolean = false
+  ) {
     // Query for power plants with all required components
-    const powerPlantQuery = world.with('powerGeneration', 'hexPosition');
+    const powerPlantQuery = world.with("powerGeneration", "hexPosition");
     this.powerPlantEntities = powerPlantQuery.entities as PowerPlantEntity[];
-      
+
     // Initialize power plants from entities with powerGeneration component
-    this.powerPlants = this.powerPlantEntities && this.powerPlantEntities.length > 0 ? 
-      this.powerPlantEntities.map((entity) => ({
-        id: entity.id,
-        playerId: entity.owner?.playerId || null,
-        pricePerKWh: entity.powerGeneration.pricePerKWh || 0,
-        maxCapacity: entity.powerGeneration.powerGenerationKW || 0,
-        remainingCapacity: entity.powerGeneration.powerGenerationKW || 0,
-        gridId: entity.id, // Each plant starts in its own grid
-        coordinates: entity.hexPosition.coordinates,
-        fuelType: entity.fuelRequirement?.fuelType || null,
-        fuelConsumptionPerKWh: entity.fuelRequirement?.fuelConsumptionPerKWh || 0,
-        maxFuelStorage: entity.fuelStorage?.maxFuelStorage || 0,
-        currentFuelStorage: entity.fuelStorage?.currentFuelStorage || 0,
-      })) : [];
+    this.powerPlants =
+      this.powerPlantEntities && this.powerPlantEntities.length > 0
+        ? this.powerPlantEntities.map((entity) => ({
+            id: entity.id,
+            playerId: entity.owner?.playerId || null,
+            pricePerKWh: entity.powerGeneration.pricePerKWh || 0,
+            maxCapacity: entity.powerGeneration.powerGenerationKW || 0,
+            remainingCapacity: entity.powerGeneration.powerGenerationKW || 0,
+            gridId: entity.id, // Each plant starts in its own grid
+            coordinates: entity.hexPosition.coordinates,
+            fuelType: entity.fuelRequirement?.fuelType || null,
+            fuelConsumptionPerKWh: entity.fuelRequirement?.fuelConsumptionPerKWh || 0,
+            maxFuelStorage: entity.fuelStorage?.maxFuelStorage || 0,
+            currentFuelStorage: entity.fuelStorage?.currentFuelStorage || 0,
+          }))
+        : [];
 
     // Query for power poles with connections and cornerPosition
-    const powerPoleQuery = world.with('connections', 'cornerPosition');
+    const powerPoleQuery = world.with("connections", "cornerPosition");
     this.powerPoleEntities = powerPoleQuery.entities as PowerPoleEntity[];
-      
+
     // Initialize power poles
-    this.powerPolesById = this.powerPoleEntities && this.powerPoleEntities.length > 0 ?
-      this.powerPoleEntities.reduce((acc, pole) => {
-        acc[pole.id] = pole;
-        return acc;
-      }, {} as Record<string, PowerPoleEntity>) : {};
+    this.powerPolesById =
+      this.powerPoleEntities && this.powerPoleEntities.length > 0
+        ? this.powerPoleEntities.reduce(
+            (acc, pole) => {
+              acc[pole.id] = pole;
+              return acc;
+            },
+            {} as Record<string, PowerPoleEntity>
+          )
+        : {};
 
     // Compile grids from connected power plants and poles
     this.grids = this.compileGrids();
@@ -141,7 +146,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       this.initializeConsumers(hexGrid);
     }
   }
-  
+
   /**
    * Initializes consumers from populated hexes
    * @param hexGrid The current hex grid
@@ -155,11 +160,10 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
         coordinates: cell.coordinates,
         demandKwh: POWER_CONSUMPTION_RATES_KW[cell.population],
         remainingDemand: POWER_CONSUMPTION_RATES_KW[cell.population],
-        connectedPlants: this.findConnectedPowerPlants(cell.coordinates)
-          .connectedPlants,
+        connectedPlants: this.findConnectedPowerPlants(cell.coordinates).connectedPlants,
       }));
   }
-  
+
   /**
    * Initializes the power system by refreshing entity queries and setting up initial state
    * @param world The current Miniplex world
@@ -169,7 +173,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
     // Refresh entity queries and initialize consumers
     this.refreshEntityQueries(world, hexGrid, true);
   }
-  
+
   /**
    * Public method to initialize the power system without running power production
    * Useful for validation operations that just need system state but don't need to simulate power
@@ -187,12 +191,12 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
   } {
     const connectedPlants: PowerPlantConnection[] = [];
     const visitedPowerPoleIds = new Set<string>();
-    
+
     // If no power poles exist, return empty results
     if (!this.powerPoleEntities || this.powerPoleEntities.length === 0) {
       return { connectedPlants, connectedPoleIds: [] };
     }
-    
+
     // Start with the power poles at the starting hex
     const startingPoles = this.powerPoleEntities.filter((pole) => {
       if (!pole.cornerPosition || !pole.cornerPosition.cornerCoordinates) return false;
@@ -201,8 +205,10 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
     });
 
     // Queue of power poles to visit, along with the path taken to reach them
-    const toVisit: { powerPoleId: string; path: string[] }[] =
-      startingPoles.map((pole) => ({ powerPoleId: pole.id, path: [] }));
+    const toVisit: { powerPoleId: string; path: string[] }[] = startingPoles.map((pole) => ({
+      powerPoleId: pole.id,
+      path: [],
+    }));
 
     // Perform a BFS along connected power poles to find the shortest paths to
     // all connected power plants
@@ -213,20 +219,26 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       visitedPowerPoleIds.add(currentVisit.powerPoleId);
 
       const currentPole = this.powerPolesById[currentVisit.powerPoleId];
-      
+
       // Skip if pole doesn't exist or doesn't have required properties
-      if (!currentPole || !currentPole.cornerPosition || !currentPole.cornerPosition.cornerCoordinates) {
+      if (
+        !currentPole ||
+        !currentPole.cornerPosition ||
+        !currentPole.cornerPosition.cornerCoordinates
+      ) {
         continue;
       }
-      
+
       const adjacentHexes = getAdjacentHexes(currentPole.cornerPosition.cornerCoordinates);
       const newPath = [...currentVisit.path, currentVisit.powerPoleId];
 
       // Check for power plants at adjacent hexes using our cached power plants
-      const plantsHere = this.powerPlants && this.powerPlants.length > 0 ? 
-        this.powerPlants.filter((plant) =>
-          adjacentHexes.some((hex) => equals(hex, plant.coordinates))
-        ) : [];
+      const plantsHere =
+        this.powerPlants && this.powerPlants.length > 0
+          ? this.powerPlants.filter((plant) =>
+              adjacentHexes.some((hex) => equals(hex, plant.coordinates))
+            )
+          : [];
       plantsHere.forEach((plant) => {
         // Only add a plant if we haven't found it yet (keeping shortest path)
         if (!connectedPlants.some((c) => c.plantId === plant.id)) {
@@ -240,10 +252,10 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       // connections should be bi-directional. So we need to find all power
       // poles that point at this one too.
       const allConnectedPoles = connectedPoles.concat(
-        this.powerPoleEntities && this.powerPoleEntities.length > 0 ?
-          this.powerPoleEntities
-            .filter((pole) => pole.connections?.connectedToIds?.includes(currentPole.id))
-            .map((pole) => pole.id)
+        this.powerPoleEntities && this.powerPoleEntities.length > 0
+          ? this.powerPoleEntities
+              .filter((pole) => pole.connections?.connectedToIds?.includes(currentPole.id))
+              .map((pole) => pole.id)
           : []
       );
       allConnectedPoles.forEach((poleId) => {
@@ -286,15 +298,14 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       processedPlantIds.add(plant.id);
 
       // Find all power plants and poles connected to this one
-      const { connectedPlants, connectedPoleIds } =
-        this.findConnectedPowerPlants(plant.coordinates);
+      const { connectedPlants, connectedPoleIds } = this.findConnectedPowerPlants(
+        plant.coordinates
+      );
 
       // Add connected plants to the grid
       for (const { plantId } of connectedPlants) {
         if (!processedPlantIds.has(plantId)) {
-          const connectedPlant = this.powerPlants.find(
-            (p) => p.id === plantId
-          )!;
+          const connectedPlant = this.powerPlants.find((p) => p.id === plantId)!;
           grid.powerPlantIds.push(plantId);
           grid.totalCapacity += connectedPlant.maxCapacity;
           processedPlantIds.add(plantId);
@@ -310,8 +321,6 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
     return grids;
   }
 
-
-  
   /**
    * Implements the System.update method
    * Process one hour of power production based on the current world state
@@ -322,50 +331,45 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
   public update(world: World<Entity>, context: PowerContext): PowerResult {
     // Initialize the power system with the provided world and hex grid
     this.initializePowerSystem(world, context.hexGrid);
-    
+
     // Now resolve the power production
     return this.resolveOneHourOfPowerProduction();
   }
-  
+
   /**
    * Implements the System.mutate method
    * Performs mutations on the game context based on the power system result
    * @param result The result from the update method
    * @param contextDraft An Immer draft of the entire game context
    */
-  public mutate(
-    result: PowerResult,
-    contextDraft: Draft<GameContext>
-  ): void {
+  public mutate(result: PowerResult, contextDraft: Draft<GameContext>): void {
     if (!result.success) return;
-    
+
     // Update fuel storage levels for power plants in the entities
     Object.entries(result.currentFuelStorageByPowerPlantId).forEach(([plantId, fuelLevel]) => {
       const entity = contextDraft.public?.entitiesById?.[plantId];
       if (!entity || !entity.fuelStorage) return;
-      
+
       entity.fuelStorage = {
         ...entity.fuelStorage,
-        currentFuelStorage: fuelLevel
+        currentFuelStorage: fuelLevel,
       };
     });
-    
+
     // Update player income and power sold in the public context
     Object.keys(result.incomePerPlayer).forEach((playerId) => {
       if (!contextDraft.public.players?.[playerId]) return;
-      
+
       const income = result.incomePerPlayer[playerId] ?? 0;
       const powerSoldKWh = result.powerSoldPerPlayerKWh[playerId] ?? 0;
-      
-      console.log(
-        `Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`
-      );
-      
+
+      console.log(`Player ${playerId} income: ${income}, power sold: ${powerSoldKWh}`);
+
       contextDraft.public.players[playerId].money += income;
       contextDraft.public.players[playerId].powerSoldKWh += powerSoldKWh;
     });
   }
-  
+
   /**
    * Process one hour of power production
    * Calculate power distribution, income, and fuel consumption
@@ -376,7 +380,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
   public resolveOneHourOfPowerProduction(): PowerResult {
     // Entity queries have already been refreshed in update() method
     // No need to call refreshEntityQueries() here
-    
+
     // Reset capacities and statuses
     this.powerPlants.forEach((plant) => {
       // Check if there's enough fuel for at least some power generation
@@ -412,14 +416,9 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
     for (const consumer of this.consumers) {
       const connectedGrids = new Set(
         consumer.connectedPlants
-          .map((connection) =>
-            this.powerPlants.find((p) => p.id === connection.plantId)
-          )
+          .map((connection) => this.powerPlants.find((p) => p.id === connection.plantId))
           .filter((plant): plant is PowerPlant => plant !== undefined)
-          .map(
-            (plant) =>
-              this.grids.find((g) => g.powerPlantIds.includes(plant.id))!
-          )
+          .map((plant) => this.grids.find((g) => g.powerPlantIds.includes(plant.id))!)
       );
 
       // Calculate total available capacity across all connected grids
@@ -446,8 +445,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       // A grid goes into blackout if any of its consumers can't meet their demand
       // from their total available capacity across all connected grids
       const causesBlackout = consumers.some(
-        (consumer) =>
-          (totalAvailablePerConsumer.get(consumer) || 0) < consumer.demandKwh
+        (consumer) => (totalAvailablePerConsumer.get(consumer) || 0) < consumer.demandKwh
       );
       if (causesBlackout) {
         grid.blackout = true;
@@ -456,14 +454,9 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
         for (const consumer of consumers) {
           const connectedGrids = new Set(
             consumer.connectedPlants
-              .map((connection) =>
-                this.powerPlants.find((p) => p.id === connection.plantId)
-              )
+              .map((connection) => this.powerPlants.find((p) => p.id === connection.plantId))
               .filter((plant): plant is PowerPlant => plant !== undefined)
-              .map(
-                (plant) =>
-                  this.grids.find((g) => g.powerPlantIds.includes(plant.id))!
-              )
+              .map((plant) => this.grids.find((g) => g.powerPlantIds.includes(plant.id))!)
           );
           for (const connectedGrid of connectedGrids) {
             connectedGrid.blackout = true;
@@ -486,9 +479,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
         )
         .filter(({ plant }) => {
           if (plant.remainingCapacity <= 0) return false;
-          const grid = this.grids.find((g) =>
-            g.powerPlantIds.includes(plant.id)
-          );
+          const grid = this.grids.find((g) => g.powerPlantIds.includes(plant.id));
           return !grid?.blackout;
         })
         .map(({ plant }) => plant);
@@ -501,9 +492,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       for (const plant of availablePlants) {
         if (remainingDemand <= 0) break;
 
-        const grid = this.grids.find((g) =>
-          g.powerPlantIds.includes(plant.id)
-        )!;
+        const grid = this.grids.find((g) => g.powerPlantIds.includes(plant.id))!;
         if (grid.blackout) continue;
 
         // Determine how much power to allocate from this plant
@@ -516,8 +505,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
 
         // Track power sold and income
         if (plant.playerId) {
-          powerSoldPerPlayer[plant.playerId] =
-            (powerSoldPerPlayer[plant.playerId] || 0) + supply;
+          powerSoldPerPlayer[plant.playerId] = (powerSoldPerPlayer[plant.playerId] || 0) + supply;
           incomePerPlayer[plant.playerId] =
             (incomePerPlayer[plant.playerId] || 0) + supply * plant.pricePerKWh;
         }
@@ -527,9 +515,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
     // After power distribution, consume fuel for plants that generated power
     this.powerPlants.forEach((plant) => {
       // Only consume fuel if the plant generated power (used some capacity)
-      const plantGrid = this.grids.find((g) =>
-        g.powerPlantIds.includes(plant.id)
-      );
+      const plantGrid = this.grids.find((g) => g.powerPlantIds.includes(plant.id));
 
       // Check if this specific plant has generated power
       const powerGeneratedKWh = plant.maxCapacity - plant.remainingCapacity;
@@ -537,10 +523,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       if (plantGrid && powerGeneratedKWh > 0) {
         // Consume fuel based on the actual power generated
         const fuelConsumed = powerGeneratedKWh * plant.fuelConsumptionPerKWh;
-        plant.currentFuelStorage = Math.max(
-          0,
-          plant.currentFuelStorage - fuelConsumed
-        );
+        plant.currentFuelStorage = Math.max(0, plant.currentFuelStorage - fuelConsumed);
       }
 
       // Record the current fuel level
@@ -567,18 +550,18 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
    * @returns An object indicating if the placement is valid and a reason if invalid
    */
   validateBuildablePlacement(
-    buildableType: 'powerPlant' | 'powerPole',
+    buildableType: "powerPlant" | "powerPole",
     playerId: string,
     coordinates?: HexCoordinates,
     cornerCoordinates?: { hex: HexCoordinates; position: number }
   ): { valid: boolean; reason?: string } {
     // Check if this is the player's first power plant (always allowed)
     const playerHasPowerPlants = this.powerPlantEntities.some(
-      entity => entity.owner?.playerId === playerId
+      (entity) => entity.owner?.playerId === playerId
     );
 
     // First power plant is always allowed
-    if (buildableType === 'powerPlant' && !playerHasPowerPlants) {
+    if (buildableType === "powerPlant" && !playerHasPowerPlants) {
       return { valid: true };
     }
 
@@ -600,11 +583,11 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
     }
 
     // For power poles, check if it's adjacent to the player's existing grid
-    if (buildableType === 'powerPole' && cornerCoordinates) {
+    if (buildableType === "powerPole" && cornerCoordinates) {
       // Check if the new pole can connect to existing poles
       const possibleConnections = findPossibleConnectionsWithWorld(
         {
-          with: () => ({ entities: this.powerPoleEntities })
+          with: () => ({ entities: this.powerPoleEntities }),
         } as any as World<Entity>, // Adapter pattern to use existing poles
         cornerCoordinates,
         playerId
@@ -620,11 +603,11 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
 
       // Check if any of the player's power plants are in the adjacent hexes
       const playerPowerPlants = this.powerPlantEntities.filter(
-        entity => entity.owner?.playerId === playerId
+        (entity) => entity.owner?.playerId === playerId
       );
-        
-      const isAdjacentToPlayerPlant = playerPowerPlants.some(
-        (entity) => adjacentHexes.some((hex) => equals(hex, entity.hexPosition.coordinates))
+
+      const isAdjacentToPlayerPlant = playerPowerPlants.some((entity) =>
+        adjacentHexes.some((hex) => equals(hex, entity.hexPosition.coordinates))
       );
 
       if (isAdjacentToPlayerPlant) {
@@ -633,13 +616,12 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
 
       return {
         valid: false,
-        reason:
-          "Power poles must be connected to your existing grid or power plants",
+        reason: "Power poles must be connected to your existing grid or power plants",
       };
     }
 
     // For power plants, check if it's adjacent to the player's existing grid
-    if (buildableType === 'powerPlant' && coordinates) {
+    if (buildableType === "powerPlant" && coordinates) {
       // Get all power poles in the player's grids
       const playerPoleIds = new Set<string>();
       playerGrids.forEach((grid) => {

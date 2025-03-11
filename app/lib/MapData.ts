@@ -71,27 +71,17 @@ export function getStateNameAtCoordinates(
         const coordinates = polygon[0] as [number, number][]; // Get the outer ring of the polygon
         let inside = false;
 
-        for (
-          let i = 0, j = coordinates.length - 1;
-          i < coordinates.length;
-          j = i++
-        ) {
+        for (let i = 0, j = coordinates.length - 1; i < coordinates.length; j = i++) {
           const [xi, yi] = coordinates[i];
           const [xj, yj] = coordinates[j];
 
           const intersect =
-            yi > lat !== yj > lat &&
-            lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+            yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
 
           if (intersect) inside = !inside;
         }
 
-        if (
-          inside &&
-          state.id &&
-          mapData.states &&
-          state.id in mapData.states
-        ) {
+        if (inside && state.id && mapData.states && state.id in mapData.states) {
           return mapData.states[state.id].properties.name;
         }
       }

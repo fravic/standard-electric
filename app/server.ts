@@ -69,10 +69,7 @@ const authHooks: AuthHooks<Env> = {
   },
 
   onAuthenticate: async ({ userId, email, env }) => {
-    await env.KV_STORAGE.put(
-      `user:${userId}:lastLogin`,
-      new Date().toISOString()
-    );
+    await env.KV_STORAGE.put(`user:${userId}:lastLogin`, new Date().toISOString());
   },
 
   onEmailVerified: async ({ userId, email, env }) => {

@@ -31,7 +31,7 @@ export interface System<TContext extends SystemContext, TResult extends SystemRe
    * @param context System-specific context needed for initialization
    */
   initialize(world: World<Entity>, context: TContext): void;
-  
+
   /**
    * Updates the system state based on the current world state
    * This performs the main processing of the system and returns results.
@@ -40,14 +40,11 @@ export interface System<TContext extends SystemContext, TResult extends SystemRe
    * @returns System-specific result object
    */
   update(world: World<Entity>, context: TContext): TResult;
-  
+
   /**
    * Performs mutations on the game context within the system's scope
    * @param result The result from the update method
    * @param contextDraft An Immer draft of the entire game context
    */
-  mutate(
-    result: TResult,
-    contextDraft: Draft<GameContext>
-  ): void;
+  mutate(result: TResult, contextDraft: Draft<GameContext>): void;
 }

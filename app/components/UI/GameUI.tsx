@@ -73,11 +73,7 @@ export const GameUI: React.FC = () => {
     <>
       <div style={styles.playersContainer}>
         {sortedPlayers.map(([playerId, player]) => (
-          <PlayerBar
-            key={playerId}
-            player={player}
-            isCurrentPlayer={playerId === userId}
-          />
+          <PlayerBar key={playerId} player={player} isCurrentPlayer={playerId === userId} />
         ))}
         {!isLobby && currentPlayer && <BuildBar player={currentPlayer} />}
       </div>
@@ -87,9 +83,7 @@ export const GameUI: React.FC = () => {
             Day {dayNumber} {timeEmoji}
           </div>
           <div style={styles.marketButton}>
-            <Button onClick={() => setShowMarketModal(true)}>
-              Commodity Market
-            </Button>
+            <Button onClick={() => setShowMarketModal(true)}>Commodity Market</Button>
           </div>
           <TerrainPaintUI />
           <HexPreviewTooltip />
@@ -98,9 +92,7 @@ export const GameUI: React.FC = () => {
       )}
       {isAuction && <PowerPlantAuction />}
       {isLobby && <Lobby players={players} />}
-      {showMarketModal && (
-        <CommodityMarketModal onClose={() => setShowMarketModal(false)} />
-      )}
+      {showMarketModal && <CommodityMarketModal onClose={() => setShowMarketModal(false)} />}
     </>
   );
 };

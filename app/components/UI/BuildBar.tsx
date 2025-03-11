@@ -12,17 +12,16 @@ interface BuildBarProps {
 }
 
 export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
-  const buildMode = useSelector(
-    clientStore,
-    (state) => state.context.buildMode
-  );
+  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
 
   const world = useWorld();
   const userId = AuthContext.useSelector((state) => state.userId);
   const blueprintEntities = useMemo(() => {
-    return [...world.with("blueprint", "owner").where((blueprint) =>
-      blueprint.owner?.playerId === userId
-    )];
+    return [
+      ...world
+        .with("blueprint", "owner")
+        .where((blueprint) => blueprint.owner?.playerId === userId),
+    ];
   }, [world, userId]);
 
   const handleBlueprintClick = (blueprintId: string) => {
@@ -62,14 +61,12 @@ export const BuildBar: React.FC<BuildBarProps> = ({ player }) => {
           key={blueprintEntity.id}
           name={blueprintEntity.blueprint.name}
           details={{
-            powerGenerationKW: blueprintEntity.blueprint.components.powerGeneration?.powerGenerationKW,
+            powerGenerationKW:
+              blueprintEntity.blueprint.components.powerGeneration?.powerGenerationKW,
             requiredRegion: blueprintEntity.blueprint.components.requiredRegion?.requiredRegionName,
           }}
           onClick={() => handleBlueprintClick(blueprintEntity.id)}
-          isActive={Boolean(
-            buildMode &&
-              buildMode.blueprintId === blueprintEntity.id
-          )}
+          isActive={Boolean(buildMode && buildMode.blueprintId === blueprintEntity.id)}
         />
       ))}
     </div>

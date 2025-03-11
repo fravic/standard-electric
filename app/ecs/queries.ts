@@ -3,7 +3,9 @@ import { equals, HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { Entity } from "./entity";
 
 export function entityAtHexCoordinate(world: World<Entity>, hexCoordinates: HexCoordinates) {
-  return world.with("hexPosition").where((entity) => equals(entity.hexPosition.coordinates, hexCoordinates)).first;
+  return world
+    .with("hexPosition")
+    .where((entity) => equals(entity.hexPosition.coordinates, hexCoordinates)).first;
 }
 
 /**
@@ -13,8 +15,9 @@ export function entityAtHexCoordinate(world: World<Entity>, hexCoordinates: HexC
 export function powerPoleBlueprintsForPlayer(world: World<Entity>, playerId: string) {
   return world
     .with("blueprint", "owner")
-    .where(entity => 
-      entity.owner.playerId === playerId && entity.blueprint.components.connections !== undefined
+    .where(
+      (entity) =>
+        entity.owner.playerId === playerId && entity.blueprint.components.connections !== undefined
     );
 }
 
@@ -25,8 +28,10 @@ export function powerPoleBlueprintsForPlayer(world: World<Entity>, playerId: str
 export function powerPlantBlueprintsForPlayer(world: World<Entity>, playerId: string) {
   return world
     .with("blueprint", "owner")
-    .where(entity => 
-      entity.owner.playerId === playerId && entity.blueprint.components.powerGeneration !== undefined
+    .where(
+      (entity) =>
+        entity.owner.playerId === playerId &&
+        entity.blueprint.components.powerGeneration !== undefined
     );
 }
 
@@ -35,15 +40,16 @@ export function powerPlantBlueprintsForPlayer(world: World<Entity>, playerId: st
  * Power poles are defined as entities with a connections component
  */
 export function powerPoles(world: World<Entity>) {
-  return world
-    .with("cornerPosition", "connections");
+  return world.with("cornerPosition", "connections");
 }
 
 /**
  * Query for power poles for a specific player
  */
 export function powerPolesForPlayer(world: World<Entity>, playerId: string) {
-  return powerPoles(world).with("owner").where(entity => entity.owner.playerId === playerId);
+  return powerPoles(world)
+    .with("owner")
+    .where((entity) => entity.owner.playerId === playerId);
 }
 
 /**
@@ -51,13 +57,14 @@ export function powerPolesForPlayer(world: World<Entity>, playerId: string) {
  * Power plants are defined as entities with a powerGeneration component
  */
 export function powerPlants(world: World<Entity>) {
-  return world
-    .with("hexPosition", "powerGeneration");
+  return world.with("hexPosition", "powerGeneration");
 }
 
 /**
  * Query for power plants for a specific player
  */
 export function powerPlantsForPlayer(world: World<Entity>, playerId: string) {
-  return powerPlants(world).with("owner").where(entity => entity.owner.playerId === playerId);
+  return powerPlants(world)
+    .with("owner")
+    .where((entity) => entity.owner.playerId === playerId);
 }

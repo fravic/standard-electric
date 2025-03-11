@@ -7,12 +7,12 @@ import { createDefaultContext } from "@/actor/createDefaultContext";
 describe("AuctionSystem", () => {
   let world: World<Entity>;
   let auctionSystem: AuctionSystem;
-  
+
   // Player IDs for reference in tests
   const PLAYER1_ID = "player1";
   const PLAYER2_ID = "player2";
   const PLAYER3_ID = "player3";
-  
+
   // Sample players - following the Player interface in game.types.ts
   const players: Record<string, Player> = {
     [PLAYER1_ID]: {
@@ -42,8 +42,8 @@ describe("AuctionSystem", () => {
     players,
     auction: null,
     totalTicks: 0,
-    randomSeed: 0
-  }
+    randomSeed: 0,
+  };
 
   beforeEach(() => {
     world = new World<Entity>();
@@ -53,7 +53,7 @@ describe("AuctionSystem", () => {
   describe("startAuction", () => {
     it("should create a new auction with provided blueprint IDs", () => {
       const result = auctionSystem.startAuction(defaultAuctionContext, true);
-      
+
       expect(result.success).toBe(true);
       expect(result.auction).toEqual({
         currentBlueprint: null,
@@ -66,7 +66,7 @@ describe("AuctionSystem", () => {
 
     it("should set isPassingAllowed to false when specified", () => {
       const result = auctionSystem.startAuction(defaultAuctionContext, false);
-      
+
       expect(result.success).toBe(true);
       expect(result.auction?.isPassingAllowed).toBe(false);
     });
@@ -81,7 +81,7 @@ describe("AuctionSystem", () => {
         PLAYER1_ID,
         1000
       );
-      
+
       expect(result.success).toBe(true);
       expect(result.auction).toEqual({
         ...startResult.auction,
@@ -105,7 +105,7 @@ describe("AuctionSystem", () => {
         "player1",
         1000
       );
-      
+
       expect(result.success).toBe(false);
       expect(result.auction).toBeNull();
     });
@@ -115,7 +115,7 @@ describe("AuctionSystem", () => {
     it("should add player to passedPlayerIds", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
       const result = auctionSystem.auctionPass(startResult.auction!, PLAYER1_ID);
-      
+
       expect(result.success).toBe(true);
       expect(result.auction?.passedPlayerIds).toContain(PLAYER1_ID);
     });
@@ -123,7 +123,7 @@ describe("AuctionSystem", () => {
     it("should return failure if passing is not allowed", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, false);
       const result = auctionSystem.auctionPass(startResult.auction!, PLAYER1_ID);
-      
+
       expect(result.success).toBe(false);
       expect(result.auction).toBeNull();
     });
@@ -132,15 +132,15 @@ describe("AuctionSystem", () => {
   describe("auctionPlaceBid", () => {
     it("should add a bid to the current blueprint", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
-      
-      const result = auctionSystem.auctionPlaceBid(
-        initResult.auction!,
-        PLAYER2_ID,
-        1100,
-        players
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
       );
-      
+
+      const result = auctionSystem.auctionPlaceBid(initResult.auction!, PLAYER2_ID, 1100, players);
+
       expect(result.success).toBe(true);
       expect(result.auction?.currentBlueprint?.bids).toEqual([
         {
@@ -156,15 +156,20 @@ describe("AuctionSystem", () => {
 
     it("should return failure if player cannot afford the bid", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
-      
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
+      );
+
       const result = auctionSystem.auctionPlaceBid(
         initResult.auction!,
         PLAYER3_ID,
         3000, // Player3 only has 2000
         players
       );
-      
+
       expect(result.success).toBe(false);
       expect(result.auction).toBeNull();
     });
@@ -173,10 +178,15 @@ describe("AuctionSystem", () => {
   describe("auctionPassBid", () => {
     it("should add a passed bid to the current blueprint", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
-      
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
+      );
+
       const result = auctionSystem.auctionPassBid(initResult.auction!, PLAYER2_ID);
-      
+
       expect(result.success).toBe(true);
       expect(result.auction?.currentBlueprint?.bids).toEqual([
         {
@@ -194,11 +204,21 @@ describe("AuctionSystem", () => {
   describe("endBidding", () => {
     it("should process the winner and update auction state", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
-      const placeBidResult = auctionSystem.auctionPlaceBid(initResult.auction!, PLAYER2_ID, 1100, players);
-      
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
+      );
+      const placeBidResult = auctionSystem.auctionPlaceBid(
+        initResult.auction!,
+        PLAYER2_ID,
+        1100,
+        players
+      );
+
       const result = auctionSystem.endBidding(placeBidResult.auction!, players);
-      
+
       expect(result.success).toBe(true);
       expect(result.auction).not.toBeNull();
       expect(result.auction?.currentBlueprint).toBeNull();
@@ -216,17 +236,22 @@ describe("AuctionSystem", () => {
   describe("shouldEndBidding", () => {
     it("should return true when only one player is left bidding", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
+      );
       const pass1Result = auctionSystem.auctionPassBid(initResult.auction!, PLAYER2_ID);
       const pass2Result = auctionSystem.auctionPassBid(pass1Result.auction!, PLAYER3_ID);
-      
+
       const context = {
         gameTime: 0,
         totalTicks: 0,
         players,
         auction: pass2Result.auction!,
       };
-      
+
       expect(auctionSystem.shouldEndBidding(context)).toBe(true);
     });
   });
@@ -234,22 +259,27 @@ describe("AuctionSystem", () => {
   describe("shouldEndAuction", () => {
     it("should return true when all players have passed or purchased", () => {
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      
+
       // Player1 buys blueprint1
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
+      );
       const endResult = auctionSystem.endBidding(initResult.auction!, players);
-      
+
       // Other players pass
       const pass1Result = auctionSystem.auctionPass(endResult.auction!, PLAYER2_ID);
       const pass2Result = auctionSystem.auctionPass(pass1Result.auction!, PLAYER3_ID);
-      
+
       const context = {
         gameTime: 0,
         totalTicks: 0,
         players,
         auction: pass2Result.auction!,
       };
-      
+
       expect(auctionSystem.shouldEndAuction(context)).toBe(true);
     });
   });
@@ -258,34 +288,38 @@ describe("AuctionSystem", () => {
     it("should update entity owners based on auction purchases", () => {
       // Set up auction with a purchase
       const startResult = auctionSystem.startAuction(defaultAuctionContext, true);
-      const initResult = auctionSystem.auctionInitiateBid(startResult.auction!, "coal_plant_small", PLAYER1_ID, 1000);
+      const initResult = auctionSystem.auctionInitiateBid(
+        startResult.auction!,
+        "coal_plant_small",
+        PLAYER1_ID,
+        1000
+      );
       const endResult = auctionSystem.endBidding(initResult.auction!, players);
-      
+
       // Create draft game context
-      const contextDraft = createDefaultContext({id: 'test-game', randomSeed: 123} as GameInput, {
-        public: { 
+      const contextDraft = createDefaultContext({ id: "test-game", randomSeed: 123 } as GameInput, {
+        public: {
           players: { ...players },
           time: { totalTicks: 0, isPaused: false },
-          entitiesById: {
-          },
+          entitiesById: {},
           auction: endResult.auction,
-          commodityMarket: { },
+          commodityMarket: {},
         },
       });
-      
+
       // Call mutate with the results
       auctionSystem.mutate(startResult, contextDraft);
       auctionSystem.mutate(initResult, contextDraft);
       auctionSystem.mutate(endResult, contextDraft);
-      
+
       // Check that the entity owner was updated
       expect(contextDraft.public.entitiesById["coal_plant_small"].owner).toEqual({
         playerId: PLAYER1_ID,
       });
-      
+
       // Check that player money was deducted
       expect(contextDraft.public.players[PLAYER1_ID].money).toBe(4000); // 5000 - 1000
-      
+
       // Check that other entity was not modified
       expect(contextDraft.public.entitiesById["coal_plant_medium"].owner).toBeUndefined();
     });

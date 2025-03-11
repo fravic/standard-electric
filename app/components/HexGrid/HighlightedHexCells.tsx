@@ -20,9 +20,7 @@ export const HighlightedHexCells: React.FC<HighlightedHexCellsProps> = ({
 }) => {
   const { highlightGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
-    const colorObj = Array.isArray(color)
-      ? new THREE.Color(color[0], color[1], color[2])
-      : color;
+    const colorObj = Array.isArray(color) ? new THREE.Color(color[0], color[1], color[2]) : color;
 
     cells.forEach((cell) => {
       const center = getCenterPoint(cell);
@@ -53,10 +51,7 @@ export const HighlightedHexCells: React.FC<HighlightedHexCellsProps> = ({
       "position",
       new THREE.Float32BufferAttribute(hexMesh.vertices, 3)
     );
-    highlightGeometry.setAttribute(
-      "color",
-      new THREE.Float32BufferAttribute(hexMesh.colors, 3)
-    );
+    highlightGeometry.setAttribute("color", new THREE.Float32BufferAttribute(hexMesh.colors, 3));
     highlightGeometry.setIndex(hexMesh.indices);
     highlightGeometry.computeVertexNormals();
 

@@ -1,10 +1,7 @@
 import React, { useMemo } from "react";
 import { Billboard, Text } from "@react-three/drei";
 import { HexCell, getCenterPoint } from "@/lib/HexCell";
-import {
-  coordinatesToString,
-  HexCoordinates,
-} from "@/lib/coordinates/HexCoordinates";
+import { coordinatesToString, HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { HexMetrics } from "@/lib/HexMetrics";
 import { UI_COLORS } from "@/lib/palette";
 import { SurveyResultComponent } from "@/ecs/entity";
@@ -16,9 +13,11 @@ interface SurveyProgressIndicatorProps {
   currentTick: number;
 }
 
-export const SurveyProgressIndicator: React.FC<
-  SurveyProgressIndicatorProps
-> = ({ cells, surveyResultByHexCell, currentTick }) => {
+export const SurveyProgressIndicator: React.FC<SurveyProgressIndicatorProps> = ({
+  cells,
+  surveyResultByHexCell,
+  currentTick,
+}) => {
   // Find cells that are currently being surveyed
   const activeSurveys = useMemo(() => {
     const result: { cell: HexCell; progress: number }[] = [];
@@ -62,10 +61,7 @@ interface SurveyProgressBarProps {
   progress: number;
 }
 
-const SurveyProgressBar: React.FC<SurveyProgressBarProps> = ({
-  cell,
-  progress,
-}) => {
+const SurveyProgressBar: React.FC<SurveyProgressBarProps> = ({ cell, progress }) => {
   const center = getCenterPoint(cell);
   const barWidth = HexMetrics.outerRadius * 1.2;
   const barHeight = 0.2;
@@ -81,16 +77,9 @@ const SurveyProgressBar: React.FC<SurveyProgressBarProps> = ({
         </mesh>
 
         {/* Progress fill */}
-        <mesh
-          position={[((progress - 1) * barWidth) / 2, 0, 0.01]}
-          scale={[progress, 1, 1]}
-        >
+        <mesh position={[((progress - 1) * barWidth) / 2, 0, 0.01]} scale={[progress, 1, 1]}>
           <planeGeometry args={[barWidth, barHeight]} />
-          <meshBasicMaterial
-            color={UI_COLORS.PRIMARY}
-            transparent
-            opacity={0.9}
-          />
+          <meshBasicMaterial color={UI_COLORS.PRIMARY} transparent opacity={0.9} />
         </mesh>
       </Billboard>
     </group>

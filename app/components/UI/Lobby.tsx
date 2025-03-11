@@ -63,8 +63,7 @@ export const Lobby: React.FC<LobbyProps> = ({ players }) => {
   const playerCount = Object.keys(players).length;
   const isHost = currentPlayer?.isHost;
   const canStartGame = isHost && playerCount > 1;
-  const canJoin =
-    playerCount < MAX_PLAYERS && !currentPlayer && playerName.trim().length > 0;
+  const canJoin = playerCount < MAX_PLAYERS && !currentPlayer && playerName.trim().length > 0;
   const sendGameEvent = GameContext.useSend();
 
   const handleJoin = () => {
@@ -118,9 +117,7 @@ export const Lobby: React.FC<LobbyProps> = ({ players }) => {
           Start Game
         </button>
       ) : (
-        <div style={{ textAlign: "center", marginTop: "10px" }}>
-          Waiting for host to start...
-        </div>
+        <div style={{ textAlign: "center", marginTop: "10px" }}>Waiting for host to start...</div>
       )}
     </div>
   );

@@ -18,13 +18,16 @@ import { clientStore } from "@/lib/clientState";
 import { AuthContext } from "@/auth.context";
 import { AuthClient } from "@open-game-collective/auth-kit/client";
 import { WorldContextProvider } from "@/components/WorldContext";
-import {
-  coordinatesToString,
-  createHexCoordinates,
-} from "@/lib/coordinates/HexCoordinates";
+import { coordinatesToString, createHexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { GamePrivateContext } from "@/actor/game.types";
 import { Entity } from "@/ecs/entity";
-import { createPowerPole, createPowerPlant, createPowerPlantBlueprint, createWorldWithEntities, createPowerPoleBlueprint } from "@/ecs/factories";
+import {
+  createPowerPole,
+  createPowerPlant,
+  createPowerPlantBlueprint,
+  createWorldWithEntities,
+  createPowerPoleBlueprint,
+} from "@/ecs/factories";
 import powerPlantBlueprints from "@/../public/powerPlantBlueprints.json";
 
 const meta: Meta<typeof Game> = {
@@ -122,7 +125,7 @@ export const Blank: Story = {
     // Create the client with empty entities
     const entities: Record<string, Entity> = {};
     const world = createWorldWithEntities(entities, {});
-    
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
@@ -158,11 +161,11 @@ export const DebugMode: Story = {
       powerGenerationKW: 1000,
       startingPrice: 10,
     });
-    
+
     const entities: Record<string, Entity> = {
       [genericPlant.id]: genericPlant,
     };
-    
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
@@ -198,7 +201,7 @@ export const WithPowerLines: Story = {
       playerId: PLAYER_ID,
       connectedToIds: [],
     });
-    
+
     const powerPole2 = createPowerPole({
       id: "power-pole-2",
       cornerCoordinates: {
@@ -208,7 +211,7 @@ export const WithPowerLines: Story = {
       playerId: PLAYER_ID,
       connectedToIds: ["power-pole-1"],
     });
-    
+
     const powerPoleLeft1 = createPowerPole({
       id: "power-pole-left-1",
       cornerCoordinates: {
@@ -218,7 +221,7 @@ export const WithPowerLines: Story = {
       playerId: PLAYER_ID,
       connectedToIds: ["power-pole-2"],
     });
-    
+
     const powerPoleLeft2 = createPowerPole({
       id: "power-pole-left-2",
       cornerCoordinates: {
@@ -228,7 +231,7 @@ export const WithPowerLines: Story = {
       playerId: PLAYER_ID,
       connectedToIds: ["power-pole-left-1"],
     });
-    
+
     const entities: Record<string, Entity> = {
       [powerPole1.id]: powerPole1,
       [powerPole2.id]: powerPole2,
@@ -269,7 +272,7 @@ export const Auction: Story = {
       powerGenerationKW: 1000,
       startingPrice: 10,
     });
-    
+
     const mediumCoalPlant = createPowerPlantBlueprint({
       id: "coal_plant_medium",
       name: "Medium Coal Plant",
@@ -279,7 +282,7 @@ export const Auction: Story = {
       startingPrice: 18,
       requiredRegionName: "California",
     });
-    
+
     const largeCoalPlant = createPowerPlantBlueprint({
       id: "coal_plant_large",
       name: "Large Coal Plant",
@@ -289,7 +292,7 @@ export const Auction: Story = {
       startingPrice: 25,
       requiredRegionName: "Texas",
     });
-    
+
     // Use the entities from the powerPlantBlueprints.json file for the auction
     const smallCoalPlantBlueprint = powerPlantBlueprints[0];
     const mediumCoalPlantBlueprint = powerPlantBlueprints[1];
@@ -300,9 +303,13 @@ export const Auction: Story = {
       [mediumCoalPlant.id]: mediumCoalPlant,
       [largeCoalPlant.id]: largeCoalPlant,
     };
-    
+
     const auction = {
-      availableBlueprintIds: [smallCoalPlantBlueprint.id, mediumCoalPlantBlueprint.id, largeCoalPlantBlueprint.id],
+      availableBlueprintIds: [
+        smallCoalPlantBlueprint.id,
+        mediumCoalPlantBlueprint.id,
+        largeCoalPlantBlueprint.id,
+      ],
       currentBlueprint: null,
       purchases: [],
       passedPlayerIds: [],
@@ -342,7 +349,7 @@ export const AuctionWithCurrentBlueprint: Story = {
       pricePerKWh: 0.05,
       startingPrice: 10,
     });
-    
+
     const mediumCoalPlant = createPowerPlantBlueprint({
       id: "coal_plant_medium",
       name: "Medium Coal Plant",
@@ -352,7 +359,7 @@ export const AuctionWithCurrentBlueprint: Story = {
       startingPrice: 18,
       requiredRegionName: "California",
     });
-    
+
     const largeCoalPlant = createPowerPlantBlueprint({
       id: "coal_plant_large",
       name: "Large Coal Plant",
@@ -362,18 +369,18 @@ export const AuctionWithCurrentBlueprint: Story = {
       startingPrice: 25,
       requiredRegionName: "Texas",
     });
-    
+
     // Use the entities from the powerPlantBlueprints.json file for the auction
     const smallCoalPlantBlueprint = powerPlantBlueprints[0];
     const mediumCoalPlantBlueprint = powerPlantBlueprints[1];
     const largeCoalPlantBlueprint = powerPlantBlueprints[2];
-    
+
     const entities: Record<string, Entity> = {
       [smallCoalPlant.id]: smallCoalPlant,
       [mediumCoalPlant.id]: mediumCoalPlant,
       [largeCoalPlant.id]: largeCoalPlant,
     };
-    
+
     const auction = {
       availableBlueprintIds: [mediumCoalPlantBlueprint.id, largeCoalPlantBlueprint.id],
       currentBlueprint: {
@@ -439,7 +446,7 @@ export const BuildablePlacementInCalifornia: Story = {
       startingPrice: 20,
       requiredRegionName: "California",
     });
-    
+
     const genericPlant = createPowerPlantBlueprint({
       id: "generic_plant",
       name: "Generic Power Plant",
@@ -447,12 +454,12 @@ export const BuildablePlacementInCalifornia: Story = {
       powerGenerationKW: 1000,
       startingPrice: 10,
     });
-    
+
     const entities: Record<string, Entity> = {
       [californiaPlant.id]: californiaPlant,
       [genericPlant.id]: genericPlant,
     };
-    
+
     const client = createActorKitMockClient<GameMachine>({
       initialSnapshot: {
         public: {
@@ -497,7 +504,7 @@ export const GridConnectivityValidation: Story = {
       maxFuelStorage: 1000,
       currentFuelStorage: 500,
     });
-    
+
     // Create power pole for Player 1
     const powerPole1 = createPowerPole({
       id: "power-pole-1",
@@ -508,7 +515,7 @@ export const GridConnectivityValidation: Story = {
       playerId: PLAYER_ID,
       connectedToIds: [],
     });
-    
+
     // Create power plant for Player 2
     const player2Plant = createPowerPlant({
       id: "player2-plant",
@@ -520,7 +527,7 @@ export const GridConnectivityValidation: Story = {
       maxFuelStorage: 1000,
       currentFuelStorage: 500,
     });
-    
+
     // Create power pole for Player 2
     const player2Pole = createPowerPole({
       id: "player2-pole",
@@ -531,7 +538,7 @@ export const GridConnectivityValidation: Story = {
       playerId: PLAYER_2_ID,
       connectedToIds: [],
     });
-    
+
     // Create generic plant blueprint for players
     const genericPlant = createPowerPlantBlueprint({
       id: "generic_plant",
@@ -540,7 +547,7 @@ export const GridConnectivityValidation: Story = {
       powerGenerationKW: 1000,
       startingPrice: 10,
     });
-    
+
     // Create player 2's copy of the blueprint
     const player2GenericPlant = createPowerPlantBlueprint({
       id: "generic_plant-player2",
@@ -610,7 +617,7 @@ export const WithCommodityMarket: Story = {
       fuelType: CommodityType.COAL,
       currentFuelStorage: 350,
     });
-    
+
     const oilPlant = createPowerPlant({
       id: "oil-plant-1",
       name: "Oil Power Plant",
@@ -620,7 +627,7 @@ export const WithCommodityMarket: Story = {
       fuelType: CommodityType.OIL,
       pricePerKWh: 0.15,
     });
-    
+
     const gasPlant = createPowerPlant({
       id: "gas-plant-1",
       name: "Gas Power Plant",
@@ -632,13 +639,13 @@ export const WithCommodityMarket: Story = {
       fuelType: CommodityType.GAS,
       currentFuelStorage: 300,
     });
-    
+
     const entities: Record<string, Entity> = {
       [coalPlant.id]: coalPlant,
       [oilPlant.id]: oilPlant,
       [gasPlant.id]: gasPlant,
     };
-    console.log({ entities })
+    console.log({ entities });
 
     // Create a player with power sold
     const player1 = createPlayer(PLAYER_ID, "Player 1", 1, 1500, true);
@@ -683,7 +690,7 @@ export const WithSurveys: Story = {
     // Create survey results for the player
     const surveyResultEntities: Entity[] = [
       createSurvey({
-        id: nanoid(), 
+        id: nanoid(),
         hexCoordinates: completedSurveyCoord1,
         surveyStartTick: currentTick - 15,
         isComplete: true,
@@ -694,7 +701,7 @@ export const WithSurveys: Story = {
         },
       }),
       createSurvey({
-        id: nanoid(), 
+        id: nanoid(),
         hexCoordinates: completedSurveyCoord2,
         surveyStartTick: currentTick - 12,
         isComplete: true,
@@ -705,7 +712,7 @@ export const WithSurveys: Story = {
         },
       }),
       createSurvey({
-        id: nanoid(), 
+        id: nanoid(),
         hexCoordinates: completedSurveyCoord3,
         surveyStartTick: currentTick - 11,
         isComplete: true,
@@ -713,13 +720,13 @@ export const WithSurveys: Story = {
         playerId: PLAYER_ID,
       }),
       createSurvey({
-        id: nanoid(), 
+        id: nanoid(),
         hexCoordinates: inProgressSurveyCoord,
         surveyStartTick: currentTick - 1,
         isComplete: false,
         playerId: PLAYER_ID,
       }),
-    ]
+    ];
 
     // Create server-side resources (ground truth)
     const hexCellResources = {
@@ -764,10 +771,13 @@ export const WithSurveys: Story = {
         },
         private: {
           hexCellResources,
-          entitiesById: surveyResultEntities.reduce((acc, entity) => {
-            acc[entity.id] = entity;
-            return acc;
-          }, {} as Record<string, Entity>),
+          entitiesById: surveyResultEntities.reduce(
+            (acc, entity) => {
+              acc[entity.id] = entity;
+              return acc;
+            },
+            {} as Record<string, Entity>
+          ),
         },
         value: "active",
       },

@@ -14,9 +14,7 @@ const PROJECTION_TRANSLATE: [number, number] = [50, 35];
 
 export async function loadUnitedStatesMapData(): Promise<MapData | null> {
   try {
-    const response = await fetch(
-      "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
-    );
+    const response = await fetch("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json");
     const topology = (await response.json()) as StateTopology;
 
     const geojson = feature(topology, topology.objects.states);
@@ -26,15 +24,15 @@ export async function loadUnitedStatesMapData(): Promise<MapData | null> {
 
     return {
       polygon: geojson.features as Feature<MultiPolygon>[],
-      projection: d3
-        .geoAlbersUsa()
-        .scale(PROJECTION_SCALE)
-        .translate(PROJECTION_TRANSLATE),
-      states: topology.objects.states.geometries.reduce((acc, state) => {
-        if (EXCLUDED_STATES.includes(state.id)) return acc;
-        acc[state.id] = state;
-        return acc;
-      }, {} as { [key: string]: StateGeometryMultiPolygon | StateGeometryPolygon }),
+      projection: d3.geoAlbersUsa().scale(PROJECTION_SCALE).translate(PROJECTION_TRANSLATE),
+      states: topology.objects.states.geometries.reduce(
+        (acc, state) => {
+          if (EXCLUDED_STATES.includes(state.id)) return acc;
+          acc[state.id] = state;
+          return acc;
+        },
+        {} as { [key: string]: StateGeometryMultiPolygon | StateGeometryPolygon }
+      ),
     };
   } catch (error) {
     console.error("Failed to load US map data:", error);

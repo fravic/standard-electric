@@ -1,9 +1,6 @@
 import { HexGrid } from "../../../lib/HexGrid";
 import { PowerSystem } from "../PowerSystem";
-import {
-  HexCoordinates,
-  coordinatesToString,
-} from "../../../lib/coordinates/HexCoordinates";
+import { HexCoordinates, coordinatesToString } from "../../../lib/coordinates/HexCoordinates";
 import { CornerPosition } from "../../../lib/coordinates/types";
 import { HexCell, Population, TerrainType } from "../../../lib/HexCell";
 import { World } from "miniplex";
@@ -20,13 +17,13 @@ const createPowerPoleAtCorner = (
     id: `pole-${hex.x}-${hex.z}-${position}`,
     name: "Power Pole",
     cornerPosition: {
-      cornerCoordinates: { hex, position }
+      cornerCoordinates: { hex, position },
     },
     connections: {
-      connectedToIds: [...connectedToIds]
+      connectedToIds: [...connectedToIds],
     },
     owner: {
-      playerId: "player1"
+      playerId: "player1",
     },
   } as Entity;
 };
@@ -46,28 +43,28 @@ const createPowerPlantAtHex = (
     id: `plant-${coordinates.x}-${coordinates.z}`,
     name: "Power Plant",
     hexPosition: {
-      coordinates
+      coordinates,
     },
     owner: {
-      playerId
+      playerId,
     },
     powerGeneration: {
       powerGenerationKW,
-      pricePerKWh
+      pricePerKWh,
     },
     fuelStorage: {
       maxFuelStorage,
-      currentFuelStorage
-    }
+      currentFuelStorage,
+    },
   };
-  
+
   if (fuelType) {
     entity.fuelRequirement = {
       fuelType,
-      fuelConsumptionPerKWh
+      fuelConsumptionPerKWh,
     };
   }
-  
+
   return entity;
 };
 
@@ -81,15 +78,15 @@ describe("PowerSystem", () => {
       height: 10,
       cellsByHexCoordinates: {} as Record<string, HexCell>,
     };
-    
+
     // Create a new Miniplex world for each test
     world = new World<Entity>();
   });
-  
+
   // Helper to create PowerContext for testing
   const createPowerContext = (time: number = 0) => ({
     gameTime: time,
-    hexGrid
+    hexGrid,
   });
 
   describe("findConnectedPowerPlants", () => {
@@ -102,10 +99,10 @@ describe("PowerSystem", () => {
       // Add entities to the world
       world.add(plant);
       world.add(pole);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
       expect(connectedPlants).toEqual([{ plantId: plant.id, path: [pole.id] }]);
     });
@@ -118,23 +115,19 @@ describe("PowerSystem", () => {
       const plant1 = createPowerPlantAtHex(hex2);
       const plant2 = createPowerPlantAtHex(hex3);
       const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
-      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.South, [
-        pole1.id,
-      ]);
+      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.South, [pole1.id]);
 
       // Add entities to the world
       world.add(plant1);
       world.add(plant2);
       world.add(pole1);
       world.add(pole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
-      expect(
-        connectedPlants.sort((a, b) => a.plantId.localeCompare(b.plantId))
-      ).toEqual(
+      expect(connectedPlants.sort((a, b) => a.plantId.localeCompare(b.plantId))).toEqual(
         [
           { plantId: plant1.id, path: [pole1.id] },
           { plantId: plant2.id, path: [pole2.id] },
@@ -149,22 +142,18 @@ describe("PowerSystem", () => {
 
       const plant = createPowerPlantAtHex(hex3);
       const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
-      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [
-        pole1.id,
-      ]);
+      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [pole1.id]);
 
       // Add entities to the world
       world.add(plant);
       world.add(pole1);
       world.add(pole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
-      expect(connectedPlants).toEqual([
-        { plantId: plant.id, path: [pole1.id, pole2.id] },
-      ]);
+      expect(connectedPlants).toEqual([{ plantId: plant.id, path: [pole1.id, pole2.id] }]);
     });
 
     it("should not find power plants that are not connected through poles", () => {
@@ -174,10 +163,10 @@ describe("PowerSystem", () => {
 
       // Add entity to the world
       world.add(plant);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
       expect(connectedPlants).toEqual([]);
     });
@@ -205,17 +194,14 @@ describe("PowerSystem", () => {
       world.add(eastPole);
       world.add(southPole);
       world.add(westPole);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
       // Starting from the north hex, the shortest path should be through the north pole
-      const { connectedPlants } =
-        powerSystem["findConnectedPowerPlants"](northHex);
-      expect(connectedPlants).toEqual([
-        { plantId: plant.id, path: [northPole.id] },
-      ]);
+      const { connectedPlants } = powerSystem["findConnectedPowerPlants"](northHex);
+      expect(connectedPlants).toEqual([{ plantId: plant.id, path: [northPole.id] }]);
     });
 
     it("should not connect to power plants through unconnected poles", () => {
@@ -229,7 +215,7 @@ describe("PowerSystem", () => {
 
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       world.add(plant);
       world.add(pole1);
       const { connectedPlants } = powerSystem.findConnectedPowerPlants(hex1);
@@ -251,21 +237,11 @@ describe("PowerSystem", () => {
 
       // Create a chain of poles connecting to the plant
       const pole1 = createPowerPoleAtCorner(startHex, CornerPosition.North, []);
-      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.North, [
-        pole1.id,
-      ]);
-      const pole3 = createPowerPoleAtCorner(hex2, CornerPosition.North, [
-        pole2.id,
-      ]);
-      const pole4 = createPowerPoleAtCorner(hex3, CornerPosition.North, [
-        pole3.id,
-      ]);
-      const pole5 = createPowerPoleAtCorner(hex4, CornerPosition.North, [
-        pole4.id,
-      ]);
-      const pole6 = createPowerPoleAtCorner(hex5, CornerPosition.North, [
-        pole5.id,
-      ]);
+      const pole2 = createPowerPoleAtCorner(hex1, CornerPosition.North, [pole1.id]);
+      const pole3 = createPowerPoleAtCorner(hex2, CornerPosition.North, [pole2.id]);
+      const pole4 = createPowerPoleAtCorner(hex3, CornerPosition.North, [pole3.id]);
+      const pole5 = createPowerPoleAtCorner(hex4, CornerPosition.North, [pole4.id]);
+      const pole6 = createPowerPoleAtCorner(hex5, CornerPosition.North, [pole5.id]);
 
       // Add entities to the world
       world.add(plant);
@@ -275,13 +251,12 @@ describe("PowerSystem", () => {
       world.add(pole4);
       world.add(pole5);
       world.add(pole6);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
-      const { connectedPlants } =
-        powerSystem["findConnectedPowerPlants"](startHex);
+      const { connectedPlants } = powerSystem["findConnectedPowerPlants"](startHex);
       expect(connectedPlants).toEqual([
         {
           plantId: plant.id,
@@ -308,40 +283,16 @@ describe("PowerSystem", () => {
       const rightPlant = createPowerPlantAtHex(rightHex2);
 
       // Create the shared starting poles
-      const startPole = createPowerPoleAtCorner(
-        startHex,
-        CornerPosition.North,
-        []
-      );
-      const northPole = createPowerPoleAtCorner(
-        northHex,
-        CornerPosition.South,
-        [startPole.id]
-      );
+      const startPole = createPowerPoleAtCorner(startHex, CornerPosition.North, []);
+      const northPole = createPowerPoleAtCorner(northHex, CornerPosition.South, [startPole.id]);
 
       // Left branch poles
-      const leftPole1 = createPowerPoleAtCorner(
-        leftHex1,
-        CornerPosition.North,
-        [northPole.id]
-      );
-      const leftPole2 = createPowerPoleAtCorner(
-        leftHex2,
-        CornerPosition.South,
-        [leftPole1.id]
-      );
+      const leftPole1 = createPowerPoleAtCorner(leftHex1, CornerPosition.North, [northPole.id]);
+      const leftPole2 = createPowerPoleAtCorner(leftHex2, CornerPosition.South, [leftPole1.id]);
 
       // Right branch poles
-      const rightPole1 = createPowerPoleAtCorner(
-        rightHex1,
-        CornerPosition.North,
-        [northPole.id]
-      );
-      const rightPole2 = createPowerPoleAtCorner(
-        rightHex2,
-        CornerPosition.South,
-        [rightPole1.id]
-      );
+      const rightPole1 = createPowerPoleAtCorner(rightHex1, CornerPosition.North, [northPole.id]);
+      const rightPole2 = createPowerPoleAtCorner(rightHex2, CornerPosition.South, [rightPole1.id]);
 
       // Add entities to the world
       world.add(leftPlant);
@@ -352,18 +303,15 @@ describe("PowerSystem", () => {
       world.add(leftPole2);
       world.add(rightPole1);
       world.add(rightPole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
-      const { connectedPlants } =
-        powerSystem["findConnectedPowerPlants"](startHex);
+      const { connectedPlants } = powerSystem["findConnectedPowerPlants"](startHex);
 
       // Sort the results for consistent comparison
-      expect(
-        connectedPlants.sort((a, b) => a.plantId.localeCompare(b.plantId))
-      ).toEqual(
+      expect(connectedPlants.sort((a, b) => a.plantId.localeCompare(b.plantId))).toEqual(
         [
           {
             plantId: leftPlant.id,
@@ -388,22 +336,10 @@ describe("PowerSystem", () => {
       const plant = createPowerPlantAtHex(centerHex);
 
       // Create a ring of poles around the center, each connected to its neighbors
-      const northPole = createPowerPoleAtCorner(
-        northHex,
-        CornerPosition.South,
-        []
-      );
-      const eastPole = createPowerPoleAtCorner(eastHex, CornerPosition.South, [
-        northPole.id,
-      ]);
-      const southPole = createPowerPoleAtCorner(
-        southHex,
-        CornerPosition.North,
-        [eastPole.id]
-      );
-      const westPole = createPowerPoleAtCorner(westHex, CornerPosition.South, [
-        southPole.id,
-      ]);
+      const northPole = createPowerPoleAtCorner(northHex, CornerPosition.South, []);
+      const eastPole = createPowerPoleAtCorner(eastHex, CornerPosition.South, [northPole.id]);
+      const southPole = createPowerPoleAtCorner(southHex, CornerPosition.North, [eastPole.id]);
+      const westPole = createPowerPoleAtCorner(westHex, CornerPosition.South, [southPole.id]);
       if (northPole.connections) {
         northPole.connections.connectedToIds.push(westPole.id); // Complete the circle
       }
@@ -414,14 +350,13 @@ describe("PowerSystem", () => {
       world.add(eastPole);
       world.add(southPole);
       world.add(westPole);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
       // Starting from the north hex, should find all poles in the network
-      const { connectedPoleIds } =
-        powerSystem["findConnectedPowerPlants"](northHex);
+      const { connectedPoleIds } = powerSystem["findConnectedPowerPlants"](northHex);
       expect(new Set(connectedPoleIds)).toEqual(
         new Set([northPole.id, eastPole.id, southPole.id, westPole.id])
       );
@@ -436,35 +371,22 @@ describe("PowerSystem", () => {
       const plant = createPowerPlantAtHex(northHex);
 
       // Create a Y-shaped network of poles
-      const startPole = createPowerPoleAtCorner(
-        startHex,
-        CornerPosition.North,
-        []
-      );
-      const leftPole = createPowerPoleAtCorner(leftHex, CornerPosition.South, [
-        startPole.id,
-      ]);
-      const rightPole = createPowerPoleAtCorner(
-        rightHex,
-        CornerPosition.South,
-        [startPole.id]
-      );
+      const startPole = createPowerPoleAtCorner(startHex, CornerPosition.North, []);
+      const leftPole = createPowerPoleAtCorner(leftHex, CornerPosition.South, [startPole.id]);
+      const rightPole = createPowerPoleAtCorner(rightHex, CornerPosition.South, [startPole.id]);
 
       // Add entities to the world
       world.add(plant);
       world.add(startPole);
       world.add(leftPole);
       world.add(rightPole);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
-      const { connectedPoleIds } =
-        powerSystem["findConnectedPowerPlants"](startHex);
-      expect(new Set(connectedPoleIds)).toEqual(
-        new Set([startPole.id, leftPole.id, rightPole.id])
-      );
+      const { connectedPoleIds } = powerSystem["findConnectedPowerPlants"](startHex);
+      expect(new Set(connectedPoleIds)).toEqual(new Set([startPole.id, leftPole.id, rightPole.id]));
     });
 
     it("should find poles connected through backward references", () => {
@@ -476,28 +398,21 @@ describe("PowerSystem", () => {
 
       // Create poles where each points to the previous one (backward references)
       const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
-      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [
-        pole1.id,
-      ]);
-      const pole3 = createPowerPoleAtCorner(hex3, CornerPosition.North, [
-        pole2.id,
-      ]);
+      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [pole1.id]);
+      const pole3 = createPowerPoleAtCorner(hex3, CornerPosition.North, [pole2.id]);
 
       // Add entities to the world
       world.add(plant);
       world.add(pole1);
       world.add(pole2);
       world.add(pole3);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
-      const { connectedPoleIds } =
-        powerSystem["findConnectedPowerPlants"](hex1);
-      expect(new Set(connectedPoleIds)).toEqual(
-        new Set([pole1.id, pole2.id, pole3.id])
-      );
+      const { connectedPoleIds } = powerSystem["findConnectedPowerPlants"](hex1);
+      expect(new Set(connectedPoleIds)).toEqual(new Set([pole1.id, pole2.id, pole3.id]));
     });
   });
 
@@ -506,10 +421,10 @@ describe("PowerSystem", () => {
       const plant = createPowerPlantAtHex({ x: 0, z: 0 });
       // Add entity to the world
       world.add(plant);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -529,10 +444,10 @@ describe("PowerSystem", () => {
       // Add entities to the world
       world.add(plant1);
       world.add(plant2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(2);
@@ -544,25 +459,18 @@ describe("PowerSystem", () => {
     it("should create a single grid for two power plants connected by power poles", () => {
       const plant1 = createPowerPlantAtHex({ x: 0, z: 0 });
       const plant2 = createPowerPlantAtHex({ x: 0, z: -2 }, "player1", 200);
-      const pole1 = createPowerPoleAtCorner(
-        { x: 0, z: 0 },
-        CornerPosition.North
-      );
-      const pole2 = createPowerPoleAtCorner(
-        { x: 0, z: -1 },
-        CornerPosition.North,
-        [pole1.id]
-      );
+      const pole1 = createPowerPoleAtCorner({ x: 0, z: 0 }, CornerPosition.North);
+      const pole2 = createPowerPoleAtCorner({ x: 0, z: -1 }, CornerPosition.North, [pole1.id]);
 
       // Add entities to the world
       world.add(plant1);
       world.add(plant2);
       world.add(pole1);
       world.add(pole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -582,26 +490,13 @@ describe("PowerSystem", () => {
       const plant2 = createPowerPlantAtHex({ x: 2, z: 0 });
 
       // Create a ring of poles connecting the plants
-      const pole1 = createPowerPoleAtCorner(
-        { x: 0, z: 0 },
-        CornerPosition.North,
-        []
-      );
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: -1 },
-        CornerPosition.South,
-        [pole1.id]
-      );
-      const pole3 = createPowerPoleAtCorner(
-        { x: 2, z: 0 },
-        CornerPosition.North,
-        [pole2.id]
-      );
-      const pole4 = createPowerPoleAtCorner(
-        { x: 1, z: 1 },
-        CornerPosition.North,
-        [pole3.id, pole1.id]
-      );
+      const pole1 = createPowerPoleAtCorner({ x: 0, z: 0 }, CornerPosition.North, []);
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: -1 }, CornerPosition.South, [pole1.id]);
+      const pole3 = createPowerPoleAtCorner({ x: 2, z: 0 }, CornerPosition.North, [pole2.id]);
+      const pole4 = createPowerPoleAtCorner({ x: 1, z: 1 }, CornerPosition.North, [
+        pole3.id,
+        pole1.id,
+      ]);
 
       // Add bi-directional connections
       if (pole1.connections) pole1.connections.connectedToIds.push(pole2.id, pole4.id);
@@ -615,10 +510,10 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       world.add(pole4);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -632,15 +527,8 @@ describe("PowerSystem", () => {
       const plant2 = createPowerPlantAtHex({ x: 0, z: -2 });
 
       // Create poles with bi-directional connections
-      const pole1 = createPowerPoleAtCorner(
-        { x: 0, z: 0 },
-        CornerPosition.North
-      );
-      const pole2 = createPowerPoleAtCorner(
-        { x: 0, z: -1 },
-        CornerPosition.North,
-        [pole1.id]
-      );
+      const pole1 = createPowerPoleAtCorner({ x: 0, z: 0 }, CornerPosition.North);
+      const pole2 = createPowerPoleAtCorner({ x: 0, z: -1 }, CornerPosition.North, [pole1.id]);
       // Modify pole1 to also connect to pole2
       if (pole1.connections) {
         pole1.connections.connectedToIds.push(pole2.id);
@@ -651,10 +539,10 @@ describe("PowerSystem", () => {
       world.add(plant2);
       world.add(pole1);
       world.add(pole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const grids = powerSystem.compileGrids();
 
       expect(grids).toHaveLength(1);
@@ -665,10 +553,7 @@ describe("PowerSystem", () => {
 
   describe("resolveOneHourOfPowerProduction", () => {
     // Helper to create a populated hex cell
-    const createPopulatedHex = (
-      coordinates: HexCoordinates,
-      population: Population
-    ): HexCell => ({
+    const createPopulatedHex = (coordinates: HexCoordinates, population: Population): HexCell => ({
       coordinates,
       population,
       terrainType: TerrainType.Plains,
@@ -682,11 +567,10 @@ describe("PowerSystem", () => {
 
     it("should allocate power from the cheapest plant first", () => {
       const consumerHex = { x: 0, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumerHex)] =
-        createPopulatedHex(
-          consumerHex,
-          Population.Village // 10kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumerHex)] = createPopulatedHex(
+        consumerHex,
+        Population.Village // 10kW demand
+      );
 
       // Create plants with different prices
       const cheapPlant = createPowerPlantAtHex(
@@ -712,17 +596,9 @@ describe("PowerSystem", () => {
 
       // Create poles and connect them to the plants
       const pole1 = createPowerPoleAtCorner(consumerHex, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.South,
-        [pole1.id]
-      );
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.South, [pole1.id]);
       const pole3 = createPowerPoleAtCorner(consumerHex, CornerPosition.South);
-      const pole4 = createPowerPoleAtCorner(
-        { x: -1, z: 0 },
-        CornerPosition.North,
-        [pole3.id]
-      );
+      const pole4 = createPowerPoleAtCorner({ x: -1, z: 0 }, CornerPosition.North, [pole3.id]);
 
       // Add entities to the world
       world.add(cheapPlant);
@@ -731,10 +607,10 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       world.add(pole4);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
       const result = powerSystem.update(world, createPowerContext());
 
@@ -745,23 +621,20 @@ describe("PowerSystem", () => {
       expect(result.powerSoldPerPlayerKWh).toEqual({
         player1: 10, // 10kW sold
       });
+      expect(result.grids.find((g) => g.powerPlantIds.includes(cheapPlant.id))?.usedCapacity).toBe(
+        10
+      );
       expect(
-        result.grids.find((g) => g.powerPlantIds.includes(cheapPlant.id))
-          ?.usedCapacity
-      ).toBe(10);
-      expect(
-        result.grids.find((g) => g.powerPlantIds.includes(expensivePlant.id))
-          ?.usedCapacity
+        result.grids.find((g) => g.powerPlantIds.includes(expensivePlant.id))?.usedCapacity
       ).toBe(0);
     });
 
     it("should cause blackouts when demand exceeds supply", () => {
       const consumerHex = { x: 0, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumerHex)] =
-        createPopulatedHex(
-          consumerHex,
-          Population.Metropolis // 100kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumerHex)] = createPopulatedHex(
+        consumerHex,
+        Population.Metropolis // 100kW demand
+      );
 
       const plant1 = createPowerPlantAtHex({ x: 1, z: 0 }, "player1", 40);
       const plant2 = createPowerPlantAtHex({ x: -1, z: 0 }, "player2", 40);
@@ -769,17 +642,9 @@ describe("PowerSystem", () => {
 
       // Create poles and connect them to the plants
       const pole1 = createPowerPoleAtCorner(consumerHex, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.South,
-        [pole1.id]
-      );
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.South, [pole1.id]);
       const pole3 = createPowerPoleAtCorner(consumerHex, CornerPosition.South);
-      const pole4 = createPowerPoleAtCorner(
-        { x: -1, z: 0 },
-        CornerPosition.North,
-        [pole3.id]
-      );
+      const pole4 = createPowerPoleAtCorner({ x: -1, z: 0 }, CornerPosition.North, [pole3.id]);
 
       // Add entities to the world
       world.add(plant1);
@@ -788,10 +653,10 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       world.add(pole4);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // Both grids should be in blackout
@@ -805,33 +670,23 @@ describe("PowerSystem", () => {
       // Two consumers connected to the same grid
       const consumer1Hex = { x: 0, z: 0 };
       const consumer2Hex = { x: 2, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer1Hex)] =
-        createPopulatedHex(
-          consumer1Hex,
-          Population.Village // 10kW demand
-        );
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer2Hex)] =
-        createPopulatedHex(
-          consumer2Hex,
-          Population.Metropolis // 100kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer1Hex)] = createPopulatedHex(
+        consumer1Hex,
+        Population.Village // 10kW demand
+      );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer2Hex)] = createPopulatedHex(
+        consumer2Hex,
+        Population.Metropolis // 100kW demand
+      );
 
       const plant = createPowerPlantAtHex({ x: 1, z: 0 }, "player1", 50);
       // 50kW capacity < 110kW total demand
 
       // Create poles and connect them to the plant
       const pole1 = createPowerPoleAtCorner(consumer1Hex, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.South,
-        [pole1.id]
-      );
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.South, [pole1.id]);
       const pole3 = createPowerPoleAtCorner(consumer2Hex, CornerPosition.North);
-      const pole4 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.North,
-        [pole3.id]
-      );
+      const pole4 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.North, [pole3.id]);
 
       // Add entities to the world
       world.add(plant);
@@ -839,10 +694,10 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       world.add(pole4);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // Grid should be in blackout
@@ -856,16 +711,14 @@ describe("PowerSystem", () => {
       // Two consumers on separate grids
       const consumer1Hex = { x: 0, z: 0 };
       const consumer2Hex = { x: 5, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer1Hex)] =
-        createPopulatedHex(
-          consumer1Hex,
-          Population.Village // 10kW demand
-        );
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer2Hex)] =
-        createPopulatedHex(
-          consumer2Hex,
-          Population.Metropolis // 100kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer1Hex)] = createPopulatedHex(
+        consumer1Hex,
+        Population.Village // 10kW demand
+      );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumer2Hex)] = createPopulatedHex(
+        consumer2Hex,
+        Population.Metropolis // 100kW demand
+      );
 
       // Grid 1: Sufficient capacity
       const plant1 = createPowerPlantAtHex(
@@ -879,11 +732,7 @@ describe("PowerSystem", () => {
         1000 // Explicitly set fuel storage
       );
       const pole1 = createPowerPoleAtCorner(consumer1Hex, CornerPosition.North);
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.South,
-        [pole1.id]
-      );
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.South, [pole1.id]);
 
       // Grid 2: Insufficient capacity
       const plant2 = createPowerPlantAtHex(
@@ -897,11 +746,7 @@ describe("PowerSystem", () => {
         1000 // Explicitly set fuel storage
       );
       const pole3 = createPowerPoleAtCorner(consumer2Hex, CornerPosition.North);
-      const pole4 = createPowerPoleAtCorner(
-        { x: 4, z: 0 },
-        CornerPosition.South,
-        [pole3.id]
-      );
+      const pole4 = createPowerPoleAtCorner({ x: 4, z: 0 }, CornerPosition.South, [pole3.id]);
 
       // Add entities to the world
       world.add(plant1);
@@ -910,19 +755,15 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       world.add(pole4);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // Grid 1 should work, Grid 2 should be in blackout
-      const grid1 = result.grids.find((g) =>
-        g.powerPlantIds.includes(plant1.id)
-      )!;
-      const grid2 = result.grids.find((g) =>
-        g.powerPlantIds.includes(plant2.id)
-      )!;
+      const grid1 = result.grids.find((g) => g.powerPlantIds.includes(plant1.id))!;
+      const grid2 = result.grids.find((g) => g.powerPlantIds.includes(plant2.id))!;
       expect(grid1.blackout).toBe(false);
       expect(grid1.usedCapacity).toBe(10);
       expect(grid2.blackout).toBe(true);
@@ -939,11 +780,10 @@ describe("PowerSystem", () => {
 
     it("should handle a consumer connected to multiple grids", () => {
       const consumerHex = { x: 0, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(consumerHex)] =
-        createPopulatedHex(
-          consumerHex,
-          Population.City // 50kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(consumerHex)] = createPopulatedHex(
+        consumerHex,
+        Population.City // 50kW demand
+      );
 
       // Two separate plants/grids, both connected to the consumer
       const plant1 = createPowerPlantAtHex(
@@ -968,22 +808,10 @@ describe("PowerSystem", () => {
       );
 
       // Create poles and connect them to the plants
-      const pole1 = createPowerPoleAtCorner(
-        consumerHex,
-        CornerPosition.North,
-        []
-      );
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.South,
-        [pole1.id]
-      );
+      const pole1 = createPowerPoleAtCorner(consumerHex, CornerPosition.North, []);
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.South, [pole1.id]);
       const pole3 = createPowerPoleAtCorner(consumerHex, CornerPosition.South);
-      const pole4 = createPowerPoleAtCorner(
-        { x: 4, z: 0 },
-        CornerPosition.North,
-        [pole3.id]
-      );
+      const pole4 = createPowerPoleAtCorner({ x: 4, z: 0 }, CornerPosition.North, [pole3.id]);
 
       // Add entities to the world
       world.add(plant1);
@@ -992,20 +820,16 @@ describe("PowerSystem", () => {
       world.add(pole2);
       world.add(pole3);
       world.add(pole4);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
 
       const result = powerSystem.update(world, createPowerContext());
 
       // Should use cheaper plant first, then the more expensive one
-      const grid1 = result.grids.find((g) =>
-        g.powerPlantIds.includes(plant1.id)
-      )!;
-      const grid2 = result.grids.find((g) =>
-        g.powerPlantIds.includes(plant2.id)
-      )!;
+      const grid1 = result.grids.find((g) => g.powerPlantIds.includes(plant1.id))!;
+      const grid2 = result.grids.find((g) => g.powerPlantIds.includes(plant2.id))!;
       expect(grid1.usedCapacity).toBe(30); // Used all capacity from cheaper plant
       expect(grid2.usedCapacity).toBe(20); // Used remaining demand from expensive plant
       expect(result.incomePerPlayer).toEqual({
@@ -1021,11 +845,10 @@ describe("PowerSystem", () => {
     it("should consume fuel based on power generated", () => {
       // Create a hex grid with a populated cell
       const hex1: HexCoordinates = { x: 0, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] =
-        createPopulatedHex(
-          hex1,
-          Population.Village // 10 kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] = createPopulatedHex(
+        hex1,
+        Population.Village // 10 kW demand
+      );
 
       // Create a power plant with 100 kW capacity and 0.1 fuel per kWh
       const plant = createPowerPlantAtHex(
@@ -1045,10 +868,10 @@ describe("PowerSystem", () => {
       // Add entities to the world
       world.add(plant);
       world.add(pole);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // The plant should have consumed 0.1 fuel per kWh * 10 kWh = 1 fuel
@@ -1058,11 +881,10 @@ describe("PowerSystem", () => {
     it("should not allow power generation if not enough fuel", () => {
       // Create a hex grid with a populated cell
       const hex1: HexCoordinates = { x: 0, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] =
-        createPopulatedHex(
-          hex1,
-          Population.Village // 10 kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] = createPopulatedHex(
+        hex1,
+        Population.Village // 10 kW demand
+      );
 
       // Create a power plant with 100 kW capacity but only 0.05 fuel left (not enough for 1 kWh)
       const plant = createPowerPlantAtHex(
@@ -1082,10 +904,10 @@ describe("PowerSystem", () => {
       // Add entities to the world
       world.add(plant);
       world.add(pole);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // The plant should not have generated any power
@@ -1105,17 +927,15 @@ describe("PowerSystem", () => {
       const hex1: HexCoordinates = { x: 0, z: 0 };
       const hex2: HexCoordinates = { x: 1, z: 0 };
 
-      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] =
-        createPopulatedHex(
-          hex1,
-          Population.Village // 10 kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] = createPopulatedHex(
+        hex1,
+        Population.Village // 10 kW demand
+      );
 
-      hexGrid.cellsByHexCoordinates[coordinatesToString(hex2)] =
-        createPopulatedHex(
-          hex2,
-          Population.Town // 25 kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex2)] = createPopulatedHex(
+        hex2,
+        Population.Town // 25 kW demand
+      );
 
       // Create a power plant with 100 kW capacity
       const plant = createPowerPlantAtHex(
@@ -1131,18 +951,16 @@ describe("PowerSystem", () => {
 
       // Create power poles connecting the populated hexes to the power plant
       const pole1 = createPowerPoleAtCorner(hex1, CornerPosition.North, []);
-      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [
-        pole1.id,
-      ]);
+      const pole2 = createPowerPoleAtCorner(hex2, CornerPosition.North, [pole1.id]);
 
       // Add entities to the world
       world.add(plant);
       world.add(pole1);
       world.add(pole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // The plant should have consumed 0.1 fuel per kWh * (10 + 25) kWh = 3.5 fuel
@@ -1154,11 +972,10 @@ describe("PowerSystem", () => {
     it("should handle multiple plants with different fuel consumption rates", () => {
       // Create a hex grid with a populated cell
       const hex1: HexCoordinates = { x: 0, z: 0 };
-      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] =
-        createPopulatedHex(
-          hex1,
-          Population.City // 50 kW demand
-        );
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] = createPopulatedHex(
+        hex1,
+        Population.City // 50 kW demand
+      );
 
       // Create two power plants with different fuel consumption rates
       const plant1 = createPowerPlantAtHex(
@@ -1192,10 +1009,10 @@ describe("PowerSystem", () => {
       world.add(plant2);
       world.add(pole1);
       world.add(pole2);
-      
+
       const powerSystem = new PowerSystem();
       // Initialize with world and hexGrid via initialize method
-      powerSystem.initialize(world, {  hexGrid });
+      powerSystem.initialize(world, { hexGrid });
       const result = powerSystem.update(world, createPowerContext());
 
       // Plant 1 should have consumed 0.1 fuel per kWh * 30 kWh = 3 fuel

@@ -155,15 +155,12 @@ export const TerrainPaintUI: React.FC = () => {
               key={terrainType}
               style={{
                 ...styles.button,
-                ...(selectedTerrainType === terrainType
-                  ? styles.activeButton
-                  : {}),
+                ...(selectedTerrainType === terrainType ? styles.activeButton : {}),
               }}
               onClick={() =>
                 clientStore.send({
                   type: "setSelectedTerrainType",
-                  terrainType:
-                    selectedTerrainType === terrainType ? null : terrainType,
+                  terrainType: selectedTerrainType === terrainType ? null : terrainType,
                 })
               }
             >
@@ -183,15 +180,12 @@ export const TerrainPaintUI: React.FC = () => {
                 key={population}
                 style={{
                   ...styles.button,
-                  ...(selectedPopulation === population
-                    ? styles.activeButton
-                    : {}),
+                  ...(selectedPopulation === population ? styles.activeButton : {}),
                 }}
                 onClick={() =>
                   clientStore.send({
                     type: "setSelectedPopulation",
-                    population:
-                      selectedPopulation === population ? null : population,
+                    population: selectedPopulation === population ? null : population,
                   })
                 }
               >

@@ -18,27 +18,13 @@ import { initializeCommodityMarket } from "@/ecs/systems/CommoditySystem";
 type GameClientEvent = z.infer<typeof GameClientEventSchema>;
 
 interface MapEditorContextType {
-  updateRegionName: (
-    coordinates: { x: number; z: number },
-    regionName: string | null
-  ) => void;
-  updateHexTerrain: (
-    coordinates: { x: number; z: number },
-    terrainType: TerrainType
-  ) => void;
-  updateHexPopulation: (
-    coordinates: { x: number; z: number },
-    population: Population
-  ) => void;
-  updateHexCity: (
-    coordinates: { x: number; z: number },
-    cityName: string | null
-  ) => void;
+  updateRegionName: (coordinates: { x: number; z: number }, regionName: string | null) => void;
+  updateHexTerrain: (coordinates: { x: number; z: number }, terrainType: TerrainType) => void;
+  updateHexPopulation: (coordinates: { x: number; z: number }, population: Population) => void;
+  updateHexCity: (coordinates: { x: number; z: number }, cityName: string | null) => void;
 }
 
-export const MapEditorContext = createContext<MapEditorContextType | null>(
-  null
-);
+export const MapEditorContext = createContext<MapEditorContextType | null>(null);
 
 export function useMapEditor() {
   return (

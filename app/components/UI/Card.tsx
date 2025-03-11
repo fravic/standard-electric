@@ -7,16 +7,11 @@ interface CardProps {
   style?: React.CSSProperties;
 }
 
-export const Card: React.FC<CardProps> = ({
-  children,
-  variant = "default",
-  style,
-}) => {
+export const Card: React.FC<CardProps> = ({ children, variant = "default", style }) => {
   return (
     <div
       style={{
-        backgroundColor:
-          variant === "dark" ? UI_COLORS.PRIMARY_DARK : UI_COLORS.BACKGROUND,
+        backgroundColor: variant === "dark" ? UI_COLORS.PRIMARY_DARK : UI_COLORS.BACKGROUND,
         padding: "1rem",
         borderRadius: "8px",
         color: UI_COLORS.TEXT_LIGHT,

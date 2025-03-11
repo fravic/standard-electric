@@ -2,14 +2,10 @@ import { World } from "miniplex";
 import { produce } from "immer";
 
 import { Entity } from "../../entity";
-import {
-  CommoditySystem,
-  CommodityContext,
-  CommoditySystemResult
-} from "../CommoditySystem";
+import { CommoditySystem, CommodityContext, CommoditySystemResult } from "../CommoditySystem";
 import { GameContext } from "@/actor/game.types";
 import { CommodityMarketState, initializeCommodityMarket } from "../CommoditySystem";
-import {CommodityType} from "@/lib/types";
+import { CommodityType } from "@/lib/types";
 import { createPowerPlant } from "@/ecs/factories";
 import { createDefaultContext } from "@/actor/createDefaultContext";
 
@@ -42,7 +38,7 @@ describe("CommoditySystem", () => {
       currentFuelStorage: 0,
     });
     world.add(powerPlant);
-    
+
     // Initialize the system with the world and a context
     const context: CommodityContext = {
       playerId: testPlayerId,
@@ -78,10 +74,11 @@ describe("CommoditySystem", () => {
       expect(result.updatedMarket).toBeDefined();
       expect(result.fuelDelta).toBeGreaterThan(0);
       expect(result.moneyDelta).toBeLessThan(0); // Money spent should be negative
-      
+
       // Ensure the updated market's price is higher than the original
-      expect(result.updatedMarket?.commodities[CommodityType.COAL].currentExchangeRate)
-        .toBeGreaterThan(market.commodities[CommodityType.COAL].currentExchangeRate);
+      expect(
+        result.updatedMarket?.commodities[CommodityType.COAL].currentExchangeRate
+      ).toBeGreaterThan(market.commodities[CommodityType.COAL].currentExchangeRate);
     });
 
     it("should fail when player doesn't have enough money", () => {
@@ -146,22 +143,18 @@ describe("CommoditySystem", () => {
       const fuelType = CommodityType.COAL;
 
       // Act
-      const result = commoditySystem.sellCommodity(
-        market,
-        powerPlantId,
-        fuelType,
-        units
-      );
+      const result = commoditySystem.sellCommodity(market, powerPlantId, fuelType, units);
 
       // Assert
       expect(result.success).toBe(true);
       expect(result.updatedMarket).toBeDefined();
       expect(result.fuelDelta).toBeLessThan(0); // Fuel removed should be negative
       expect(result.moneyDelta).toBeGreaterThan(0); // Money gained should be positive
-      
+
       // Ensure the updated market's price is lower than the original
-      expect(result.updatedMarket?.commodities[fuelType].currentExchangeRate)
-        .toBeLessThan(market.commodities[fuelType].currentExchangeRate);
+      expect(result.updatedMarket?.commodities[fuelType].currentExchangeRate).toBeLessThan(
+        market.commodities[fuelType].currentExchangeRate
+      );
     });
 
     it("should fail when power plant doesn't have enough fuel", () => {
@@ -185,12 +178,7 @@ describe("CommoditySystem", () => {
       const fuelType = CommodityType.COAL;
 
       // Act
-      const result = commoditySystem.sellCommodity(
-        market,
-        powerPlantId,
-        fuelType,
-        units
-      );
+      const result = commoditySystem.sellCommodity(market, powerPlantId, fuelType, units);
 
       // Assert
       expect(result.success).toBe(false);
@@ -204,7 +192,7 @@ describe("CommoditySystem", () => {
       const fuelType = CommodityType.COAL;
       const initialMoney = 1000;
       const initialFuel = 0;
-      
+
       // Replace the power plant with one with known values
       world.clear(); // Remove the default power plant
       const powerPlant = createPowerPlant({
@@ -220,29 +208,29 @@ describe("CommoditySystem", () => {
         currentFuelStorage: initialFuel,
       });
       world.add(powerPlant);
-      
+
       // Create game context draft
       const gameContext: GameContext = {
         public: {
           id: "test-game",
           time: { totalTicks: 10, isPaused: false },
           players: {
-            [testPlayerId]: { 
+            [testPlayerId]: {
               name: "Test Player",
               number: 1,
-              money: initialMoney, 
+              money: initialMoney,
               powerSoldKWh: 0,
-              isHost: true
-            }
+              isHost: true,
+            },
           },
           commodityMarket: market,
           entitiesById: {
             [powerPlantId]: powerPlant,
           },
-          hexGrid: { 
-            width: 10, 
-            height: 10, 
-            cellsByHexCoordinates: {} 
+          hexGrid: {
+            width: 10,
+            height: 10,
+            cellsByHexCoordinates: {},
           },
           auction: null,
           randomSeed: 12345,
@@ -259,37 +247,37 @@ describe("CommoditySystem", () => {
 
       // Prepare buy result
       const buyResult = commoditySystem.buyCommodity(
-        market, 
-        powerPlantId, 
-        fuelType, 
-        units, 
+        market,
+        powerPlantId,
+        fuelType,
+        units,
         initialMoney
       );
-      
+
       // Force the result to be successful for testing mutations
       const successfulBuyResult: CommoditySystemResult = {
         success: true,
         updatedMarket: market,
         powerPlantId: powerPlantId,
         fuelDelta: 50, // Add 50 fuel units
-        moneyDelta: -200 // Spend 200 money
+        moneyDelta: -200, // Spend 200 money
       };
 
       // Act - Apply mutations
-      const contextDraft = produce(gameContext, draft => {
+      const contextDraft = produce(gameContext, (draft) => {
         commoditySystem.mutate(successfulBuyResult, draft);
       });
 
       // Assert
       const updatedPlayer = contextDraft.public.players[testPlayerId];
       const updatedPowerPlant = contextDraft.public.entitiesById[powerPlantId];
-      
+
       // Verify player money decreased
       expect(updatedPlayer.money).toBeLessThan(initialMoney);
-      
+
       // Verify power plant fuel increased
       expect(updatedPowerPlant.fuelStorage!.currentFuelStorage).toBeGreaterThan(initialFuel);
-      
+
       // Verify market was updated
       expect(contextDraft.public.commodityMarket).toEqual(market);
     });
@@ -300,7 +288,7 @@ describe("CommoditySystem", () => {
       const units = 5;
       const fuelType = CommodityType.COAL;
       const initialMoney = 1000;
-      
+
       // Replace the power plant with one with known values
       world.clear(); // Remove the default power plant
       const powerPlant = createPowerPlant({
@@ -316,36 +304,36 @@ describe("CommoditySystem", () => {
         currentFuelStorage: initialFuel,
       });
       world.add(powerPlant);
-      
+
       // Create game context draft
       const gameContext: GameContext = {
         public: {
           id: "test-game",
           time: { totalTicks: 10, isPaused: false },
           players: {
-            [testPlayerId]: { 
+            [testPlayerId]: {
               name: "Test Player",
               number: 1,
-              money: initialMoney, 
+              money: initialMoney,
               powerSoldKWh: 0,
-              isHost: true
-            }
+              isHost: true,
+            },
           },
           commodityMarket: market,
           entitiesById: {
             [powerPlantId]: powerPlant,
           },
-          hexGrid: { 
-            width: 10, 
-            height: 10, 
-            cellsByHexCoordinates: {} 
+          hexGrid: {
+            width: 10,
+            height: 10,
+            cellsByHexCoordinates: {},
           },
           auction: null,
           randomSeed: 12345,
         },
         private: {},
       };
-      
+
       // Initialize the context for this test
       const context: CommodityContext = {
         playerId: testPlayerId,
@@ -359,24 +347,24 @@ describe("CommoditySystem", () => {
         updatedMarket: market,
         powerPlantId: powerPlantId,
         fuelDelta: -30, // Remove 30 fuel units
-        moneyDelta: 100 // Gain 100 money
+        moneyDelta: 100, // Gain 100 money
       };
 
       // Act - Apply mutations
-      const contextDraft = produce(gameContext, draft => {
+      const contextDraft = produce(gameContext, (draft) => {
         commoditySystem.mutate(successfulSellResult, draft);
       });
 
       // Assert
       const updatedPlayer = contextDraft.public.players[testPlayerId];
       const updatedPowerPlant = contextDraft.public.entitiesById[powerPlantId];
-      
+
       // Verify player money increased
       expect(updatedPlayer.money).toBeGreaterThan(initialMoney);
-      
+
       // Verify power plant fuel decreased
       expect(updatedPowerPlant.fuelStorage!.currentFuelStorage).toBeLessThan(initialFuel);
-      
+
       // Verify market was updated
       expect(contextDraft.public.commodityMarket).toEqual(market);
     });

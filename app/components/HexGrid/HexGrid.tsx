@@ -14,10 +14,7 @@ interface HexGridProps {}
 export function HexGrid({}: HexGridProps) {
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
-  const buildMode = useSelector(
-    clientStore,
-    (state) => state.context.buildMode
-  );
+  const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
   const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
   const sendGameEvent = GameContext.useSend();
 
@@ -34,12 +31,18 @@ export function HexGrid({}: HexGridProps) {
         throw new Error(`Blueprint ${buildMode.blueprintId} not found`);
       }
       const options: AdditionalBlueprintOptions = {
-        cornerPosition: blueprintEntity.blueprint?.allowedPosition === "corner" && nearestCorner? {
-          cornerCoordinates: nearestCorner
-        } : undefined,
-        hexPosition: blueprintEntity.blueprint?.allowedPosition === "hex" ? {
-          coordinates,
-        } : undefined,
+        cornerPosition:
+          blueprintEntity.blueprint?.allowedPosition === "corner" && nearestCorner
+            ? {
+                cornerCoordinates: nearestCorner,
+              }
+            : undefined,
+        hexPosition:
+          blueprintEntity.blueprint?.allowedPosition === "hex"
+            ? {
+                coordinates,
+              }
+            : undefined,
       };
       sendGameEvent({
         type: "ADD_BUILDABLE",

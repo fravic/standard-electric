@@ -120,12 +120,8 @@ const getCommodityIcon = (type: CommodityType) => {
   }
 };
 
-export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
-  onClose,
-}) => {
-  const { commodityMarket } = GameContext.useSelector(
-    (state) => state.public
-  );
+export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({ onClose }) => {
+  const { commodityMarket } = GameContext.useSelector((state) => state.public);
   const world = useWorld();
   const userId = AuthContext.useSelector((state) => state.userId);
   const marketRates = useMemo(() => {
@@ -137,9 +133,11 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
     const fuelReqEntities = [...world.with("fuelRequirement")];
     const fuelStorageEntities = [...world.with("fuelStorage")];
     const fuelTypeSet = new Set(
-      fuelReqEntities.map(e => e.fuelRequirement?.fuelType).filter(Boolean)
-        .concat(fuelStorageEntities.map(e => e.fuelStorage?.fuelType).filter(Boolean))
-      );
+      fuelReqEntities
+        .map((e) => e.fuelRequirement?.fuelType)
+        .filter(Boolean)
+        .concat(fuelStorageEntities.map((e) => e.fuelStorage?.fuelType).filter(Boolean))
+    );
     return Array.from(fuelTypeSet) as CommodityType[];
   }, [world]);
 
@@ -169,10 +167,8 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
                 const currentRate = commodity.currentExchangeRate;
 
                 // Calculate position in price range (0-100%)
-                const priceRange =
-                  config.maxExchangeRate - config.minExchangeRate;
-                const positionPercent =
-                  ((currentRate - config.minExchangeRate) / priceRange) * 100;
+                const priceRange = config.maxExchangeRate - config.minExchangeRate;
+                const positionPercent = ((currentRate - config.minExchangeRate) / priceRange) * 100;
 
                 return (
                   <tr key={fuelType}>
@@ -213,9 +209,7 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({
             </tbody>
           </table>
         ) : (
-          <div style={styles.noData}>
-            No active commodities found on the map.
-          </div>
+          <div style={styles.noData}>No active commodities found on the map.</div>
         )}
       </Card>
     </div>

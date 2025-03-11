@@ -28,10 +28,7 @@ interface HexGridTerrainProps {
   onClick: (event: ThreeEvent<MouseEvent | PointerEvent>) => void;
   onHover: (event: ThreeEvent<PointerEvent>) => void;
   onPointerLeave: () => void;
-  onUpdateCell?: (
-    coordinates: HexCoordinates,
-    updates: Partial<HexCell>
-  ) => void;
+  onUpdateCell?: (coordinates: HexCoordinates, updates: Partial<HexCell>) => void;
   debug?: boolean;
   surveyedHexCoords: Set<string>;
 }
@@ -58,10 +55,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     (state) => state.context.mapBuilder.selectedPopulation
   );
 
-  const debouncedOnHover = useMemo(
-    () => debounce(onHover, 50, { maxWait: 50 }),
-    [onHover]
-  );
+  const debouncedOnHover = useMemo(() => debounce(onHover, 50, { maxWait: 50 }), [onHover]);
 
   React.useEffect(() => {
     return () => {
@@ -99,22 +93,13 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
 
   const handleClick = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
-      if (
-        isPaintbrushMode &&
-        (selectedTerrainType || selectedPopulation !== null)
-      ) {
+      if (isPaintbrushMode && (selectedTerrainType || selectedPopulation !== null)) {
         paintCell(event);
       } else {
         onClick(event);
       }
     },
-    [
-      onClick,
-      paintCell,
-      isPaintbrushMode,
-      selectedTerrainType,
-      selectedPopulation,
-    ]
+    [onClick, paintCell, isPaintbrushMode, selectedTerrainType, selectedPopulation]
   );
 
   const { terrainGeometry } = useMemo(() => {
@@ -122,7 +107,10 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     cells.forEach((cell) => {
       const center = getCenterPoint(cell);
       // Use the new function to get color with exploration status
-      const color = getColorWithExplorationStatus(cell, surveyedHexCoords.has(coordinatesToString(cell.coordinates)));
+      const color = getColorWithExplorationStatus(
+        cell,
+        surveyedHexCoords.has(coordinatesToString(cell.coordinates))
+      );
       for (let d = 0; d < 6; d++) {
         if (!isUnderwater(cell)) {
           hexMesh.addTriangle(
@@ -136,14 +124,8 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     });
 
     const terrainGeometry = new THREE.BufferGeometry();
-    terrainGeometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(hexMesh.vertices, 3)
-    );
-    terrainGeometry.setAttribute(
-      "color",
-      new THREE.Float32BufferAttribute(hexMesh.colors, 3)
-    );
+    terrainGeometry.setAttribute("position", new THREE.Float32BufferAttribute(hexMesh.vertices, 3));
+    terrainGeometry.setAttribute("color", new THREE.Float32BufferAttribute(hexMesh.colors, 3));
     terrainGeometry.setIndex(hexMesh.indices);
     terrainGeometry.computeVertexNormals();
 
@@ -186,10 +168,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
           })}
         {/* City Labels */}
         {cells.map((cell) => (
-          <CityLabel
-            key={`city-${coordinatesToString(cell.coordinates)}`}
-            cell={cell}
-          />
+          <CityLabel key={`city-${coordinatesToString(cell.coordinates)}`} cell={cell} />
         ))}
       </mesh>
       <HexGridDecorations cells={cells} />

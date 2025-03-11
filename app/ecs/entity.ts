@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  HexCoordinatesSchema,
-  CornerCoordinatesSchema,
-} from "@/lib/coordinates/types";
+import { HexCoordinatesSchema, CornerCoordinatesSchema } from "@/lib/coordinates/types";
 import { CommodityType } from "@/lib/types";
 
 /**
@@ -33,9 +30,7 @@ export const CornerPositionComponentSchema = z.object({
   cornerCoordinates: CornerCoordinatesSchema,
 });
 
-export type CornerPositionComponent = z.infer<
-  typeof CornerPositionComponentSchema
->;
+export type CornerPositionComponent = z.infer<typeof CornerPositionComponentSchema>;
 
 /**
  * OwnerComponent
@@ -76,9 +71,7 @@ export const PowerGenerationComponentSchema = z.object({
   pricePerKWh: z.number(),
 });
 
-export type PowerGenerationComponent = z.infer<
-  typeof PowerGenerationComponentSchema
->;
+export type PowerGenerationComponent = z.infer<typeof PowerGenerationComponentSchema>;
 
 /**
  * FuelRequirementComponent
@@ -89,9 +82,7 @@ export const FuelRequirementComponentSchema = z.object({
   fuelConsumptionPerKWh: z.number().optional(),
 });
 
-export type FuelRequirementComponent = z.infer<
-  typeof FuelRequirementComponentSchema
->;
+export type FuelRequirementComponent = z.infer<typeof FuelRequirementComponentSchema>;
 
 /**
  * FuelStorageComponent
@@ -123,9 +114,7 @@ export const RequiredRegionComponentSchema = z.object({
   requiredRegionName: z.string(),
 });
 
-export type RequiredRegionComponent = z.infer<
-  typeof RequiredRegionComponentSchema
->;
+export type RequiredRegionComponent = z.infer<typeof RequiredRegionComponentSchema>;
 
 /**
  * BlueprintComponent
@@ -154,10 +143,12 @@ export type BlueprintComponent = z.infer<typeof BlueprintComponentSchema>;
 export const SurveyResultComponentSchema = z.object({
   surveyStartTick: z.number(),
   isComplete: z.boolean().optional(),
-  resource: z.object({
-    resourceType: z.nativeEnum(CommodityType),
-    resourceAmount: z.number(),
-  }).optional(),
+  resource: z
+    .object({
+      resourceType: z.nativeEnum(CommodityType),
+      resourceAmount: z.number(),
+    })
+    .optional(),
 });
 
 export type SurveyResultComponent = z.infer<typeof SurveyResultComponentSchema>;

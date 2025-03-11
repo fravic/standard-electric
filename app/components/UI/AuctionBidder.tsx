@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, { useMemo } from "react";
 import { UI_COLORS } from "@/lib/palette";
 import { Player, Auction } from "@/actor/game.types";
 import { GameContext } from "@/actor/game.context";
@@ -11,21 +11,12 @@ interface AuctionBidderProps {
   randomSeed: number;
 }
 
-export function AuctionBidder({
-  players,
-  auction,
-  totalTicks,
-  randomSeed,
-}: AuctionBidderProps) {
+export function AuctionBidder({ players, auction, totalTicks, randomSeed }: AuctionBidderProps) {
   const auctionSystem = useMemo(() => {
     return new AuctionSystem();
-  }, [])
+  }, []);
 
-  const bidderOrder = auctionSystem.getBidderPriorityOrder(
-    players,
-    totalTicks,
-    randomSeed
-  );
+  const bidderOrder = auctionSystem.getBidderPriorityOrder(players, totalTicks, randomSeed);
 
   // Ensure these arrays exist with defaults
   const passedPlayerIds = auction.passedPlayerIds ?? [];
@@ -34,13 +25,13 @@ export function AuctionBidder({
     players,
     auction,
     totalTicks,
-    randomSeed
+    randomSeed,
   });
   const currentInitiatorId = auctionSystem.getNextInitiator({
     players,
     auction,
     totalTicks,
-    randomSeed
+    randomSeed,
   });
   const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
 
@@ -77,8 +68,7 @@ export function AuctionBidder({
           const isInitiator = playerId === currentInitiatorId;
           const isBidder = playerId === currentBidderId;
           const isPlayerTurn =
-            (auction.currentBlueprint && isBidder) ||
-            (!auction.currentBlueprint && isInitiator);
+            (auction.currentBlueprint && isBidder) || (!auction.currentBlueprint && isInitiator);
 
           return (
             <div
@@ -90,9 +80,7 @@ export function AuctionBidder({
                 opacity: isInactive ? 0.5 : 1,
                 color: UI_COLORS.TEXT_LIGHT,
                 padding: "0.5rem",
-                backgroundColor: isPlayerTurn
-                  ? UI_COLORS.PRIMARY_DARK
-                  : "transparent",
+                backgroundColor: isPlayerTurn ? UI_COLORS.PRIMARY_DARK : "transparent",
                 borderRadius: "4px",
               }}
             >
@@ -102,11 +90,8 @@ export function AuctionBidder({
                 {hasPassed
                   ? "(Passed)"
                   : purchase
-                  ? `(Bought ${
-                      entitiesById[purchase.blueprintId]
-                        ?.name ?? "Unknown Plant"
-                    })`
-                  : ""}
+                    ? `(Bought ${entitiesById[purchase.blueprintId]?.name ?? "Unknown Plant"})`
+                    : ""}
               </span>
             </div>
           );

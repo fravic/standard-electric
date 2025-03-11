@@ -10,11 +10,7 @@ export function formatPowerKWh(kilowattHours: number): string {
 
   // Format with appropriate decimal places
   const formattedValue =
-    value >= 100
-      ? value.toFixed(0)
-      : value >= 10
-      ? value.toFixed(1)
-      : value.toFixed(2);
+    value >= 100 ? value.toFixed(0) : value >= 10 ? value.toFixed(1) : value.toFixed(2);
 
   return `${formattedValue} ${units[unitIndex]}`;
 }

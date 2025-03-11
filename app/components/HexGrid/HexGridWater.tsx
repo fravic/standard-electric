@@ -100,10 +100,7 @@ interface HexGridWaterProps {
   grid: HexGrid;
 }
 
-export const HexGridWater = React.memo(function HexGridWater({
-  cells,
-  grid,
-}: HexGridWaterProps) {
+export const HexGridWater = React.memo(function HexGridWater({ cells, grid }: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {
@@ -126,14 +123,8 @@ export const HexGridWater = React.memo(function HexGridWater({
     });
 
     const waterGeometry = new THREE.BufferGeometry();
-    waterGeometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(hexMesh.vertices, 3)
-    );
-    waterGeometry.setAttribute(
-      "uv",
-      new THREE.Float32BufferAttribute(hexMesh.uvs, 2)
-    );
+    waterGeometry.setAttribute("position", new THREE.Float32BufferAttribute(hexMesh.vertices, 3));
+    waterGeometry.setAttribute("uv", new THREE.Float32BufferAttribute(hexMesh.uvs, 2));
     waterGeometry.setIndex(hexMesh.indices);
     waterGeometry.computeVertexNormals();
 

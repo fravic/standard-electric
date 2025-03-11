@@ -69,38 +69,44 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     }
 
     const playerId = this.context.playerId;
-    const blueprintEntity = this.world.entities.find(e => e.id === blueprintId);
+    const blueprintEntity = this.world.entities.find((e) => e.id === blueprintId);
 
-    if (!blueprintEntity || !('blueprint' in blueprintEntity)) {
-      return { 
+    if (!blueprintEntity || !("blueprint" in blueprintEntity)) {
+      return {
         valid: false,
-        reason: "Blueprint not found or invalid" 
+        reason: "Blueprint not found or invalid",
       };
     }
 
     // Verify ownership
     if (blueprintEntity.owner?.playerId !== playerId) {
-      return { 
+      return {
         valid: false,
-        reason: `Player ${playerId} is not the owner of blueprint ${blueprintId}` 
+        reason: `Player ${playerId} is not the owner of blueprint ${blueprintId}`,
       };
     }
 
     // Check if player has enough money
     const cost = blueprintEntity.cost?.amount ?? 0;
     if (this.context.playerMoney < cost) {
-      return { 
+      return {
         valid: false,
         reason: "Not enough money to build",
-        cost 
+        cost,
       };
     }
 
     // Create a temporary entity to validate placement
-    const buildable = createEntityFromBlueprint(blueprintEntity as With<Entity, 'blueprint'>, options);
+    const buildable = createEntityFromBlueprint(
+      blueprintEntity as With<Entity, "blueprint">,
+      options
+    );
 
     // For connections-type buildables (like power poles), find possible connections
-    if (blueprintEntity.blueprint?.components?.connections && options.cornerPosition?.cornerCoordinates) {
+    if (
+      blueprintEntity.blueprint?.components?.connections &&
+      options.cornerPosition?.cornerCoordinates
+    ) {
       const connections = findPossibleConnectionsWithWorld(
         this.world,
         options.cornerPosition.cornerCoordinates,
@@ -113,18 +119,18 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     const validation = this.validateBuildableLocationInternal(buildable);
 
     if (!validation.valid) {
-      return { 
+      return {
         valid: false,
-        reason: validation.reason 
+        reason: validation.reason,
       };
     }
 
     return {
       valid: true,
-      cost
+      cost,
     };
   }
-  
+
   /**
    * Internal method that validates if a buildable can be placed at its specified location
    */
@@ -206,10 +212,7 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
       // Check if the region matches the required state (if specified)
       const requiredRegion = buildable.requiredRegion;
 
-      if (
-        requiredRegion &&
-        cell.regionName !== requiredRegion.requiredRegionName
-      ) {
+      if (requiredRegion && cell.regionName !== requiredRegion.requiredRegionName) {
         return {
           valid: false,
           reason: `This power plant must be placed in ${requiredRegion.requiredRegionName}`,
@@ -243,10 +246,7 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
   /**
    * Creates a buildable entity at the specified location
    */
-  createBuildable(
-    blueprintId: string,
-    options: AdditionalBlueprintOptions
-  ): BuildableResult {
+  createBuildable(blueprintId: string, options: AdditionalBlueprintOptions): BuildableResult {
     if (!this.world || !this.context) {
       return { success: false, reason: "System not initialized" };
     }
@@ -255,45 +255,48 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     const validationResult = this.validateBuildableLocation(blueprintId, options);
     if (!validationResult.valid) {
       console.error(`Invalid buildable location: ${validationResult.reason}`);
-      return { 
-        success: false, 
+      return {
+        success: false,
         reason: validationResult.reason,
-        cost: validationResult.cost
+        cost: validationResult.cost,
       };
     }
 
     const playerId = this.context.playerId;
-    const blueprintEntity = this.world.entities.find(e => e.id === blueprintId) as With<Entity, 'blueprint'>;
+    const blueprintEntity = this.world.entities.find((e) => e.id === blueprintId) as With<
+      Entity,
+      "blueprint"
+    >;
     const cost = blueprintEntity.cost?.amount ?? 0;
     if (blueprintEntity.blueprint.buildsRemaining === 0) {
-      return { 
-        success: false, 
-        reason: "No more builds remaining for this blueprint"
+      return {
+        success: false,
+        reason: "No more builds remaining for this blueprint",
       };
     }
     if (this.context.playerMoney < cost) {
-      return { 
-        success: false, 
-        reason: "Not enough money to build"
+      return {
+        success: false,
+        reason: "Not enough money to build",
       };
     }
 
     // For connections-type buildables (like power poles), find possible connections
-    const connectionsOptions = blueprintEntity.blueprint.components.connections 
-      ? { 
-          ...options.connections, 
+    const connectionsOptions = blueprintEntity.blueprint.components.connections
+      ? {
+          ...options.connections,
           connectedToIds: findPossibleConnectionsWithWorld(
-            this.world, 
-            options.cornerPosition!.cornerCoordinates, 
+            this.world,
+            options.cornerPosition!.cornerCoordinates,
             playerId
-          ) 
-        } 
+          ),
+        }
       : undefined;
 
     // Create the entity from the blueprint
     const entity = createEntityFromBlueprint(blueprintEntity, {
       ...options,
-      connections: connectionsOptions
+      connections: connectionsOptions,
     });
 
     return {
@@ -301,7 +304,7 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
       entity,
       cost,
       moneyRemaining: this.context.playerMoney - cost,
-      usedBlueprintId: blueprintId
+      usedBlueprintId: blueprintId,
     };
   }
 
@@ -323,21 +326,24 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     if (!result.success || !this.context) {
       return;
     }
-    
+
     const playerId = this.context.playerId;
     const { cost, entity, usedBlueprintId } = result;
-    
+
     // Only make changes if we have an entity to add (this happens in createBuildable)
     if (entity) {
       // Deduct the cost from the player's money
       contextDraft.public.players[playerId].money -= cost ?? 0;
-      
+
       // Add the new entity to the game context
       contextDraft.public.entitiesById[entity.id] = entity;
-      
+
       // Update the blueprint's remaining builds if necessary
       if (usedBlueprintId) {
-        const blueprint = contextDraft.public.entitiesById[usedBlueprintId] as With<Entity, 'blueprint'>;
+        const blueprint = contextDraft.public.entitiesById[usedBlueprintId] as With<
+          Entity,
+          "blueprint"
+        >;
         if (blueprint.blueprint.buildsRemaining !== undefined) {
           const buildsRemaining = blueprint.blueprint.buildsRemaining - 1;
           if (buildsRemaining <= 0) {

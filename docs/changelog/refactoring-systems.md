@@ -38,10 +38,7 @@ export interface SystemResult {
  * TContext extends the base SystemContext with system-specific properties
  * TResult extends the base SystemResult with system-specific properties
  */
-export interface System<
-  TContext extends SystemContext,
-  TResult extends SystemResult
-> {
+export interface System<TContext extends SystemContext, TResult extends SystemResult> {
   /**
    * Updates the system state based on the current world state
    * @param world The current Miniplex world
@@ -255,27 +252,25 @@ For each system, follow this pattern:
 
 ```typescript
 // Before (in game.machine.ts)
-auctionInitiateBid: assign(
-  ({ context, event }: { context: GameContext; event: GameEvent }) => ({
-    public: produce(context.public, (draft) => {
-      if (event.type === "INITIATE_BID" && draft.auction) {
-        const blueprintId = event.blueprintId;
-        const blueprint = draft.entitiesById[blueprintId];
-        if (!blueprint) return;
+auctionInitiateBid: assign(({ context, event }: { context: GameContext; event: GameEvent }) => ({
+  public: produce(context.public, (draft) => {
+    if (event.type === "INITIATE_BID" && draft.auction) {
+      const blueprintId = event.blueprintId;
+      const blueprint = draft.entitiesById[blueprintId];
+      if (!blueprint) return;
 
-        draft.auction.currentBlueprint = {
-          blueprintId,
-          bids: [
-            {
-              playerId: event.caller.id,
-              amount: blueprint.cost?.amount || 0,
-            },
-          ],
-        };
-      }
-    }),
-  })
-);
+      draft.auction.currentBlueprint = {
+        blueprintId,
+        bids: [
+          {
+            playerId: event.caller.id,
+            amount: blueprint.cost?.amount || 0,
+          },
+        ],
+      };
+    }
+  }),
+}));
 
 // After refactoring
 // In AuctionSystem.ts
@@ -355,38 +350,36 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
 }
 
 // In game.machine.ts
-auctionInitiateBid: assign(
-  ({ context, event }: { context: GameContext; event: GameEvent }) => {
-    const auctionSystem = new AuctionSystem();
-    const world = createWorldWithEntities(context.public.entitiesById);
+auctionInitiateBid: assign(({ context, event }: { context: GameContext; event: GameEvent }) => {
+  const auctionSystem = new AuctionSystem();
+  const world = createWorldWithEntities(context.public.entitiesById);
 
-    // Create a properly typed context object for the auction system
-    const auctionContext: AuctionContext = {
-      auction: context.public.auction!,
-      event,
-      players: context.public.players,
-      gameTime: context.public.time.totalTicks,
-    };
+  // Create a properly typed context object for the auction system
+  const auctionContext: AuctionContext = {
+    auction: context.public.auction!,
+    event,
+    players: context.public.players,
+    gameTime: context.public.time.totalTicks,
+  };
 
-    const result = auctionSystem.update(world, auctionContext);
+  const result = auctionSystem.update(world, auctionContext);
 
-    if (!result.success) return context;
+  if (!result.success) return context;
 
-    return {
-      public: produce(context.public, (draft) => {
-        if (result.auction) {
-          draft.auction = result.auction;
-        }
+  return {
+    public: produce(context.public, (draft) => {
+      if (result.auction) {
+        draft.auction = result.auction;
+      }
 
-        // Let the system handle all mutations to the game context
-        auctionSystem.mutate(draft, result);
+      // Let the system handle all mutations to the game context
+      auctionSystem.mutate(draft, result);
 
-        // System.mutate now handles all state changes directly
-        // No need for additional state change logic here
-      }),
-    };
-  }
-);
+      // System.mutate now handles all state changes directly
+      // No need for additional state change logic here
+    }),
+  };
+});
 ```
 
 ## System-Specific Types

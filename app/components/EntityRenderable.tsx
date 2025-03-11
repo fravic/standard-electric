@@ -7,7 +7,7 @@ import { Entity } from "@/ecs/entity";
 import { PALETTE } from "@/lib/palette";
 import { toWorldPoint } from "@/lib/coordinates/HexCoordinates";
 
-interface EntityRenderableProps  {
+interface EntityRenderableProps {
   entity: Entity;
 }
 
@@ -19,21 +19,13 @@ export const EntityRenderable: React.FC<EntityRenderableProps> = ({ entity }) =>
   }
 
   if (entityRenderable.renderableComponentName === "PowerPole") {
-    return (
-      <PowerPole
-        pole={entity}
-        isGhost={Boolean(entity.isGhost)}
-      />
-    );
+    return <PowerPole pole={entity} isGhost={Boolean(entity.isGhost)} />;
   }
 
   // TODO: Extract out power plant component
   if (entityRenderable.renderableComponentName === "PowerPlant" && entity.hexPosition) {
     return (
-      <Box
-        position={toWorldPoint(entity.hexPosition.coordinates)}
-        args={[0.5, 1, 0.5]}
-      >
+      <Box position={toWorldPoint(entity.hexPosition.coordinates)} args={[0.5, 1, 0.5]}>
         <meshStandardMaterial
           color={PALETTE.DARK_GREEN}
           transparent={Boolean(entity.isGhost)}

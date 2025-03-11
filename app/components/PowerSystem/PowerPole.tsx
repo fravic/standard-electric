@@ -46,11 +46,7 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
         const connectedCornerCoordinates = connectedPole?.cornerPosition?.cornerCoordinates;
         if (!connectedPole || !connectedCornerCoordinates) return null;
 
-        const start = new THREE.Vector3(
-          position[0],
-          position[1] + POLE_HEIGHT_Y,
-          position[2]
-        );
+        const start = new THREE.Vector3(position[0], position[1] + POLE_HEIGHT_Y, position[2]);
         const end = new THREE.Vector3(
           cornerToWorldPoint(connectedCornerCoordinates)[0],
           cornerToWorldPoint(connectedCornerCoordinates)[1] + POLE_HEIGHT_Y,
@@ -58,9 +54,7 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
         );
 
         // Calculate middle control point for the curve
-        const mid = new THREE.Vector3()
-          .addVectors(start, end)
-          .multiplyScalar(0.5);
+        const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
         mid.y -= POWER_LINE_DROOP_Y; // Pull down the middle point to create sag
 
         return (

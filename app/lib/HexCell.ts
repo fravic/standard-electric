@@ -35,15 +35,10 @@ export const HexCellSchema = z.object({
 
 export type HexCell = z.infer<typeof HexCellSchema>;
 
-export function createHexCell(
-  x: number,
-  z: number,
-  regionName: string | null = null
-): HexCell {
+export function createHexCell(x: number, z: number, regionName: string | null = null): HexCell {
   // Randomly assign terrain type
   const terrainTypes = Object.values(TerrainType);
-  const terrainType =
-    terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
+  const terrainType = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
 
   return {
     coordinates: { x, z },
@@ -94,10 +89,7 @@ export function getColor(cell: HexCell): Color {
 /**
  * Get the color of a hex cell, darkening it if it hasn't been surveyed by the player
  */
-export function getColorWithExplorationStatus(
-  cell: HexCell,
-  hasBeenSurveyed: boolean
-): Color {
+export function getColorWithExplorationStatus(cell: HexCell, hasBeenSurveyed: boolean): Color {
   const baseColor = getColor(cell);
 
   // If not surveyed, darken the color

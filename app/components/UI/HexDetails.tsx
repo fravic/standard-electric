@@ -102,9 +102,7 @@ const EntityDetails: React.FC = () => {
   const world = useWorld();
 
   const userId = AuthContext.useSelector((state) => state.userId);
-  const { commodityMarket, players } = GameContext.useSelector(
-    (state) => state.public
-  );
+  const { commodityMarket, players } = GameContext.useSelector((state) => state.public);
   const sendGameEvent = GameContext.useSend();
 
   // Find the entity at the selected coordinates (assume only one for now)
@@ -122,8 +120,7 @@ const EntityDetails: React.FC = () => {
   // Calculate fuel percentage with null checks
   const maxFuelStorage = entity.fuelStorage?.maxFuelStorage || 0;
   const currentFuelStorage = entity.fuelStorage?.currentFuelStorage || 0;
-  const fuelPercentage =
-    maxFuelStorage > 0 ? (currentFuelStorage / maxFuelStorage) * 100 : 0;
+  const fuelPercentage = maxFuelStorage > 0 ? (currentFuelStorage / maxFuelStorage) * 100 : 0;
 
   // Get market rates for this fuel type
   const marketRates = useMemo(() => {
@@ -164,8 +161,7 @@ const EntityDetails: React.FC = () => {
     player.money >= fuelRates.buyPrice &&
     currentFuelStorage < maxFuelStorage;
 
-  const canSellFuel =
-    isOwner && fuelType && fuelRates && currentFuelStorage > 0;
+  const canSellFuel = isOwner && fuelType && fuelRates && currentFuelStorage > 0;
 
   return (
     <>
@@ -197,8 +193,7 @@ const EntityDetails: React.FC = () => {
             {fuelRates && (
               <div>
                 <small>
-                  Buy: ${fuelRates.buyPrice.toFixed(2)} | Sell: $
-                  {fuelRates.sellPrice.toFixed(2)}
+                  Buy: ${fuelRates.buyPrice.toFixed(2)} | Sell: ${fuelRates.sellPrice.toFixed(2)}
                 </small>
               </div>
             )}
@@ -220,7 +215,6 @@ const EntityDetails: React.FC = () => {
             />
           </div>
 
-
           <div style={styles.infoRow}>
             <span style={styles.label}>Consumption Rate:</span>
             <span>{entity.fuelRequirement!.fuelConsumptionPerKWh} per kWh</span>
@@ -231,11 +225,7 @@ const EntityDetails: React.FC = () => {
               <Button onClick={handleBuyFuel} disabled={!canBuyFuel} fullWidth>
                 Buy Fuel
               </Button>
-              <Button
-                onClick={handleSellFuel}
-                disabled={!canSellFuel}
-                fullWidth
-              >
+              <Button onClick={handleSellFuel} disabled={!canSellFuel} fullWidth>
                 Sell Fuel
               </Button>
             </div>
@@ -263,7 +253,11 @@ const SurveyDetails: React.FC = () => {
   // Get the survey data for the selected hex
   const world = useWorld();
   const surveyResults = world.with("surveyResult");
-  const surveyResultForCell = surveyResults.where((ent) => Boolean(selectedHexCoordinates) && equals(ent.hexPosition!.coordinates, selectedHexCoordinates!)).first;
+  const surveyResultForCell = surveyResults.where(
+    (ent) =>
+      Boolean(selectedHexCoordinates) &&
+      equals(ent.hexPosition!.coordinates, selectedHexCoordinates!)
+  ).first;
 
   // Check if player has any active survey
   const hasActiveSurveyInProgress = useMemo(() => {
@@ -272,8 +266,7 @@ const SurveyDetails: React.FC = () => {
   }, [userId, currentTick, gameState.private]);
 
   // Handle starting a new survey
-  const canSurvey =
-    selectedHexCoordinates && !hasActiveSurveyInProgress && !surveyResultForCell;
+  const canSurvey = selectedHexCoordinates && !hasActiveSurveyInProgress && !surveyResultForCell;
   const handleStartSurvey = () => {
     if (!canSurvey) return;
 
@@ -295,7 +288,10 @@ const SurveyDetails: React.FC = () => {
   }
 
   // If survey is in progress but not complete
-  if (surveyResultForCell && !SurveySystem.isSurveyComplete(surveyResultForCell.surveyResult.surveyStartTick, currentTick)) {
+  if (
+    surveyResultForCell &&
+    !SurveySystem.isSurveyComplete(surveyResultForCell.surveyResult.surveyStartTick, currentTick)
+  ) {
     const progress = Math.min(
       ((currentTick - surveyResultForCell.surveyResult.surveyStartTick) / SURVEY_DURATION_TICKS) *
         100,
@@ -328,9 +324,7 @@ const SurveyDetails: React.FC = () => {
         <h3 style={styles.resourceTitle}>Survey Results</h3>
         <div style={styles.infoRow}>
           <span style={styles.label}>Resource Found:</span>
-          <span style={{ textTransform: "capitalize" }}>
-            {resource.resourceType}
-          </span>
+          <span style={{ textTransform: "capitalize" }}>{resource.resourceType}</span>
         </div>
         <div style={styles.infoRow}>
           <span style={styles.label}>Amount:</span>

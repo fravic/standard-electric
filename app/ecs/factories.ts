@@ -7,10 +7,13 @@ import { CornerCoordinates, HexCoordinates } from "@/lib/coordinates/types";
 import { CommodityType } from "@/lib/types";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 
-export function createWorldWithEntities(publicEntitiesById: Record<string, Entity>, privateEntitiesById: Record<string, Entity>) {
+export function createWorldWithEntities(
+  publicEntitiesById: Record<string, Entity>,
+  privateEntitiesById: Record<string, Entity>
+) {
   const world = new World<Entity>();
-  Object.values(publicEntitiesById).forEach(entity => world.add(entity));
-  Object.values(privateEntitiesById).forEach(entity => world.add(entity));
+  Object.values(publicEntitiesById).forEach((entity) => world.add(entity));
+  Object.values(privateEntitiesById).forEach((entity) => world.add(entity));
   return world;
 }
 
@@ -20,15 +23,17 @@ export function createWorldWithEntities(publicEntitiesById: Record<string, Entit
 export const AdditionalBlueprintOptionsSchema = z.object({
   cornerPosition: CornerPositionComponentSchema.optional(),
   hexPosition: HexPositionComponentSchema.optional(),
-  connections: z.object({
-    connectedToIds: z.array(z.string()),
-  }).optional(),
+  connections: z
+    .object({
+      connectedToIds: z.array(z.string()),
+    })
+    .optional(),
 });
 
 export type AdditionalBlueprintOptions = z.infer<typeof AdditionalBlueprintOptionsSchema>;
 
 export function createEntityFromBlueprint(
-  blueprintEntity: With<Entity, 'blueprint'>,
+  blueprintEntity: With<Entity, "blueprint">,
   options: AdditionalBlueprintOptions
 ): Entity {
   return {
@@ -40,7 +45,7 @@ export function createEntityFromBlueprint(
   };
 }
 
-export function createPowerPoleBlueprint(playerId: string): With<Entity, 'blueprint'> {
+export function createPowerPoleBlueprint(playerId: string): With<Entity, "blueprint"> {
   return {
     id: nanoid(),
     name: "Power pole blueprint",
@@ -58,14 +63,12 @@ export function createPowerPoleBlueprint(playerId: string): With<Entity, 'bluepr
     },
     owner: {
       playerId,
-    }
+    },
   };
 }
 
-export function createDefaultBlueprintsForPlayer(playerId: string): With<Entity, 'blueprint'>[] {
-  return [
-    createPowerPoleBlueprint(playerId)
-  ]
+export function createDefaultBlueprintsForPlayer(playerId: string): With<Entity, "blueprint">[] {
+  return [createPowerPoleBlueprint(playerId)];
 }
 
 /**
@@ -122,11 +125,15 @@ export function createPowerPlant(options: {
     owner: {
       playerId: options.playerId,
     },
-    ...(options.maxFuelStorage !== undefined && options.currentFuelStorage !== undefined ? { fuelStorage: {
-      fuelType: options.fuelType,
-      maxFuelStorage: options.maxFuelStorage,
-      currentFuelStorage: options.currentFuelStorage,
-    } } : {}),
+    ...(options.maxFuelStorage !== undefined && options.currentFuelStorage !== undefined
+      ? {
+          fuelStorage: {
+            fuelType: options.fuelType,
+            maxFuelStorage: options.maxFuelStorage,
+            currentFuelStorage: options.currentFuelStorage,
+          },
+        }
+      : {}),
     powerGeneration: {
       powerGenerationKW: options.powerGenerationKW,
       pricePerKWh: options.pricePerKWh,
@@ -155,7 +162,7 @@ export function createPowerPlantBlueprint(options: {
   fuelConsumptionPerKWh?: number;
   pricePerKWh?: number;
   requiredRegionName?: string;
-}): With<Entity, 'blueprint'> {
+}): With<Entity, "blueprint"> {
   return {
     id: options.id || nanoid(),
     name: `${options.name} blueprint`,
@@ -166,23 +173,27 @@ export function createPowerPlantBlueprint(options: {
         renderable: {
           renderableComponentName: "PowerPlant",
         },
-        powerGeneration: options.pricePerKWh ? {
-          powerGenerationKW: options.powerGenerationKW,
-          pricePerKWh: options.pricePerKWh,
-        } : undefined,
+        powerGeneration: options.pricePerKWh
+          ? {
+              powerGenerationKW: options.powerGenerationKW,
+              pricePerKWh: options.pricePerKWh,
+            }
+          : undefined,
         fuelRequirement: {
           fuelType: options.fuelType || null,
           fuelConsumptionPerKWh: options.fuelConsumptionPerKWh || 0,
         },
-        requiredRegion: options.requiredRegionName ? { requiredRegionName: options.requiredRegionName } : undefined,
-      }
+        requiredRegion: options.requiredRegionName
+          ? { requiredRegionName: options.requiredRegionName }
+          : undefined,
+      },
     },
     owner: {
       playerId: options.playerId,
     },
     auctionable: {
       startingPrice: options.startingPrice,
-    }
+    },
   };
 }
 
@@ -200,11 +211,11 @@ export function createSurvey(options: {
   return {
     id: options.id || nanoid(),
     name: `Survey for ${coordinatesToString(options.hexCoordinates)}`,
-    hexPosition: {  
+    hexPosition: {
       coordinates: options.hexCoordinates,
     },
     surveyResult: {
-      surveyStartTick: options.surveyStartTick, 
+      surveyStartTick: options.surveyStartTick,
       isComplete: options.isComplete,
       resource: options.resource,
     },

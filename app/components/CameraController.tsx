@@ -146,8 +146,7 @@ export function CameraController(): React.ReactNode {
 
       // Normalize target velocity if it exists
       const length = Math.sqrt(
-        targetVelocity.x * targetVelocity.x +
-          targetVelocity.z * targetVelocity.z
+        targetVelocity.x * targetVelocity.x + targetVelocity.z * targetVelocity.z
       );
       if (length > 0) {
         targetVelocity.x /= length;
@@ -167,25 +166,15 @@ export function CameraController(): React.ReactNode {
       });
 
       // Apply movement using current velocity
-      const movement = new Vector3(
-        springs.vx.get() * deltaTime,
-        0,
-        springs.vz.get() * deltaTime
-      );
+      const movement = new Vector3(springs.vx.get() * deltaTime, 0, springs.vz.get() * deltaTime);
 
       // Calculate new positions
       const newCameraPos = camera.position.clone().add(movement);
-      const newTargetPos = (controls as OrbitControls).target
-        .clone()
-        .add(movement);
+      const newTargetPos = (controls as OrbitControls).target.clone().add(movement);
 
       // Check and apply movement for each axis independently
-      const canMoveX =
-        isWithinBounds(newCameraPos.x, "X") &&
-        isWithinBounds(newTargetPos.x, "X");
-      const canMoveZ =
-        isWithinBounds(newCameraPos.z, "Z") &&
-        isWithinBounds(newTargetPos.z, "Z");
+      const canMoveX = isWithinBounds(newCameraPos.x, "X") && isWithinBounds(newTargetPos.x, "X");
+      const canMoveZ = isWithinBounds(newCameraPos.z, "Z") && isWithinBounds(newTargetPos.z, "Z");
 
       if (canMoveX) {
         camera.position.x = newCameraPos.x;

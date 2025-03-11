@@ -25,11 +25,7 @@ async function generateMap() {
       const normalizedZ = (z / hexGrid.height) * 100;
 
       // Get state info at these coordinates
-      const regionName = getStateNameAtCoordinates(
-        mapData,
-        normalizedX,
-        normalizedZ
-      );
+      const regionName = getStateNameAtCoordinates(mapData, normalizedX, normalizedZ);
       const cell = createHexCell(x, z, regionName);
 
       if (!regionName) {

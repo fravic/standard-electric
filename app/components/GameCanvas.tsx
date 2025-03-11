@@ -1,11 +1,6 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import {
-  EffectComposer,
-  Bloom,
-  DotScreen,
-  Scanline,
-} from "@react-three/postprocessing";
+import { EffectComposer, Bloom, DotScreen, Scanline } from "@react-three/postprocessing";
 import { KernelSize, BlendFunction } from "postprocessing";
 
 import { CameraController } from "./CameraController";
@@ -37,11 +32,7 @@ export function GameCanvas() {
           luminanceSmoothing={0.4}
           kernelSize={KernelSize.SMALL}
         />
-        <Scanline
-          blendFunction={BlendFunction.OVERLAY}
-          density={1.25}
-          opacity={0.1}
-        />
+        <Scanline blendFunction={BlendFunction.OVERLAY} density={1.25} opacity={0.1} />
       </EffectComposer>
     </Canvas>
   );

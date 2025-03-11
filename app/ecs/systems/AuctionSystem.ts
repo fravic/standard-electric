@@ -67,13 +67,10 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * @param allowPassing Whether passing is allowed in this auction
    * @returns A new Auction object
    */
-  public startAuction(
-    auctionContext: AuctionContext,
-    allowPassing: boolean = true
-  ): AuctionResult {
+  public startAuction(auctionContext: AuctionContext, allowPassing: boolean = true): AuctionResult {
     // TODO: Should set up a different set of blueprints each auction. Only one auction for now.
     // Parse the entities from the JSON file using the EntitySchema
-    const powerPlantEntities = (powerPlantBlueprintsData as any[]).map(blueprint => 
+    const powerPlantEntities = (powerPlantBlueprintsData as any[]).map((blueprint) =>
       EntitySchema.parse(blueprint)
     );
     const availableEntities = powerPlantEntities.slice(
@@ -81,7 +78,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
       // First auction has at least one blueprint per player
       Math.max(Object.keys(auctionContext.players).length, 3)
     );
-    const blueprintIds = availableEntities.map(entity => entity.id);
+    const blueprintIds = availableEntities.map((entity) => entity.id);
 
     const auction = {
       currentBlueprint: null,
@@ -90,12 +87,12 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
       isPassingAllowed: allowPassing,
       passedPlayerIds: [],
     };
-    
+
     return {
       success: true,
       auction,
       purchasesToProcess: [],
-      entitiesToAdd: availableEntities
+      entitiesToAdd: availableEntities,
     };
   }
 
@@ -116,12 +113,12 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     if (!auction || !blueprintId || !initiatorPlayerId) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Check if blueprint is available
     if (!auction.availableBlueprintIds.includes(blueprintId)) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     const updatedAuction = {
       ...auction,
       currentBlueprint: {
@@ -134,11 +131,11 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
         ],
       },
     };
-    
+
     return {
       success: true,
       auction: updatedAuction,
-      purchasesToProcess: []
+      purchasesToProcess: [],
     };
   }
 
@@ -148,33 +145,30 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * @param playerId ID of the player passing
    * @returns Updated auction state or null if invalid
    */
-  public auctionPass(
-    auction: Auction,
-    playerId: string
-  ): AuctionResult {
+  public auctionPass(auction: Auction, playerId: string): AuctionResult {
     if (!auction || !playerId) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Check if passing is allowed
     if (!auction.isPassingAllowed) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Check if player has already passed
     if (auction.passedPlayerIds.includes(playerId)) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     const updatedAuction = {
       ...auction,
       passedPlayerIds: [...auction.passedPlayerIds, playerId],
     };
-    
+
     return {
       success: true,
       auction: updatedAuction,
-      purchasesToProcess: []
+      purchasesToProcess: [],
     };
   }
 
@@ -195,17 +189,17 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     if (!auction?.currentBlueprint || !playerId) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Check if player can afford the bid
     if (!this.canPlayerAffordBid(players[playerId], amount)) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Check if player has already purchased
-    if (auction.purchases.some(p => p.playerId === playerId)) {
+    if (auction.purchases.some((p) => p.playerId === playerId)) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     const updatedAuction = {
       ...auction,
       currentBlueprint: {
@@ -219,11 +213,11 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
         ],
       },
     };
-    
+
     return {
       success: true,
       auction: updatedAuction,
-      purchasesToProcess: []
+      purchasesToProcess: [],
     };
   }
 
@@ -233,20 +227,17 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * @param playerId ID of the player passing
    * @returns Updated auction state or null if invalid
    */
-  public auctionPassBid(
-    auction: Auction,
-    playerId: string
-  ): AuctionResult {
+  public auctionPassBid(auction: Auction, playerId: string): AuctionResult {
     if (!auction?.currentBlueprint || !playerId) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Check if player has already passed or bid on this blueprint
-    const playerBids = auction.currentBlueprint.bids.filter(bid => bid.playerId === playerId);
-    if (playerBids.some(bid => bid.passed)) {
+    const playerBids = auction.currentBlueprint.bids.filter((bid) => bid.playerId === playerId);
+    if (playerBids.some((bid) => bid.passed)) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     const updatedAuction = {
       ...auction,
       currentBlueprint: {
@@ -260,11 +251,11 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
         ],
       },
     };
-    
+
     return {
       success: true,
       auction: updatedAuction,
-      purchasesToProcess: []
+      purchasesToProcess: [],
     };
   }
 
@@ -274,15 +265,12 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * @param players Map of player information
    * @returns Updated auction state or null if invalid
    */
-  public endBidding(
-    auction: Auction,
-    players: Record<string, Player>
-  ): AuctionResult {
+  public endBidding(auction: Auction, players: Record<string, Player>): AuctionResult {
     const updatedAuction = this.processBlueprintWinner(players, auction);
     if (!updatedAuction) {
       return { success: false, auction: null, purchasesToProcess: [] };
     }
-    
+
     // Find the newest purchase that was just added
     const newPurchases = [];
     if (updatedAuction.purchases.length > auction.purchases.length) {
@@ -290,11 +278,11 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
       const latestPurchase = updatedAuction.purchases[updatedAuction.purchases.length - 1];
       newPurchases.push(latestPurchase);
     }
-    
+
     return {
       success: true,
       auction: updatedAuction,
-      purchasesToProcess: newPurchases
+      purchasesToProcess: newPurchases,
     };
   }
 
@@ -305,7 +293,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    */
   public getNextInitiator(context: AuctionContext): string | undefined {
     if (!context.auction) return undefined;
-    
+
     return this.getNextInitiatorPlayerId(
       context.players,
       context.auction,
@@ -321,7 +309,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    */
   public getNextBidder(context: AuctionContext): string | null {
     if (!context.auction) return null;
-    
+
     return this.getNextBidderPlayerId(
       context.players,
       context.auction,
@@ -337,7 +325,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    */
   public shouldEndBidding(context: AuctionContext): boolean {
     if (!context.auction) return false;
-    
+
     return this.shouldEndBiddingInternal(context.players, context.auction);
   }
 
@@ -348,20 +336,17 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    */
   public shouldEndAuction(context: AuctionContext): boolean {
     if (!context.auction) return false;
-    
+
     return this.shouldEndAuctionInternal(context.players, context.auction);
   }
-  
+
   /**
    * Implements the System.mutate method
    * Performs mutations on the game context based on the auction result
    * @param result The result from the update method
    * @param contextDraft An Immer draft of the entire game context
    */
-  public mutate(
-    result: AuctionResult,
-    contextDraft: Draft<GameContext>
-  ): void {
+  public mutate(result: AuctionResult, contextDraft: Draft<GameContext>): void {
     // Update the auction state in the public context
     if (result.auction) {
       contextDraft.public.auction = result.auction;
@@ -371,18 +356,18 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     }
 
     // Process each purchase
-    result.purchasesToProcess?.forEach(purchase => {
+    result.purchasesToProcess?.forEach((purchase) => {
       const { playerId, blueprintId, price } = purchase;
-      
+
       // Update player money in public context
       if (contextDraft.public.players[playerId]) {
         contextDraft.public.players[playerId].money -= price;
       }
-      
+
       // Add blueprint to player inventory
       if (contextDraft.public.entitiesById[blueprintId]) {
         const blueprint = contextDraft.public.entitiesById[blueprintId];
-        
+
         // Set the owner of the blueprint to the player
         if (blueprint) {
           blueprint.owner = { playerId };
@@ -391,11 +376,11 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     });
 
     // Process each entity to add
-    result.entitiesToAdd?.forEach(entity => {
+    result.entitiesToAdd?.forEach((entity) => {
       contextDraft.public.entitiesById[entity.id] = entity;
     });
   }
-  
+
   /**
    * Returns the order in which players should bid, based on their power sold.
    * Players who have sold less power get priority (ascending order).
@@ -438,18 +423,13 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     totalTicks: number,
     randomSeed: number
   ): string | undefined {
-    const bidderOrder = this.getBidderPriorityOrder(
-      players,
-      totalTicks,
-      randomSeed
-    );
+    const bidderOrder = this.getBidderPriorityOrder(players, totalTicks, randomSeed);
     const passedPlayerIds = auction.passedPlayerIds ?? [];
     const purchases = auction.purchases ?? [];
 
     return bidderOrder.find(
       (playerId) =>
-        !passedPlayerIds.includes(playerId) &&
-        !purchases.some((p) => p.playerId === playerId)
+        !passedPlayerIds.includes(playerId) && !purchases.some((p) => p.playerId === playerId)
     );
   }
 
@@ -468,11 +448,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
   ): string | null {
     if (!auction.currentBlueprint) return null;
 
-    const bidderOrder = this.getBidderPriorityOrder(
-      players,
-      totalTicks,
-      randomSeed
-    );
+    const bidderOrder = this.getBidderPriorityOrder(players, totalTicks, randomSeed);
 
     // Filter out players who have already purchased or passed the auction
     const eligibleBidders = bidderOrder.filter(
@@ -510,10 +486,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * Checks if bidding should end on the current blueprint
    * @private
    */
-  private shouldEndBiddingInternal(
-    players: Record<string, Player>,
-    auction: Auction
-  ): boolean {
+  private shouldEndBiddingInternal(players: Record<string, Player>, auction: Auction): boolean {
     if (!auction?.currentBlueprint) return false;
 
     // Count how many players have not passed
@@ -525,9 +498,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     );
 
     // Count passed players from bids
-    const passedPlayers = new Set(
-      bids.filter((bid) => bid.passed).map((bid) => bid.playerId)
-    );
+    const passedPlayers = new Set(bids.filter((bid) => bid.passed).map((bid) => bid.playerId));
 
     // Only one player left bidding
     return activePlayers.size - passedPlayers.size <= 1;
@@ -537,10 +508,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
    * Checks if the entire auction should end
    * @private
    */
-  private shouldEndAuctionInternal(
-    players: Record<string, Player>,
-    auction: Auction
-  ): boolean {
+  private shouldEndAuctionInternal(players: Record<string, Player>, auction: Auction): boolean {
     if (!auction) return false;
 
     const allPlayers = Object.keys(players);
@@ -566,12 +534,15 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     // Find the winning bid (highest non-passed bid)
     const winningBid = auction.currentBlueprint.bids
       .filter((bid) => !bid.passed && bid.amount !== undefined)
-      .reduce((highest, current) => {
-        if (!highest || (current.amount || 0) > (highest.amount || 0)) {
-          return current;
-        }
-        return highest;
-      }, null as { playerId: string; amount?: number } | null);
+      .reduce(
+        (highest, current) => {
+          if (!highest || (current.amount || 0) > (highest.amount || 0)) {
+            return current;
+          }
+          return highest;
+        },
+        null as { playerId: string; amount?: number } | null
+      );
 
     if (!winningBid || !winningBid.amount) return null;
 
@@ -582,9 +553,7 @@ export class AuctionSystem implements System<AuctionContext, AuctionResult> {
     return {
       ...auction,
       currentBlueprint: null,
-      availableBlueprintIds: auction.availableBlueprintIds.filter(
-        (id) => id !== blueprintId
-      ),
+      availableBlueprintIds: auction.availableBlueprintIds.filter((id) => id !== blueprintId),
       purchases: [
         ...auction.purchases,
         {
