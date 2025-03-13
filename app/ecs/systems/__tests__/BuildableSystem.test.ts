@@ -186,7 +186,7 @@ describe("BuildableSystem", () => {
             playerMoney: 1000,
           },
           "pole-blueprint-id",
-          { cornerCoordinates: newPole.cornerPosition?.cornerCoordinates }
+          { cornerPosition: { cornerCoordinates: newPole.cornerPosition!.cornerCoordinates } }
         );
 
         expect(result).toBe(false);
@@ -247,7 +247,7 @@ describe("BuildableSystem", () => {
         });
 
         const validationResult = buildableSystem.validateBuildableLocation("pole-blueprint-id", {
-          cornerCoordinates: newPole.cornerPosition?.cornerCoordinates,
+          cornerPosition: { cornerCoordinates: newPole.cornerPosition!.cornerCoordinates },
           connections: { connectedToIds: ["player1-pole1"] },
         });
 
@@ -309,7 +309,7 @@ describe("BuildableSystem", () => {
         });
 
         const validationResult = buildableSystem.validateBuildableLocation("pole-blueprint-id", {
-          cornerCoordinates: newPole.cornerPosition?.cornerCoordinates,
+          cornerPosition: { cornerCoordinates: newPole.cornerPosition!.cornerCoordinates },
           connections: { connectedToIds: ["player1-pole1"] },
         });
 
@@ -385,7 +385,7 @@ describe("BuildableSystem", () => {
 
         const validationResult = buildableSystem.validateBuildableLocation(
           "player3-plant-blueprint-id",
-          { hexCoordinates: newPlant.hexPosition?.coordinates }
+          { hexPosition: { coordinates: newPlant.hexPosition!.coordinates } }
         );
 
         expect(validationResult.valid).toBe(true);
@@ -541,7 +541,7 @@ describe("BuildableSystem", () => {
             surveyedHexCells,
           },
           "plant-blueprint-id",
-          { hexCoordinates: newPlant.hexPosition?.coordinates }
+          { hexPosition: { coordinates: newPlant.hexPosition!.coordinates } }
         );
 
         expect(result).toBe(false);
@@ -613,7 +613,7 @@ describe("BuildableSystem", () => {
         });
 
         const validationResult = buildableSystem.validateBuildableLocation("plant-blueprint-id", {
-          hexCoordinates: newPlant.hexPosition?.coordinates,
+          hexPosition: { coordinates: newPlant.hexPosition!.coordinates },
         });
 
         expect(validationResult.valid).toBe(true);
@@ -759,7 +759,7 @@ describe("BuildableSystem", () => {
   });
 
   describe("createBuildable", () => {
-    test.only("should create a buildable entity successfully", () => {
+    test("should create a buildable entity successfully", () => {
       const entities = setupEntities();
 
       // Create a pole at a valid location first to ensure grid connectivity
@@ -819,13 +819,6 @@ describe("BuildableSystem", () => {
         playerMoney: 50, // Not enough for pole (100)
       });
 
-      const result = system.createBuildable("pole-blueprint-id", {
-        cornerCoordinates: {
-          hex: centerCoords,
-          position: CornerPosition.North,
-        },
-      });
-
       // Use BuildableSystem directly instead of the static method
       const noMoneyBuildableSystem = new BuildableSystem();
       noMoneyBuildableSystem.initialize(entities, {
@@ -835,9 +828,11 @@ describe("BuildableSystem", () => {
       });
       // Get the result from the createBuildable method
       const noMoneyResult = noMoneyBuildableSystem.createBuildable("pole-blueprint-id", {
-        cornerCoordinates: {
-          hex: centerCoords,
-          position: CornerPosition.North,
+        cornerPosition: {
+          cornerCoordinates: {
+            hex: centerCoords,
+            position: CornerPosition.North,
+          },
         },
       });
       expect(noMoneyResult.success).toBe(false);
@@ -854,13 +849,6 @@ describe("BuildableSystem", () => {
         playerMoney: 1000,
       });
 
-      const result = system.createBuildable("pole-blueprint-id", {
-        cornerCoordinates: {
-          hex: { x: 1, z: -1 }, // Non-region cell
-          position: CornerPosition.North,
-        },
-      });
-
       // Use BuildableSystem directly for the invalid location test
       const invalidLocationSystem = new BuildableSystem();
       invalidLocationSystem.initialize(entities, {
@@ -870,13 +858,15 @@ describe("BuildableSystem", () => {
       });
       // Get the result from the createBuildable method
       const invalidLocationResult = invalidLocationSystem.createBuildable("pole-blueprint-id", {
-        cornerCoordinates: {
-          hex: { x: 1, z: -1 }, // Non-region cell
-          position: CornerPosition.North,
+        cornerPosition: {
+          cornerCoordinates: {
+            hex: { x: 1, z: -1 }, // Non-region cell
+            position: CornerPosition.North,
+          },
         },
       });
       expect(invalidLocationResult.success).toBe(false);
-      expect(invalidLocationResult.reason).toBe("Invalid buildable type or missing coordinates");
+      expect(invalidLocationResult.reason).toBe("Power poles must be placed in a region");
     });
   });
 });

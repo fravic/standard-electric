@@ -12,6 +12,7 @@ import { useWorld } from "../WorldContext";
 import { entityAtHexCoordinate } from "@/ecs/queries";
 import { CommodityType } from "@/lib/types";
 import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
+import { Entity } from "@/ecs/entity";
 
 const styles = {
   container: {
@@ -90,30 +91,36 @@ const styles = {
     marginBottom: "0.5rem",
     textTransform: "capitalize" as const,
   },
+  entityContainer: {
+    marginBottom: "1.5rem",
+    padding: "1rem",
+    borderRadius: "8px",
+  },
+  entityTitle: {
+    color: UI_COLORS.TEXT_LIGHT,
+    margin: 0,
+    fontSize: "1.1rem",
+    marginBottom: "0.75rem",
+  },
 };
 
-const EntityDetails: React.FC = () => {
-  // Always call all hooks at the top level, regardless of conditions
-  const selectedHexCoordinates = useSelector(
-    clientStore,
-    (state) => state.context.selectedHexCoordinates
-  );
-
-  const world = useWorld();
-
+// New component to handle power plants and their commodity market logic
+const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
   const userId = AuthContext.useSelector((state) => state.userId);
   const { commodityMarket, players } = GameContext.useSelector((state) => state.public);
   const sendGameEvent = GameContext.useSend();
+  const world = useWorld();
 
-  // Find the entity at the selected coordinates (assume only one for now)
-  const entity = useMemo(() => {
-    if (!selectedHexCoordinates) return undefined;
-    return entityAtHexCoordinate(world, selectedHexCoordinates);
-  }, [selectedHexCoordinates, world]);
+  // Calculate market rates
+  const marketRates = useMemo(() => {
+    if (!userId) return undefined;
+    const commoditySystem = new CommoditySystem();
+    commoditySystem.initialize(world, { playerId: userId, market: commodityMarket });
+    return commoditySystem.getMarketRates(commodityMarket);
+  }, [world, userId, commodityMarket]);
 
-  if (!entity) {
-    return null;
-  }
+  if (!entity.powerGeneration) return null;
+
   const isOwner = entity.owner?.playerId === userId;
   const player = userId ? players[userId] : undefined;
 
@@ -122,14 +129,8 @@ const EntityDetails: React.FC = () => {
   const currentFuelStorage = entity.fuelStorage?.currentFuelStorage || 0;
   const fuelPercentage = maxFuelStorage > 0 ? (currentFuelStorage / maxFuelStorage) * 100 : 0;
 
-  // Get market rates for this fuel type
-  const marketRates = useMemo(() => {
-    const commoditySystem = new CommoditySystem();
-    commoditySystem.initialize(world, { playerId: userId!, market: commodityMarket });
-    return commoditySystem.getMarketRates(commodityMarket);
-  }, [world, userId, commodityMarket]);
   const fuelType = entity.fuelRequirement?.fuelType as CommodityType;
-  const fuelRates = fuelType ? marketRates[fuelType] : null;
+  const fuelRates = fuelType && marketRates ? marketRates[fuelType] : null;
 
   const handleBuyFuel = () => {
     if (!fuelType || !isOwner) return;
@@ -165,19 +166,15 @@ const EntityDetails: React.FC = () => {
 
   return (
     <>
-      {entity.powerGeneration && (
-        <>
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Power Generation:</span>
-            <span>{entity.powerGeneration.powerGenerationKW} kW</span>
-          </div>
+      <div style={styles.infoRow}>
+        <span style={styles.label}>Power Generation:</span>
+        <span>{entity.powerGeneration.powerGenerationKW} kW</span>
+      </div>
 
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Price per kWh:</span>
-            <span>${entity.powerGeneration.pricePerKWh.toFixed(2)}</span>
-          </div>
-        </>
-      )}
+      <div style={styles.infoRow}>
+        <span style={styles.label}>Price per kWh:</span>
+        <span>${entity.powerGeneration.pricePerKWh.toFixed(2)}</span>
+      </div>
 
       {entity.owner && (
         <div style={styles.infoRow}>
@@ -237,7 +234,7 @@ const EntityDetails: React.FC = () => {
 };
 
 // Component to display survey results or survey button
-const SurveyDetails: React.FC = () => {
+const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
   const selectedHexCoordinates = useSelector(
     clientStore,
     (state) => state.context.selectedHexCoordinates
@@ -252,6 +249,68 @@ const SurveyDetails: React.FC = () => {
 
   // Get the survey data for the selected hex
   const world = useWorld();
+
+  // If we're rendering this for a specific entity with survey results, use that
+  if (entity?.surveyResult) {
+    const surveyResult = entity.surveyResult;
+
+    // If survey is in progress but not complete
+    if (!SurveySystem.isSurveyComplete(surveyResult.surveyStartTick, currentTick)) {
+      const progress = Math.min(
+        ((currentTick - surveyResult.surveyStartTick) / SURVEY_DURATION_TICKS) * 100,
+        100
+      );
+
+      return (
+        <div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Survey in Progress:</span>
+          </div>
+          <div style={styles.progressContainer}>
+            <div
+              style={{
+                ...styles.progressBar,
+                width: `${progress}%`,
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // If survey is complete and resources were found
+    const resource = surveyResult.resource;
+    const isComplete = surveyResult.isComplete;
+    if (isComplete && resource) {
+      return (
+        <div style={styles.resourceSection}>
+          <h3 style={styles.resourceTitle}>Survey Results</h3>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Resource Found:</span>
+            <span style={{ textTransform: "capitalize" }}>{resource.resourceType}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.label}>Amount:</span>
+            <span>{resource.resourceAmount} units</span>
+          </div>
+        </div>
+      );
+    }
+
+    // If survey is complete but no resources were found
+    if (isComplete) {
+      return (
+        <div style={styles.resourceSection}>
+          <h3 style={styles.resourceTitle}>Survey Results</h3>
+          <div style={styles.infoRow}>
+            <span>No resources found in this hex.</span>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Otherwise, check if there's any survey result entity for the selected hex
   const surveyResults = world.with("surveyResult");
   const surveyResultForCell = surveyResults.where(
     (ent) =>
@@ -263,7 +322,7 @@ const SurveyDetails: React.FC = () => {
   const hasActiveSurveyInProgress = useMemo(() => {
     if (!userId) return false;
     return SurveySystem.hasActiveSurvey(world);
-  }, [userId, currentTick, gameState.private]);
+  }, [userId, currentTick, gameState.private, world]);
 
   // Handle starting a new survey
   const canSurvey = selectedHexCoordinates && !hasActiveSurveyInProgress && !surveyResultForCell;
@@ -287,72 +346,43 @@ const SurveyDetails: React.FC = () => {
     );
   }
 
-  // If survey is in progress but not complete
-  if (
-    surveyResultForCell &&
-    !SurveySystem.isSurveyComplete(surveyResultForCell.surveyResult.surveyStartTick, currentTick)
-  ) {
-    const progress = Math.min(
-      ((currentTick - surveyResultForCell.surveyResult.surveyStartTick) / SURVEY_DURATION_TICKS) *
-        100,
-      100
-    );
-
-    return (
-      <div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Survey in Progress:</span>
-        </div>
-        <div style={styles.progressContainer}>
-          <div
-            style={{
-              ...styles.progressBar,
-              width: `${progress}%`,
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // If survey is complete and resources were found
-  const resource = surveyResultForCell?.surveyResult.resource;
-  const isComplete = surveyResultForCell?.surveyResult.isComplete;
-  if (isComplete && resource) {
-    return (
-      <div style={styles.resourceSection}>
-        <h3 style={styles.resourceTitle}>Survey Results</h3>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Resource Found:</span>
-          <span style={{ textTransform: "capitalize" }}>{resource.resourceType}</span>
-        </div>
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Amount:</span>
-          <span>{resource.resourceAmount} units</span>
-        </div>
-      </div>
-    );
-  }
-
-  // If survey is complete but no resources were found
-  if (isComplete) {
-    return (
-      <div style={styles.resourceSection}>
-        <h3 style={styles.resourceTitle}>Survey Results</h3>
-        <div style={styles.infoRow}>
-          <span>No resources found in this hex.</span>
-        </div>
-      </div>
-    );
+  // If there's a survey result entity but we don't have it directly
+  if (surveyResultForCell) {
+    return <SurveyDetails entity={surveyResultForCell} />;
   }
 
   // Fallback
   return null;
 };
 
+// Refactored EntityDetails component to handle different entity types
+const EntityDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
+  const userId = AuthContext.useSelector((state) => state.userId);
+  const { players } = GameContext.useSelector((state) => state.public);
+
+  return (
+    <div style={styles.entityContainer}>
+      <h3 style={styles.entityTitle}>{entity.name || "Unknown Entity"}</h3>
+
+      {/* Render entity type-specific components */}
+      {entity.powerGeneration && <PowerPlantDetails entity={entity} />}
+
+      {/* Show owner information if not shown by a specific component */}
+      {entity.owner && !entity.powerGeneration && (
+        <div style={styles.infoRow}>
+          <span style={styles.label}>Owner:</span>
+          <span>{players[entity.owner.playerId].name}</span>
+        </div>
+      )}
+
+      {/* Render survey results if this entity has them */}
+      {entity.surveyResult && <SurveyDetails entity={entity} />}
+    </div>
+  );
+};
+
 // Main HexDetails component
 export const HexDetails: React.FC = () => {
-  // Always call all hooks at the top level
   const selectedHexCoordinates = useSelector(
     clientStore,
     (state) => state.context.selectedHexCoordinates
@@ -367,33 +397,43 @@ export const HexDetails: React.FC = () => {
 
   const world = useWorld();
 
-  // Find the entity at the selected coordinates (assume only one for now)
-  const entity = useMemo(() => {
-    if (!selectedHexCoordinates) return undefined;
-    return entityAtHexCoordinate(world, selectedHexCoordinates);
+  // Find all entities at the selected coordinates
+  const entitiesAtHex = useMemo(() => {
+    if (!selectedHexCoordinates) return [];
+
+    // Get all entities with hexPosition
+    return world
+      .with("hexPosition")
+      .where((entity) => equals(entity.hexPosition.coordinates, selectedHexCoordinates)).entities;
   }, [selectedHexCoordinates, world]);
 
   if (!selectedHexCoordinates) {
     return null;
   }
 
-  // Get the title based on the entity type
-  const title = entity ? entity.name : "Selected Hex";
-
   return (
     <Card style={styles.container}>
       <div style={styles.header}>
-        <h2 style={styles.title}>{title}</h2>
+        <h2 style={styles.title}>
+          {entitiesAtHex.length > 0
+            ? `${entitiesAtHex.length} ${entitiesAtHex.length === 1 ? "Entity" : "Entities"}`
+            : "Selected Hex"}
+        </h2>
         <Button onClick={handleClose}>Close</Button>
       </div>
-
-      <EntityDetails />
 
       <div style={styles.infoRow}>
         <span style={styles.label}>Coordinates:</span>
         <span>{coordinatesToString(selectedHexCoordinates)}</span>
       </div>
-      <SurveyDetails />
+
+      {/* Render each entity */}
+      {entitiesAtHex.length > 0 ? (
+        entitiesAtHex.map((entity) => <EntityDetails key={entity.id} entity={entity} />)
+      ) : (
+        // If no entities, show the survey component for the hex
+        <SurveyDetails />
+      )}
     </Card>
   );
 };
