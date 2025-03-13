@@ -5,28 +5,17 @@ import { useTexture } from "@react-three/drei";
 import { WATER_COLORS } from "@/lib/palette";
 
 const waterVertexShader = `
-#include <common>
-#include <lights_pars_begin>
-
 varying vec2 vUv;
 varying vec3 vPosition;
-varying vec3 vNormal;
 
 void main() {
-    #include <beginnormal_vertex>
-    #include <defaultnormal_vertex>
-
     vUv = uv;
-    vNormal = normalize(normalMatrix * normal);
     vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
 const waterFragmentShader = `
-#include <common>
-#include <lights_pars_begin>
-
 precision highp float;
 
 uniform float time;
@@ -34,10 +23,10 @@ uniform vec3 deepColor;
 uniform vec3 shallowColor;
 uniform sampler2D waveNoiseTexture;
 uniform sampler2D waveDistortionTexture;
+uniform float waterOpacity;
 
 varying vec2 vUv;
 varying vec3 vPosition;
-varying vec3 vNormal;
 
 #define WAVE_SCALE vec2(0.01, 0.02)
 #define WAVE_SPEED vec2(0.001, 0.004)
@@ -46,8 +35,6 @@ varying vec3 vNormal;
 #define WAVE_NOISE_CUTOFF 0.75
 #define WAVE_DISTORTION_STRENGTH 0.2
 #define WAVE_COLOR_STRENGTH 0.4
-#define LIGHTING_INTENSITY 0.8  // How much the lighting affects the water
-#define MIN_BRIGHTNESS 0.4      // Minimum brightness of water even in darkness
 
 // Anti-aliasing
 #define SMOOTHSTEP_AA 0.01
@@ -60,7 +47,7 @@ void main() {
     float waterDepth = 1.0 - vUv.y * vUv.y;
     vec3 color = shallowColor;
     color = mix(color, deepColor, waterDepth);
-
+    
     // Sample noise
     vec2 tilingDistortionUv = abs(fract(vPosition.xz * WAVE_DISTORTION_SCALE + time * WAVE_DISTORTION_SPEED) * 2.0 - 1.0);
     vec2 distortSample = texture2D(waveDistortionTexture, tilingDistortionUv).rg * WAVE_DISTORTION_STRENGTH;
@@ -75,17 +62,16 @@ void main() {
     waveNoise = smoothstep(waveNoiseCutoff - SMOOTHSTEP_AA, waveNoiseCutoff + SMOOTHSTEP_AA, waveNoise);
     color = color + waveNoise * WAVE_COLOR_STRENGTH;
     
-    // Calculate lighting using Three.js built-in light uniforms
-    vec3 lighting = vec3(0.0);
+    // Set opacity based on depth - shallow water is visible, deep water is transparent
+    float opacity = 1.0 - smoothstep(0.2, 0.8, waterDepth);
     
-    // Ambient light (reduced intensity)
-    lighting += ambientLightColor * 0.7;
+    // Add wave foam to opacity
+    opacity = max(opacity, waveNoise);
     
-    // Mix between base color and lit color
-    vec3 litColor = color * lighting;
-    color = mix(color * MIN_BRIGHTNESS, litColor, LIGHTING_INTENSITY);
+    // Apply global opacity control
+    opacity *= waterOpacity;
     
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(color, opacity);
 }
 `;
 
@@ -98,9 +84,16 @@ import { getNeighbor } from "@/lib/coordinates/HexCoordinates";
 interface HexGridWaterProps {
   cells: HexCell[];
   grid: HexGrid;
+  waterOpacity?: number;
+  blendMode?: "normal" | "additive" | "multiply" | "overlay";
 }
 
-export const HexGridWater = React.memo(function HexGridWater({ cells, grid }: HexGridWaterProps) {
+export const HexGridWater = React.memo(function HexGridWater({
+  cells,
+  grid,
+  waterOpacity = 0.6,
+  blendMode = "normal",
+}: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {
@@ -144,9 +137,9 @@ export const HexGridWater = React.memo(function HexGridWater({ cells, grid }: He
       shallowColor: { value: new THREE.Color(WATER_COLORS.SHALLOW) },
       waveNoiseTexture: { value: waveNoiseTexture },
       waveDistortionTexture: { value: waveDistortionTexture },
-      ...THREE.UniformsLib.lights, // Include Three.js light uniforms
+      waterOpacity: { value: waterOpacity },
     }),
-    [waveNoiseTexture, waveDistortionTexture]
+    [waveNoiseTexture, waveDistortionTexture, waterOpacity]
   );
 
   useFrame((state) => {
@@ -163,7 +156,13 @@ export const HexGridWater = React.memo(function HexGridWater({ cells, grid }: He
         uniforms={uniforms}
         vertexShader={waterVertexShader}
         fragmentShader={waterFragmentShader}
-        lights // Enable Three.js light handling
+        blending={getBlendingMode(blendMode)}
+        blendEquation={blendMode === "overlay" ? THREE.AddEquation : undefined}
+        blendSrc={blendMode === "overlay" ? THREE.SrcAlphaFactor : undefined}
+        blendDst={blendMode === "overlay" ? THREE.OneMinusSrcAlphaFactor : undefined}
+        blendEquationAlpha={blendMode === "overlay" ? THREE.AddEquation : undefined}
+        blendSrcAlpha={blendMode === "overlay" ? THREE.OneFactor : undefined}
+        blendDstAlpha={blendMode === "overlay" ? THREE.OneMinusSrcAlphaFactor : undefined}
       />
     </mesh>
   );
@@ -184,4 +183,19 @@ function cornerIsShoreline(
       (neighborNext && !isUnderwater(neighborNext))) ??
     false
   );
+}
+
+// Helper function to get the appropriate THREE.js blending mode
+function getBlendingMode(blendMode: string): THREE.Blending {
+  switch (blendMode) {
+    case "additive":
+      return THREE.AdditiveBlending;
+    case "multiply":
+      return THREE.MultiplyBlending;
+    case "overlay":
+      return THREE.CustomBlending;
+    case "normal":
+    default:
+      return THREE.NormalBlending;
+  }
 }
