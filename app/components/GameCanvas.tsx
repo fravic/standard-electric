@@ -7,6 +7,7 @@ import { CameraController } from "./CameraController";
 import { HexGrid } from "./HexGrid/HexGrid";
 import { WATER_COLORS } from "@/lib/palette";
 import { Lighting } from "./Lighting";
+import { ShiftingBackground } from "./ShiftingBackground";
 
 export function GameCanvas() {
   return (
@@ -24,6 +25,7 @@ export function GameCanvas() {
       <OrbitControls makeDefault />
       <CameraController />
       <Lighting />
+      <ShiftingBackground />
       <HexGrid />
       <EffectComposer>
         <Bloom
