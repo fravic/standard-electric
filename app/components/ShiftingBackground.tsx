@@ -2,9 +2,9 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useRef, useMemo, useEffect, useState } from "react";
 import * as THREE from "three";
 import { Billboard } from "@react-three/drei";
-import { WATER_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { ticksToHour } from "@/lib/time";
+import { MILLISECONDS_PER_IN_GAME_HOUR } from "@/lib/constants";
 
 // Vertex shader for our background plane
 const vertexShader = `
@@ -32,7 +32,7 @@ varying vec2 vUv;
 
 // Function to calculate weighted blending based on distance
 float weightedDistance(vec2 point1, vec2 point2) {
-  return 1.0 / (pow(distance(point1, point2), 2.0) + 0.01);
+  return 1.0 / (pow(distance(point1, point2), 2.2) + 0.01);
 }
 
 void main() {
@@ -86,20 +86,19 @@ type ShiftingBackgroundProps = {
 const SUNRISE_HOUR = 6;
 const SUNSET_START_HOUR = 19;
 const NIGHT_START_HOUR = 22;
+const SHIFT_SPEED = 0.4; // Lower makes the background move slower
 
 // Day and night control point colors
 const DAY_COLORS = {
-  PRIMARY: "#4488FF",      // Bright sky blue
+  PRIMARY: "#6BBBFF",      // Bright sky blue
   SECONDARY: "#90DAEE",    // Light blue 
-  ACCENT: "#C1E4FF",       // Very light blue
-  DEEP: "#60A0FF"          // Slightly deeper blue
+  ACCENT: "#466CC8"        // Accent blue
 };
 
 const NIGHT_COLORS = {
   PRIMARY: "#1A2D50",      // Dark navy
   SECONDARY: "#2233AA",    // Deep blue
-  ACCENT: "#0A1530",       // Very dark blue
-  DEEP: "#0D1526"          // Almost black blue
+  ACCENT: "#114494"        // Very dark blue
 };
 
 // Calculate time-based blend factor (0-1 range)
@@ -115,8 +114,6 @@ function getTimeBlendFactor(hour: number): number {
   }
 }
 
-const TIME_SCALE = 0.2; // Lower makes the background move slower
-
 export function ShiftingBackground({
   controlPoints,
   distance = 100, // Set a large distance to ensure it's behind everything
@@ -126,7 +123,7 @@ export function ShiftingBackground({
     { color: DAY_COLORS.PRIMARY, basePosition: [0.5, 0.5], amplitude: [0.2, 0.2], frequency: [1.4, 1.0], phase: [0, 0] },
     { color: DAY_COLORS.SECONDARY, basePosition: [0.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.8, 1.2], phase: [1.0, 0] },
     { color: DAY_COLORS.ACCENT, basePosition: [1.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.1, 0.1], phase: [2.0, 0] },
-    { color: DAY_COLORS.DEEP, basePosition: [0.0, 0.0], amplitude: [0.4, 0.4], frequency: [0.6, 1.4], phase: [3.0, 0] },
+    { color: DAY_COLORS.PRIMARY, basePosition: [0.0, 0.0], amplitude: [0.4, 0.4], frequency: [0.6, 1.4], phase: [3.0, 0] },
     { color: DAY_COLORS.ACCENT, basePosition: [1.0, 0.0], amplitude: [0.2, 0.2], frequency: [3, 3], phase: [4.0, 0] },
   ];
   
@@ -135,7 +132,7 @@ export function ShiftingBackground({
     { color: NIGHT_COLORS.PRIMARY, basePosition: [0.5, 0.5], amplitude: [0.2, 0.2], frequency: [1.4, 1.0], phase: [0, 0] },
     { color: NIGHT_COLORS.SECONDARY, basePosition: [0.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.8, 1.2], phase: [1.0, 0] },
     { color: NIGHT_COLORS.ACCENT, basePosition: [1.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.1, 0.1], phase: [2.0, 0] },
-    { color: NIGHT_COLORS.DEEP, basePosition: [0.0, 0.0], amplitude: [0.4, 0.4], frequency: [0.6, 1.4], phase: [3.0, 0] },
+    { color: NIGHT_COLORS.PRIMARY, basePosition: [0.0, 0.0], amplitude: [0.4, 0.4], frequency: [0.6, 1.4], phase: [3.0, 0] },
     { color: NIGHT_COLORS.ACCENT, basePosition: [1.0, 0.0], amplitude: [0.2, 0.2], frequency: [3, 3], phase: [4.0, 0] },
   ];
   
@@ -258,8 +255,12 @@ export function ShiftingBackground({
       animState.current.prevHour = hour;
     }
     
-    // Smooth animation of blend factor
-    const animationSpeed = 1.0;
+    // Smooth animation of blend factor over the duration of one in-game hour
+    // Calculate animation speed based on MILLISECONDS_PER_IN_GAME_HOUR
+    // delta is in seconds, so we convert accordingly
+    const secondsPerInGameHour = MILLISECONDS_PER_IN_GAME_HOUR / 1000;
+    const animationSpeed = 1.0 / secondsPerInGameHour;
+    
     animState.current.currentBlendFactor = THREE.MathUtils.lerp(
       animState.current.currentBlendFactor,
       animState.current.targetBlendFactor,
@@ -294,7 +295,7 @@ export function ShiftingBackground({
       const phaseY = point.phase[1];
       
       // Calculate offset using sin/cos
-      const t = currentTime * TIME_SCALE;
+      const t = currentTime * SHIFT_SPEED;
       const offsetX = amplitudeX * Math.sin(t * frequencyX + phaseX);
       const offsetY = amplitudeY * Math.cos(t * frequencyY + phaseY);
       

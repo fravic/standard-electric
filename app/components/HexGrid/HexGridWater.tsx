@@ -80,19 +80,18 @@ import { HexDirection, HexMetrics } from "../../lib/HexMetrics";
 import { HexMesh } from "../../lib/HexMesh";
 import { getCell, HexGrid } from "../../lib/HexGrid";
 import { getNeighbor } from "@/lib/coordinates/HexCoordinates";
+import { PALETTE } from "@/lib/palette";
 
 interface HexGridWaterProps {
   cells: HexCell[];
   grid: HexGrid;
-  waterOpacity?: number;
-  blendMode?: "normal" | "additive" | "multiply" | "overlay";
 }
+
+const WATER_OPACITY = 0.3;
 
 export const HexGridWater = React.memo(function HexGridWater({
   cells,
   grid,
-  waterOpacity = 0.6,
-  blendMode = "normal",
 }: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
@@ -133,13 +132,13 @@ export const HexGridWater = React.memo(function HexGridWater({
   const uniforms = useMemo(
     () => ({
       time: { value: 0 },
-      deepColor: { value: new THREE.Color(WATER_COLORS.DEEP) },
-      shallowColor: { value: new THREE.Color(WATER_COLORS.SHALLOW) },
+      deepColor: { value: new THREE.Color(PALETTE.POWDER_BLUE) },
+      shallowColor: { value: new THREE.Color(PALETTE.POWDER_BLUE) },
       waveNoiseTexture: { value: waveNoiseTexture },
       waveDistortionTexture: { value: waveDistortionTexture },
-      waterOpacity: { value: waterOpacity },
+      waterOpacity: { value: WATER_OPACITY },
     }),
-    [waveNoiseTexture, waveDistortionTexture, waterOpacity]
+    [waveNoiseTexture, waveDistortionTexture]
   );
 
   useFrame((state) => {
@@ -156,13 +155,7 @@ export const HexGridWater = React.memo(function HexGridWater({
         uniforms={uniforms}
         vertexShader={waterVertexShader}
         fragmentShader={waterFragmentShader}
-        blending={getBlendingMode(blendMode)}
-        blendEquation={blendMode === "overlay" ? THREE.AddEquation : undefined}
-        blendSrc={blendMode === "overlay" ? THREE.SrcAlphaFactor : undefined}
-        blendDst={blendMode === "overlay" ? THREE.OneMinusSrcAlphaFactor : undefined}
-        blendEquationAlpha={blendMode === "overlay" ? THREE.AddEquation : undefined}
-        blendSrcAlpha={blendMode === "overlay" ? THREE.OneFactor : undefined}
-        blendDstAlpha={blendMode === "overlay" ? THREE.OneMinusSrcAlphaFactor : undefined}
+        blending={THREE.AdditiveBlending}
       />
     </mesh>
   );
@@ -183,19 +176,4 @@ function cornerIsShoreline(
       (neighborNext && !isUnderwater(neighborNext))) ??
     false
   );
-}
-
-// Helper function to get the appropriate THREE.js blending mode
-function getBlendingMode(blendMode: string): THREE.Blending {
-  switch (blendMode) {
-    case "additive":
-      return THREE.AdditiveBlending;
-    case "multiply":
-      return THREE.MultiplyBlending;
-    case "overlay":
-      return THREE.CustomBlending;
-    case "normal":
-    default:
-      return THREE.NormalBlending;
-  }
 }

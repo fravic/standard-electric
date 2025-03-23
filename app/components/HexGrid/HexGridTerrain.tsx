@@ -92,11 +92,10 @@ interface HexGridTerrainProps {
   onUpdateCell?: (coordinates: HexCoordinates, updates: Partial<HexCell>) => void;
   debug?: boolean;
   surveyedHexCoords: Set<string>;
-  outlineColor?: THREE.Color | string;
-  outlineOpacity?: number;
-  outlineWidth?: number;
-  blendMode?: "normal" | "additive" | "multiply" | "overlay";
 }
+
+const GRID_OPACITY = 0.3;
+const GRID_THICKNESS = 0.16; // Controls width of the outline in shader
 
 export const HexGridTerrain = React.memo(function HexGridTerrain({
   cells,
@@ -106,10 +105,6 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   onUpdateCell,
   debug = false,
   surveyedHexCoords,
-  outlineColor = PALETTE.BASE_WHITE,
-  outlineOpacity = 0.1,
-  outlineWidth = 0.16, // Controls the width of the outline in shader
-  blendMode = "additive",
 }: HexGridTerrainProps) {
   const isPaintbrushMode = useSelector(
     clientStore,
@@ -173,14 +168,13 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
 
   // Create the shader material
   const hexMaterial = useMemo(() => {
-    const threeOutlineColor =
-      typeof outlineColor === "string" ? new THREE.Color(outlineColor) : outlineColor;
+    const threeOutlineColor = new THREE.Color(PALETTE.POWDER_BLUE);
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
         outlineColor: { value: threeOutlineColor },
-        outlineWidth: { value: outlineWidth },
-        outlineOpacity: { value: outlineOpacity },
+        outlineWidth: { value: GRID_THICKNESS },
+        outlineOpacity: { value: GRID_OPACITY },
       },
       vertexShader: hexOutlineVertexShader,
       fragmentShader: hexOutlineFragmentShader,
@@ -188,32 +182,10 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
       side: THREE.DoubleSide,
     });
 
-    // Set blend mode based on prop
-    switch (blendMode) {
-      case "additive":
-        material.blending = THREE.AdditiveBlending;
-        break;
-      case "multiply":
-        material.blending = THREE.MultiplyBlending;
-        break;
-      case "overlay":
-        // Custom overlay-like blending
-        material.blending = THREE.CustomBlending;
-        material.blendEquation = THREE.AddEquation;
-        material.blendSrc = THREE.SrcAlphaFactor;
-        material.blendDst = THREE.OneMinusSrcAlphaFactor;
-        material.blendEquationAlpha = THREE.AddEquation;
-        material.blendSrcAlpha = THREE.OneFactor;
-        material.blendDstAlpha = THREE.OneMinusSrcAlphaFactor;
-        break;
-      case "normal":
-      default:
-        material.blending = THREE.NormalBlending;
-        break;
-    }
+    material.blending = THREE.AdditiveBlending;
 
     return material;
-  }, [outlineColor, outlineWidth, outlineOpacity, blendMode]);
+  }, []);
 
   // Create the geometry with proper UV mappings and vertex colors
   const hexGeometry = useMemo(() => {
