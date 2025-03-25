@@ -90,27 +90,27 @@ const SHIFT_SPEED = 0.4; // Lower makes the background move slower
 
 // Day and night control point colors
 const DAY_COLORS = {
-  PRIMARY: "#6BBBFF",      // Bright sky blue
-  SECONDARY: "#90DAEE",    // Light blue 
-  ACCENT: "#466CC8"        // Accent blue
+  PRIMARY: "#6BBBFF", // Bright sky blue
+  SECONDARY: "#90DAEE", // Light blue
+  ACCENT: "#466CC8", // Accent blue
 };
 
 const NIGHT_COLORS = {
-  PRIMARY: "#1A2D50",      // Dark navy
-  SECONDARY: "#2233AA",    // Deep blue
-  ACCENT: "#114494"        // Very dark blue
+  PRIMARY: "#1A2D50", // Dark navy
+  SECONDARY: "#2233AA", // Deep blue
+  ACCENT: "#114494", // Very dark blue
 };
 
 // Calculate time-based blend factor (0-1 range)
 function getTimeBlendFactor(hour: number): number {
   if (hour >= SUNRISE_HOUR && hour < SUNRISE_HOUR + 2) {
-    return (hour - SUNRISE_HOUR) / 2;  // Sunrise transition
+    return (hour - SUNRISE_HOUR) / 2; // Sunrise transition
   } else if (hour >= SUNRISE_HOUR + 2 && hour < SUNSET_START_HOUR) {
-    return 1;  // Full day
+    return 1; // Full day
   } else if (hour >= SUNSET_START_HOUR && hour < NIGHT_START_HOUR) {
-    return 1 - ((hour - SUNSET_START_HOUR) / (NIGHT_START_HOUR - SUNSET_START_HOUR)); // Sunset
+    return 1 - (hour - SUNSET_START_HOUR) / (NIGHT_START_HOUR - SUNSET_START_HOUR); // Sunset
   } else {
-    return 0;  // Night
+    return 0; // Night
   }
 }
 
@@ -120,25 +120,85 @@ export function ShiftingBackground({
 }: ShiftingBackgroundProps) {
   // Day control points
   const dayControlPoints: ControlPoint[] = [
-    { color: DAY_COLORS.PRIMARY, basePosition: [0.5, 0.5], amplitude: [0.2, 0.2], frequency: [1.4, 1.0], phase: [0, 0] },
-    { color: DAY_COLORS.SECONDARY, basePosition: [0.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.8, 1.2], phase: [1.0, 0] },
-    { color: DAY_COLORS.ACCENT, basePosition: [1.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.1, 0.1], phase: [2.0, 0] },
-    { color: DAY_COLORS.PRIMARY, basePosition: [0.0, 0.0], amplitude: [0.4, 0.4], frequency: [0.6, 1.4], phase: [3.0, 0] },
-    { color: DAY_COLORS.ACCENT, basePosition: [1.0, 0.0], amplitude: [0.2, 0.2], frequency: [3, 3], phase: [4.0, 0] },
+    {
+      color: DAY_COLORS.PRIMARY,
+      basePosition: [0.5, 0.5],
+      amplitude: [0.2, 0.2],
+      frequency: [1.4, 1.0],
+      phase: [0, 0],
+    },
+    {
+      color: DAY_COLORS.SECONDARY,
+      basePosition: [0.0, 1.0],
+      amplitude: [0.4, 0.4],
+      frequency: [0.8, 1.2],
+      phase: [1.0, 0],
+    },
+    {
+      color: DAY_COLORS.ACCENT,
+      basePosition: [1.0, 1.0],
+      amplitude: [0.4, 0.4],
+      frequency: [0.1, 0.1],
+      phase: [2.0, 0],
+    },
+    {
+      color: DAY_COLORS.PRIMARY,
+      basePosition: [0.0, 0.0],
+      amplitude: [0.4, 0.4],
+      frequency: [0.6, 1.4],
+      phase: [3.0, 0],
+    },
+    {
+      color: DAY_COLORS.ACCENT,
+      basePosition: [1.0, 0.0],
+      amplitude: [0.2, 0.2],
+      frequency: [3, 3],
+      phase: [4.0, 0],
+    },
   ];
-  
+
   // Night control points (same positions, different colors)
   const nightControlPoints: ControlPoint[] = [
-    { color: NIGHT_COLORS.PRIMARY, basePosition: [0.5, 0.5], amplitude: [0.2, 0.2], frequency: [1.4, 1.0], phase: [0, 0] },
-    { color: NIGHT_COLORS.SECONDARY, basePosition: [0.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.8, 1.2], phase: [1.0, 0] },
-    { color: NIGHT_COLORS.ACCENT, basePosition: [1.0, 1.0], amplitude: [0.4, 0.4], frequency: [0.1, 0.1], phase: [2.0, 0] },
-    { color: NIGHT_COLORS.PRIMARY, basePosition: [0.0, 0.0], amplitude: [0.4, 0.4], frequency: [0.6, 1.4], phase: [3.0, 0] },
-    { color: NIGHT_COLORS.ACCENT, basePosition: [1.0, 0.0], amplitude: [0.2, 0.2], frequency: [3, 3], phase: [4.0, 0] },
+    {
+      color: NIGHT_COLORS.PRIMARY,
+      basePosition: [0.5, 0.5],
+      amplitude: [0.2, 0.2],
+      frequency: [1.4, 1.0],
+      phase: [0, 0],
+    },
+    {
+      color: NIGHT_COLORS.SECONDARY,
+      basePosition: [0.0, 1.0],
+      amplitude: [0.4, 0.4],
+      frequency: [0.8, 1.2],
+      phase: [1.0, 0],
+    },
+    {
+      color: NIGHT_COLORS.ACCENT,
+      basePosition: [1.0, 1.0],
+      amplitude: [0.4, 0.4],
+      frequency: [0.1, 0.1],
+      phase: [2.0, 0],
+    },
+    {
+      color: NIGHT_COLORS.PRIMARY,
+      basePosition: [0.0, 0.0],
+      amplitude: [0.4, 0.4],
+      frequency: [0.6, 1.4],
+      phase: [3.0, 0],
+    },
+    {
+      color: NIGHT_COLORS.ACCENT,
+      basePosition: [1.0, 0.0],
+      amplitude: [0.2, 0.2],
+      frequency: [3, 3],
+      phase: [4.0, 0],
+    },
   ];
-  
+
   // Combine day and night points or use provided ones
   const combinedPoints = controlPoints || [...dayControlPoints, ...nightControlPoints];
-  
+
   // Ensure we don't exceed shader array limits (10 maximum)
   const safePoints = combinedPoints.slice(0, 10);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
@@ -186,26 +246,28 @@ export function ShiftingBackground({
   }, [size.width, size.height, distance, camera]);
 
   // Get the current game time for day/night transitions
-  const { totalTicks } = GameContext.useSelector((state: { public: { time: { totalTicks: number } } }) => state.public.time);
+  const { totalTicks } = GameContext.useSelector(
+    (state: { public: { time: { totalTicks: number } } }) => state.public.time
+  );
   const hour = ticksToHour(totalTicks);
-  
+
   // Animation state for smooth transitions
   const animState = useRef({
     currentBlendFactor: getTimeBlendFactor(hour),
     targetBlendFactor: getTimeBlendFactor(hour),
-    prevHour: hour
+    prevHour: hour,
   });
-  
+
   // Create and store a reference to the uniforms object
   const uniformsRef = useRef<Record<string, any>>();
-  
+
   // Initialize the uniforms object once
   if (!uniformsRef.current) {
     // Create arrays for our uniform values
     const colorArray = new Array(10).fill(null).map(() => new THREE.Color(0, 0, 0));
     const positionArray = new Array(10).fill(null).map(() => new THREE.Vector2(0.5, 0.5));
     const alphaArray = new Array(10).fill(0);
-    
+
     // Initialize with day and night points
     for (let i = 0; i < 10; i++) {
       // Day points (first 5)
@@ -218,7 +280,7 @@ export function ShiftingBackground({
         alphaArray[i] = 1.0; // Day points start visible
       }
       // Night points (second 5)
-      else if (i < 10 && i-5 < nightControlPoints.length) {
+      else if (i < 10 && i - 5 < nightControlPoints.length) {
         const nightPointIndex = i - 5;
         colorArray[i] = new THREE.Color(nightControlPoints[nightPointIndex].color);
         positionArray[i] = new THREE.Vector2(
@@ -228,63 +290,68 @@ export function ShiftingBackground({
         alphaArray[i] = 0.0; // Night points start invisible
       }
     }
-    
+
     // Create the uniforms object with arrays
     const uniformsObj: Record<string, any> = {
       time: { value: 0 },
       numControlPoints: { value: 10 },
       colors: { value: colorArray },
       positions: { value: positionArray },
-      alphas: { value: alphaArray }
+      alphas: { value: alphaArray },
     };
-    
+
     uniformsRef.current = uniformsObj;
   }
 
   // Update animations on each frame
   useFrame((_, delta) => {
     if (!uniformsRef.current) return;
-    
+
     // Update time uniform
     uniformsRef.current.time.value += delta;
     const currentTime = uniformsRef.current.time.value;
-    
+
     // Check if hour has changed and update target blend factor
     if (hour !== animState.current.prevHour) {
       animState.current.targetBlendFactor = getTimeBlendFactor(hour);
       animState.current.prevHour = hour;
     }
-    
+
     // Smooth animation of blend factor over the duration of one in-game hour
     // Calculate animation speed based on MILLISECONDS_PER_IN_GAME_HOUR
     // delta is in seconds, so we convert accordingly
     const secondsPerInGameHour = MILLISECONDS_PER_IN_GAME_HOUR / 1000;
     const animationSpeed = 1.0 / secondsPerInGameHour;
-    
+
     animState.current.currentBlendFactor = THREE.MathUtils.lerp(
       animState.current.currentBlendFactor,
       animState.current.targetBlendFactor,
       Math.min(1, delta * animationSpeed)
     );
-    
+
     // Current blend factor between day and night
     const dayNightFactor = animState.current.currentBlendFactor;
-    
+
     // Update alpha values for day/night transition using our array
     for (let i = 0; i < 5; i++) {
       // Day points fade out as night approaches
       uniformsRef.current.alphas.value[i] = dayNightFactor;
-      
+
       // Night points fade in as night approaches
-      uniformsRef.current.alphas.value[i+5] = 1.0 - dayNightFactor;
+      uniformsRef.current.alphas.value[i + 5] = 1.0 - dayNightFactor;
     }
-    
+
     // Update positions for all control points
     for (let i = 0; i < 10; i++) {
       // Select the correct control point based on index
-      const point = i < 5 ? 
-        (i < dayControlPoints.length ? dayControlPoints[i] : dayControlPoints[0]) : 
-        (i-5 < nightControlPoints.length ? nightControlPoints[i-5] : nightControlPoints[0]);
+      const point =
+        i < 5
+          ? i < dayControlPoints.length
+            ? dayControlPoints[i]
+            : dayControlPoints[0]
+          : i - 5 < nightControlPoints.length
+            ? nightControlPoints[i - 5]
+            : nightControlPoints[0];
       const baseX = point.basePosition[0];
       const baseY = point.basePosition[1];
       const amplitudeX = point.amplitude[0];
@@ -293,16 +360,16 @@ export function ShiftingBackground({
       const frequencyY = point.frequency[1];
       const phaseX = point.phase[0];
       const phaseY = point.phase[1];
-      
+
       // Calculate offset using sin/cos
       const t = currentTime * SHIFT_SPEED;
       const offsetX = amplitudeX * Math.sin(t * frequencyX + phaseX);
       const offsetY = amplitudeY * Math.cos(t * frequencyY + phaseY);
-      
+
       // Update position in our positions array
       uniformsRef.current.positions.value[i].set(baseX + offsetX, baseY + offsetY);
     }
-    
+
     // Force material update if it exists
     if (materialRef.current) {
       materialRef.current.needsUpdate = true;

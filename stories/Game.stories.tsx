@@ -65,9 +65,9 @@ const createPlayer = (
   money: number = 100,
   isHost: boolean = false
 ) => {
-
   return {
     name,
+    id,
     number,
     money,
     powerSoldKWh: 0,

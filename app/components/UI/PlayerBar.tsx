@@ -68,11 +68,11 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({ player, isCurrentPlayer })
       }}
     >
       <div style={styles.playerInfo}>
-        <div 
-          style={{ 
-            ...styles.colorIndicator, 
-            backgroundColor: playerColor 
-          }} 
+        <div
+          style={{
+            ...styles.colorIndicator,
+            backgroundColor: playerColor,
+          }}
         />
         <div style={styles.money}>
           {player.name} - ${player.money}

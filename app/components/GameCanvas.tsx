@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, DotScreen, Scanline } from "@react-three/postprocessing";
 import { KernelSize, BlendFunction } from "postprocessing";
@@ -23,6 +23,8 @@ export function GameCanvas() {
       <color attach="background" args={[WATER_COLORS.BACKGROUND]} />
       <OrbitControls makeDefault />
       <CameraController />
+      <directionalLight position={[-5, 5, -2]} intensity={1} />
+      <ambientLight intensity={3} />
       <ShiftingBackground />
       <HexGrid />
       <EffectComposer>

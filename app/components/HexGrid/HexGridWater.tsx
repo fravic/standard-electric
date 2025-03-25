@@ -89,10 +89,7 @@ interface HexGridWaterProps {
 
 const WATER_OPACITY = 0.3;
 
-export const HexGridWater = React.memo(function HexGridWater({
-  cells,
-  grid,
-}: HexGridWaterProps) {
+export const HexGridWater = React.memo(function HexGridWater({ cells, grid }: HexGridWaterProps) {
   const { waterGeometry } = useMemo(() => {
     const hexMesh = new HexMesh();
     cells.forEach((cell) => {

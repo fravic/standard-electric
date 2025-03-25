@@ -8,7 +8,7 @@ export const PLAYER_COLORS = [
   "#46C9CD", // Teal
   "#67CA76", // Green
   "#8346CD", // Purple
-  "#CD7946"  // Orange - fits the palette as a complementary color
+  "#CD7946", // Orange - fits the palette as a complementary color
 ];
 
 // Function to get a player color based on player number
