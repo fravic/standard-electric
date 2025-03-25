@@ -14,6 +14,7 @@ import { AuthContext } from "@/auth.context";
 import hexGrid from "@/../public/hexgrid.json";
 import { WorldContextProvider } from "@/components/WorldContext";
 import { initializeCommodityMarket } from "@/ecs/systems/CommoditySystem";
+import { getPlayerColor } from "@/lib/constants";
 
 type GameClientEvent = z.infer<typeof GameClientEventSchema>;
 
@@ -50,7 +51,8 @@ export default function MapEditor() {
             money: 1000,
             powerSoldKWh: 0,
             isHost: true,
-            number: 0,
+            number: 1,
+            color: getPlayerColor(1),
           },
         },
         time: {

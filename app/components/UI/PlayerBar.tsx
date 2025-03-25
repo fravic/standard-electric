@@ -3,14 +3,26 @@ import { UI_COLORS } from "@/lib/palette";
 import { Player } from "@/actor/game.types";
 import { formatPowerKWh } from "@/lib/power/formatPower";
 import { Card } from "./Card";
+import { PLAYER_COLORS } from "@/lib/constants";
 
 const POWER_SELL_GOAL_KWH = 1_000_000_000; // 1 TWh in kWh
 
 const styles = {
   container: {
     marginBottom: "10px",
-    border: (isCurrentPlayer: boolean) =>
-      isCurrentPlayer ? `2px solid ${UI_COLORS.PRIMARY}` : "none",
+    border: (isCurrentPlayer: boolean, playerColor: string) =>
+      isCurrentPlayer ? `2px solid ${playerColor || UI_COLORS.PRIMARY}` : "none",
+  },
+  playerInfo: {
+    display: "flex" as const,
+    alignItems: "center" as const,
+    gap: "8px",
+  },
+  colorIndicator: {
+    width: "12px",
+    height: "12px",
+    borderRadius: "50%",
+    display: "inline-block" as const,
   },
   money: {
     fontWeight: "bold" as const,
@@ -24,7 +36,6 @@ const styles = {
   },
   progressBar: {
     height: "20px",
-    backgroundColor: UI_COLORS.PRIMARY,
     borderRadius: "3px",
     transition: "width 0.3s ease-in-out",
   },
@@ -47,16 +58,25 @@ interface PlayerBarProps {
 
 export const PlayerBar: React.FC<PlayerBarProps> = ({ player, isCurrentPlayer }) => {
   const powerProgress = Math.min(player.powerSoldKWh / POWER_SELL_GOAL_KWH, 1) * 100;
+  const playerColor = player.color;
 
   return (
     <Card
       style={{
         ...styles.container,
-        border: styles.container.border(isCurrentPlayer ?? false),
+        border: styles.container.border(isCurrentPlayer ?? false, playerColor),
       }}
     >
-      <div style={styles.money}>
-        {player.name} - ${player.money}
+      <div style={styles.playerInfo}>
+        <div 
+          style={{ 
+            ...styles.colorIndicator, 
+            backgroundColor: playerColor 
+          }} 
+        />
+        <div style={styles.money}>
+          {player.name} - ${player.money}
+        </div>
       </div>
       <div>
         <div>Power Sold Progress</div>
@@ -65,6 +85,7 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({ player, isCurrentPlayer })
             style={{
               ...styles.progressBar,
               width: `${powerProgress}%`,
+              backgroundColor: playerColor,
             }}
           />
           <div style={styles.progressText}>{formatPowerKWh(player.powerSoldKWh)}</div>

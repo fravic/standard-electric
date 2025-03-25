@@ -1,6 +1,7 @@
 import { assign, setup, spawnChild, stopChild } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
 import { produce, current } from "immer";
+import { getPlayerColor } from "@/lib/constants";
 
 import { GameContext, GameEvent, GameInput } from "./game.types";
 import { gameTimerActor } from "./gameTimerActor";
@@ -150,12 +151,14 @@ export const gameMachine = setup({
 
       return {
         public: produce(context.public, (draft) => {
+          const playerNumber = Object.keys(draft.players).length + 1;
           draft.players[playerId] = {
             name: event.name,
-            number: Object.keys(draft.players).length + 1,
+            number: playerNumber,
             money: 100,
             powerSoldKWh: 0,
-            isHost: Object.keys(draft.players).length === 0,
+            isHost: playerNumber === 1,
+            color: getPlayerColor(playerNumber),
           };
           // Create default blueprints for each player
           const defaultBlueprints = createDefaultBlueprintsForPlayer(playerId);

@@ -11,6 +11,7 @@ import { Game } from "@/components/Game";
 import { HexGrid } from "@/lib/HexGrid";
 import { initializeCommodityMarket } from "@/ecs/systems/CommoditySystem";
 import { CommodityType } from "@/lib/types";
+import { getPlayerColor } from "@/lib/constants";
 
 import hexGrid from "@/../public/hexgrid.json";
 import { CornerPosition } from "@/lib/coordinates/types";
@@ -64,12 +65,14 @@ const createPlayer = (
   money: number = 100,
   isHost: boolean = false
 ) => {
+
   return {
     name,
     number,
     money,
     powerSoldKWh: 0,
     isHost,
+    color: getPlayerColor(number),
   };
 };
 

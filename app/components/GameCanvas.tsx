@@ -6,7 +6,7 @@ import { KernelSize, BlendFunction } from "postprocessing";
 import { CameraController } from "./CameraController";
 import { HexGrid } from "./HexGrid/HexGrid";
 import { WATER_COLORS } from "@/lib/palette";
-import { Lighting } from "./Lighting";
+import { ShiftingBackground } from "./ShiftingBackground";
 
 export function GameCanvas() {
   return (
@@ -23,7 +23,7 @@ export function GameCanvas() {
       <color attach="background" args={[WATER_COLORS.BACKGROUND]} />
       <OrbitControls makeDefault />
       <CameraController />
-      <Lighting />
+      <ShiftingBackground />
       <HexGrid />
       <EffectComposer>
         <Bloom

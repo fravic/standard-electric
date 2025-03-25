@@ -6,11 +6,10 @@ import {
   WithActorKitInput,
 } from "actor-kit";
 
-import { BlueprintComponent } from "../ecs/entity";
 import { HexGrid } from "../lib/HexGrid";
 import { GameClientEventSchema, GameInputSchema, GameServiceEventSchema } from "./game.schemas";
 import { Env } from "../env";
-import { CommodityMarketState } from "../lib/market/CommodityMarket";
+import { CommodityMarketState } from "../ecs/systems/CommoditySystem";
 import { Entity } from "../ecs/entity";
 import { HexCellResource } from "@/ecs/systems/SurveySystem";
 
@@ -20,6 +19,7 @@ export interface Player {
   money: number;
   powerSoldKWh: number;
   isHost: boolean;
+  color: string; // Player's color, assigned based on player number
 }
 
 // No longer need AuctionBlueprint interface as we'll use Entity directly
