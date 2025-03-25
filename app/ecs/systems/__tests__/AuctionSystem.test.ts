@@ -21,6 +21,7 @@ describe("AuctionSystem", () => {
       money: 5000,
       powerSoldKWh: 100,
       isHost: true,
+      color: "#46C9CD", // Teal - first player color
     },
     [PLAYER2_ID]: {
       name: "Player 2",
@@ -28,6 +29,7 @@ describe("AuctionSystem", () => {
       money: 3000,
       powerSoldKWh: 200,
       isHost: false,
+      color: "#67CA76", // Green - second player color
     },
     [PLAYER3_ID]: {
       name: "Player 3",
@@ -35,6 +37,7 @@ describe("AuctionSystem", () => {
       money: 2000,
       powerSoldKWh: 50,
       isHost: false,
+      color: "#8346CD", // Purple - third player color
     },
   };
 

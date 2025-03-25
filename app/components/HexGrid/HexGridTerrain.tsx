@@ -27,12 +27,15 @@ import { PALETTE } from "@/lib/palette";
 const hexOutlineVertexShader = `
   varying vec2 vUv;
   varying vec3 vColor;
+  varying float vIsSurveyed;
   
   attribute vec3 color;
+  attribute float isSurveyed;
   
   void main() {
     vUv = uv;
     vColor = color;
+    vIsSurveyed = isSurveyed;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
@@ -41,9 +44,12 @@ const hexOutlineFragmentShader = `
   uniform vec3 outlineColor;
   uniform float outlineWidth;
   uniform float outlineOpacity;
+  uniform vec3 fillColor;
+  uniform float fillOpacity;
   
   varying vec2 vUv;
   varying vec3 vColor;
+  varying float vIsSurveyed;
   
   float getDistanceToHexEdge(vec2 uv) {
     // Convert from UV space [0,1] to centered [-0.5,0.5] space
@@ -73,12 +79,15 @@ const hexOutlineFragmentShader = `
     }
     
     // For outlines, use outline color at outline opacity
-    // For interior, use cell color but with zero opacity (transparent)
+    // For interior, use surveyed hex fill if surveyed, otherwise transparent
     if (edgeIntensity > 0.0) {
       // This is part of the outline
       gl_FragColor = vec4(outlineColor, outlineOpacity);
+    } else if (vIsSurveyed > 0.5) {
+      // For surveyed hex interiors, use configurable fill color with additive blending
+      gl_FragColor = vec4(fillColor, fillOpacity);
     } else {
-      // This is the interior - make it transparent
+      // For non-surveyed hex interiors, keep transparent
       gl_FragColor = vec4(vColor, 0.0);
     }
   }
@@ -169,12 +178,16 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
   // Create the shader material
   const hexMaterial = useMemo(() => {
     const threeOutlineColor = new THREE.Color(PALETTE.POWDER_BLUE);
+    const threeFillColor = new THREE.Color(PALETTE.POWDER_BLUE);
+    const FILL_OPACITY = 0.15;
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
         outlineColor: { value: threeOutlineColor },
         outlineWidth: { value: GRID_THICKNESS },
         outlineOpacity: { value: GRID_OPACITY },
+        fillColor: { value: threeFillColor },
+        fillOpacity: { value: FILL_OPACITY },
       },
       vertexShader: hexOutlineVertexShader,
       fragmentShader: hexOutlineFragmentShader,
@@ -192,16 +205,17 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     const vertices: number[] = [];
     const uvs: number[] = [];
     const colors: number[] = [];
+    const isSurveyed: number[] = [];
     const indices: number[] = [];
 
     cells.forEach((cell) => {
       if (isUnderwater(cell)) return;
 
       const center = getCenterPoint(cell);
-      const cellColor = getColorWithExplorationStatus(
-        cell,
-        surveyedHexCoords.has(coordinatesToString(cell.coordinates))
-      );
+      const coordString = coordinatesToString(cell.coordinates);
+      const isCellSurveyed = surveyedHexCoords.has(coordString);
+      const cellColor = getColorWithExplorationStatus(cell, isCellSurveyed);
+      const surveyedValue = isCellSurveyed ? 1.0 : 0.0;
 
       // Create a hexagon with proper UV mapping and vertex colors
       const centerUV = [0.5, 0.5];
@@ -211,6 +225,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
       vertices.push(center[0], center[1], center[2]);
       uvs.push(centerUV[0], centerUV[1]);
       colors.push(cellColor.r, cellColor.g, cellColor.b);
+      isSurveyed.push(surveyedValue);
 
       // Add vertices for the hex corners with UV coordinates
       for (let d = 0; d < 6; d++) {
@@ -227,6 +242,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
 
         // Every vertex has the same color as the cell
         colors.push(cellColor.r, cellColor.g, cellColor.b);
+        isSurveyed.push(surveyedValue);
       }
 
       // Create triangles from center to each pair of adjacent corners
@@ -243,6 +259,7 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
     geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
     geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+    geometry.setAttribute("isSurveyed", new THREE.Float32BufferAttribute(isSurveyed, 1));
     geometry.setIndex(indices);
 
     return geometry;

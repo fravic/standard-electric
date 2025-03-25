@@ -221,6 +221,7 @@ describe("CommoditySystem", () => {
               money: initialMoney,
               powerSoldKWh: 0,
               isHost: true,
+              color: "#46C9CD", // Teal - first player color
             },
           },
           commodityMarket: market,
@@ -317,6 +318,7 @@ describe("CommoditySystem", () => {
               money: initialMoney,
               powerSoldKWh: 0,
               isHost: true,
+              color: "#46C9CD", // Teal - first player color
             },
           },
           commodityMarket: market,
