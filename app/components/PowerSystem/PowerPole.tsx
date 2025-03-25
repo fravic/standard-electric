@@ -53,6 +53,8 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
         >
           <meshToonMaterial
             color={playerColor}
+            emissive={playerColor}
+            emissiveIntensity={0.6}
             transparent={isGhost}
             opacity={isGhost ? 0.5 : 1}
           />
@@ -110,9 +112,11 @@ function PowerLine({ start, end, color, isGhost = false }: PowerLineProps) {
 
   return (
     <mesh geometry={tubeGeometry}>
-      <meshToonMaterial 
-        color={color} 
-        transparent={isGhost} 
+      <meshToonMaterial
+        color={color}
+        emissive={color}
+        emissiveIntensity={0.6}
+        transparent={isGhost}
         opacity={isGhost ? 0.5 : 1}
       />
     </mesh>

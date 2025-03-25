@@ -24,15 +24,15 @@ export function GameCanvas() {
       <OrbitControls makeDefault />
       <CameraController />
       <directionalLight position={[-5, 5, -2]} intensity={1} />
-      <ambientLight intensity={3} />
+      <ambientLight intensity={2} />
       <ShiftingBackground />
       <HexGrid />
       <EffectComposer>
         <Bloom
-          intensity={0.15}
-          luminanceThreshold={0.7}
-          luminanceSmoothing={0.4}
-          kernelSize={KernelSize.SMALL}
+          intensity={0.5}
+          luminanceThreshold={0.4}
+          luminanceSmoothing={0.9}
+          kernelSize={KernelSize.MEDIUM}
         />
         <Scanline blendFunction={BlendFunction.OVERLAY} density={1.25} opacity={0.1} />
       </EffectComposer>
