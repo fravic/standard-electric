@@ -1,6 +1,10 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+
+// Import the necessary classes from three.quarks
+// We'll use type assertions where needed to bypass TypeScript checking issues
+import { ParticleSystem, BatchedRenderer, ConstantValue, IntervalValue, RenderMode, PointEmitter, ForceOverLife, ColorOverLife, ColorRange, Gradient, Vector3 } from 'three.quarks';
 
 interface SmokeParticlesProps {
   position: [number, number, number];
@@ -15,191 +19,97 @@ export function SmokeParticles({
   position,
   count = 50,
   size = 0.25,
-  spread = 0,
+  spread = 0.5,
   opacity = 0.4,
   enabled = true,
 }: SmokeParticlesProps) {
-  const pointsRef = useRef<THREE.Points>(null);
+  // Create refs to hold our particle system and renderer
+  const groupRef = useRef<THREE.Group>(null);
+  const particleSystemRef = useRef<ParticleSystem | null>(null);
+  const batchRendererRef = useRef<BatchedRenderer | null>(null);
 
-  // Load multiple smoke textures from blackSmoke folder
-  const textures = useLoader(
+  // Load a smoke texture
+  const smokeTexture = useLoader(
     THREE.TextureLoader,
-    [
-      '/public/assets/textures/blackSmoke/blackSmoke01.png',
-      '/public/assets/textures/blackSmoke/blackSmoke02.png',
-      '/public/assets/textures/blackSmoke/blackSmoke03.png',
-      '/public/assets/textures/blackSmoke/blackSmoke04.png',
-      '/public/assets/textures/blackSmoke/blackSmoke05.png',
-      '/public/assets/textures/blackSmoke/blackSmoke06.png',
-      '/public/assets/textures/blackSmoke/blackSmoke07.png',
-      '/public/assets/textures/blackSmoke/blackSmoke08.png',
-      '/public/assets/textures/blackSmoke/blackSmoke09.png',
-      '/public/assets/textures/blackSmoke/blackSmoke10.png',
-    ]
+    '/public/assets/textures/blackSmoke/blackSmoke01.png'
   );
 
-  // Texture indices for each particle
-  const textureIndicesRef = useRef<Uint8Array>(new Uint8Array(count));
+  // Create and set up particle system
+  useEffect(() => {
+    if (!smokeTexture) return;
 
-  // Refs to track particle state across frames
-  const activeParticlesRef = useRef(0);
-  const spawnTimerRef = useRef(0);
-  const particleOpacitiesRef = useRef<Float32Array>(new Float32Array(count));
+    // Create a new batch renderer
+    const batchRenderer = new BatchedRenderer();
+    batchRendererRef.current = batchRenderer;
 
-  // Velocity vectors for smooth movement
-  const velocitiesRef = useRef<Float32Array>(new Float32Array(count * 3));
+    // Create the smoke particle system with type assertion to bypass TS errors
+    const smokeSystem = new ParticleSystem({
+      // Basic settings
+      duration: -1, // Continuous
+      looping: true,
+      startLife: new IntervalValue(1.5, 2.5),
+      startSpeed: new ConstantValue(0),
+      startSize: new IntervalValue(size * 0.2, size),
+      worldSpace: true,
+      emissionOverTime: new ConstantValue(enabled ? count / 4 : 0),
+      material: new THREE.MeshBasicMaterial({
+        map: smokeTexture,
+        transparent: true,
+        depthWrite: false,
+        opacity: opacity,
+        blending: THREE.NormalBlending
+      }),
+      renderMode: RenderMode.BillBoard
+    });
+    particleSystemRef.current = smokeSystem;
+    smokeSystem.emitterShape = new PointEmitter();
+    smokeSystem.emitter.position.set(position[0], position[1], position[2]);
+    smokeSystem.addBehavior(new ForceOverLife(new IntervalValue(-0.075, 0.075), new ConstantValue(0.4), new IntervalValue(-0.075, 0.075)));
 
-  // Initialize particles positions, colors, and velocities
-  const positions = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      // Initialize positions
-      pos[i * 3] = position[0];
-      pos[i * 3 + 1] = position[1];
-      pos[i * 3 + 2] = position[2];
+    const fadeGradient = new Gradient(
+      // Color keyframes - each is [Vector3(r,g,b), timePoint]
+      // Contant white color
+      [
+        [new Vector3(1, 1, 1), 0], // White at start
+        [new Vector3(1, 1, 1), 1], // White at end
+      ],
+      // Alpha keyframes - each is [alphaValue, timePoint]
+      [
+        [0, 0],       // Start transparent (alpha = 0) at t = 0
+        [1, 0.1],     // Quickly fade in to full opacity at t = 0.1 (10% of lifetime)
+        [1, 0.3],     // Stay at full opacity until t = 0.3 (30% of lifetime)
+        [0, 1],       // Slowly fade out to transparent by t = 1 (end of lifetime)
+      ]
+    );
 
-      // Initialize opacities
-      particleOpacitiesRef.current[i] = 0;
+    smokeSystem.addBehavior(new ColorOverLife(fadeGradient));
 
-      // Initialize velocity vectors (x, y, z)
-      velocitiesRef.current[i * 3] = (Math.random() - 0.5) * 0.05;     // x velocity
-      velocitiesRef.current[i * 3 + 1] = 0;                           // y velocity (handled separately)
-      velocitiesRef.current[i * 3 + 2] = (Math.random() - 0.5) * 0.05; // z velocity
+    // Add to renderer
+    batchRenderer.addSystem(smokeSystem);
 
-      // Assign a random texture to each particle
-      textureIndicesRef.current[i] = Math.floor(Math.random() * textures.length);
+    // Add to scene
+    if (groupRef.current) {
+      groupRef.current.add(smokeSystem.emitter);
+      groupRef.current.add(batchRenderer);
     }
-    return pos;
-  }, [count, position[0], position[1], position[2]]);
 
-  // Create colors array for vertex coloring (RGBA for each particle)
-  const colors = useMemo(() => new Float32Array(count * 4), [count]);
+    return () => {
+      // Cleanup
+      if (smokeSystem.emitter.parent) {
+        smokeSystem.emitter.parent.remove(smokeSystem.emitter);
+      }
+      if (batchRenderer.parent) {
+        batchRenderer.parent.remove(batchRenderer);
+      }
+    };
+  }, [smokeTexture, position[0], position[1], position[2], count, size, opacity, enabled]);
 
-  // Animation: particles rise upward over time and fade out
   useFrame((_, delta) => {
-    if (!pointsRef.current) return;
-
-    // Spawn new particles if enabled
-    if (enabled && activeParticlesRef.current < count) {
-      spawnTimerRef.current += delta;
-      // Spawn a new particle every 0.1 seconds
-      if (spawnTimerRef.current > 0.1) {
-        spawnTimerRef.current = 0;
-
-        // Activate a new particle
-        const i = activeParticlesRef.current;
-        const positionAttr = pointsRef.current.geometry.getAttribute('position') as THREE.BufferAttribute;
-
-        // Set position at the origin with some random spread
-        positionAttr.setX(i, position[0] + (Math.random() - 0.5) * spread);
-        positionAttr.setY(i, position[1] + Math.random() * 0.1);
-        positionAttr.setZ(i, position[2] + (Math.random() - 0.5) * spread);
-
-        // Initialize opacity to max value
-        particleOpacitiesRef.current[i] = opacity;
-        activeParticlesRef.current++;
-      }
-    }
-
-    // Update active particles
-    const positionAttr = pointsRef.current.geometry.getAttribute('position') as THREE.BufferAttribute;
-    const opacities = particleOpacitiesRef.current;
-
-    // Create a copy of the material for each particle with different opacity
-    for (let i = 0; i < activeParticlesRef.current; i++) {
-      // Update y position to make particles rise upward
-      const currentY = positionAttr.getY(i);
-      const yDelta = delta * (0.2 + (currentY - position[1]) * 0.1); // Accelerate as they rise
-      positionAttr.setY(i, currentY + yDelta);
-
-      // Fade out opacity over time
-      opacities[i] -= delta * 0.1; // Adjust this value to control fade speed
-
-      // If particle has faded out completely, reset it (if enabled)
-      if (opacities[i] <= 0) {
-        opacities[i] = 0;
-
-        // Only reset if enabled, otherwise just keep it invisible
-        if (enabled) {
-          // Reset particle to the base position
-          positionAttr.setX(i, position[0] + (Math.random() - 0.5) * spread);
-          positionAttr.setY(i, position[1]);
-          positionAttr.setZ(i, position[2] + (Math.random() - 0.5) * spread);
-
-          // Reset opacity to max
-          opacities[i] = opacity;
-        }
-      }
-
-      // Apply smooth sideways drift based on velocity
-      const x = positionAttr.getX(i);
-      const z = positionAttr.getZ(i);
-
-      // Get this particle's velocity
-      const vx = velocitiesRef.current[i * 3];
-      const vz = velocitiesRef.current[i * 3 + 2];
-
-      // Apply velocity over time
-      positionAttr.setX(i, x + vx * delta);
-      positionAttr.setZ(i, z + vz * delta);
-    }
-
-    // Update each particle's color based on its opacity
-    const colorAttr = pointsRef.current.geometry.getAttribute('color') as THREE.BufferAttribute;
-
-    for (let i = 0; i < activeParticlesRef.current; i++) {
-      // Set RGB to white/gray and use opacity for alpha channel
-      colorAttr.setXYZW(
-        i,
-        0.6,  // R
-        0.6,  // G
-        0.6,  // B
-        opacities[i]  // A - individual opacity
-      );
-    }
-
-    // Mark both position and color attributes as needing update
-    positionAttr.needsUpdate = true;
-    colorAttr.needsUpdate = true;
-
+    if (!particleSystemRef.current || !batchRendererRef.current) return;
+    batchRendererRef.current.update(delta);
   });
 
-  // Choose a random texture for our smoke
-  const texture = useMemo(() => {
-    // Get a random texture from our loaded textures
-    return textures[Math.floor(Math.random() * textures.length)];
-  }, [textures]);
-
-  return (
-    <>
-      <points ref={pointsRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={count}
-            array={positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={count}
-            array={colors}
-            itemSize={4}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          attach="material"
-          map={texture}
-          size={size}
-          sizeAttenuation
-          transparent
-          vertexColors
-          depthWrite={false}
-          alphaTest={0.01}
-        />
-      </points>
-    </>
-  );
+  return <group ref={groupRef} />;
 }
 
 

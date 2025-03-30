@@ -18,6 +18,7 @@ interface CameraConfigType {
     MIN_Z: number;
     MAX_Z: number;
   };
+  START_POSITION: Vector3;
 }
 
 // Camera configuration
@@ -33,6 +34,7 @@ const CAMERA_CONFIG: CameraConfigType = {
     MIN_Z: 0,
     MAX_Z: 80,
   },
+  START_POSITION: new Vector3(15, 0, 15),
 };
 
 interface KeyMap {
@@ -82,8 +84,21 @@ export function CameraController(): React.ReactNode {
       orbitControls.maxDistance = CAMERA_CONFIG.MAX_DISTANCE;
       orbitControls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
       orbitControls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
+
+      // Set initial camera position
+      camera.position.set(
+        CAMERA_CONFIG.START_POSITION.x,
+        camera.position.y,
+        CAMERA_CONFIG.START_POSITION.z
+      );
+      orbitControls.target.set(
+        CAMERA_CONFIG.START_POSITION.x,
+        0,
+        CAMERA_CONFIG.START_POSITION.z
+      );
+      orbitControls.update();
     }
-  }, [controls]);
+  }, [controls, camera]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
