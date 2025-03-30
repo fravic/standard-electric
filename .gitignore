@@ -6,6 +6,7 @@ node_modules/
 # Build outputs
 /dist
 /public/dist
+/public/assets
 /build
 .next
 .wrangler
