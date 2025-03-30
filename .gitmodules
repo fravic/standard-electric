@@ -1,0 +1,3 @@
+[submodule "public/standard-electric-assets"]
+	path = public/standard-electric-assets
+	url = git@github.com:fravic/standard-electric-assets.git
