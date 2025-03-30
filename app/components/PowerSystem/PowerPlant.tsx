@@ -1,10 +1,12 @@
 import React, { useRef } from "react";
 import { useGLTF } from "@react-three/drei";
+import * as THREE from "three";
 
 import { Entity } from "@/ecs/entity";
 import { toWorldPoint } from "@/lib/coordinates/HexCoordinates";
 import { ToonModelRenderer } from "../Shared/ToonModelRenderer";
 import { GameContext } from "@/actor/game.context";
+import { SmokeParticles } from "./SmokeParticles";
 
 interface PowerPlantProps {
   entity: Entity;
@@ -24,6 +26,10 @@ export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
   // Clone the found object or return null if not found
   const powerPlantModel = powerPlantObject ? powerPlantObject.clone() : null;
 
+  // Find the SmokeParticles object to get its position
+  const smokeObject = scene.getObjectByName("SmokeParticles");
+  const smokeLocalPosition = smokeObject ? smokeObject.position.clone() : null;
+
   // Reset the transform of the model to ignore any offset from the GLB scene
   if (powerPlantModel) {
     powerPlantModel.position.set(0, 0, 0);
@@ -41,14 +47,23 @@ export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
   const playerColor = entity.owner?.playerId && players[entity.owner.playerId]?.color;
 
   return (
-    <ToonModelRenderer
-      model={powerPlantModel}
-      position={position}
-      isGhost={isGhost}
-      playerColor={playerColor}
-    />
+    <>
+      <ToonModelRenderer
+        model={powerPlantModel}
+        position={position}
+        isGhost={isGhost}
+        playerColor={playerColor}
+      />
+      {smokeLocalPosition && (
+        <SmokeParticles position={[
+          position[0] + smokeLocalPosition.x,
+          position[1] + smokeLocalPosition.y,
+          position[2] + smokeLocalPosition.z
+        ]} />
+      )}
+    </>
   );
 }
 
 // Preload the model
-useGLTF.preload("/standard-electric-assets/glb/PowerPlants.glb");
+useGLTF.preload("/public/assets/glb/PowerPlants.glb");
