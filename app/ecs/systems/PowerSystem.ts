@@ -370,7 +370,7 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
 
       // Update energyGeneratedLastTickKwh if this power plant generated power
       if (entity.powerGeneration) {
-        const powerPlant = this.powerPlants.find(p => p.id === plantId);
+        const powerPlant = this.powerPlants.find((p) => p.id === plantId);
         if (powerPlant) {
           const energyGenerated = powerPlant.maxCapacity - powerPlant.remainingCapacity;
           entity.powerGeneration.energyGeneratedLastTickKwh = energyGenerated;
@@ -386,10 +386,11 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
           const poleEntity = contextDraft.public?.entitiesById?.[poleId];
           if (poleEntity?.connections) {
             // Add to the existing value as a pole might be part of multiple paths
-            const plant = this.powerPlants.find(p => p.id === connection.plantId);
+            const plant = this.powerPlants.find((p) => p.id === connection.plantId);
             if (plant) {
               const energyDistributed = plant.maxCapacity - plant.remainingCapacity;
-              poleEntity.connections.energyDistributedLastTickKwh += energyDistributed / connection.path.length;
+              poleEntity.connections.energyDistributedLastTickKwh +=
+                energyDistributed / connection.path.length;
             }
           }
         }

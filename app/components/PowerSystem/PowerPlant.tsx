@@ -61,7 +61,7 @@ export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
             position[1] + smokeLocalPosition.y,
             position[2] + smokeLocalPosition.z,
           ]}
-          enabled={!isGhost}
+          enabled={!isGhost && (entity.powerGeneration?.energyGeneratedLastTickKwh ?? 0) > 0}
         />
       )}
     </>

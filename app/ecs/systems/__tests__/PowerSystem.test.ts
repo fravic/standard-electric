@@ -576,11 +576,7 @@ describe("PowerSystem", () => {
       );
 
       // Create a power pole connecting the plant to the consumer
-      const pole = createPowerPoleAtCorner(
-        { x: 0, z: 0 },
-        CornerPosition.North,
-        []
-      );
+      const pole = createPowerPoleAtCorner({ x: 0, z: 0 }, CornerPosition.North, []);
 
       // Add entities to the world
       world.add(plant);
@@ -610,10 +606,14 @@ describe("PowerSystem", () => {
       powerSystem.mutate(result, mockContext as any);
 
       // Verify that energyGeneratedLastTickKwh is set correctly
-      expect(mockContext.public.entitiesById[plant.id]?.powerGeneration?.energyGeneratedLastTickKwh).toBe(25);
-      
+      expect(
+        mockContext.public.entitiesById[plant.id]?.powerGeneration?.energyGeneratedLastTickKwh
+      ).toBe(25);
+
       // Verify that the power pole's energyDistributedLastTickKwh is set
-      expect(mockContext.public.entitiesById[pole.id]?.connections?.energyDistributedLastTickKwh).toBe(25);
+      expect(
+        mockContext.public.entitiesById[pole.id]?.connections?.energyDistributedLastTickKwh
+      ).toBe(25);
     });
 
     it("should set energyGeneratedLastTickKwh and energyDistributedLastTickKwh for active entities", () => {
@@ -650,17 +650,9 @@ describe("PowerSystem", () => {
       );
 
       // Create power poles - one connected to the consumer, one not
-      const pole1 = createPowerPoleAtCorner(
-        { x: 0, z: 0 },
-        CornerPosition.North,
-        []
-      );
-      
-      const pole2 = createPowerPoleAtCorner(
-        { x: 1, z: 0 },
-        CornerPosition.North,
-        []
-      );
+      const pole1 = createPowerPoleAtCorner({ x: 0, z: 0 }, CornerPosition.North, []);
+
+      const pole2 = createPowerPoleAtCorner({ x: 1, z: 0 }, CornerPosition.North, []);
 
       // Add entities to the world
       world.add(plant1);
@@ -682,13 +674,13 @@ describe("PowerSystem", () => {
               powerGeneration: {
                 powerGenerationKW: 100,
                 pricePerKWh: 0.1,
-                energyGeneratedLastTickKwh: 50 // Set initial value
+                energyGeneratedLastTickKwh: 50, // Set initial value
               },
               fuelStorage: { ...plant1.fuelStorage },
               hexPosition: { ...plant1.hexPosition },
               owner: { ...plant1.owner },
               fuelRequirement: { ...plant1.fuelRequirement },
-              renderable: { ...plant1.renderable }
+              renderable: { ...plant1.renderable },
             },
             [plant2.id]: {
               id: plant2.id,
@@ -696,35 +688,35 @@ describe("PowerSystem", () => {
               powerGeneration: {
                 powerGenerationKW: 100,
                 pricePerKWh: 0.1,
-                energyGeneratedLastTickKwh: 50 // Set initial value
+                energyGeneratedLastTickKwh: 50, // Set initial value
               },
               fuelStorage: { ...plant2.fuelStorage },
               hexPosition: { ...plant2.hexPosition },
               owner: { ...plant2.owner },
               fuelRequirement: { ...plant2.fuelRequirement },
-              renderable: { ...plant2.renderable }
+              renderable: { ...plant2.renderable },
             },
             [pole1.id]: {
               id: pole1.id,
               name: pole1.name,
               connections: {
                 connectedToIds: [],
-                energyDistributedLastTickKwh: 50 // Set initial value
+                energyDistributedLastTickKwh: 50, // Set initial value
               },
               cornerPosition: { ...pole1.cornerPosition },
               owner: { ...pole1.owner },
-              renderable: { ...pole1.renderable }
+              renderable: { ...pole1.renderable },
             },
             [pole2.id]: {
               id: pole2.id,
               name: pole2.name,
               connections: {
                 connectedToIds: [],
-                energyDistributedLastTickKwh: 50 // Set initial value
+                energyDistributedLastTickKwh: 50, // Set initial value
               },
               cornerPosition: { ...pole2.cornerPosition },
               owner: { ...pole2.owner },
-              renderable: { ...pole2.renderable }
+              renderable: { ...pole2.renderable },
             },
           },
           players: {
@@ -738,10 +730,14 @@ describe("PowerSystem", () => {
       powerSystem.mutate(result, mockContext as any);
 
       // Verify that energyGeneratedLastTickKwh is set correctly for the active plant
-      expect(mockContext.public.entitiesById[plant1.id]?.powerGeneration?.energyGeneratedLastTickKwh).toBe(25);
-      
+      expect(
+        mockContext.public.entitiesById[plant1.id]?.powerGeneration?.energyGeneratedLastTickKwh
+      ).toBe(25);
+
       // Verify that the connected power pole's energyDistributedLastTickKwh is set
-      expect(mockContext.public.entitiesById[pole1.id]?.connections?.energyDistributedLastTickKwh).toBe(25);
+      expect(
+        mockContext.public.entitiesById[pole1.id]?.connections?.energyDistributedLastTickKwh
+      ).toBe(25);
     });
 
     // Helper to create a populated hex cell

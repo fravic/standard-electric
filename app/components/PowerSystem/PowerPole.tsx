@@ -54,7 +54,9 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
           <meshToonMaterial
             color={playerColor}
             emissive={playerColor}
-            emissiveIntensity={0.6}
+            emissiveIntensity={
+              (pole.connections?.energyDistributedLastTickKwh ?? 0) > 0 ? 0.6 : 0.2
+            }
             transparent={isGhost}
             opacity={isGhost ? 0.5 : 1}
           />
@@ -80,6 +82,7 @@ export function PowerPole({ pole, isGhost = false }: PowerPoleProps) {
             ]}
             color={playerColor}
             isGhost={isGhost}
+            isActive={(pole.connections?.energyDistributedLastTickKwh ?? 0) > 0}
           />
         );
       })}
@@ -93,9 +96,10 @@ interface PowerLineProps {
   end: [number, number, number];
   color: THREE.Color;
   isGhost?: boolean;
+  isActive?: boolean;
 }
 
-function PowerLine({ start, end, color, isGhost = false }: PowerLineProps) {
+function PowerLine({ start, end, color, isGhost = false, isActive = false }: PowerLineProps) {
   // Create a path between start and end points
   const path = useMemo(() => {
     const curve = new THREE.LineCurve3(
@@ -115,7 +119,7 @@ function PowerLine({ start, end, color, isGhost = false }: PowerLineProps) {
       <meshToonMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={0.6}
+        emissiveIntensity={isActive ? 0.6 : 0.2}
         transparent={isGhost}
         opacity={isGhost ? 0.5 : 1}
       />
