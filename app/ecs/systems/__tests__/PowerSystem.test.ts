@@ -21,6 +21,7 @@ const createPowerPoleAtCorner = (
     },
     connections: {
       connectedToIds: [...connectedToIds],
+      energyDistributedLastTickKwh: 0,
     },
     owner: {
       playerId: "player1",
@@ -51,6 +52,7 @@ const createPowerPlantAtHex = (
     powerGeneration: {
       powerGenerationKW,
       pricePerKWh,
+      energyGeneratedLastTickKwh: 0,
     },
     fuelStorage: {
       maxFuelStorage,
@@ -552,6 +554,196 @@ describe("PowerSystem", () => {
   });
 
   describe("resolveOneHourOfPowerProduction", () => {
+    it("should update energyGeneratedLastTickKwh for power plants that generate power", () => {
+      // Create a hex grid with a populated cell
+      const hex1: HexCoordinates = { x: 0, z: 0 };
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] = createPopulatedHex(
+        hex1,
+        Population.Town // 25kW demand
+      );
+
+      // Create a power plant with plenty of fuel
+      const plantHex: HexCoordinates = { x: 0, z: -1 };
+      const plant = createPowerPlantAtHex(
+        plantHex,
+        "player1",
+        100, // 100kW capacity
+        0.1, // $0.10 per kWh
+        CommodityType.COAL,
+        0.1, // 0.1 fuel per kWh
+        1000, // 1000 fuel storage
+        100 // 100 current fuel
+      );
+
+      // Create a power pole connecting the plant to the consumer
+      const pole = createPowerPoleAtCorner(
+        { x: 0, z: 0 },
+        CornerPosition.North,
+        []
+      );
+
+      // Add entities to the world
+      world.add(plant);
+      world.add(pole);
+
+      // Create and initialize the power system
+      const powerSystem = new PowerSystem();
+      powerSystem.initialize(world, { hexGrid });
+
+      // Process power production
+      const result = powerSystem.update(world, createPowerContext());
+
+      // Create a mock GameContext to test the mutate method
+      const mockContext = {
+        public: {
+          entitiesById: {
+            [plant.id]: { ...plant },
+            [pole.id]: { ...pole },
+          },
+          players: {
+            player1: { money: 0, powerSoldKWh: 0 },
+          },
+        },
+      };
+
+      // Apply mutations
+      powerSystem.mutate(result, mockContext as any);
+
+      // Verify that energyGeneratedLastTickKwh is set correctly
+      expect(mockContext.public.entitiesById[plant.id]?.powerGeneration?.energyGeneratedLastTickKwh).toBe(25);
+      
+      // Verify that the power pole's energyDistributedLastTickKwh is set
+      expect(mockContext.public.entitiesById[pole.id]?.connections?.energyDistributedLastTickKwh).toBe(25);
+    });
+
+    it("should set energyGeneratedLastTickKwh and energyDistributedLastTickKwh for active entities", () => {
+      // Create a hex grid with a populated cell
+      const hex1: HexCoordinates = { x: 0, z: 0 };
+      hexGrid.cellsByHexCoordinates[coordinatesToString(hex1)] = createPopulatedHex(
+        hex1,
+        Population.Town // 25kW demand
+      );
+
+      // Create two power plants - one with fuel and one without
+      const plantHex1: HexCoordinates = { x: 0, z: -1 };
+      const plant1 = createPowerPlantAtHex(
+        plantHex1,
+        "player1",
+        100, // 100kW capacity
+        0.1, // $0.10 per kWh
+        CommodityType.COAL,
+        0.1, // 0.1 fuel per kWh
+        1000, // 1000 fuel storage
+        100 // 100 current fuel
+      );
+
+      const plantHex2: HexCoordinates = { x: 1, z: -1 };
+      const plant2 = createPowerPlantAtHex(
+        plantHex2,
+        "player1",
+        100, // 100kW capacity
+        0.1, // $0.10 per kWh
+        CommodityType.COAL,
+        0.1, // 0.1 fuel per kWh
+        1000, // 1000 fuel storage
+        0 // 0 current fuel - won't generate power
+      );
+
+      // Create power poles - one connected to the consumer, one not
+      const pole1 = createPowerPoleAtCorner(
+        { x: 0, z: 0 },
+        CornerPosition.North,
+        []
+      );
+      
+      const pole2 = createPowerPoleAtCorner(
+        { x: 1, z: 0 },
+        CornerPosition.North,
+        []
+      );
+
+      // Add entities to the world
+      world.add(plant1);
+      world.add(plant2);
+      world.add(pole1);
+      world.add(pole2);
+
+      // Create and initialize the power system
+      const powerSystem = new PowerSystem();
+      powerSystem.initialize(world, { hexGrid });
+
+      // Create a mock GameContext to test the mutate method
+      const mockContext = {
+        public: {
+          entitiesById: {
+            [plant1.id]: {
+              id: plant1.id,
+              name: plant1.name,
+              powerGeneration: {
+                powerGenerationKW: 100,
+                pricePerKWh: 0.1,
+                energyGeneratedLastTickKwh: 50 // Set initial value
+              },
+              fuelStorage: { ...plant1.fuelStorage },
+              hexPosition: { ...plant1.hexPosition },
+              owner: { ...plant1.owner },
+              fuelRequirement: { ...plant1.fuelRequirement },
+              renderable: { ...plant1.renderable }
+            },
+            [plant2.id]: {
+              id: plant2.id,
+              name: plant2.name,
+              powerGeneration: {
+                powerGenerationKW: 100,
+                pricePerKWh: 0.1,
+                energyGeneratedLastTickKwh: 50 // Set initial value
+              },
+              fuelStorage: { ...plant2.fuelStorage },
+              hexPosition: { ...plant2.hexPosition },
+              owner: { ...plant2.owner },
+              fuelRequirement: { ...plant2.fuelRequirement },
+              renderable: { ...plant2.renderable }
+            },
+            [pole1.id]: {
+              id: pole1.id,
+              name: pole1.name,
+              connections: {
+                connectedToIds: [],
+                energyDistributedLastTickKwh: 50 // Set initial value
+              },
+              cornerPosition: { ...pole1.cornerPosition },
+              owner: { ...pole1.owner },
+              renderable: { ...pole1.renderable }
+            },
+            [pole2.id]: {
+              id: pole2.id,
+              name: pole2.name,
+              connections: {
+                connectedToIds: [],
+                energyDistributedLastTickKwh: 50 // Set initial value
+              },
+              cornerPosition: { ...pole2.cornerPosition },
+              owner: { ...pole2.owner },
+              renderable: { ...pole2.renderable }
+            },
+          },
+          players: {
+            player1: { money: 0, powerSoldKWh: 0 },
+          },
+        },
+      };
+
+      // Process power production and apply mutations
+      const result = powerSystem.update(world, createPowerContext());
+      powerSystem.mutate(result, mockContext as any);
+
+      // Verify that energyGeneratedLastTickKwh is set correctly for the active plant
+      expect(mockContext.public.entitiesById[plant1.id]?.powerGeneration?.energyGeneratedLastTickKwh).toBe(25);
+      
+      // Verify that the connected power pole's energyDistributedLastTickKwh is set
+      expect(mockContext.public.entitiesById[pole1.id]?.connections?.energyDistributedLastTickKwh).toBe(25);
+    });
+
     // Helper to create a populated hex cell
     const createPopulatedHex = (coordinates: HexCoordinates, population: Population): HexCell => ({
       coordinates,

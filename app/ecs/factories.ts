@@ -26,6 +26,7 @@ export const AdditionalBlueprintOptionsSchema = z.object({
   connections: z
     .object({
       connectedToIds: z.array(z.string()),
+      energyDistributedLastTickKwh: z.number().default(0),
     })
     .optional(),
 });
@@ -55,6 +56,7 @@ export function createPowerPoleBlueprint(playerId: string): With<Entity, "bluepr
       components: {
         connections: {
           connectedToIds: [],
+          energyDistributedLastTickKwh: 0,
         },
         renderable: {
           renderableComponentName: "PowerPole",
@@ -92,6 +94,7 @@ export function createPowerPole(options: {
     },
     connections: {
       connectedToIds: options.connectedToIds,
+      energyDistributedLastTickKwh: 0,
     },
     renderable: {
       renderableComponentName: "PowerPole",
@@ -137,6 +140,7 @@ export function createPowerPlant(options: {
     powerGeneration: {
       powerGenerationKW: options.powerGenerationKW,
       pricePerKWh: options.pricePerKWh,
+      energyGeneratedLastTickKwh: 0,
     },
     fuelRequirement: {
       fuelType: options.fuelType,
@@ -177,6 +181,7 @@ export function createPowerPlantBlueprint(options: {
           ? {
               powerGenerationKW: options.powerGenerationKW,
               pricePerKWh: options.pricePerKWh,
+              energyGeneratedLastTickKwh: 0,
             }
           : undefined,
         fuelRequirement: {

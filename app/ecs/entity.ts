@@ -58,6 +58,7 @@ export type CostComponent = z.infer<typeof CostComponentSchema>;
  */
 export const ConnectionsComponentSchema = z.object({
   connectedToIds: z.array(z.string()),
+  energyDistributedLastTickKwh: z.number().default(0),
 });
 
 export type ConnectionsComponent = z.infer<typeof ConnectionsComponentSchema>;
@@ -69,6 +70,7 @@ export type ConnectionsComponent = z.infer<typeof ConnectionsComponentSchema>;
 export const PowerGenerationComponentSchema = z.object({
   powerGenerationKW: z.number(),
   pricePerKWh: z.number(),
+  energyGeneratedLastTickKwh: z.number().default(0),
 });
 
 export type PowerGenerationComponent = z.infer<typeof PowerGenerationComponentSchema>;

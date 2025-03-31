@@ -345,6 +345,19 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
   public mutate(result: PowerResult, contextDraft: Draft<GameContext>): void {
     if (!result.success) return;
 
+    // First, reset all energyGeneratedLastTickKwh and energyDistributedLastTickKwh values to 0
+    // This ensures that entities that didn't generate or distribute power in this tick will show 0
+    if (contextDraft.public?.entitiesById) {
+      Object.values(contextDraft.public.entitiesById).forEach((entity) => {
+        if (entity.powerGeneration) {
+          entity.powerGeneration.energyGeneratedLastTickKwh = 0;
+        }
+        if (entity.connections) {
+          entity.connections.energyDistributedLastTickKwh = 0;
+        }
+      });
+    }
+
     // Update fuel storage levels for power plants in the entities
     Object.entries(result.currentFuelStorageByPowerPlantId).forEach(([plantId, fuelLevel]) => {
       const entity = contextDraft.public?.entitiesById?.[plantId];
@@ -354,7 +367,34 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
         ...entity.fuelStorage,
         currentFuelStorage: fuelLevel,
       };
+
+      // Update energyGeneratedLastTickKwh if this power plant generated power
+      if (entity.powerGeneration) {
+        const powerPlant = this.powerPlants.find(p => p.id === plantId);
+        if (powerPlant) {
+          const energyGenerated = powerPlant.maxCapacity - powerPlant.remainingCapacity;
+          entity.powerGeneration.energyGeneratedLastTickKwh = energyGenerated;
+        }
+      }
     });
+
+    // Update power pole energy distribution values
+    for (const consumer of this.consumers) {
+      for (const connection of consumer.connectedPlants) {
+        // For each path (which contains power pole IDs), update the energyDistributedLastTickKwh
+        for (const poleId of connection.path) {
+          const poleEntity = contextDraft.public?.entitiesById?.[poleId];
+          if (poleEntity?.connections) {
+            // Add to the existing value as a pole might be part of multiple paths
+            const plant = this.powerPlants.find(p => p.id === connection.plantId);
+            if (plant) {
+              const energyDistributed = plant.maxCapacity - plant.remainingCapacity;
+              poleEntity.connections.energyDistributedLastTickKwh += energyDistributed / connection.path.length;
+            }
+          }
+        }
+      }
+    }
 
     // Update player income and power sold in the public context
     Object.keys(result.incomePerPlayer).forEach((playerId) => {
@@ -529,6 +569,9 @@ export class PowerSystem implements System<PowerContext, PowerResult> {
       // Record the current fuel level
       currentFuelStorageByPowerPlantId[plant.id] = plant.currentFuelStorage;
     });
+
+    // At this point, all power distribution has been calculated
+    // The actual update of the entity components happens in the mutate method
 
     return {
       success: true,
