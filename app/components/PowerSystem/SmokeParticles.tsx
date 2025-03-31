@@ -1,10 +1,22 @@
-import React, { useRef, useEffect } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
-import * as THREE from 'three';
+import React, { useRef, useEffect } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
+import * as THREE from "three";
 
 // Import the necessary classes from three.quarks
 // We'll use type assertions where needed to bypass TypeScript checking issues
-import { ParticleSystem, BatchedRenderer, ConstantValue, IntervalValue, RenderMode, PointEmitter, ForceOverLife, ColorOverLife, ColorRange, Gradient, Vector3 } from 'three.quarks';
+import {
+  ParticleSystem,
+  BatchedRenderer,
+  ConstantValue,
+  IntervalValue,
+  RenderMode,
+  PointEmitter,
+  ForceOverLife,
+  ColorOverLife,
+  ColorRange,
+  Gradient,
+  Vector3,
+} from "three.quarks";
 
 interface SmokeParticlesProps {
   position: [number, number, number];
@@ -31,7 +43,7 @@ export function SmokeParticles({
   // Load a smoke texture
   const smokeTexture = useLoader(
     THREE.TextureLoader,
-    '/public/assets/textures/blackSmoke/blackSmoke01.png'
+    "/public/assets/textures/blackSmoke/blackSmoke01.png"
   );
 
   // Create and set up particle system
@@ -57,14 +69,20 @@ export function SmokeParticles({
         transparent: true,
         depthWrite: false,
         opacity: opacity,
-        blending: THREE.NormalBlending
+        blending: THREE.NormalBlending,
       }),
-      renderMode: RenderMode.BillBoard
+      renderMode: RenderMode.BillBoard,
     });
     particleSystemRef.current = smokeSystem;
     smokeSystem.emitterShape = new PointEmitter();
     smokeSystem.emitter.position.set(position[0], position[1], position[2]);
-    smokeSystem.addBehavior(new ForceOverLife(new IntervalValue(-0.075, 0.075), new ConstantValue(0.4), new IntervalValue(-0.075, 0.075)));
+    smokeSystem.addBehavior(
+      new ForceOverLife(
+        new IntervalValue(-0.075, 0.075),
+        new ConstantValue(0.4),
+        new IntervalValue(-0.075, 0.075)
+      )
+    );
 
     const fadeGradient = new Gradient(
       // Color keyframes - each is [Vector3(r,g,b), timePoint]
@@ -75,10 +93,10 @@ export function SmokeParticles({
       ],
       // Alpha keyframes - each is [alphaValue, timePoint]
       [
-        [0, 0],       // Start transparent (alpha = 0) at t = 0
-        [1, 0.1],     // Quickly fade in to full opacity at t = 0.1 (10% of lifetime)
-        [1, 0.3],     // Stay at full opacity until t = 0.3 (30% of lifetime)
-        [0, 1],       // Slowly fade out to transparent by t = 1 (end of lifetime)
+        [0, 0], // Start transparent (alpha = 0) at t = 0
+        [1, 0.1], // Quickly fade in to full opacity at t = 0.1 (10% of lifetime)
+        [1, 0.3], // Stay at full opacity until t = 0.3 (30% of lifetime)
+        [0, 1], // Slowly fade out to transparent by t = 1 (end of lifetime)
       ]
     );
 
@@ -111,5 +129,3 @@ export function SmokeParticles({
 
   return <group ref={groupRef} />;
 }
-
-

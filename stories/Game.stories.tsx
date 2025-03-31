@@ -162,6 +162,7 @@ export const DebugMode: Story = {
       name: "Generic Power Plant",
       playerId: PLAYER_2_ID,
       powerGenerationKW: 1000,
+      pricePerKWh: 10,
       startingPrice: 10,
     });
 
@@ -446,6 +447,7 @@ export const BuildablePlacementInCalifornia: Story = {
       name: "California Power Plant",
       playerId: PLAYER_ID,
       powerGenerationKW: 2000,
+      pricePerKWh: 20,
       startingPrice: 20,
       requiredRegionName: "California",
     });
@@ -455,12 +457,38 @@ export const BuildablePlacementInCalifornia: Story = {
       name: "Generic Power Plant",
       playerId: PLAYER_ID,
       powerGenerationKW: 1000,
+      pricePerKWh: 10,
       startingPrice: 10,
     });
+
+    // Create survey results for the player
+    const surveyResultEntities: Entity[] = [
+      createSurvey({
+        id: nanoid(),
+        hexCoordinates: createHexCoordinates(3, 11),
+        surveyStartTick: 0,
+        isComplete: true,
+        playerId: PLAYER_ID,
+      }),
+      createSurvey({
+        id: nanoid(),
+        hexCoordinates: createHexCoordinates(4, 11),
+        surveyStartTick: 0,
+        isComplete: true,
+        playerId: PLAYER_ID,
+      }),
+    ];
 
     const entities: Record<string, Entity> = {
       [californiaPlant.id]: californiaPlant,
       [genericPlant.id]: genericPlant,
+      ...surveyResultEntities.reduce(
+        (acc, entity) => {
+          acc[entity.id] = entity;
+          return acc;
+        },
+        {} as Record<string, Entity>
+      ),
     };
 
     const client = createActorKitMockClient<GameMachine>({
@@ -470,7 +498,7 @@ export const BuildablePlacementInCalifornia: Story = {
           players: {
             [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 1000, true),
           },
-          time: { totalTicks: 0, isPaused: false },
+          time: { totalTicks: 10, isPaused: false },
           auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
@@ -548,6 +576,7 @@ export const GridConnectivityValidation: Story = {
       name: "Generic Power Plant",
       playerId: PLAYER_ID,
       powerGenerationKW: 1000,
+      pricePerKWh: 10,
       startingPrice: 10,
     });
 
@@ -557,6 +586,7 @@ export const GridConnectivityValidation: Story = {
       name: "Generic Power Plant",
       playerId: PLAYER_2_ID,
       powerGenerationKW: 1000,
+      pricePerKWh: 10,
       startingPrice: 10,
     });
 

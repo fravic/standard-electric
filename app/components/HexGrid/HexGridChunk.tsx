@@ -136,7 +136,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       });
     }
 
-    const isValidLocation = BuildableSystem.isValidBuildableLocation(
+    // Set the isGhost property on the ghost entity
+    ghostEntity.isGhost = { isGhost: true };
+
+    const validationResult = BuildableSystem.isValidBuildableLocation(
       world,
       {
         hexGrid: grid,
@@ -147,8 +150,9 @@ export const HexGridChunk = React.memo(function HexGridChunk({
       buildingBlueprint.id,
       ghostEntity
     );
+    console.log("--- check is valid", { ghostEntity, validationResult });
 
-    if (!isValidLocation) {
+    if (!validationResult.valid) {
       return null;
     }
 

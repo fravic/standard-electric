@@ -160,7 +160,7 @@ export function createPowerPlantBlueprint(options: {
   startingPrice: number;
   fuelType?: CommodityType;
   fuelConsumptionPerKWh?: number;
-  pricePerKWh?: number;
+  pricePerKWh: number;
   requiredRegionName?: string;
 }): With<Entity, "blueprint"> {
   return {

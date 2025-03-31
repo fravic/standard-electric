@@ -366,16 +366,16 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
 
   /**
    * Static helper method to check if a buildable location is valid
+   * @returns The full validation result including reason if invalid
    */
   static isValidBuildableLocation(
     world: World<Entity>,
     context: BuildableContext,
     blueprintId: string,
     options: AdditionalBlueprintOptions
-  ): boolean {
+  ): BuildableValidationResult {
     const system = new BuildableSystem();
     system.initialize(world, context);
-    const result = system.validateBuildableLocation(blueprintId, options);
-    return result.valid;
+    return system.validateBuildableLocation(blueprintId, options);
   }
 }

@@ -189,7 +189,8 @@ describe("BuildableSystem", () => {
           { cornerPosition: { cornerCoordinates: newPole.cornerPosition!.cornerCoordinates } }
         );
 
-        expect(result).toBe(false);
+        expect(result.valid).toBe(false);
+        expect(result.reason).toBeDefined();
       });
 
       test("should allow power poles in cells with a region", () => {
@@ -544,7 +545,8 @@ describe("BuildableSystem", () => {
           { hexPosition: { coordinates: newPlant.hexPosition!.coordinates } }
         );
 
-        expect(result).toBe(false);
+        expect(result.valid).toBe(false);
+        expect(result.reason).toBeDefined();
       });
 
       test("should allow buildables in surveyed locations", () => {

@@ -91,11 +91,7 @@ export function CameraController(): React.ReactNode {
         camera.position.y,
         CAMERA_CONFIG.START_POSITION.z
       );
-      orbitControls.target.set(
-        CAMERA_CONFIG.START_POSITION.x,
-        0,
-        CAMERA_CONFIG.START_POSITION.z
-      );
+      orbitControls.target.set(CAMERA_CONFIG.START_POSITION.x, 0, CAMERA_CONFIG.START_POSITION.z);
       orbitControls.update();
     }
   }, [controls, camera]);

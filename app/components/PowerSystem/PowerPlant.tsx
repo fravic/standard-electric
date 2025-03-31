@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import * as THREE from "three";
 
 import { Entity } from "@/ecs/entity";
 import { toWorldPoint } from "@/lib/coordinates/HexCoordinates";
@@ -45,6 +44,7 @@ export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
 
   // Get the player color from the entity owner if available
   const playerColor = entity.owner?.playerId && players[entity.owner.playerId]?.color;
+  console.log({ isGhost });
 
   return (
     <>
@@ -55,11 +55,14 @@ export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
         playerColor={playerColor}
       />
       {smokeLocalPosition && (
-        <SmokeParticles position={[
-          position[0] + smokeLocalPosition.x,
-          position[1] + smokeLocalPosition.y,
-          position[2] + smokeLocalPosition.z
-        ]} />
+        <SmokeParticles
+          position={[
+            position[0] + smokeLocalPosition.x,
+            position[1] + smokeLocalPosition.y,
+            position[2] + smokeLocalPosition.z,
+          ]}
+          enabled={!isGhost}
+        />
       )}
     </>
   );

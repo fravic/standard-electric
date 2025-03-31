@@ -128,7 +128,7 @@ export const gameMachine = setup({
         context.public.entitiesById,
         playerPrivateContext.entitiesById
       );
-      return BuildableSystem.isValidBuildableLocation(
+      const validationResult = BuildableSystem.isValidBuildableLocation(
         world,
         {
           playerId,
@@ -138,6 +138,8 @@ export const gameMachine = setup({
         blueprintId,
         event.options
       );
+
+      return validationResult.valid;
     },
   },
   actions: {
