@@ -19,7 +19,7 @@ export interface BuildableContext extends SystemContext {
   playerId: string;
   hexGrid: HexGrid;
   playerMoney: number;
-  surveyedHexCells?: Set<string>;
+  surveyedHexCells: Set<string>;
 }
 
 /**
@@ -112,7 +112,7 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
         options.cornerPosition.cornerCoordinates,
         playerId
       );
-      buildable.connections = { connectedToIds: connections };
+      buildable.connections = { connectedToIds: connections, energyDistributedLastTickKwh: 0 };
     }
 
     // Check if the location is valid using our internal validation
@@ -144,29 +144,25 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     const playerId = this.context.playerId;
     const surveyedHexCells = this.context.surveyedHexCells;
 
-    // First, check if the location is surveyed (if surveyedHexCells is provided)
-    if (surveyedHexCells) {
-      if (buildable.hexPosition?.coordinates) {
-        // For buildables placed on hex cells (like power plants)
-        const coordString = coordinatesToString(buildable.hexPosition.coordinates);
-        if (!surveyedHexCells.has(coordString)) {
-          return { valid: false, reason: "This location has not been surveyed" };
-        }
-      } else if (buildable.cornerPosition?.cornerCoordinates) {
-        // For buildables placed on corners (like power poles)
-        // Check if any of the adjacent hexes are surveyed
-        const adjacentHexes = getAdjacentHexes(buildable.cornerPosition.cornerCoordinates);
-        const anySurveyed = adjacentHexes.some((hex) =>
-          surveyedHexCells.has(coordinatesToString(hex))
-        );
+    // First, check if the location is surveyed
+    if (buildable.hexPosition?.coordinates) {
+      // For buildables placed on hex cells (like power plants)
+      const coordString = coordinatesToString(buildable.hexPosition.coordinates);
+      if (!surveyedHexCells.has(coordString)) {
+        return { valid: false, reason: "This location has not been surveyed" };
+      }
+    } else if (buildable.cornerPosition?.cornerCoordinates) {
+      // For buildables placed on corners (like power poles)
+      // Check if any of the adjacent hexes are surveyed
+      const adjacentHexes = getAdjacentHexes(buildable.cornerPosition.cornerCoordinates);
+      const anySurveyed = adjacentHexes.some((hex) =>
+        surveyedHexCells.has(coordinatesToString(hex))
+      );
 
-        if (!anySurveyed) {
-          return { valid: false, reason: "This location has not been surveyed" };
-        }
+      if (!anySurveyed) {
+        return { valid: false, reason: "This location has not been surveyed" };
       }
     }
-
-    // Next, check region requirements
 
     // For power poles, check if the corner is in a valid region
     if (buildable.cornerPosition?.cornerCoordinates) {
@@ -284,13 +280,14 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     // For connections-type buildables (like power poles), find possible connections
     const connectionsOptions = blueprintEntity.blueprint.components.connections
       ? {
-          ...options.connections,
-          connectedToIds: findPossibleConnectionsWithWorld(
-            this.world,
-            options.cornerPosition!.cornerCoordinates,
-            playerId
-          ),
-        }
+        ...options.connections,
+        connectedToIds: findPossibleConnectionsWithWorld(
+          this.world,
+          options.cornerPosition!.cornerCoordinates,
+          playerId
+        ),
+        energyDistributedLastTickKwh: 0,
+      }
       : undefined;
 
     // Create the entity from the blueprint

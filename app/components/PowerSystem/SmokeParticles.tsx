@@ -43,7 +43,7 @@ export function SmokeParticles({
   // Load a smoke texture
   const smokeTexture = useLoader(
     THREE.TextureLoader,
-    "/public/assets/textures/blackSmoke/blackSmoke01.png"
+    "/assets/textures/blackSmoke/blackSmoke01.png"
   );
 
   // Create and set up particle system

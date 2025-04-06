@@ -2,6 +2,7 @@ import { assign, setup, spawnChild, stopChild } from "xstate";
 import { ActorKitStateMachine } from "actor-kit";
 import { produce, current } from "immer";
 import { getPlayerColor } from "@/lib/constants";
+import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 
 import { GameContext, GameEvent, GameInput } from "./game.types";
 import { gameTimerActor } from "./gameTimerActor";
@@ -128,12 +129,24 @@ export const gameMachine = setup({
         context.public.entitiesById,
         playerPrivateContext.entitiesById
       );
+      // Get surveyed cells for this player
+      const surveyedHexCoords = new Set<string>();
+      world.with("surveyResult").where(entity => 
+        entity.surveyResult?.isComplete === true && 
+        entity.owner?.playerId === playerId
+      ).entities.forEach(survey => {
+        if (survey.hexPosition?.coordinates) {
+          surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
+        }
+      });
+
       const validationResult = BuildableSystem.isValidBuildableLocation(
         world,
         {
           playerId,
           hexGrid: context.public.hexGrid,
           playerMoney: context.public.players[playerId].money,
+          surveyedHexCells: surveyedHexCoords
         },
         blueprintId,
         event.options
@@ -226,10 +239,23 @@ export const gameMachine = setup({
             contextDraft.private[playerId].entitiesById
           );
           const buildableSystem = new BuildableSystem();
+          
+          // Get surveyed cells for this player
+          const surveyedHexCoords = new Set<string>();
+          world.with("surveyResult").where(entity => 
+            entity.surveyResult?.isComplete === true && 
+            entity.owner?.playerId === playerId
+          ).entities.forEach(survey => {
+            if (survey.hexPosition?.coordinates) {
+              surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
+            }
+          });
+          
           buildableSystem.initialize(world, {
             playerId,
             hexGrid: contextDraft.public.hexGrid,
             playerMoney: contextDraft.public.players[playerId].money,
+            surveyedHexCells: surveyedHexCoords
           });
           const result = buildableSystem.createBuildable(blueprintId, event.options);
           if (result.success) {

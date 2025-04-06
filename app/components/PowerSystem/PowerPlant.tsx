@@ -13,7 +13,7 @@ interface PowerPlantProps {
 }
 
 export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
-  const { scene } = useGLTF("/public/assets/glb/PowerPlants.glb");
+  const { scene } = useGLTF("/assets/glb/PowerPlants.glb");
   // Get the players from the game context
   const players = GameContext.useSelector(
     (state: { public: { players: Record<string, { color: string }> } }) => state.public.players
