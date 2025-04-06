@@ -5,8 +5,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        serif: ['"Wittgenstein"', "serif"],
         sans: [
-          '"Inter"',
+          '"Chivo Mono"',
           "ui-sans-serif",
           "system-ui",
           "sans-serif",

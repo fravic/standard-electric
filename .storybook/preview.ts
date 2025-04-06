@@ -12,6 +12,7 @@ const preview: Preview = {
       },
     },
   },
+
   decorators: [
     // Wrap stories with theme provider if needed
     withThemeByClassName({
@@ -29,6 +30,8 @@ const preview: Preview = {
       );
     },
   ],
+
+  tags: ["autodocs"]
 };
 
 export default preview;
