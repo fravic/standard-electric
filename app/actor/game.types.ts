@@ -14,6 +14,7 @@ import { Entity } from "../ecs/entity";
 import { HexCellResource } from "@/ecs/systems/SurveySystem";
 
 export interface Player {
+  id: string;
   name: string;
   number: number;
   money: number;

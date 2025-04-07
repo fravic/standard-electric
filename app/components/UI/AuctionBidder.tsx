@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
-import { UI_COLORS } from "@/lib/palette";
-import { Player, Auction } from "@/actor/game.types";
 import { GameContext } from "@/actor/game.context";
 import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
+import { Auction, Player } from "@/actor/game.types";
 
 interface AuctionBidderProps {
   players: Record<string, Player>;
@@ -15,12 +14,9 @@ export function AuctionBidder({ players, auction, totalTicks, randomSeed }: Auct
   const auctionSystem = useMemo(() => {
     return new AuctionSystem();
   }, []);
+  const { entitiesById } = GameContext.useSelector((state) => state.public);
 
-  const bidderOrder = auctionSystem.getBidderPriorityOrder(players, totalTicks, randomSeed);
-
-  // Ensure these arrays exist with defaults
-  const passedPlayerIds = auction.passedPlayerIds ?? [];
-  const purchases = auction.purchases ?? [];
+  // Get current bidder and initiator
   const currentBidderId = auctionSystem.getNextBidder({
     players,
     auction,
@@ -33,34 +29,21 @@ export function AuctionBidder({ players, auction, totalTicks, randomSeed }: Auct
     totalTicks,
     randomSeed,
   });
-  const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
+
+  // Compute player orders
+  const passedPlayerIds = auction.passedPlayerIds;
+  const playerIds = Object.keys(players);
+  const purchases: { playerId: string; blueprintId: string }[] = auction.purchases;
+
+  // Compute player turn order
+  const bidderOrder = auctionSystem.getBidderPriorityOrder(players, totalTicks, randomSeed);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        marginBottom: "1rem",
-      }}
-    >
-      <h3
-        style={{
-          color: UI_COLORS.TEXT_LIGHT,
-          marginTop: 0,
-          marginBottom: "0.5rem",
-        }}
-      >
-        Bidding Order
-      </h3>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.5rem",
-        }}
-      >
-        {bidderOrder.map((playerId) => {
+    <div className="mb-4 rounded-lg bg-black/5 p-4">
+      <div className="mb-2 font-serif-extra text-foreground">Bidders</div>
+
+      <div className="flex flex-col gap-2">
+        {bidderOrder.map((playerId: string) => {
           const player = players[playerId];
           const hasPassed = passedPlayerIds.includes(playerId);
           const purchase = purchases.find((p) => p.playerId === playerId);
@@ -73,20 +56,13 @@ export function AuctionBidder({ players, auction, totalTicks, randomSeed }: Auct
           return (
             <div
               key={playerId}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                opacity: isInactive ? 0.5 : 1,
-                color: UI_COLORS.TEXT_LIGHT,
-                padding: "0.5rem",
-                backgroundColor: isPlayerTurn ? UI_COLORS.PRIMARY_DARK : "transparent",
-                borderRadius: "4px",
-              }}
+              className={`flex items-center gap-2 rounded p-2 text-foreground ${
+                isInactive ? "opacity-50" : ""
+              } ${isPlayerTurn ? "bg-black/10" : ""}`}
             >
-              {isPlayerTurn && <span style={{ marginRight: "0.5rem" }}>➜</span>}
+              {isPlayerTurn && <span className="mr-2">➜</span>}
               <span>{player.name}</span>
-              <span style={{ marginLeft: "auto", fontSize: "0.9em" }}>
+              <span className="ml-auto text-[0.9em]">
                 {hasPassed
                   ? "(Passed)"
                   : purchase

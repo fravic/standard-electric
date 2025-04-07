@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
 import { BuildButton } from "./BuildButton";
@@ -47,26 +46,9 @@ export function PowerPlantAuction() {
   const canAffordBid = minimumBid && currentPlayer ? currentPlayer.money >= minimumBid : false;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.75)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Card style={{ maxWidth: "600px", width: "100%" }}>
-        <h2
-          style={{
-            color: UI_COLORS.TEXT_LIGHT,
-            marginTop: 0,
-            marginBottom: "1rem",
-          }}
-        >
-          Power Plant Auction
-        </h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black/75">
+      <Card className="max-w-[600px] w-full">
+        <h2 className="mt-0 mb-4 text-foreground font-serif-extra">Power Plant Auction</h2>
 
         <AuctionBidder
           players={players}
@@ -76,16 +58,8 @@ export function PowerPlantAuction() {
         />
 
         {auction.currentBlueprint && (
-          <Card variant="dark" style={{ marginBottom: "1rem" }}>
-            <h3
-              style={{
-                color: UI_COLORS.TEXT_LIGHT,
-                marginTop: 0,
-                marginBottom: "1rem",
-              }}
-            >
-              Current Auction
-            </h3>
+          <Card variant="secondary" className="mb-4">
+            <h3 className="mt-0 mb-4 text-foreground font-serif-extra">Current Auction</h3>
             <BuildButton
               variant="bid"
               name={currentBlueprint?.name || ""}
@@ -98,38 +72,14 @@ export function PowerPlantAuction() {
               price={minimumBid || 0}
               disabled={true}
               onClick={() => {}}
-              style={{
-                border: "1px solid rgba(255, 255, 255, 0.4)",
-              }}
+              className="border border-black/20"
             />
-            <div
-              style={{
-                marginTop: "1rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-              }}
-            >
-              <h4
-                style={{
-                  color: UI_COLORS.TEXT_LIGHT,
-                  marginTop: 0,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Bids
-              </h4>
+            <div className="mt-4 flex flex-col gap-2">
+              <h4 className="mt-0 mb-2 text-foreground font-serif-extra">Bids</h4>
               {auction.currentBlueprint.bids.map((bid, index) => (
                 <div
                   key={index}
-                  style={{
-                    color: UI_COLORS.TEXT_LIGHT,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "0.5rem",
-                    backgroundColor: "rgba(0, 0, 0, 0.2)",
-                    borderRadius: "4px",
-                  }}
+                  className="flex justify-between rounded bg-black/5 p-2 text-foreground"
                 >
                   <span>{players[bid.playerId].name}</span>
                   <span>{bid.passed ? "Passed" : bid.amount ? `$${bid.amount}` : ""}</span>
@@ -137,7 +87,7 @@ export function PowerPlantAuction() {
               ))}
             </div>
             {isCurrentBidder && (
-              <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem" }}>
+              <div className="mt-4 flex gap-2">
                 <Button
                   fullWidth
                   disabled={!canAffordBid}
@@ -169,22 +119,8 @@ export function PowerPlantAuction() {
           </Card>
         )}
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-          }}
-        >
-          <h3
-            style={{
-              color: UI_COLORS.TEXT_LIGHT,
-              marginTop: 0,
-              marginBottom: "1rem",
-            }}
-          >
-            Available Power Plants
-          </h3>
+        <div className="flex flex-col gap-2">
+          <h3 className="mt-0 mb-4 text-foreground font-serif-extra">Available Power Plants</h3>
           {auction.availableBlueprintIds.map((blueprintId) => {
             const blueprint = entitiesById[blueprintId];
             if (!blueprint) return null;
@@ -217,7 +153,7 @@ export function PowerPlantAuction() {
           {isCurrentInitiator && !auction.currentBlueprint && auction.isPassingAllowed && (
             <Button
               fullWidth
-              style={{ marginTop: "1rem" }}
+              className="mt-4"
               onClick={() => sendGameEvent({ type: "PASS_AUCTION" })}
             >
               Pass Auction

@@ -1,22 +1,20 @@
 import React from "react";
-import { UI_COLORS } from "@/lib/palette";
+import { cn } from "@/lib/utils";
 
 interface CardProps {
   children: React.ReactNode;
-  variant?: "default" | "dark";
-  style?: React.CSSProperties;
+  variant?: "primary" | "secondary";
+  className?: string;
 }
 
-export const Card: React.FC<CardProps> = ({ children, variant = "default", style }) => {
+export const Card: React.FC<CardProps> = ({ children, variant = "primary", className }) => {
   return (
     <div
-      style={{
-        backgroundColor: variant === "dark" ? UI_COLORS.PRIMARY_DARK : UI_COLORS.BACKGROUND,
-        padding: "1rem",
-        borderRadius: "8px",
-        color: UI_COLORS.TEXT_LIGHT,
-        ...style,
-      }}
+      className={cn(
+        "rounded-lg p-4 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-foreground",
+        variant === "primary" ? "bg-primary-button" : "bg-secondary-button",
+        className
+      )}
     >
       {children}
     </div>

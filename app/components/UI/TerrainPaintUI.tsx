@@ -5,60 +5,10 @@ import { clientStore } from "@/lib/clientState";
 import { GameContext } from "@/actor/game.context";
 import { useMapEditor } from "@/routes/mapEditor";
 import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
-import { UI_COLORS } from "@/lib/palette";
 import { TextInput } from "./TextInput";
 import { Card } from "./Card";
-
-const styles = {
-  container: {
-    position: "fixed" as const,
-    top: "200px",
-    right: "10px",
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "8px",
-    zIndex: 1000,
-  },
-  label: {
-    fontWeight: "bold" as const,
-  },
-  button: {
-    backgroundColor: UI_COLORS.PRIMARY,
-    border: "none",
-    color: UI_COLORS.TEXT_LIGHT,
-    padding: "4px 8px",
-    borderRadius: "3px",
-    cursor: "pointer",
-  },
-  activeButton: {
-    backgroundColor: UI_COLORS.PRIMARY_DARK,
-  },
-  buttonGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "4px",
-    marginTop: "4px",
-  },
-  section: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "8px",
-  },
-  exportButton: {
-    backgroundColor: UI_COLORS.PRIMARY,
-    color: UI_COLORS.TEXT_LIGHT,
-    marginTop: "10px",
-    padding: "8px 16px",
-    width: "100%",
-  },
-  input: {
-    backgroundColor: UI_COLORS.PRIMARY_DARK,
-    border: `1px solid ${UI_COLORS.PRIMARY_DARK}`,
-    color: UI_COLORS.TEXT_LIGHT,
-    padding: "4px 8px",
-    borderRadius: "3px",
-  },
-};
+import { Button } from "./Button";
+import { cn } from "@/lib/utils";
 
 export const TerrainPaintUI: React.FC = () => {
   const isPaintbrushMode = useSelector(
@@ -125,16 +75,13 @@ export const TerrainPaintUI: React.FC = () => {
   };
 
   return (
-    <Card style={styles.container}>
-      <div style={styles.section}>
-        <div>
-          <span style={styles.label}>Paintbrush Mode</span>
-          <button
-            style={{
-              ...styles.button,
-              ...(isPaintbrushMode ? styles.activeButton : {}),
-              marginLeft: "8px",
-            }}
+    <Card className="fixed top-[200px] right-[10px] flex flex-col gap-2 z-[1000] max-w-[250px]">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="font-bold">Paintbrush Mode</span>
+          <Button
+            variant={isPaintbrushMode ? "secondary" : "primary"}
+            className="ml-2"
             onClick={() =>
               clientStore.send({
                 type: "setPaintbrushMode",
@@ -143,20 +90,17 @@ export const TerrainPaintUI: React.FC = () => {
             }
           >
             {isPaintbrushMode ? "On" : "Off"}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div style={styles.section}>
-        <h4>Terrain Type</h4>
-        <div style={styles.buttonGrid}>
+      <div className="flex flex-col gap-2">
+        <h4 className="font-serif-extra m-0">Terrain Type</h4>
+        <div className="grid grid-cols-2 gap-1">
           {Object.values(TerrainType).map((terrainType) => (
-            <button
+            <Button
               key={terrainType}
-              style={{
-                ...styles.button,
-                ...(selectedTerrainType === terrainType ? styles.activeButton : {}),
-              }}
+              variant={selectedTerrainType === terrainType ? "secondary" : "primary"}
               onClick={() =>
                 clientStore.send({
                   type: "setSelectedTerrainType",
@@ -165,23 +109,20 @@ export const TerrainPaintUI: React.FC = () => {
               }
             >
               {terrainType}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
-      <div style={styles.section}>
-        <h4>Population</h4>
-        <div style={styles.buttonGrid}>
+      <div className="flex flex-col gap-2">
+        <h4 className="font-serif-extra m-0">Population</h4>
+        <div className="grid grid-cols-2 gap-1">
           {Object.values(Population)
             .filter((value) => typeof value === "number")
             .map((population) => (
-              <button
+              <Button
                 key={population}
-                style={{
-                  ...styles.button,
-                  ...(selectedPopulation === population ? styles.activeButton : {}),
-                }}
+                variant={selectedPopulation === population ? "secondary" : "primary"}
                 onClick={() =>
                   clientStore.send({
                     type: "setSelectedPopulation",
@@ -190,49 +131,46 @@ export const TerrainPaintUI: React.FC = () => {
                 }
               >
                 {Population[population]}
-              </button>
+              </Button>
             ))}
         </div>
       </div>
 
-      <div style={styles.section}>
-        <h4>City Name</h4>
+      <div className="flex flex-col gap-2">
+        <h4 className="font-serif-extra m-0">City Name</h4>
         <TextInput
           value={currentCityName}
           onChange={handleCityNameChange}
           placeholder="Enter city name..."
           disabled={!selectedHexCoordinates}
-          style={{ padding: "4px 8px" }}
+          className="p-2"
         />
       </div>
 
-      <div style={styles.section}>
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <h4>Region Name</h4>
-          <button
-            style={{
-              ...styles.button,
-              padding: "2px 6px",
-              fontSize: "12px",
-            }}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <h4 className="font-serif-extra m-0">Region Name</h4>
+          <Button
+            variant="primary"
+            className="py-1 px-2 text-xs"
             onClick={handleClearRegion}
             disabled={!selectedHexCoordinates || !currentRegionName}
           >
             Clear
-          </button>
+          </Button>
         </div>
         <TextInput
           value={currentRegionName}
           onChange={handleRegionNameChange}
           placeholder="Enter region name..."
           disabled={!selectedHexCoordinates}
-          style={{ padding: "4px 8px" }}
+          className="p-2"
         />
       </div>
 
-      <button style={styles.exportButton} onClick={handleExport}>
+      <Button variant="primary" className="mt-2 w-full" onClick={handleExport}>
         Export Map
-      </button>
+      </Button>
     </Card>
   );
 };

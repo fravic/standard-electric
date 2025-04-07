@@ -331,6 +331,7 @@ exports[`Game Machine should allow players to join, start the game, and perform 
   "players": {
     "player-1": {
       "color": "#46C9CD",
+      "id": "player-1",
       "isHost": true,
       "money": 41.42,
       "name": "Player 1",
@@ -339,6 +340,7 @@ exports[`Game Machine should allow players to join, start the game, and perform 
     },
     "player-2": {
       "color": "#67CA76",
+      "id": "player-2",
       "isHost": false,
       "money": 50.48,
       "name": "Player 2",

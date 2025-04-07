@@ -131,14 +131,17 @@ export const gameMachine = setup({
       );
       // Get surveyed cells for this player
       const surveyedHexCoords = new Set<string>();
-      world.with("surveyResult").where(entity => 
-        entity.surveyResult?.isComplete === true && 
-        entity.owner?.playerId === playerId
-      ).entities.forEach(survey => {
-        if (survey.hexPosition?.coordinates) {
-          surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
-        }
-      });
+      world
+        .with("surveyResult")
+        .where(
+          (entity) =>
+            entity.surveyResult?.isComplete === true && entity.owner?.playerId === playerId
+        )
+        .entities.forEach((survey) => {
+          if (survey.hexPosition?.coordinates) {
+            surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
+          }
+        });
 
       const validationResult = BuildableSystem.isValidBuildableLocation(
         world,
@@ -146,7 +149,7 @@ export const gameMachine = setup({
           playerId,
           hexGrid: context.public.hexGrid,
           playerMoney: context.public.players[playerId].money,
-          surveyedHexCells: surveyedHexCoords
+          surveyedHexCells: surveyedHexCoords,
         },
         blueprintId,
         event.options
@@ -168,6 +171,7 @@ export const gameMachine = setup({
         public: produce(context.public, (draft) => {
           const playerNumber = Object.keys(draft.players).length + 1;
           draft.players[playerId] = {
+            id: playerId,
             name: event.name,
             number: playerNumber,
             money: 100,
@@ -239,23 +243,26 @@ export const gameMachine = setup({
             contextDraft.private[playerId].entitiesById
           );
           const buildableSystem = new BuildableSystem();
-          
+
           // Get surveyed cells for this player
           const surveyedHexCoords = new Set<string>();
-          world.with("surveyResult").where(entity => 
-            entity.surveyResult?.isComplete === true && 
-            entity.owner?.playerId === playerId
-          ).entities.forEach(survey => {
-            if (survey.hexPosition?.coordinates) {
-              surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
-            }
-          });
-          
+          world
+            .with("surveyResult")
+            .where(
+              (entity) =>
+                entity.surveyResult?.isComplete === true && entity.owner?.playerId === playerId
+            )
+            .entities.forEach((survey) => {
+              if (survey.hexPosition?.coordinates) {
+                surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
+              }
+            });
+
           buildableSystem.initialize(world, {
             playerId,
             hexGrid: contextDraft.public.hexGrid,
             playerMoney: contextDraft.public.players[playerId].money,
-            surveyedHexCells: surveyedHexCoords
+            surveyedHexCells: surveyedHexCoords,
           });
           const result = buildableSystem.createBuildable(blueprintId, event.options);
           if (result.success) {

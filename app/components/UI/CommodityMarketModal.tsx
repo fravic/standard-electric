@@ -22,10 +22,6 @@ const styles = {
     justifyContent: "center",
     zIndex: 1000,
   },
-  container: {
-    maxWidth: "700px",
-    width: "100%",
-  },
   header: {
     display: "flex",
     justifyContent: "space-between",
@@ -143,7 +139,7 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({ onCl
 
   return (
     <div style={styles.overlay}>
-      <Card style={styles.container}>
+      <Card className="max-w-[700px] w-full">
         <div style={styles.header}>
           <h2 style={styles.title}>Commodity Market</h2>
           <Button onClick={onClose}>Close</Button>

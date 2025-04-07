@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Use bun, not npm or pnpm
+
+- This project uses bun, not npm
+- Use bun to install or remove dependencies
+- Use bun/bunx to run commands

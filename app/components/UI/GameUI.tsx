@@ -57,10 +57,6 @@ export const GameUI: React.FC = () => {
   const isLobby = GameContext.useMatches("lobby");
   const isAuction = GameContext.useMatches("auction");
   const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
-  const selectedHexCoordinates = useSelector(
-    clientStore,
-    (state) => state.context.selectedHexCoordinates
-  );
 
   // Sort players so current player is first, then alphabetically by name
   const sortedPlayers = Object.entries(players).sort(([id1, p1], [id2, p2]) => {

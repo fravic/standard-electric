@@ -13,96 +13,7 @@ import { entityAtHexCoordinate } from "@/ecs/queries";
 import { CommodityType } from "@/lib/types";
 import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
 import { Entity } from "@/ecs/entity";
-
-const styles = {
-  container: {
-    position: "fixed" as const,
-    top: "70px",
-    right: "10px",
-    maxWidth: "350px",
-    width: "100%",
-    zIndex: 1000,
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "1rem",
-  },
-  title: {
-    color: UI_COLORS.TEXT_LIGHT,
-    margin: 0,
-    fontSize: "1.2rem",
-  },
-  infoRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "0.5rem",
-  },
-  label: {
-    fontWeight: "bold" as const,
-    opacity: 0.8,
-  },
-  fuelSection: {
-    marginTop: "1rem",
-    padding: "1rem",
-    backgroundColor: UI_COLORS.PRIMARY_DARK,
-    borderRadius: "8px",
-  },
-  fuelHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "0.5rem",
-  },
-  fuelTitle: {
-    color: UI_COLORS.TEXT_LIGHT,
-    margin: 0,
-    fontSize: "1rem",
-    textTransform: "capitalize" as const,
-  },
-  progressContainer: {
-    height: "12px",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderRadius: "6px",
-    overflow: "hidden",
-    marginBottom: "0.5rem",
-  },
-  progressBar: {
-    height: "100%",
-    backgroundColor: UI_COLORS.PRIMARY,
-    transition: "width 0.3s ease",
-  },
-  buttonContainer: {
-    display: "flex",
-    gap: "0.5rem",
-    marginTop: "1rem",
-  },
-  resourceSection: {
-    marginTop: "1rem",
-    padding: "1rem",
-    backgroundColor: UI_COLORS.PRIMARY_DARK,
-    borderRadius: "8px",
-  },
-  resourceTitle: {
-    color: UI_COLORS.TEXT_LIGHT,
-    margin: 0,
-    fontSize: "1.2rem",
-    marginBottom: "0.5rem",
-    textTransform: "capitalize" as const,
-  },
-  entityContainer: {
-    marginBottom: "1.5rem",
-    padding: "1rem",
-    borderRadius: "8px",
-  },
-  entityTitle: {
-    color: UI_COLORS.TEXT_LIGHT,
-    margin: 0,
-    fontSize: "1.1rem",
-    marginBottom: "0.75rem",
-  },
-};
+import { cn } from "@/lib/utils";
 
 // New component to handle power plants and their commodity market logic
 const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
@@ -166,27 +77,27 @@ const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
 
   return (
     <>
-      <div style={styles.infoRow}>
-        <span style={styles.label}>Power Generation:</span>
+      <div className="mb-2 flex justify-between text-foreground">
+        <span className="font-bold opacity-80">Power Generation:</span>
         <span>{entity.powerGeneration.powerGenerationKW} kW</span>
       </div>
 
-      <div style={styles.infoRow}>
-        <span style={styles.label}>Price per kWh:</span>
+      <div className="mb-2 flex justify-between text-foreground">
+        <span className="font-bold opacity-80">Price per kWh:</span>
         <span>${entity.powerGeneration.pricePerKWh.toFixed(2)}</span>
       </div>
 
       {entity.owner && (
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Owner:</span>
+        <div className="mb-2 flex justify-between text-foreground">
+          <span className="font-bold opacity-80">Owner:</span>
           <span>{players[entity.owner.playerId].name}</span>
         </div>
       )}
 
       {fuelType && (
-        <div style={styles.fuelSection}>
-          <div style={styles.fuelHeader}>
-            <h3 style={styles.fuelTitle}>{fuelType} Fuel</h3>
+        <div className="mt-4 rounded-lg bg-[#DBF8FD] p-4 text-foreground">
+          <div className="mb-2 flex justify-between items-center">
+            <h3 className="m-0 text-base capitalize font-serif-extra">{fuelType} Fuel</h3>
             {fuelRates && (
               <div>
                 <small>
@@ -196,29 +107,30 @@ const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
             )}
           </div>
 
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Fuel Storage:</span>
+          <div className="mb-2 flex justify-between text-foreground">
+            <span className="font-bold opacity-80">Fuel Storage:</span>
             <span>
               {currentFuelStorage.toFixed(1)} / {maxFuelStorage.toFixed(1)}
             </span>
           </div>
 
-          <div style={styles.progressContainer}>
+          <div className="mb-2 h-3 overflow-hidden rounded-md bg-black/10">
             <div
+              className="h-full rounded transition-[width] duration-300 ease-in-out"
               style={{
-                ...styles.progressBar,
                 width: `${fuelPercentage}%`,
+                backgroundColor: UI_COLORS.PRIMARY,
               }}
             />
           </div>
 
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Consumption Rate:</span>
+          <div className="mb-2 flex justify-between text-foreground">
+            <span className="font-bold opacity-80">Consumption Rate:</span>
             <span>{entity.fuelRequirement!.fuelConsumptionPerKWh} per kWh</span>
           </div>
 
           {isOwner && (
-            <div style={styles.buttonContainer}>
+            <div className="mt-4 flex gap-2">
               <Button onClick={handleBuyFuel} disabled={!canBuyFuel} fullWidth>
                 Buy Fuel
               </Button>
@@ -263,14 +175,15 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
 
       return (
         <div>
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Survey in Progress:</span>
+          <div className="mb-2 flex justify-between text-foreground">
+            <span className="font-bold opacity-80">Survey in Progress:</span>
           </div>
-          <div style={styles.progressContainer}>
+          <div className="mb-2 h-3 overflow-hidden rounded-md bg-black/10">
             <div
+              className="h-full rounded transition-[width] duration-300 ease-in-out"
               style={{
-                ...styles.progressBar,
                 width: `${progress}%`,
+                backgroundColor: UI_COLORS.PRIMARY,
               }}
             />
           </div>
@@ -283,14 +196,14 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
     const isComplete = surveyResult.isComplete;
     if (isComplete && resource) {
       return (
-        <div style={styles.resourceSection}>
-          <h3 style={styles.resourceTitle}>Survey Results</h3>
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Resource Found:</span>
-            <span style={{ textTransform: "capitalize" }}>{resource.resourceType}</span>
+        <div className="mt-4 rounded-lg bg-[#DBF8FD] p-4 text-foreground">
+          <h3 className="m-0 mb-2 text-lg capitalize font-serif-extra">Survey Results</h3>
+          <div className="mb-2 flex justify-between text-foreground">
+            <span className="font-bold opacity-80">Resource Found:</span>
+            <span className="capitalize">{resource.resourceType}</span>
           </div>
-          <div style={styles.infoRow}>
-            <span style={styles.label}>Amount:</span>
+          <div className="mb-2 flex justify-between text-foreground">
+            <span className="font-bold opacity-80">Amount:</span>
             <span>{resource.resourceAmount} units</span>
           </div>
         </div>
@@ -300,9 +213,9 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
     // If survey is complete but no resources were found
     if (isComplete) {
       return (
-        <div style={styles.resourceSection}>
-          <h3 style={styles.resourceTitle}>Survey Results</h3>
-          <div style={styles.infoRow}>
+        <div className="mt-4 rounded-lg bg-[#DBF8FD] p-4 text-foreground">
+          <h3 className="m-0 mb-2 text-lg capitalize font-serif-extra">Survey Results</h3>
+          <div className="mb-2 text-foreground">
             <span>No resources found in this hex.</span>
           </div>
         </div>
@@ -338,7 +251,7 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
   // If no survey data and no active survey, show the survey button
   if (canSurvey) {
     return (
-      <div style={styles.buttonContainer}>
+      <div className="mt-4 flex gap-2">
         <Button onClick={handleStartSurvey} fullWidth disabled={!canSurvey}>
           Survey This Hex
         </Button>
@@ -361,16 +274,16 @@ const EntityDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
   const { players } = GameContext.useSelector((state) => state.public);
 
   return (
-    <div style={styles.entityContainer}>
-      <h3 style={styles.entityTitle}>{entity.name || "Unknown Entity"}</h3>
+    <div className="mb-6 rounded p-4 text-foreground">
+      <h3 className="m-0 mb-3 text-[1.1rem] font-serif-extra">{entity.name || "Unknown Entity"}</h3>
 
       {/* Render entity type-specific components */}
       {entity.powerGeneration && <PowerPlantDetails entity={entity} />}
 
       {/* Show owner information if not shown by a specific component */}
       {entity.owner && !entity.powerGeneration && (
-        <div style={styles.infoRow}>
-          <span style={styles.label}>Owner:</span>
+        <div className="mb-2 flex justify-between text-foreground">
+          <span className="font-bold opacity-80">Owner:</span>
           <span>{players[entity.owner.playerId].name}</span>
         </div>
       )}
@@ -412,9 +325,9 @@ export const HexDetails: React.FC = () => {
   }
 
   return (
-    <Card style={styles.container}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>
+    <Card className="fixed top-[70px] right-[10px] max-w-[350px] w-full z-[1000]">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="m-0 text-[1.2rem] text-foreground font-serif-extra">
           {entitiesAtHex.length > 0
             ? `${entitiesAtHex.length} ${entitiesAtHex.length === 1 ? "Entity" : "Entities"}`
             : "Selected Hex"}
@@ -422,8 +335,8 @@ export const HexDetails: React.FC = () => {
         <Button onClick={handleClose}>Close</Button>
       </div>
 
-      <div style={styles.infoRow}>
-        <span style={styles.label}>Coordinates:</span>
+      <div className="mb-2 flex justify-between text-foreground">
+        <span className="font-bold opacity-80">Coordinates:</span>
         <span>{coordinatesToString(selectedHexCoordinates)}</span>
       </div>
 

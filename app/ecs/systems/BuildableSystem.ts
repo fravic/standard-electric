@@ -280,14 +280,14 @@ export class BuildableSystem implements System<BuildableContext, BuildableResult
     // For connections-type buildables (like power poles), find possible connections
     const connectionsOptions = blueprintEntity.blueprint.components.connections
       ? {
-        ...options.connections,
-        connectedToIds: findPossibleConnectionsWithWorld(
-          this.world,
-          options.cornerPosition!.cornerCoordinates,
-          playerId
-        ),
-        energyDistributedLastTickKwh: 0,
-      }
+          ...options.connections,
+          connectedToIds: findPossibleConnectionsWithWorld(
+            this.world,
+            options.cornerPosition!.cornerCoordinates,
+            playerId
+          ),
+          energyDistributedLastTickKwh: 0,
+        }
       : undefined;
 
     // Create the entity from the blueprint

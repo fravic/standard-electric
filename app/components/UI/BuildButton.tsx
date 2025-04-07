@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "./Button";
+import { cn } from "@/lib/utils";
 
 interface BuildButtonProps {
   onClick: () => void;
@@ -12,6 +13,7 @@ interface BuildButtonProps {
     requiredRegion?: string;
   };
   variant?: "place" | "bid";
+  className?: string;
   style?: React.CSSProperties;
 }
 
@@ -23,21 +25,22 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
   price,
   details,
   variant = "place",
+  className,
   style,
 }) => {
   return (
-    <Button onClick={onClick} disabled={disabled} isActive={isActive} fullWidth style={style}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: "2px",
-        }}
-      >
+    <Button
+      onClick={onClick}
+      disabled={disabled}
+      isActive={isActive}
+      fullWidth
+      className={className}
+      style={style}
+    >
+      <div className="flex flex-col items-start gap-0.5">
         <div>{name}</div>
         {details && (
-          <div style={{ fontSize: "12px", opacity: 0.8 }}>
+          <div className="text-xs opacity-80">
             {details.powerGenerationKW && `${details.powerGenerationKW}kW`}
             {details.requiredRegion && ` • ${details.requiredRegion}`}
           </div>

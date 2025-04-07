@@ -1,56 +1,13 @@
 import React, { useState } from "react";
-import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
 import { Player } from "@/actor/game.types";
 import { TextInput } from "./TextInput";
+import { Card } from "./Card";
+import { Button } from "./Button";
+import { cn } from "@/lib/utils";
 
 const MAX_PLAYERS = 6;
-
-const styles = {
-  container: {
-    position: "fixed" as const,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    backgroundColor: UI_COLORS.BACKGROUND,
-    color: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    fontFamily: "monospace",
-    zIndex: 1000,
-    minWidth: "300px",
-  },
-  title: {
-    fontSize: "24px",
-    marginBottom: "20px",
-    textAlign: "center" as const,
-  },
-  button: {
-    width: "100%",
-    backgroundColor: UI_COLORS.PRIMARY,
-    border: "none",
-    color: UI_COLORS.TEXT_LIGHT,
-    padding: "10px",
-    textAlign: "center" as const,
-    cursor: "pointer",
-    borderRadius: "4px",
-    marginTop: "10px",
-  },
-  disabledButton: {
-    backgroundColor: UI_COLORS.PRIMARY_DARK,
-    cursor: "not-allowed",
-    opacity: 0.7,
-  },
-  playerList: {
-    marginTop: "20px",
-  },
-  playerCount: {
-    textAlign: "center" as const,
-    marginBottom: "10px",
-    color: UI_COLORS.TEXT_LIGHT,
-  },
-};
 
 interface LobbyProps {
   players: Record<string, Player>;
@@ -79,46 +36,52 @@ export const Lobby: React.FC<LobbyProps> = ({ players }) => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.title}>Game Lobby</div>
-      <div style={styles.playerCount}>
-        Players: {playerCount}/{MAX_PLAYERS}
-      </div>
+    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 min-w-[300px]">
+      <Card className="p-6">
+        <h2 className="text-2xl mb-5 text-center font-serif-extra">Game Lobby</h2>
+        <div className="text-center mb-4 opacity-80">
+          Players: {playerCount}/{MAX_PLAYERS}
+        </div>
 
-      {!currentPlayer ? (
-        <>
-          <TextInput
-            placeholder="Enter your name"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            maxLength={20}
-            style={{ marginBottom: "10px" }}
-          />
-          <button
-            style={{
-              ...styles.button,
-              ...(canJoin ? {} : styles.disabledButton),
-            }}
-            onClick={handleJoin}
-            disabled={!canJoin}
-          >
-            Join Game
-          </button>
-        </>
-      ) : isHost ? (
-        <button
-          style={{
-            ...styles.button,
-            ...(canStartGame ? {} : styles.disabledButton),
-          }}
-          onClick={handleStartGame}
-          disabled={!canStartGame}
-        >
-          Start Game
-        </button>
-      ) : (
-        <div style={{ textAlign: "center", marginTop: "10px" }}>Waiting for host to start...</div>
-      )}
+        {!currentPlayer ? (
+          <div className="flex flex-col gap-3">
+            <TextInput
+              placeholder="Enter your name"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              maxLength={20}
+            />
+            <Button onClick={handleJoin} disabled={!canJoin} fullWidth>
+              Join Game
+            </Button>
+          </div>
+        ) : isHost ? (
+          <Button onClick={handleStartGame} disabled={!canStartGame} fullWidth>
+            Start Game
+          </Button>
+        ) : (
+          <div className="text-center mt-4 opacity-80">Waiting for host to start...</div>
+        )}
+
+        {playerCount > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg mb-2 font-serif-extra">Players</h3>
+            <ul className="flex flex-col gap-2">
+              {Object.values(players).map((player) => (
+                <li key={player.id} className="flex items-center gap-3">
+                  <div
+                    className="w-3 h-3 rounded-[1px]"
+                    style={{ backgroundColor: player.color }}
+                  />
+                  <span>
+                    {player.name} {player.isHost && "(Host)"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

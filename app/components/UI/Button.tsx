@@ -1,5 +1,5 @@
 import React from "react";
-import { UI_COLORS } from "@/lib/palette";
+import { cn } from "@/lib/utils";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary";
@@ -14,36 +14,23 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   isActive = false,
   children,
-  style,
+  className,
   ...props
 }) => {
   return (
     <button
-      style={{
-        backgroundColor: UI_COLORS.PRIMARY,
-        border: "none",
-        color: UI_COLORS.TEXT_LIGHT,
-        padding: "8px 16px",
-        textAlign: "center",
-        textDecoration: "none",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: fullWidth ? "100%" : "auto",
-        cursor: disabled ? "not-allowed" : "pointer",
-        borderRadius: "4px",
-        transition: "background-color 0.3s",
-        ...(isActive && {
-          backgroundColor: UI_COLORS.PRIMARY_DARK,
-          color: UI_COLORS.TEXT_LIGHT,
-        }),
-        ...(disabled && {
-          backgroundColor: UI_COLORS.PRIMARY_DARK,
-          color: UI_COLORS.TEXT_LIGHT,
-          opacity: 0.7,
-        }),
-        ...style,
-      }}
+      className={cn(
+        "flex items-center justify-between rounded px-4 py-2 transition-colors",
+        variant === "primary" ? "bg-primary-button" : "bg-secondary-button",
+        "border border-button-border shadow-[0_2px_0_0_rgba(0,0,0,0.05)] shadow-button-inner",
+        "font-serif-extra text-foreground",
+        {
+          "w-full": fullWidth,
+          "bg-secondary-button": isActive,
+          "opacity-70 cursor-not-allowed": disabled,
+        },
+        className
+      )}
       disabled={disabled}
       {...props}
     >
