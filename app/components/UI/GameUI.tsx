@@ -4,7 +4,6 @@ import { TerrainPaintUI } from "./TerrainPaintUI";
 import { HOURS_PER_DAY } from "../../lib/constants";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
-import { UI_COLORS } from "@/lib/palette";
 import { isDayTime } from "@/lib/time";
 import { PlayerBar } from "./PlayerBar";
 import { BuildBar } from "./BuildBar";
@@ -15,35 +14,8 @@ import { CommodityMarketModal } from "./CommodityMarketModal";
 import { Button } from "./Button";
 import { clientStore } from "@/lib/clientState";
 import { useSelector } from "@xstate/store/react";
-
-const styles = {
-  playersContainer: {
-    position: "fixed" as const,
-    top: "10px",
-    left: "10px",
-    zIndex: 1000,
-    maxHeight: "calc(100vh - 20px)",
-    overflowY: "auto" as const,
-    width: "300px",
-  },
-  timeContainer: {
-    position: "fixed" as const,
-    top: "10px",
-    right: "10px",
-    backgroundColor: UI_COLORS.BACKGROUND,
-    color: "white",
-    padding: "10px",
-    borderRadius: "5px",
-    fontFamily: "monospace",
-    zIndex: 1000,
-  },
-  marketButton: {
-    position: "fixed" as const,
-    top: "70px",
-    right: "10px",
-    zIndex: 1000,
-  },
-};
+import { CornerDecorations } from "./CornerDecorations";
+import { Card } from "./Card";
 
 export const GameUI: React.FC = () => {
   const [showMarketModal, setShowMarketModal] = useState(false);
@@ -67,25 +39,31 @@ export const GameUI: React.FC = () => {
 
   return (
     <>
-      <div style={styles.playersContainer}>
+      <CornerDecorations />
+
+      <div className="fixed top-[10px] left-[10px] z-10 max-h-[calc(100vh-20px)] overflow-y-auto w-[300px]">
         {sortedPlayers.map(([playerId, player]) => (
           <PlayerBar key={playerId} player={player} isCurrentPlayer={playerId === userId} />
         ))}
         {!isLobby && currentPlayer && <BuildBar player={currentPlayer} />}
       </div>
+
       {!isLobby && (
         <>
-          <div style={styles.timeContainer}>
+          <Card className="fixed top-[10px] right-[10px] z-10 font-mono py-2 px-3">
             Day {dayNumber} {timeEmoji}
-          </div>
-          <div style={styles.marketButton}>
+          </Card>
+
+          <div className="fixed top-[70px] right-[10px] z-10">
             <Button onClick={() => setShowMarketModal(true)}>Commodity Market</Button>
           </div>
+
           <TerrainPaintUI />
           <HexPreviewTooltip />
           {!isDebug && <HexDetails />}
         </>
       )}
+
       {isAuction && <PowerPlantAuction />}
       {isLobby && <Lobby players={players} />}
       {showMarketModal && <CommodityMarketModal onClose={() => setShowMarketModal(false)} />}

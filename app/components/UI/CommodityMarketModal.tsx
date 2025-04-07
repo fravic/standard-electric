@@ -1,104 +1,16 @@
 import React, { useMemo } from "react";
 import { Card } from "./Card";
 import { Button } from "./Button";
-import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { CommodityType } from "@/lib/types";
 import { useWorld } from "../WorldContext";
 import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
 import { AuthContext } from "@/auth.context";
+import { cn } from "@/lib/utils";
 
 interface CommodityMarketModalProps {
   onClose: () => void;
 }
-
-const styles = {
-  overlay: {
-    position: "fixed" as const,
-    inset: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "1.5rem",
-  },
-  title: {
-    color: UI_COLORS.TEXT_LIGHT,
-    margin: 0,
-    fontSize: "1.5rem",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse" as const,
-    marginBottom: "1rem",
-  },
-  tableHeader: {
-    textAlign: "left" as const,
-    padding: "0.75rem 1rem",
-    borderBottom: `2px solid ${UI_COLORS.PRIMARY_DARK}`,
-    color: UI_COLORS.TEXT_LIGHT,
-    fontWeight: "bold" as const,
-  },
-  tableCell: {
-    padding: "0.75rem 1rem",
-    borderBottom: `1px solid ${UI_COLORS.PRIMARY_DARK}`,
-    color: UI_COLORS.TEXT_LIGHT,
-  },
-  commodityName: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    textTransform: "capitalize" as const,
-    fontWeight: "bold" as const,
-  },
-  priceCell: {
-    fontFamily: "monospace",
-  },
-  scaleContainer: {
-    width: "100%",
-    height: "8px",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderRadius: "4px",
-    overflow: "hidden",
-    position: "relative" as const,
-  },
-  scaleTrack: {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    height: "100%",
-    backgroundColor: UI_COLORS.PRIMARY,
-  },
-  scaleMarker: {
-    position: "absolute" as const,
-    top: "-3px",
-    width: "4px",
-    height: "14px",
-    backgroundColor: "white",
-    borderRadius: "2px",
-    transform: "translateX(-50%)",
-  },
-  scaleLabels: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "0.75rem",
-    color: UI_COLORS.TEXT_LIGHT,
-    opacity: 0.7,
-    marginTop: "4px",
-  },
-  noData: {
-    textAlign: "center" as const,
-    padding: "2rem",
-    color: UI_COLORS.TEXT_LIGHT,
-    opacity: 0.7,
-  },
-};
 
 // Helper function to get commodity icon
 const getCommodityIcon = (type: CommodityType) => {
@@ -138,21 +50,29 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({ onCl
   }, [world]);
 
   return (
-    <div style={styles.overlay}>
+    <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
       <Card className="max-w-[700px] w-full">
-        <div style={styles.header}>
-          <h2 style={styles.title}>Commodity Market</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-foreground m-0 text-2xl font-serif-extra">Commodity Market</h2>
           <Button onClick={onClose}>Close</Button>
         </div>
 
         {activeFuelTypes.length > 0 ? (
-          <table style={styles.table}>
+          <table className="w-full border-collapse mb-4">
             <thead>
               <tr>
-                <th style={styles.tableHeader}>Commodity</th>
-                <th style={styles.tableHeader}>Buy Price</th>
-                <th style={styles.tableHeader}>Sell Price</th>
-                <th style={styles.tableHeader}>Price Range</th>
+                <th className="text-left py-3 px-4 border-b-2 border-secondary-button text-foreground font-bold">
+                  Commodity
+                </th>
+                <th className="text-left py-3 px-4 border-b-2 border-secondary-button text-foreground font-bold">
+                  Buy Price
+                </th>
+                <th className="text-left py-3 px-4 border-b-2 border-secondary-button text-foreground font-bold">
+                  Sell Price
+                </th>
+                <th className="text-left py-3 px-4 border-b-2 border-secondary-button text-foreground font-bold">
+                  Price Range
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -168,33 +88,34 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({ onCl
 
                 return (
                   <tr key={fuelType}>
-                    <td style={styles.tableCell}>
-                      <div style={styles.commodityName}>
+                    <td className="py-3 px-4 border-b border-secondary-button text-foreground">
+                      <div className="flex items-center gap-2 capitalize font-bold">
                         {getCommodityIcon(fuelType)} {fuelType}
                       </div>
                     </td>
-                    <td style={{ ...styles.tableCell, ...styles.priceCell }}>
+                    <td className="py-3 px-4 border-b border-secondary-button text-foreground font-mono">
                       ${rates.buyPrice.toFixed(2)} / {config.unitSize}kg
                     </td>
-                    <td style={{ ...styles.tableCell, ...styles.priceCell }}>
+                    <td className="py-3 px-4 border-b border-secondary-button text-foreground font-mono">
                       ${rates.sellPrice.toFixed(2)} / {config.unitSize}kg
                     </td>
-                    <td style={styles.tableCell}>
-                      <div style={styles.scaleContainer}>
+                    <td className="py-3 px-4 border-b border-secondary-button text-foreground">
+                      <div className="w-full h-2 bg-black/30 rounded overflow-hidden relative">
                         <div
+                          className="absolute top-0 left-0 h-full bg-primary-button"
                           style={{
-                            ...styles.scaleTrack,
                             width: `${positionPercent}%`,
                           }}
                         />
                         <div
+                          className="absolute top-[-3px] w-1 h-[14px] bg-secondary-button rounded"
                           style={{
-                            ...styles.scaleMarker,
                             left: `${positionPercent}%`,
+                            transform: "translateX(-50%)",
                           }}
                         />
                       </div>
-                      <div style={styles.scaleLabels}>
+                      <div className="flex justify-between text-xs text-foreground opacity-70 mt-1">
                         <span>${config.minExchangeRate}</span>
                         <span>${config.maxExchangeRate}</span>
                       </div>
@@ -205,7 +126,9 @@ export const CommodityMarketModal: React.FC<CommodityMarketModalProps> = ({ onCl
             </tbody>
           </table>
         ) : (
-          <div style={styles.noData}>No active commodities found on the map.</div>
+          <div className="text-center py-8 text-foreground opacity-70">
+            No active commodities found on the map.
+          </div>
         )}
       </Card>
     </div>
