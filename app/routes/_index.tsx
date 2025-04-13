@@ -7,15 +7,11 @@ export const meta: MetaFunction = () => {
     { title: "Standard Electric" },
     {
       name: "description",
-      content: "A game",
+      content:
+        "Compete to build the biggest electrical company in this multiplayer, sustainability-focused strategy game",
     },
   ];
 };
-
-// const fetchTodoActor = createActorFetch<TodoMachine>({
-//   actorType: "todo",
-//   host: context.env.ACTOR_KIT_HOST,
-// });
 
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
   // Access userId and sessionId from context
@@ -28,12 +24,11 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
     userId,
     sessionId,
     userData: userData ? JSON.parse(userData) : null,
+    host: context.env.ACTOR_KIT_HOST,
   });
 }
 
 export type LoaderData = {
-  gameId: string;
-  deviceType: string;
   host: string;
   userId: string;
   sessionId: string;
@@ -41,7 +36,7 @@ export type LoaderData = {
 };
 
 export default function Index() {
-  const { sessionId, userData } = useLoaderData<LoaderData>();
+  const { sessionId, userData, host } = useLoaderData<LoaderData>();
   const userId = AuthContext.useSelector((state) => state.userId);
 
   return (
@@ -51,6 +46,7 @@ export default function Index() {
         Logged in as: {userId} ({sessionId})
       </div>
       <pre>{JSON.stringify(userData, null, 2)}</pre>
+      <pre>{host}</pre>
     </div>
   );
 }

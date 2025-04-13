@@ -69,4 +69,4 @@ export function PowerPlant({ entity, isGhost = false }: PowerPlantProps) {
 }
 
 // Preload the model
-useGLTF.preload("/public/assets/glb/PowerPlants.glb");
+useGLTF.preload("/assets/glb/PowerPlants.glb");

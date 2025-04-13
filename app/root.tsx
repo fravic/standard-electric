@@ -33,6 +33,7 @@ export const links: LinksFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({
+    host: context.env.ACTOR_KIT_HOST,
     sessionId: context.sessionId,
     sessionToken: context.sessionToken,
     userId: context.userId,
@@ -42,11 +43,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export default function App() {
   const isDevelopment = true;
 
-  const { sessionId, sessionToken, userId } = useLoaderData<typeof loader>();
+  const { sessionId, sessionToken, userId, host } = useLoaderData<typeof loader>();
 
   const [authClient] = useState(
     createAuthClient({
-      host: "localhost:8787",
+      host,
       userId: userId,
       sessionToken: sessionToken,
     })

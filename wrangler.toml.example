@@ -8,7 +8,6 @@ assets = { directory = "./public" }
 
 [vars]
 NODE_ENV = "development"
-WEB_HOST = "localhost:8787"
 ACTOR_KIT_HOST = "your-actor-kit-host.example.com"
 
 [[kv_namespaces]]
