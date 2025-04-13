@@ -23,6 +23,7 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .dev.vars
+wrangler.toml
 
 # Editor directories and files
 .vscode/
