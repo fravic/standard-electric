@@ -29,6 +29,25 @@ export const links: LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Wittgenstein:ital,wght@0,400..900;1,400..900&display=swap",
   },
+  // Web App Manifest
+  { rel: "manifest", href: "/manifest.json" },
+  // iOS homescreen icons
+  { rel: "apple-touch-icon", href: "/assets/icons/apple-touch-icon.png" },
+  { rel: "icon", type: "image/png", sizes: "192x192", href: "/assets/icons/icon-192x192.png" },
+  { rel: "icon", type: "image/png", sizes: "512x512", href: "/assets/icons/icon-512x512.png" },
+  // iOS splash screens - landscape orientation
+  {
+    rel: "apple-touch-startup-image",
+    href: "/assets/splashscreens/apple-splash-2436-1125.png",
+    media:
+      "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)",
+  }, // iPhone X/XS/11 Pro
+  {
+    rel: "apple-touch-startup-image",
+    href: "/assets/splashscreens/apple-splash-2048-1536.png",
+    media:
+      "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)",
+  }, // iPad
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -58,7 +77,11 @@ export default function App() {
       <html lang="en">
         <head>
           <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+          <meta name="theme-color" content="#000000" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-title" content="Standard Electric" />
           <Meta />
           <Links />
         </head>
