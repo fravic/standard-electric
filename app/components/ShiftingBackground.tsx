@@ -1,9 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { useRef, useMemo, useEffect, useState } from "react";
+import { useRef, useMemo, useEffect, useState, useContext } from "react";
 import * as THREE from "three";
 import { Billboard } from "@react-three/drei";
-import { GameContext } from "@/actor/game.context";
-import { ticksToHour } from "@/lib/time";
 import { MILLISECONDS_PER_IN_GAME_HOUR } from "@/lib/constants";
 
 // Vertex shader for our background plane
@@ -80,6 +78,7 @@ type ControlPoint = {
 type ShiftingBackgroundProps = {
   controlPoints?: ControlPoint[];
   distance?: number;
+  hour?: number; // Add hour prop
 };
 
 // Time constants (hours in 24-hour format)
@@ -117,6 +116,7 @@ function getTimeBlendFactor(hour: number): number {
 export function ShiftingBackground({
   controlPoints,
   distance = 100, // Set a large distance to ensure it's behind everything
+  hour = 12, // Default to noon
 }: ShiftingBackgroundProps) {
   // Day control points
   const dayControlPoints: ControlPoint[] = [
@@ -244,12 +244,6 @@ export function ShiftingBackground({
       meshRef.current.scale.set(width, height, 1);
     }
   }, [size.width, size.height, distance, camera]);
-
-  // Get the current game time for day/night transitions
-  const { totalTicks } = GameContext.useSelector(
-    (state: { public: { time: { totalTicks: number } } }) => state.public.time
-  );
-  const hour = ticksToHour(totalTicks);
 
   // Animation state for smooth transitions
   const animState = useRef({

@@ -7,8 +7,18 @@ import { CameraController } from "./CameraController";
 import { HexGrid } from "./HexGrid/HexGrid";
 import { WATER_COLORS } from "@/lib/palette";
 import { ShiftingBackground } from "./ShiftingBackground";
+import { GameContext } from "@/actor/game.context";
+import { ticksToHour } from "@/lib/time";
 
 export function GameCanvas() {
+  // Get the current game time for day/night transitions
+  const { totalTicks } = GameContext.useSelector(
+    (state: { public: { time: { totalTicks: number } } }) => state.public.time
+  );
+
+  // Convert ticks to hour for the ShiftingBackground
+  const hour = ticksToHour(totalTicks);
+
   return (
     <Canvas
       style={{
@@ -25,7 +35,7 @@ export function GameCanvas() {
       <CameraController />
       <directionalLight position={[-5, 5, -2]} intensity={1} />
       <ambientLight intensity={2} />
-      <ShiftingBackground />
+      <ShiftingBackground hour={hour} />
       <HexGrid />
       <EffectComposer>
         <Bloom
