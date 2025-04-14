@@ -124,6 +124,10 @@ export function CameraController(): React.ReactNode {
       orbitControls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
       orbitControls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
 
+      // Restrict horizontal rotation (keep fixed to current orientation)
+      orbitControls.minAzimuthAngle = orbitControls.getAzimuthalAngle();
+      orbitControls.maxAzimuthAngle = orbitControls.getAzimuthalAngle();
+
       // Map controls configuration (following Three.js MapControls)
       orbitControls.mouseButtons = {
         LEFT: MOUSE.PAN,
@@ -133,7 +137,7 @@ export function CameraController(): React.ReactNode {
 
       orbitControls.touches = {
         ONE: TOUCH.PAN,
-        TWO: TOUCH.DOLLY_ROTATE,
+        TWO: TOUCH.DOLLY_PAN,
       };
 
       // Set initial camera position with bird's eye view angle
