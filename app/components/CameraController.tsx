@@ -1,6 +1,6 @@
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
-import { Vector3, Camera, Object3D } from "three";
+import { useEffect, useRef, useState } from "react";
+import { Vector3, Camera, Object3D, MOUSE, TOUCH } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { useSelector } from "@xstate/store/react";
 import { clientStore } from "@/lib/clientState";
@@ -12,6 +12,7 @@ interface CameraConfigType {
   MAX_DISTANCE: number;
   MIN_POLAR_ANGLE: number;
   MAX_POLAR_ANGLE: number;
+  DEFAULT_POLAR_ANGLE: number;
   PAN_BOUNDS: {
     MIN_X: number;
     MAX_X: number;
@@ -23,11 +24,12 @@ interface CameraConfigType {
 
 // Camera configuration
 const CAMERA_CONFIG: CameraConfigType = {
-  PAN_SPEED: 15,
-  MIN_DISTANCE: 2,
-  MAX_DISTANCE: 50,
+  PAN_SPEED: 28,
+  MIN_DISTANCE: 5,
+  MAX_DISTANCE: 16,
   MIN_POLAR_ANGLE: 0,
-  MAX_POLAR_ANGLE: Math.PI / 8,
+  MAX_POLAR_ANGLE: Math.PI / 5,
+  DEFAULT_POLAR_ANGLE: Math.PI / 8,
   PAN_BOUNDS: {
     MIN_X: 0,
     MAX_X: 100,
@@ -46,6 +48,7 @@ export function CameraController(): React.ReactNode {
   const keys = useRef<KeyMap>({});
   const lastTime = useRef<number>(performance.now());
   const animationFrameRef = useRef<number>();
+  const isShiftKeyDown = useRef<boolean>(false);
   const areKeyboardControlsActive = useSelector(
     clientStore,
     (state) => state.context.areKeyboardControlsActive
@@ -56,9 +59,9 @@ export function CameraController(): React.ReactNode {
     vx: 0,
     vz: 0,
     config: {
-      tension: 50,
-      friction: 15,
-      clamp: true, // Prevents spring bounce-back
+      tension: 40,
+      friction: 8,
+      clamp: false,
       precision: 0.0001,
     },
   }));
@@ -74,23 +77,76 @@ export function CameraController(): React.ReactNode {
     return position >= min && position <= max;
   };
 
+  // Set up shift key handler for enabling rotation
+  useEffect(() => {
+    const handleShiftKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Shift") {
+        isShiftKeyDown.current = true;
+      }
+    };
+
+    const handleShiftKeyUp = (e: KeyboardEvent): void => {
+      if (e.key === "Shift") {
+        isShiftKeyDown.current = false;
+      }
+    };
+
+    window.addEventListener("keydown", handleShiftKeyDown);
+    window.addEventListener("keyup", handleShiftKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleShiftKeyDown);
+      window.removeEventListener("keyup", handleShiftKeyUp);
+    };
+  }, []);
+
   useEffect(() => {
     if (controls) {
       const orbitControls = controls as OrbitControls;
-      orbitControls.enablePan = false;
+
+      // Configure like MapControls
+      orbitControls.screenSpacePanning = false; // Pan orthogonal to world-space direction
+      orbitControls.enablePan = true;
       orbitControls.enableDamping = true;
-      orbitControls.dampingFactor = 0.05;
+      orbitControls.dampingFactor = 0.06;
+      orbitControls.enableRotate = true;
+
+      // Adjust speeds
+      orbitControls.panSpeed = 2.0;
+      orbitControls.rotateSpeed = 0.8;
+      orbitControls.zoomSpeed = 1.2;
+
+      // Distance constraints
       orbitControls.minDistance = CAMERA_CONFIG.MIN_DISTANCE;
       orbitControls.maxDistance = CAMERA_CONFIG.MAX_DISTANCE;
+
+      // Angle constraints for limited tilting
       orbitControls.minPolarAngle = CAMERA_CONFIG.MIN_POLAR_ANGLE;
       orbitControls.maxPolarAngle = CAMERA_CONFIG.MAX_POLAR_ANGLE;
 
-      // Set initial camera position
+      // Map controls configuration (following Three.js MapControls)
+      orbitControls.mouseButtons = {
+        LEFT: MOUSE.PAN,
+        MIDDLE: MOUSE.DOLLY,
+        RIGHT: MOUSE.ROTATE,
+      };
+
+      orbitControls.touches = {
+        ONE: TOUCH.PAN,
+        TWO: TOUCH.DOLLY_ROTATE,
+      };
+
+      // Set initial camera position with bird's eye view angle
+      const height = 20; // Initial height
+      const angle = CAMERA_CONFIG.DEFAULT_POLAR_ANGLE;
+      const radius = height / Math.cos(Math.PI / 2 - angle);
+
       camera.position.set(
         CAMERA_CONFIG.START_POSITION.x,
-        camera.position.y,
-        CAMERA_CONFIG.START_POSITION.z
+        radius * Math.cos(angle),
+        CAMERA_CONFIG.START_POSITION.z + radius * Math.sin(angle)
       );
+
       orbitControls.target.set(CAMERA_CONFIG.START_POSITION.x, 0, CAMERA_CONFIG.START_POSITION.z);
       orbitControls.update();
     }
@@ -119,8 +175,15 @@ export function CameraController(): React.ReactNode {
   useEffect(() => {
     const panCamera = (): void => {
       if (!areKeyboardControlsActive || !controls) {
-        // When inactive, smoothly bring velocity to zero
-        springApi.start({ vx: 0, vz: 0 });
+        // When inactive, smoothly bring velocity to zero, but more gradually
+        springApi.start({
+          vx: 0,
+          vz: 0,
+          config: {
+            friction: 12, // Higher friction when stopping
+            tension: 30, // Lower tension for smoother deceleration
+          },
+        });
         animationFrameRef.current = requestAnimationFrame(panCamera);
         return;
       }
@@ -164,11 +227,18 @@ export function CameraController(): React.ReactNode {
         targetVelocity.z /= length;
       }
 
-      // Apply speed scaling
+      // Apply speed scaling with enhanced acceleration
       const zoomFactor = camera.position.y / 10;
       const speed = CAMERA_CONFIG.PAN_SPEED * Math.max(1, zoomFactor);
-      targetVelocity.x *= speed;
-      targetVelocity.z *= speed;
+
+      // Add acceleration curve for more responsive feel
+      const acceleration =
+        keys.current["w"] || keys.current["a"] || keys.current["s"] || keys.current["d"]
+          ? 1.2
+          : 1.0;
+
+      targetVelocity.x *= speed * acceleration;
+      targetVelocity.z *= speed * acceleration;
 
       // Update spring velocity
       springApi.start({
