@@ -28,7 +28,6 @@ export function createDefaultContext(
         },
         entitiesById: {} as Record<string, Entity>,
         hexGrid: HexGridSchema.parse(hexGridData),
-        auction: null,
         randomSeed: input.randomSeed ?? Math.floor(Math.random() * 1000000),
         commodityMarket: initializeCommodityMarket(),
       },

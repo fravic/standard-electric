@@ -7,7 +7,6 @@ import { coordinatesToString } from "@/lib/coordinates/HexCoordinates";
 import { GameContext, GameEvent, GameInput } from "./game.types";
 import { gameTimerActor } from "./gameTimerActor";
 import { PowerSystem } from "@/ecs/systems/PowerSystem";
-import { AuctionSystem } from "@/ecs/systems/AuctionSystem";
 import { Entity } from "@/ecs/entity";
 import { CommoditySystem, CommodityContext } from "@/ecs/systems/CommoditySystem";
 import {
@@ -35,96 +34,20 @@ export const gameMachine = setup({
       const playerId = event.caller.id;
       return context.public.players[playerId]?.isHost === true;
     },
-    isCurrentBidder: ({ context, event }) => {
-      if (!context.public.auction || !context.public.auction.currentBlueprint) {
-        return false;
-      }
-
-      const auctionSystem = new AuctionSystem();
-      const auctionContext = {
-        gameTime: context.public.time.totalTicks,
-        totalTicks: context.public.time.totalTicks,
-        players: context.public.players,
-        auction: context.public.auction,
-        randomSeed: context.public.randomSeed,
-      };
-
-      const nextBidderId = auctionSystem.getNextBidder(auctionContext);
-      return nextBidderId === event.caller.id;
-    },
-    isCurrentInitiator: ({ context, event }) => {
-      if (!context.public.auction) return false;
-      const playerId = event.caller.id;
-
-      const auctionSystem = new AuctionSystem();
-      const auctionContext = {
-        gameTime: context.public.time.totalTicks,
-        totalTicks: context.public.time.totalTicks,
-        players: context.public.players,
-        auction: context.public.auction,
-        randomSeed: context.public.randomSeed,
-      };
-
-      return auctionSystem.getNextInitiator(auctionContext) === playerId;
-    },
-    canAffordBid: ({ context, event }) => {
-      if (
-        !context.public.auction ||
-        !context.public.auction.currentBlueprint ||
-        event.type !== "AUCTION_PLACE_BID"
-      ) {
-        return false;
-      }
-
-      const player = context.public.players[event.caller.id];
-      if (!player) return false;
-
-      return player.money >= event.amount;
-    },
-    shouldEndBidding: ({ context }) => {
-      if (!context.public.auction) return false;
-
-      const auctionSystem = new AuctionSystem();
-      const auctionContext = {
-        totalTicks: context.public.time.totalTicks,
-        players: context.public.players,
-        auction: context.public.auction,
-        randomSeed: context.public.randomSeed,
-      };
-
-      return auctionSystem.shouldEndBidding(auctionContext);
-    },
-    shouldEndAuction: ({ context }) => {
-      if (!context.public.auction) return false;
-
-      const auctionSystem = new AuctionSystem();
-      const auctionContext = {
-        totalTicks: context.public.time.totalTicks,
-        players: context.public.players,
-        auction: context.public.auction,
-        randomSeed: context.public.randomSeed,
-      };
-
-      return auctionSystem.shouldEndAuction(auctionContext);
-    },
     isValidBuildableLocation: ({ context, event }) => {
       if (event.type !== "ADD_BUILDABLE") {
         return false;
       }
-
       const playerId = event.caller.id;
       const blueprintId = event.blueprintId;
       const playerPrivateContext = context.private[playerId];
-
       const blueprintEntity = context.public.entitiesById[blueprintId];
       if (!blueprintEntity) {
         return false;
       }
-
       if (blueprintEntity.owner?.playerId !== playerId) {
         throw new Error(`Player ${playerId} is not the owner of blueprint ${blueprintId}`);
       }
-
       const world = createWorldWithEntities(
         context.public.entitiesById,
         playerPrivateContext.entitiesById
@@ -142,7 +65,6 @@ export const gameMachine = setup({
             surveyedHexCoords.add(coordinatesToString(survey.hexPosition.coordinates));
           }
         });
-
       const validationResult = BuildableSystem.isValidBuildableLocation(
         world,
         {
@@ -154,7 +76,6 @@ export const gameMachine = setup({
         blueprintId,
         event.options
       );
-
       return validationResult.valid;
     },
   },
@@ -273,96 +194,6 @@ export const gameMachine = setup({
         }
       })
     ),
-
-    // Auctions
-    startAuction: assign(({ context }: { context: GameContext }) =>
-      produce(context, (draft) => {
-        const auctionSystem = new AuctionSystem();
-        const auctionContext = {
-          totalTicks: context.public.time.totalTicks,
-          players: context.public.players,
-          auction: context.public.auction,
-          randomSeed: context.public.randomSeed,
-        };
-        const result = auctionSystem.startAuction(auctionContext, false); // No passing allowed on the first auction
-        auctionSystem.mutate(result, draft);
-      })
-    ),
-    auctionInitiateBid: assign(({ context, event }: { context: GameContext; event: GameEvent }) =>
-      produce(context, (draft) => {
-        if (event.type === "INITIATE_BID" && draft.public.auction) {
-          const blueprintId = event.blueprintId;
-          const blueprint = draft.public.entitiesById[blueprintId];
-          if (!blueprint) return;
-
-          // Use AuctionSystem to initiate a bid
-          const auctionSystem = new AuctionSystem();
-          const initialBidAmount = blueprint.cost?.amount || 0;
-          const result = auctionSystem.auctionInitiateBid(
-            draft.public.auction,
-            blueprintId,
-            event.caller.id,
-            initialBidAmount
-          );
-          auctionSystem.mutate(result, draft);
-        }
-      })
-    ),
-    auctionPass: assign(({ context, event }: { context: GameContext; event: GameEvent }) =>
-      produce(context, (draft) => {
-        if (event.type === "PASS_AUCTION" && draft.public.auction) {
-          // Use AuctionSystem to pass the auction
-          const auctionSystem = new AuctionSystem();
-          const result = auctionSystem.auctionPass(draft.public.auction, event.caller.id);
-          auctionSystem.mutate(result, draft);
-        }
-      })
-    ),
-    auctionPlaceBid: assign(({ context, event }: { context: GameContext; event: GameEvent }) =>
-      produce(context, (draft) => {
-        if (event.type === "AUCTION_PLACE_BID" && draft.public.auction) {
-          // Use AuctionSystem to place a bid
-          const auctionSystem = new AuctionSystem();
-          const result = auctionSystem.auctionPlaceBid(
-            draft.public.auction,
-            event.caller.id,
-            event.amount,
-            context.public.players
-          );
-
-          auctionSystem.mutate(result, draft);
-        }
-      })
-    ),
-    auctionPassBid: assign(({ context, event }: { context: GameContext; event: GameEvent }) =>
-      produce(context, (draft) => {
-        if (event.type === "AUCTION_PASS_BID" && draft.public.auction?.currentBlueprint) {
-          // Use AuctionSystem to pass a bid
-          const auctionSystem = new AuctionSystem();
-          const result = auctionSystem.auctionPassBid(draft.public.auction, event.caller.id);
-          auctionSystem.mutate(result, draft);
-        }
-      })
-    ),
-    endBidding: assign(({ context }) => {
-      return produce(context, (contextDraft) => {
-        const auctionSystem = new AuctionSystem();
-
-        // Use AuctionSystem to end bidding
-        const result = auctionSystem.endBidding(
-          contextDraft.public.auction!,
-          contextDraft.public.players
-        );
-
-        if (!result.success || !result.auction) return;
-
-        // Update auction state
-        contextDraft.public.auction = result.auction;
-
-        // Use the mutate method to update context with auction results
-        auctionSystem.mutate(result, contextDraft);
-      });
-    }),
 
     // Commodity Market
     buyCommodity: assign(({ context, event }: { context: GameContext; event: GameEvent }) => {

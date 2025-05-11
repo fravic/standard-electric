@@ -23,25 +23,8 @@ export interface Player {
   color: string; // Player's color, assigned based on player number
 }
 
-// No longer need AuctionBlueprint interface as we'll use Entity directly
-
 export interface Auction {
-  availableBlueprintIds: string[];
-  currentBlueprint: null | {
-    blueprintId: string;
-    bids: {
-      playerId: string;
-      amount?: number;
-      passed?: boolean;
-    }[];
-  };
-  purchases: {
-    playerId: string;
-    blueprintId: string;
-    price: number;
-  }[];
-  isPassingAllowed: boolean;
-  passedPlayerIds: string[];
+  // No longer need Auction interface as we'll use Entity directly
 }
 
 interface GamePublicContext {
@@ -55,7 +38,6 @@ interface GamePublicContext {
   };
   entitiesById: Record<string, Entity>;
   hexGrid: HexGrid;
-  auction: Auction | null;
   randomSeed: number;
   commodityMarket: CommodityMarketState;
 }
