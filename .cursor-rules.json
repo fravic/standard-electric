@@ -1,0 +1,3 @@
+{
+  "run-tests": "After creating or updating any tests, always run the tests using 'bun test'. If the test output indicates a snapshot mismatch, update the snapshots using 'bun test --update-snapshots'. Always ensure tests pass after any test changes."
+}

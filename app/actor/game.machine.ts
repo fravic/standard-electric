@@ -500,55 +500,9 @@ export const gameMachine = setup({
           actions: "joinGame",
         },
         START_GAME: {
-          target: "auction",
+          target: "active",
           guard: "isHost",
           actions: "precomputeResources",
-        },
-      },
-    },
-    auction: {
-      entry: ["startAuction"],
-      initial: "initiatingBid",
-      states: {
-        initiatingBid: {
-          always: {
-            target: "#game.active",
-            guard: "shouldEndAuction",
-          },
-          on: {
-            INITIATE_BID: {
-              actions: "auctionInitiateBid",
-              target: "biddingOnBlueprint",
-              guards: ["isCurrentInitiator", "canAffordBid"],
-            },
-            PASS_AUCTION: {
-              actions: "auctionPass",
-              guard: "isCurrentInitiator",
-            },
-          },
-        },
-        biddingOnBlueprint: {
-          always: [
-            {
-              target: "initiatingBid",
-              guard: "shouldEndBidding",
-              actions: "endBidding",
-            },
-            {
-              target: "#game.active",
-              guard: "shouldEndAuction",
-            },
-          ],
-          on: {
-            AUCTION_PLACE_BID: {
-              actions: "auctionPlaceBid",
-              guards: ["isCurrentBidder", "canAffordBid"],
-            },
-            AUCTION_PASS_BID: {
-              actions: "auctionPassBid",
-              guards: ["isCurrentBidder"],
-            },
-          },
         },
       },
     },

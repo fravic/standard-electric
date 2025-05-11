@@ -171,126 +171,18 @@ describe("Game Machine", () => {
       storage: mockStorage,
     } as unknown as GameEvent);
 
-    // 5. Assert - Check that the game state has changed to 'auction'
-    const auctionSnapshot = gameActor.getSnapshot();
-    expect(auctionSnapshot.value).toEqual({
-      auction: "initiatingBid",
-    });
+    // 5. Assert - Check that the game state has changed to 'active'
+    const activeSnapshot = gameActor.getSnapshot();
+    expect(activeSnapshot.value).toEqual("active");
 
-    // Check that the auction state is initialized
-    expect(auctionSnapshot.context.public.auction).toBeTruthy();
+    // Verify that players have blueprints
+    world = createWorldWithEntities(activeSnapshot.context.public.entitiesById, {});
+    const player1Blueprints = powerPlantBlueprintsForPlayer(world, "player-1");
+    const player2Blueprints = powerPlantBlueprintsForPlayer(world, "player-2");
+    expect(player1Blueprints.entities.length).toBeGreaterThan(0);
+    expect(player2Blueprints.entities.length).toBeGreaterThan(0);
 
-    // Get the first available blueprint from the auction
-    const availableBlueprintIds = auctionSnapshot.context.public.auction!.availableBlueprintIds;
-    expect(availableBlueprintIds.length).toBeGreaterThan(0);
-    const blueprintId = availableBlueprintIds[0];
-
-    // 6. Act - Player 1 initiates a bid for the first blueprint
-    gameActor.send(
-      createEvent(
-        {
-          type: "INITIATE_BID",
-          blueprintId,
-        },
-        "player-1",
-        mockEnv,
-        mockStorage
-      )
-    );
-
-    // Check that the bid was initiated
-    const bidInitiatedSnapshot = gameActor.getSnapshot();
-    expect(bidInitiatedSnapshot.value).toEqual({
-      auction: "biddingOnBlueprint",
-    });
-    expect(bidInitiatedSnapshot.context.public.auction!.currentBlueprint).toBeTruthy();
-    expect(bidInitiatedSnapshot.context.public.auction!.currentBlueprint!.blueprintId).toEqual(
-      blueprintId
-    );
-
-    // 7. Act - Player 2 places a bid
-    const initialBidAmount =
-      bidInitiatedSnapshot.context.public.auction!.currentBlueprint!.bids[0].amount || 0;
-    const player2BidAmount = initialBidAmount + 10;
-
-    gameActor.send(
-      createEvent(
-        {
-          type: "AUCTION_PLACE_BID",
-          amount: player2BidAmount,
-        },
-        "player-2",
-        mockEnv,
-        mockStorage
-      )
-    );
-
-    // 8. Act - Player 1 places another bid
-    const player1BidAmount = player2BidAmount + 10;
-    gameActor.send(
-      createEvent(
-        {
-          type: "AUCTION_PLACE_BID",
-          amount: player1BidAmount,
-        },
-        "player-1",
-        mockEnv,
-        mockStorage
-      )
-    );
-
-    // 9. Act - Player 2 passes the bid
-    gameActor.send(
-      createEvent(
-        {
-          type: "AUCTION_PASS_BID",
-        },
-        "player-2",
-        mockEnv,
-        mockStorage
-      )
-    );
-
-    // Check that the bidding ended and player 1 won the blueprint
-    const biddingEndedSnapshot = gameActor.getSnapshot();
-    const purchases = biddingEndedSnapshot.context.public.auction!.purchases;
-    expect(purchases.length).toBeGreaterThan(0);
-    expect(purchases[purchases.length - 1].playerId).toEqual("player-1");
-    expect(purchases[purchases.length - 1].blueprintId).toEqual(blueprintId);
-
-    // 10. Act - Get the next blueprint and player 2 buys it
-    // First check if we're in initiatingBid state
-    if (
-      typeof biddingEndedSnapshot.value === "object" &&
-      "auction" in biddingEndedSnapshot.value &&
-      biddingEndedSnapshot.value.auction === "initiatingBid"
-    ) {
-      const nextBlueprintId = biddingEndedSnapshot.context.public.auction!.availableBlueprintIds[0];
-
-      gameActor.send(
-        createEvent(
-          {
-            type: "INITIATE_BID",
-            blueprintId: nextBlueprintId,
-          },
-          "player-2",
-          mockEnv,
-          mockStorage
-        )
-      );
-
-      // Check that player 2 won the blueprint (automatically, since player 1 cannot take any more)
-      const nextBiddingSnapshot = gameActor.getSnapshot();
-      const nextPurchases = nextBiddingSnapshot.context.public.auction!.purchases;
-      expect(nextPurchases.length).toBeGreaterThan(purchases.length);
-      expect(nextPurchases[nextPurchases.length - 1].playerId).toEqual("player-2");
-    }
-
-    // 12. Assert - Check that we're in the active state
-    let currentSnapshot = gameActor.getSnapshot();
-    expect(currentSnapshot.value).toEqual("active");
-
-    // 13. Act - Survey hex cells
+    // 6. Act - Survey hex cells
     // Player 1 surveys a hex cell
     const player1SurveyCoordinates: HexCoordinates = { x: 3, z: 11 };
     gameActor.send(
@@ -319,7 +211,7 @@ describe("Game Machine", () => {
       )
     );
 
-    // 14. Act - Pass 5 game ticks to complete the surveys
+    // 7. Act - Pass 5 game ticks to complete the surveys
     for (let i = 0; i < 5; i++) {
       gameActor.send(
         createEvent(
@@ -333,9 +225,9 @@ describe("Game Machine", () => {
       );
     }
 
-    // 15. Act - Build power plants on the surveyed cells
+    // 8. Act - Build power plants on the surveyed cells
     // Find a power plant blueprint owned by player 1
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
+    world = createWorldWithEntities(activeSnapshot.context.public.entitiesById, {});
     const player1Blueprint = powerPlantBlueprintsForPlayer(world, "player-1").first;
     const player1PowerPlantBlueprintId = player1Blueprint!.id;
 
@@ -358,7 +250,7 @@ describe("Game Machine", () => {
     );
 
     // Find a power plant blueprint owned by player 2
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
+    world = createWorldWithEntities(activeSnapshot.context.public.entitiesById, {});
     const player2Blueprint = powerPlantBlueprintsForPlayer(world, "player-2").first;
     const player2PowerPlantBlueprintId = player2Blueprint!.id;
 
@@ -380,9 +272,9 @@ describe("Game Machine", () => {
       )
     );
 
-    // 16. Act - Build power poles
+    // 9. Act - Build power poles
     // Find power pole blueprints
-    world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
+    world = createWorldWithEntities(activeSnapshot.context.public.entitiesById, {});
     const player1PoleBlueprint = powerPoleBlueprintsForPlayer(world, "player-1").first;
     const player1PoleBlueprintId = player1PoleBlueprint!.id;
 
@@ -429,18 +321,18 @@ describe("Game Machine", () => {
     );
 
     // Update the current snapshot to include the built power poles
-    currentSnapshot = gameActor.getSnapshot();
+    const currentSnapshot = gameActor.getSnapshot();
 
     // Verify that power poles were built
     world = createWorldWithEntities(currentSnapshot.context.public.entitiesById, {});
     const builtPowerPoles = powerPoles(world);
     expect(builtPowerPoles.entities.length).toBeGreaterThan(0);
 
-    // 17. Assert - Final game state
+    // 10. Assert - Final game state
     const finalSnapshot = gameActor.getSnapshot();
     expect(finalSnapshot.value).toEqual("active");
 
-    // 18. Act - Buy and sell commodities
+    // 11. Act - Buy and sell commodities
     // Find power plants owned by player 1 and player 2
     world = createWorldWithEntities(finalSnapshot.context.public.entitiesById, {});
     const player1PowerPlants = world.entities.filter(

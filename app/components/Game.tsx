@@ -11,7 +11,6 @@ import { GameCanvas } from "./GameCanvas";
 import { AuthContext } from "@/auth.context";
 
 export function Game() {
-  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
   const state = GameContext.useSelector((state) => state);
   const userId = AuthContext.useSelector((state) => state.userId);
 
@@ -28,7 +27,7 @@ export function Game() {
     <div style={{ width: "100vw", height: "100vh" }}>
       <GameCanvas />
       <GameUI />
-      {isDebug && <FPSCounter />}
+      <FPSCounter />
     </div>
   );
 }

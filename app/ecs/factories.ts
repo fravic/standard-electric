@@ -70,7 +70,27 @@ export function createPowerPoleBlueprint(playerId: string): With<Entity, "bluepr
 }
 
 export function createDefaultBlueprintsForPlayer(playerId: string): With<Entity, "blueprint">[] {
-  return [createPowerPoleBlueprint(playerId)];
+  return [
+    createPowerPoleBlueprint(playerId),
+    createPowerPlantBlueprint({
+      playerId,
+      name: "Starter Coal Plant",
+      powerGenerationKW: 1000,
+      startingPrice: 10,
+      pricePerKWh: 0.1,
+      fuelType: CommodityType.COAL,
+      fuelConsumptionPerKWh: 0.1,
+    }),
+  ].map((bp) => {
+    if (bp.blueprint.components.powerGeneration) {
+      bp.blueprint.components.fuelStorage = {
+        fuelType: CommodityType.COAL,
+        currentFuelStorage: 0,
+        maxFuelStorage: 1000,
+      };
+    }
+    return bp;
+  });
 }
 
 /**
