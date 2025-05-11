@@ -1,0 +1,13 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Use existing UI components
+
+This rule is helpful whenever creating or modifying UI elements
+
+- Always use existing UI components (like Card, Button, TextInput, etc.) instead of creating new ones from scratch
+- Check for existing components in the UI folder before implementing custom elements
+- Maintain consistent styling by leveraging our component library
+- For inputs, use TextInput component rather than raw HTML inputs

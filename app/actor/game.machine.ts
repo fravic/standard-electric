@@ -82,12 +82,22 @@ export const gameMachine = setup({
   actions: {
     joinGame: assign(({ context, event }: { context: GameContext; event: GameEvent }) => {
       if (event.type !== "JOIN_GAME") return context;
-
       const playerId = event.caller.id;
-
+      // Always prompt for company name if not provided
+      if (!event.name) {
+        return {
+          ...context,
+          private: {
+            ...context.private,
+            [playerId]: {
+              ...context.private[playerId],
+              awaitingCompanyName: true,
+            },
+          },
+        };
+      }
       // Initialize private context for the player
       const updatedPrivate = { ...context.private, [playerId]: { entitiesById: {} } };
-
       return {
         public: produce(context.public, (draft) => {
           const playerNumber = Object.keys(draft.players).length + 1;
@@ -322,25 +332,16 @@ export const gameMachine = setup({
   },
 }).createMachine({
   id: "game",
-  initial: "lobby",
+  initial: "active",
   context: ({ input }: { input: GameInput }) => createDefaultContext(input, {}),
   states: {
-    lobby: {
-      on: {
-        JOIN_GAME: {
-          actions: "joinGame",
-        },
-        START_GAME: {
-          target: "active",
-          guard: "isHost",
-          actions: "precomputeResources",
-        },
-      },
-    },
     active: {
       entry: ["stopGameTimer", "startGameTimer"],
       exit: ["stopGameTimer"],
       on: {
+        JOIN_GAME: {
+          actions: "joinGame",
+        },
         ADD_BUILDABLE: {
           guard: "isValidBuildableLocation",
           actions: "addBuildable",

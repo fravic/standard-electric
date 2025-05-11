@@ -6,29 +6,34 @@ import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
 import { isDayTime } from "@/lib/time";
 import { BuildBar } from "./BuildBar";
-import { Lobby } from "./Lobby";
 import { HexDetails } from "./HexDetails";
 import { clientStore } from "@/lib/clientState";
 import { useSelector } from "@xstate/store/react";
 import { Card } from "./Card";
+import { JoinGamePrompt } from "./JoinGamePrompt";
 
 export const GameUI: React.FC = () => {
   const userId = AuthContext.useSelector((state) => state.userId);
   const { players, time } = GameContext.useSelector((state) => state.public);
-  const currentPlayer = userId ? players[userId] : undefined;
+  const isInGame = userId && players[userId];
+  const currentPlayer = isInGame ? players[userId] : undefined;
   const { totalTicks } = time;
   const timeEmoji = isDayTime(totalTicks) ? "☀️" : "🌙";
   const dayNumber = Math.floor(totalTicks / HOURS_PER_DAY) + 1;
-  const isLobby = GameContext.useMatches("lobby");
-  const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
+  const isDebug = useSelector(clientStore, (state: any) => state.context.isDebug);
+
+  // Show join game prompt if player is not in the game
+  if (!isInGame && userId) {
+    return <JoinGamePrompt />;
+  }
 
   return (
     <>
       <div className="fixed top-[10px] left-[10px] z-10 max-h-[calc(100vh-20px)] overflow-y-auto w-[300px]">
-        {!isLobby && currentPlayer && <BuildBar player={currentPlayer} />}
+        {currentPlayer && <BuildBar player={currentPlayer} />}
       </div>
 
-      {!isLobby && (
+      {currentPlayer && (
         <>
           <Card className="fixed top-[10px] right-[10px] z-10 font-mono py-2 px-3">
             Day {dayNumber} {timeEmoji}
@@ -39,8 +44,6 @@ export const GameUI: React.FC = () => {
           {!isDebug && <HexDetails />}
         </>
       )}
-
-      {isLobby && <Lobby players={players} />}
     </>
   );
 };
