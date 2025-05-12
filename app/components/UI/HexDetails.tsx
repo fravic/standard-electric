@@ -1,6 +1,4 @@
 import React, { useMemo, useRef, useEffect } from "react";
-import { Button } from "./Button";
-import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
 import { clientStore } from "@/lib/clientState";
@@ -8,11 +6,9 @@ import { coordinatesToString, equals } from "@/lib/coordinates/HexCoordinates";
 import { useSelector } from "@xstate/store/react";
 import { SURVEY_DURATION_TICKS, SurveySystem } from "@/ecs/systems/SurveySystem";
 import { useWorld } from "../WorldContext";
-import { entityAtHexCoordinate } from "@/ecs/queries";
 import { CommodityType } from "@/lib/types";
 import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
 import { Entity } from "@/ecs/entity";
-import { cn } from "@/lib/utils";
 import {
   IonModal,
   IonContent,
@@ -20,7 +16,7 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
-  IonButton as IonButtonComponent,
+  IonButton,
   IonItem,
   IonLabel,
   IonGrid,
@@ -91,33 +87,20 @@ export const HexDetails: React.FC = () => {
               : "Selected Hex"}
           </IonTitle>
           <IonButtons slot="end">
-            <IonButtonComponent onClick={handleClose}>Close</IonButtonComponent>
+            <IonButton onClick={handleClose}>Close</IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding bg-white h-[80vh]">
         {selectedHexCoordinates && (
-          <IonList className="min-h-[300px] pb-5">
-            <IonItem lines="none">
-              <IonLabel>
-                <IonGrid>
-                  <IonRow>
-                    <IonCol size="7">
-                      <strong className="opacity-80">Coordinates:</strong>
-                    </IonCol>
-                    <IonCol size="5" className="ion-text-end">
-                      {coordinatesToString(selectedHexCoordinates)}
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonLabel>
-            </IonItem>
-
+          <IonList className="min-h-[300px] p-5">
             {/* Render each entity */}
             {entitiesAtHex.length > 0
               ? entitiesAtHex.map((entity) => <EntityDetails key={entity.id} entity={entity} />)
               : null}
+
+            {/* Survey details are handled separately since an entity won't exist yet if not yet surveyed */}
             <SurveyDetails />
           </IonList>
         )}
@@ -286,12 +269,12 @@ const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
 
             {isOwner && (
               <div className="mt-4 flex gap-2">
-                <Button onClick={handleBuyFuel} disabled={!canBuyFuel} fullWidth>
+                <IonButton onClick={handleBuyFuel} disabled={!canBuyFuel} expand="block">
                   Buy Fuel
-                </Button>
-                <Button onClick={handleSellFuel} disabled={!canSellFuel} fullWidth>
+                </IonButton>
+                <IonButton onClick={handleSellFuel} disabled={!canSellFuel} expand="block">
                   Sell Fuel
-                </Button>
+                </IonButton>
               </div>
             )}
           </IonCardContent>
@@ -431,11 +414,9 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
   // If no survey data and no active survey, show the survey button
   if (canSurvey) {
     return (
-      <div className="mt-4 px-2 pb-4">
-        <Button onClick={handleStartSurvey} fullWidth disabled={!canSurvey}>
-          Survey This Hex
-        </Button>
-      </div>
+      <IonButton onClick={handleStartSurvey} expand="block" disabled={!canSurvey}>
+        Survey This Hex
+      </IonButton>
     );
   }
 
@@ -448,9 +429,8 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
   return null;
 };
 
-// Refactored EntityDetails component to handle different entity types
+// Renders various entity details
 const EntityDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
-  const userId = AuthContext.useSelector((state) => state.userId);
   const { players } = GameContext.useSelector((state) => state.public);
 
   return (
@@ -479,9 +459,6 @@ const EntityDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
           </IonLabel>
         </IonItem>
       )}
-
-      {/* Render survey results if this entity has them */}
-      {entity.surveyResult && <SurveyDetails entity={entity} />}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "./Button";
+import { IonButton } from "@ionic/react";
 import { cn } from "@/lib/utils";
 
 interface BuildButtonProps {
@@ -29,11 +29,12 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
   style,
 }) => {
   return (
-    <Button
+    <IonButton
       onClick={onClick}
       disabled={disabled}
-      isActive={isActive}
-      fullWidth
+      fill={isActive ? "solid" : "outline"}
+      expand="block"
+      color="primary"
       className={className}
       style={style}
     >
@@ -53,6 +54,6 @@ export const BuildButton: React.FC<BuildButtonProps> = ({
           : variant === "bid"
             ? "Bid"
             : "Place"}
-    </Button>
+    </IonButton>
   );
 };

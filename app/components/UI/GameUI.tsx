@@ -7,7 +7,7 @@ import { isDayTime } from "@/lib/time";
 import { HexDetails } from "./HexDetails";
 import { clientStore } from "@/lib/clientState";
 import { useSelector } from "@xstate/store/react";
-import { Card } from "./Card";
+import { IonCard, IonCardContent } from "@ionic/react";
 import { JoinGamePrompt } from "./JoinGamePrompt";
 
 export const GameUI: React.FC = () => {
@@ -29,9 +29,11 @@ export const GameUI: React.FC = () => {
     <>
       {currentPlayer && (
         <>
-          <Card className="fixed top-[10px] right-[10px] z-10 font-mono">
-            Day {dayNumber} {timeEmoji}
-          </Card>
+          <IonCard className="fixed top-[10px] right-[10px] z-10 font-mono">
+            <IonCardContent>
+              Day {dayNumber} {timeEmoji}
+            </IonCardContent>
+          </IonCard>
 
           <TerrainPaintUI />
           {!isDebug && <HexDetails />}
