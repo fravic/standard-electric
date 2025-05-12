@@ -68,11 +68,20 @@ bun run dev
 bun install
 ```
 
-2. Set up environment variables:
+2. Set up environment variables (modify these as necessary):
 
 ```bash
 cp .dev.vars.example .dev.vars
+cp .wrangler.toml.example wrangler.toml
 ```
+
+3. This game is intended to run primarily on mobile, so you may want to accept requests from your phone to your dev machine. To do this, install and run ngrok:
+
+```bash
+ngrok http --url=your-ngrok-url.ngrok.app 8787
+```
+
+You'll also need to update your ACTOR_KIT_HOST env var in dev.vars to `your-ngrok-url.ngrok.app`.
 
 ## Tests
 

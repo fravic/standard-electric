@@ -73,9 +73,10 @@ export const HexDetails: React.FC = () => {
     <IonModal
       ref={modalRef}
       isOpen={Boolean(selectedHexCoordinates)}
-      initialBreakpoint={0.5}
+      initialBreakpoint={0.25}
       breakpoints={[0, 0.25, 0.5, 0.75, 1]}
-      backdropDismiss={true}
+      backdropBreakpoint={0.75}
+      backdropDismiss={false}
       onDidDismiss={handleClose}
       handle={true}
     >

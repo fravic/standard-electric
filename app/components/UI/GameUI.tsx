@@ -30,13 +30,12 @@ export const GameUI: React.FC = () => {
       {currentPlayer && (
         <>
           <IonCard
-            className="fixed right-[10px] z-10 font-mono"
+            className="fixed z-10 font-mono mx-auto left-0 right-0 w-fit"
             style={{
               top: "var(--ion-safe-area-top, 10px)",
-              marginTop: "10px",
             }}
           >
-            <IonCardContent>
+            <IonCardContent className="py-2 px-4">
               Day {dayNumber} {timeEmoji}
             </IonCardContent>
           </IonCard>

@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import { GameContext } from "@/actor/game.context";
 import { IonButton, IonCard, IonCardContent } from "@ionic/react";
 import { TextInput } from "./TextInput";
-import { cn } from "@/lib/utils";
 
 export const JoinGamePrompt: React.FC = () => {
   const [companyName, setCompanyName] = useState("");
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const sendGameEvent = GameContext.useSend();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: { target: { value: string } }) => {
     const value = e.target.value;
     setCompanyName(value);
     setIsBtnDisabled(!value.trim());

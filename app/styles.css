@@ -68,7 +68,9 @@ html {
 html,
 body {
   height: 100%;
+  min-height: 100vh;
   overflow: hidden; /* Prevent scrolling on the page */
+  overscroll-behavior: none;
   width: 100%;
 }
 
