@@ -72,6 +72,8 @@ body {
   overflow: hidden; /* Prevent scrolling on the page */
   overscroll-behavior: none;
   width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 body {

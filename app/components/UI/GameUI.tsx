@@ -32,7 +32,7 @@ export const GameUI: React.FC = () => {
           <IonCard
             className="fixed z-10 font-mono mx-auto left-0 right-0 w-fit"
             style={{
-              top: "var(--ion-safe-area-top, 10px)",
+              top: "max(env(safe-area-inset-top, 10px), 10px)",
             }}
           >
             <IonCardContent className="py-2 px-4">

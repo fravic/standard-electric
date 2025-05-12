@@ -79,6 +79,7 @@ export const HexDetails: React.FC = () => {
       backdropDismiss={false}
       onDidDismiss={handleClose}
       handle={true}
+      className="fixed bottom-0"
     >
       <IonHeader>
         <IonToolbar>
