@@ -1,22 +1,31 @@
 import React from "react";
+import { IonCard, IonCardContent } from "@ionic/react";
 import { cn } from "@/lib/utils";
 
 interface CardProps {
   children: React.ReactNode;
   variant?: "primary" | "secondary";
   className?: string;
+  onClick?: (event: React.MouseEvent<HTMLIonCardElement>) => void;
 }
 
-export const Card: React.FC<CardProps> = ({ children, variant = "primary", className }) => {
+export const Card: React.FC<CardProps> = ({
+  children,
+  variant = "primary",
+  className,
+  onClick,
+  ...props
+}) => {
   return (
-    <div
+    <IonCard
       className={cn(
-        "rounded-lg p-4 shadow-[0_2px_0_0_rgba(0,0,0,0.05)] text-foreground",
-        variant === "primary" ? "bg-primary-button" : "bg-secondary-button",
+        variant === "primary" ? "bg-(--primary-button)" : "bg-(--secondary-button)",
         className
       )}
+      onClick={onClick}
+      {...props}
     >
-      {children}
-    </div>
+      <IonCardContent>{children}</IonCardContent>
+    </IonCard>
   );
 };

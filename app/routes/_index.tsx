@@ -68,7 +68,6 @@ export default function Index() {
                 Enter Game Code
               </label>
               <TextInput
-                id="gameCode"
                 value={gameCode}
                 onChange={(e) => setGameCode(e.target.value)}
                 placeholder="Enter game code..."
@@ -76,7 +75,7 @@ export default function Index() {
               />
             </div>
 
-            <Button type="submit" fullWidth variant="primary">
+            <Button fullWidth variant="primary">
               Join Game
             </Button>
           </form>

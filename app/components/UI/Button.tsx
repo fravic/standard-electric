@@ -1,11 +1,15 @@
 import React from "react";
+import { IonButton } from "@ionic/react";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps {
   variant?: "primary" | "secondary";
   fullWidth?: boolean;
   disabled?: boolean;
   isActive?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  onClick?: (event: React.MouseEvent<HTMLIonButtonElement>) => void;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -15,26 +19,25 @@ export const Button: React.FC<ButtonProps> = ({
   isActive = false,
   children,
   className,
+  onClick,
   ...props
 }) => {
   return (
-    <button
+    <IonButton
       className={cn(
-        "flex items-center justify-between rounded px-4 py-2 transition-colors",
-        variant === "primary" ? "bg-primary-button" : "bg-secondary-button",
-        "border border-button-border shadow-[0_2px_0_0_rgba(0,0,0,0.05)] shadow-button-inner",
-        "font-serif-extra text-foreground",
         {
           "w-full": fullWidth,
-          "bg-secondary-button": isActive,
-          "opacity-70 cursor-not-allowed": disabled,
         },
         className
       )}
+      color={variant === "primary" ? "primary" : "secondary"}
       disabled={disabled}
+      fill={isActive ? "solid" : "outline"}
+      expand={fullWidth ? "block" : undefined}
+      onClick={onClick}
       {...props}
     >
       {children}
-    </button>
+    </IonButton>
   );
 };

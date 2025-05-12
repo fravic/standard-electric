@@ -1,25 +1,37 @@
 import React from "react";
+import { IonInput } from "@ionic/react";
 import { clientStore } from "@/lib/clientState";
 import { cn } from "@/lib/utils";
 
-interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextInputProps {
   fullWidth?: boolean;
+  value?: string;
+  onChange?: (event: { target: { value: string } }) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
 }
 
-export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
-  ({ className, fullWidth = true, ...props }, ref) => {
+export const TextInput = React.forwardRef<HTMLIonInputElement, TextInputProps>(
+  ({ className, fullWidth = true, onChange, ...props }, ref) => {
     return (
-      <input
+      <IonInput
         ref={ref}
-        type="text"
         className={cn(
-          "bg-secondary-button border border-button-border rounded text-foreground p-2",
-          "placeholder:text-foreground/50",
           {
             "w-full": fullWidth,
           },
           className
         )}
+        onIonInput={(e) => {
+          if (onChange) {
+            onChange({
+              target: {
+                value: e.detail.value || "",
+              },
+            });
+          }
+        }}
         onFocus={() =>
           clientStore.send({
             type: "setKeyboardControlsActive",

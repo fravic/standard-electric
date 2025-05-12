@@ -53,6 +53,8 @@
     "wrangler": "4"
   },
   "dependencies": {
+    "@ionic/react": "^8.5.7",
+    "@ionic/react-router": "^8.5.7",
     "@open-game-collective/auth-kit": "^0.0.2",
     "@phosphor-icons/react": "^2.1.7",
     "@react-spring/three": "^9.7.5",
@@ -67,6 +69,7 @@
     "@xstate/store": "^2.6.2",
     "actor-kit": "^0.47.0",
     "clsx": "^2.1.1",
+    "ionicons": "^8.0.8",
     "isbot": "^4.1.0",
     "miniplex": "^2.0.0",
     "postprocessing": "^6.36.6",

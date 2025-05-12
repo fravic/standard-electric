@@ -1,5 +1,4 @@
-import React, { useMemo } from "react";
-import { Card } from "./Card";
+import React, { useMemo, useRef, useEffect } from "react";
 import { Button } from "./Button";
 import { UI_COLORS } from "@/lib/palette";
 import { GameContext } from "@/actor/game.context";
@@ -14,6 +13,118 @@ import { CommodityType } from "@/lib/types";
 import { CommoditySystem } from "@/ecs/systems/CommoditySystem";
 import { Entity } from "@/ecs/entity";
 import { cn } from "@/lib/utils";
+import {
+  IonModal,
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonButton as IonButtonComponent,
+  IonItem,
+  IonLabel,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonProgressBar,
+  IonList,
+} from "@ionic/react";
+
+export const HexDetails: React.FC = () => {
+  const selectedHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.selectedHexCoordinates
+  );
+
+  const modalRef = useRef<HTMLIonModalElement>(null);
+
+  const handleClose = () => {
+    clientStore.send({
+      type: "selectHex",
+      coordinates: null,
+    });
+  };
+
+  const world = useWorld();
+
+  // Find all entities at the selected coordinates
+  const entitiesAtHex = useMemo(() => {
+    if (!selectedHexCoordinates) return [];
+
+    // Get all entities with hexPosition
+    return world
+      .with("hexPosition")
+      .where((entity) => equals(entity.hexPosition.coordinates, selectedHexCoordinates)).entities;
+  }, [selectedHexCoordinates, world]);
+
+  // Control modal presentation based on selectedHexCoordinates
+  useEffect(() => {
+    if (selectedHexCoordinates && modalRef.current) {
+      // Set a timeout to allow the modal to be properly initialized
+      setTimeout(() => {
+        modalRef.current?.present();
+      }, 50);
+    } else if (modalRef.current?.isOpen) {
+      modalRef.current.dismiss();
+    }
+  }, [selectedHexCoordinates]);
+
+  return (
+    <IonModal
+      ref={modalRef}
+      isOpen={Boolean(selectedHexCoordinates)}
+      initialBreakpoint={0.5}
+      breakpoints={[0, 0.25, 0.5, 0.75, 1]}
+      backdropDismiss={true}
+      onDidDismiss={handleClose}
+      handle={true}
+    >
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle className="font-serif-extra">
+            {entitiesAtHex.length > 0
+              ? `${entitiesAtHex.length} ${entitiesAtHex.length === 1 ? "Entity" : "Entities"}`
+              : "Selected Hex"}
+          </IonTitle>
+          <IonButtons slot="end">
+            <IonButtonComponent onClick={handleClose}>Close</IonButtonComponent>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent className="ion-padding bg-white h-[80vh]">
+        {selectedHexCoordinates && (
+          <IonList className="min-h-[300px] pb-5">
+            <IonItem lines="none">
+              <IonLabel>
+                <IonGrid>
+                  <IonRow>
+                    <IonCol size="7">
+                      <strong className="opacity-80">Coordinates:</strong>
+                    </IonCol>
+                    <IonCol size="5" className="ion-text-end">
+                      {coordinatesToString(selectedHexCoordinates)}
+                    </IonCol>
+                  </IonRow>
+                </IonGrid>
+              </IonLabel>
+            </IonItem>
+
+            {/* Render each entity */}
+            {entitiesAtHex.length > 0
+              ? entitiesAtHex.map((entity) => <EntityDetails key={entity.id} entity={entity} />)
+              : null}
+            <SurveyDetails />
+          </IonList>
+        )}
+      </IonContent>
+    </IonModal>
+  );
+};
 
 // New component to handle power plants and their commodity market logic
 const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
@@ -77,69 +188,114 @@ const PowerPlantDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
 
   return (
     <>
-      <div className="mb-2 flex justify-between text-foreground">
-        <span className="font-bold opacity-80">Power Generation:</span>
-        <span>{entity.powerGeneration.powerGenerationKW} kW</span>
-      </div>
+      <IonItem lines="none">
+        <IonLabel>
+          <IonGrid>
+            <IonRow>
+              <IonCol size="7">
+                <strong className="opacity-80">Power Generation:</strong>
+              </IonCol>
+              <IonCol size="5" className="ion-text-end">
+                {entity.powerGeneration.powerGenerationKW} kW
+              </IonCol>
+            </IonRow>
+          </IonGrid>
+        </IonLabel>
+      </IonItem>
 
-      <div className="mb-2 flex justify-between text-foreground">
-        <span className="font-bold opacity-80">Price per kWh:</span>
-        <span>${entity.powerGeneration.pricePerKWh.toFixed(2)}</span>
-      </div>
+      <IonItem lines="none">
+        <IonLabel>
+          <IonGrid>
+            <IonRow>
+              <IonCol size="7">
+                <strong className="opacity-80">Price per kWh:</strong>
+              </IonCol>
+              <IonCol size="5" className="ion-text-end">
+                ${entity.powerGeneration.pricePerKWh.toFixed(2)}
+              </IonCol>
+            </IonRow>
+          </IonGrid>
+        </IonLabel>
+      </IonItem>
 
       {entity.owner && (
-        <div className="mb-2 flex justify-between text-foreground">
-          <span className="font-bold opacity-80">Owner:</span>
-          <span>{players[entity.owner.playerId].name}</span>
-        </div>
+        <IonItem lines="none">
+          <IonLabel>
+            <IonGrid>
+              <IonRow>
+                <IonCol size="7">
+                  <strong className="opacity-80">Owner:</strong>
+                </IonCol>
+                <IonCol size="5" className="ion-text-end">
+                  {players[entity.owner.playerId].name}
+                </IonCol>
+              </IonRow>
+            </IonGrid>
+          </IonLabel>
+        </IonItem>
       )}
 
       {fuelType && (
-        <div className="mt-4 rounded-lg bg-[#DBF8FD] p-4 text-foreground">
-          <div className="mb-2 flex justify-between items-center">
-            <h3 className="m-0 text-base capitalize font-serif-extra">{fuelType} Fuel</h3>
+        <IonCard className="mt-4">
+          <IonCardHeader>
+            <IonCardTitle className="text-base capitalize font-serif-extra">
+              {fuelType} Fuel
+            </IonCardTitle>
             {fuelRates && (
-              <div>
-                <small>
-                  Buy: ${fuelRates.buyPrice.toFixed(2)} | Sell: ${fuelRates.sellPrice.toFixed(2)}
-                </small>
+              <div className="text-sm">
+                Buy: ${fuelRates.buyPrice.toFixed(2)} | Sell: ${fuelRates.sellPrice.toFixed(2)}
               </div>
             )}
-          </div>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem lines="none">
+              <IonLabel>
+                <IonGrid>
+                  <IonRow>
+                    <IonCol size="7">
+                      <strong className="opacity-80">Fuel Storage:</strong>
+                    </IonCol>
+                    <IonCol size="5" className="ion-text-end">
+                      {currentFuelStorage.toFixed(1)} / {maxFuelStorage.toFixed(1)}
+                    </IonCol>
+                  </IonRow>
+                </IonGrid>
+              </IonLabel>
+            </IonItem>
 
-          <div className="mb-2 flex justify-between text-foreground">
-            <span className="font-bold opacity-80">Fuel Storage:</span>
-            <span>
-              {currentFuelStorage.toFixed(1)} / {maxFuelStorage.toFixed(1)}
-            </span>
-          </div>
+            <IonProgressBar
+              value={fuelPercentage / 100}
+              color="primary"
+              className="my-2"
+            ></IonProgressBar>
 
-          <div className="mb-2 h-3 overflow-hidden rounded-md bg-black/10">
-            <div
-              className="h-full rounded transition-[width] duration-300 ease-in-out"
-              style={{
-                width: `${fuelPercentage}%`,
-                backgroundColor: UI_COLORS.PRIMARY,
-              }}
-            />
-          </div>
+            <IonItem lines="none">
+              <IonLabel>
+                <IonGrid>
+                  <IonRow>
+                    <IonCol size="7">
+                      <strong className="opacity-80">Consumption Rate:</strong>
+                    </IonCol>
+                    <IonCol size="5" className="ion-text-end">
+                      {entity.fuelRequirement!.fuelConsumptionPerKWh} per kWh
+                    </IonCol>
+                  </IonRow>
+                </IonGrid>
+              </IonLabel>
+            </IonItem>
 
-          <div className="mb-2 flex justify-between text-foreground">
-            <span className="font-bold opacity-80">Consumption Rate:</span>
-            <span>{entity.fuelRequirement!.fuelConsumptionPerKWh} per kWh</span>
-          </div>
-
-          {isOwner && (
-            <div className="mt-4 flex gap-2">
-              <Button onClick={handleBuyFuel} disabled={!canBuyFuel} fullWidth>
-                Buy Fuel
-              </Button>
-              <Button onClick={handleSellFuel} disabled={!canSellFuel} fullWidth>
-                Sell Fuel
-              </Button>
-            </div>
-          )}
-        </div>
+            {isOwner && (
+              <div className="mt-4 flex gap-2">
+                <Button onClick={handleBuyFuel} disabled={!canBuyFuel} fullWidth>
+                  Buy Fuel
+                </Button>
+                <Button onClick={handleSellFuel} disabled={!canSellFuel} fullWidth>
+                  Sell Fuel
+                </Button>
+              </div>
+            )}
+          </IonCardContent>
+        </IonCard>
       )}
     </>
   );
@@ -174,20 +330,14 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
       );
 
       return (
-        <div>
-          <div className="mb-2 flex justify-between text-foreground">
-            <span className="font-bold opacity-80">Survey in Progress:</span>
-          </div>
-          <div className="mb-2 h-3 overflow-hidden rounded-md bg-black/10">
-            <div
-              className="h-full rounded transition-[width] duration-300 ease-in-out"
-              style={{
-                width: `${progress}%`,
-                backgroundColor: UI_COLORS.PRIMARY,
-              }}
-            />
-          </div>
-        </div>
+        <>
+          <IonItem lines="none">
+            <IonLabel>
+              <strong className="opacity-80">Survey in Progress:</strong>
+            </IonLabel>
+          </IonItem>
+          <IonProgressBar value={progress / 100} color="primary" className="my-2"></IonProgressBar>
+        </>
       );
     }
 
@@ -196,29 +346,59 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
     const isComplete = surveyResult.isComplete;
     if (isComplete && resource) {
       return (
-        <div className="mt-4 rounded-lg bg-[#DBF8FD] p-4 text-foreground">
-          <h3 className="m-0 mb-2 text-lg capitalize font-serif-extra">Survey Results</h3>
-          <div className="mb-2 flex justify-between text-foreground">
-            <span className="font-bold opacity-80">Resource Found:</span>
-            <span className="capitalize">{resource.resourceType}</span>
-          </div>
-          <div className="mb-2 flex justify-between text-foreground">
-            <span className="font-bold opacity-80">Amount:</span>
-            <span>{resource.resourceAmount} units</span>
-          </div>
-        </div>
+        <IonCard className="mt-4">
+          <IonCardHeader>
+            <IonCardTitle className="text-lg capitalize font-serif-extra">
+              Survey Results
+            </IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem lines="none">
+              <IonLabel>
+                <IonGrid>
+                  <IonRow>
+                    <IonCol size="7">
+                      <strong className="opacity-80">Resource Found:</strong>
+                    </IonCol>
+                    <IonCol size="5" className="ion-text-end capitalize">
+                      {resource.resourceType}
+                    </IonCol>
+                  </IonRow>
+                </IonGrid>
+              </IonLabel>
+            </IonItem>
+            <IonItem lines="none">
+              <IonLabel>
+                <IonGrid>
+                  <IonRow>
+                    <IonCol size="7">
+                      <strong className="opacity-80">Amount:</strong>
+                    </IonCol>
+                    <IonCol size="5" className="ion-text-end">
+                      {resource.resourceAmount} units
+                    </IonCol>
+                  </IonRow>
+                </IonGrid>
+              </IonLabel>
+            </IonItem>
+          </IonCardContent>
+        </IonCard>
       );
     }
 
     // If survey is complete but no resources were found
     if (isComplete) {
       return (
-        <div className="mt-4 rounded-lg bg-[#DBF8FD] p-4 text-foreground">
-          <h3 className="m-0 mb-2 text-lg capitalize font-serif-extra">Survey Results</h3>
-          <div className="mb-2 text-foreground">
-            <span>No resources found in this hex.</span>
-          </div>
-        </div>
+        <IonCard className="mt-4">
+          <IonCardHeader>
+            <IonCardTitle className="text-lg capitalize font-serif-extra">
+              Survey Results
+            </IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            <div className="text-foreground">No resources found in this hex.</div>
+          </IonCardContent>
+        </IonCard>
       );
     }
   }
@@ -251,7 +431,7 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
   // If no survey data and no active survey, show the survey button
   if (canSurvey) {
     return (
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 px-2 pb-4">
         <Button onClick={handleStartSurvey} fullWidth disabled={!canSurvey}>
           Survey This Hex
         </Button>
@@ -274,79 +454,34 @@ const EntityDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
   const { players } = GameContext.useSelector((state) => state.public);
 
   return (
-    <div className="mb-6 rounded p-4 text-foreground">
-      <h3 className="m-0 mb-3 text-[1.1rem] font-serif-extra">{entity.name || "Unknown Entity"}</h3>
+    <div className="mb-6">
+      <IonItem lines="none" className="font-serif-extra text-[1.1rem]">
+        {entity.name || "Unknown Entity"}
+      </IonItem>
 
       {/* Render entity type-specific components */}
       {entity.powerGeneration && <PowerPlantDetails entity={entity} />}
 
       {/* Show owner information if not shown by a specific component */}
       {entity.owner && !entity.powerGeneration && (
-        <div className="mb-2 flex justify-between text-foreground">
-          <span className="font-bold opacity-80">Owner:</span>
-          <span>{players[entity.owner.playerId].name}</span>
-        </div>
+        <IonItem lines="none">
+          <IonLabel>
+            <IonGrid>
+              <IonRow>
+                <IonCol size="7">
+                  <strong className="opacity-80">Owner:</strong>
+                </IonCol>
+                <IonCol size="5" className="ion-text-end">
+                  {players[entity.owner.playerId].name}
+                </IonCol>
+              </IonRow>
+            </IonGrid>
+          </IonLabel>
+        </IonItem>
       )}
 
       {/* Render survey results if this entity has them */}
       {entity.surveyResult && <SurveyDetails entity={entity} />}
     </div>
-  );
-};
-
-// Main HexDetails component
-export const HexDetails: React.FC = () => {
-  const selectedHexCoordinates = useSelector(
-    clientStore,
-    (state) => state.context.selectedHexCoordinates
-  );
-
-  const handleClose = () => {
-    clientStore.send({
-      type: "selectHex",
-      coordinates: null,
-    });
-  };
-
-  const world = useWorld();
-
-  // Find all entities at the selected coordinates
-  const entitiesAtHex = useMemo(() => {
-    if (!selectedHexCoordinates) return [];
-
-    // Get all entities with hexPosition
-    return world
-      .with("hexPosition")
-      .where((entity) => equals(entity.hexPosition.coordinates, selectedHexCoordinates)).entities;
-  }, [selectedHexCoordinates, world]);
-
-  if (!selectedHexCoordinates) {
-    return null;
-  }
-
-  return (
-    <Card className="fixed top-[70px] right-[10px] max-w-[350px] w-full z-[1000]">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="m-0 text-[1.2rem] text-foreground font-serif-extra">
-          {entitiesAtHex.length > 0
-            ? `${entitiesAtHex.length} ${entitiesAtHex.length === 1 ? "Entity" : "Entities"}`
-            : "Selected Hex"}
-        </h2>
-        <Button onClick={handleClose}>Close</Button>
-      </div>
-
-      <div className="mb-2 flex justify-between text-foreground">
-        <span className="font-bold opacity-80">Coordinates:</span>
-        <span>{coordinatesToString(selectedHexCoordinates)}</span>
-      </div>
-
-      {/* Render each entity */}
-      {entitiesAtHex.length > 0 ? (
-        entitiesAtHex.map((entity) => <EntityDetails key={entity.id} entity={entity} />)
-      ) : (
-        // If no entities, show the survey component for the hex
-        <SurveyDetails />
-      )}
-    </Card>
   );
 };
