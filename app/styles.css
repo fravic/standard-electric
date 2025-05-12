@@ -68,6 +68,8 @@ html {
 html,
 body {
   height: 100%;
+  overflow: hidden; /* Prevent scrolling on the page */
+  width: 100%;
 }
 
 body {
