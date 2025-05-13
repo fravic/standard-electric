@@ -29,6 +29,7 @@ export function GameCanvas() {
         position: [0, 5, 5],
         fov: 75,
       }}
+      dpr={[1, 2]}
     >
       <color attach="background" args={[WATER_COLORS.BACKGROUND]} />
       <OrbitControls makeDefault />
@@ -44,7 +45,6 @@ export function GameCanvas() {
           luminanceSmoothing={0.9}
           kernelSize={KernelSize.MEDIUM}
         />
-        <Scanline blendFunction={BlendFunction.OVERLAY} density={1.25} opacity={0.1} />
       </EffectComposer>
     </Canvas>
   );
