@@ -1,8 +1,8 @@
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { GameContext } from "@/actor/game.context";
 import { AuthContext } from "@/auth.context";
 import { clientStore } from "@/lib/clientState";
-import { coordinatesToString, equals } from "@/lib/coordinates/HexCoordinates";
+import { coordinatesToString, equals, HexCoordinates } from "@/lib/coordinates/HexCoordinates";
 import { useSelector } from "@xstate/store/react";
 import { SURVEY_DURATION_TICKS, SurveySystem } from "@/ecs/systems/SurveySystem";
 import { useWorld } from "../WorldContext";
@@ -58,19 +58,18 @@ export const HexDetails: React.FC = () => {
   }, [selectedHexCoordinates, world]);
 
   // Control modal presentation based on selectedHexCoordinates
+  const [modalKey, setModalKey] = useState<string | null>(null);
   useEffect(() => {
-    if (selectedHexCoordinates && modalRef.current) {
-      // Set a timeout to allow the modal to be properly initialized
-      setTimeout(() => {
-        modalRef.current?.present();
-      }, 50);
-    } else if (modalRef.current?.isOpen) {
-      modalRef.current.dismiss();
+    if (selectedHexCoordinates) {
+      setModalKey(coordinatesToString(selectedHexCoordinates));
     }
-  }, [selectedHexCoordinates]);
+  }, [selectedHexCoordinates, setModalKey]);
+
+  if (!modalKey) return null;
 
   return (
     <IonModal
+      key={modalKey}
       ref={modalRef}
       isOpen={Boolean(selectedHexCoordinates)}
       initialBreakpoint={0.25}

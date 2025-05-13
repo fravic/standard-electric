@@ -15,6 +15,10 @@ export function HexGrid({}: HexGridProps) {
   const hexGrid = GameContext.useSelector((state) => state.public.hexGrid);
   const isDebug = useSelector(clientStore, (state) => state.context.isDebug);
   const buildMode = useSelector(clientStore, (state) => state.context.buildMode);
+  const selectedHexCoordinates = useSelector(
+    clientStore,
+    (state) => state.context.selectedHexCoordinates
+  );
   const entitiesById = GameContext.useSelector((state) => state.public.entitiesById);
   const sendGameEvent = GameContext.useSend();
 
@@ -67,6 +71,7 @@ export function HexGrid({}: HexGridProps) {
             grid={hexGrid}
             onCellClick={handleCellClick}
             debug={isDebug}
+            selectedHexCell={selectedHexCoordinates}
           />
         ))
       )}

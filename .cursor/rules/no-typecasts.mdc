@@ -1,0 +1,12 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Avoid Type Casting
+- Avoid using type assertions like `as Type` whenever possible
+- Instead, prefer to properly define interfaces, unions and type parameters
+- If needed, prefer type guards (`is` functions) over type assertions
+- When interacting with external APIs, use proper type definitions rather than force-casting
+- When handling possibly null/undefined values, prefer to use proper nullable types in interfaces rather than casting
+- For component props, always include null/undefined in the type definition if it can accept those values

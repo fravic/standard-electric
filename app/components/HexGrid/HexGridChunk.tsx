@@ -39,6 +39,7 @@ interface HexGridChunkProps {
   grid: HexGrid;
   onCellClick: (coordinates: HexCoordinates, nearestCorner: CornerCoordinates | null) => void;
   debug?: boolean;
+  selectedHexCell?: HexCoordinates | null;
 }
 
 export const HexGridChunk = React.memo(function HexGridChunk({
@@ -46,6 +47,7 @@ export const HexGridChunk = React.memo(function HexGridChunk({
   grid,
   onCellClick,
   debug = false,
+  selectedHexCell,
 }: HexGridChunkProps) {
   const userId = AuthContext.useSelector((state) => state.userId);
   const player = GameContext.useSelector((state) => state.public.players[userId!]);
@@ -237,12 +239,17 @@ export const HexGridChunk = React.memo(function HexGridChunk({
     return cells.filter((cell) => cell.regionName === hoveringCell.regionName);
   }, [cells, grid, hoveringHexCoordinates]);
 
-  // Get cells to highlight based on required state for power plant build mode
-  const requiredStateHighlightedCells = useMemo(() => {
-    const requiredRegion = buildingBlueprint?.blueprint.components.requiredRegion;
-    if (!requiredRegion) return [];
-    return cells.filter((cell) => cell.regionName === requiredRegion.requiredRegionName);
-  }, [cells, buildingBlueprint]);
+  // Get selected cell for highlighting
+  const selectedCell = useMemo(() => {
+    if (!selectedHexCell) return null;
+
+    // Check if the selected cell is in this chunk
+    const isInChunk = coordinatesInChunk.some((coord) => equals(coord, selectedHexCell));
+    if (!isInChunk) return null;
+
+    const cell = getCell(grid, selectedHexCell);
+    return cell;
+  }, [selectedHexCell, coordinatesInChunk, grid]);
 
   // Get renderable entities in this chunk
   const chunkEntities = useMemo(() => {
@@ -274,15 +281,15 @@ export const HexGridChunk = React.memo(function HexGridChunk({
           cells={highlightedCells}
           color={[1, 1, 1]}
           opacity={0.02}
-          height={0.05}
+          height={0.02}
         />
       )}
-      {requiredStateHighlightedCells.length > 0 && (
+      {selectedCell && (
         <HighlightedHexCells
-          cells={requiredStateHighlightedCells}
-          color={[0.2, 0.8, 0.2]}
-          opacity={0.05}
-          height={0.1}
+          cells={[selectedCell]}
+          color={[1, 1, 0]} // Yellow color
+          opacity={0.14}
+          height={0.02}
         />
       )}
       {chunkEntities.map((entity) => (
