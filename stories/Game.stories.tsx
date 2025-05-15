@@ -29,7 +29,7 @@ import {
   createWorldWithEntities,
   createPowerPoleBlueprint,
 } from "@/ecs/factories";
-import powerPlantBlueprints from "@/../public/powerPlantBlueprints.json";
+import { IonWrapper } from "@/components/IonWrapper";
 
 const meta: Meta<typeof Game> = {
   component: Game,
@@ -38,6 +38,11 @@ const meta: Meta<typeof Game> = {
       actorType: "game",
       context: GameContext,
     }),
+    (Story) => (
+      <IonWrapper>
+        <Story />
+      </IonWrapper>
+    ),
   ],
   parameters: {
     layout: "fullscreen",
@@ -139,7 +144,6 @@ export const Blank: Story = {
             },
           },
           time: { totalTicks: 0, isPaused: false },
-          auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
@@ -179,7 +183,6 @@ export const DebugMode: Story = {
             [PLAYER_2_ID]: createPlayer(PLAYER_2_ID, "Player 2", 2, 1000),
           },
           time: { totalTicks: 0, isPaused: false },
-          auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
@@ -251,7 +254,6 @@ export const WithPowerLines: Story = {
             [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
           },
           time: { totalTicks: 10, isPaused: false },
-          auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
@@ -259,180 +261,6 @@ export const WithPowerLines: Story = {
         },
         private: createEmptyPrivateContext(),
         value: "active",
-      },
-    });
-
-    await mountGame(mount, client);
-  },
-};
-
-export const Auction: Story = {
-  play: async ({ canvasElement, mount }) => {
-    const smallCoalPlant = createPowerPlantBlueprint({
-      id: "coal_plant_small",
-      name: "Small Coal Plant",
-      playerId: SERVER_ONLY_ID,
-      pricePerKWh: 0.05,
-      powerGenerationKW: 1000,
-      startingPrice: 10,
-    });
-
-    const mediumCoalPlant = createPowerPlantBlueprint({
-      id: "coal_plant_medium",
-      name: "Medium Coal Plant",
-      playerId: SERVER_ONLY_ID,
-      powerGenerationKW: 2000,
-      pricePerKWh: 0.05,
-      startingPrice: 18,
-      requiredRegionName: "California",
-    });
-
-    const largeCoalPlant = createPowerPlantBlueprint({
-      id: "coal_plant_large",
-      name: "Large Coal Plant",
-      playerId: SERVER_ONLY_ID,
-      powerGenerationKW: 3000,
-      pricePerKWh: 0.05,
-      startingPrice: 25,
-      requiredRegionName: "Texas",
-    });
-
-    // Use the entities from the powerPlantBlueprints.json file for the auction
-    const smallCoalPlantBlueprint = powerPlantBlueprints[0];
-    const mediumCoalPlantBlueprint = powerPlantBlueprints[1];
-    const largeCoalPlantBlueprint = powerPlantBlueprints[2];
-
-    const entities: Record<string, Entity> = {
-      [smallCoalPlant.id]: smallCoalPlant,
-      [mediumCoalPlant.id]: mediumCoalPlant,
-      [largeCoalPlant.id]: largeCoalPlant,
-    };
-
-    const auction = {
-      availableBlueprintIds: [
-        smallCoalPlantBlueprint.id,
-        mediumCoalPlantBlueprint.id,
-        largeCoalPlantBlueprint.id,
-      ],
-      currentBlueprint: null,
-      purchases: [],
-      passedPlayerIds: [],
-      isPassingAllowed: true,
-    };
-
-    const client = createActorKitMockClient<GameMachine>({
-      initialSnapshot: {
-        public: {
-          id: "game-123",
-          players: {
-            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
-          },
-          time: { totalTicks: 0, isPaused: false },
-          auction,
-          hexGrid: hexGrid as HexGrid,
-          randomSeed: 123,
-          commodityMarket: initializeCommodityMarket(),
-          entitiesById: entities,
-        },
-        private: createEmptyPrivateContext(),
-        value: { auction: "initiatingBid" },
-      },
-    });
-
-    await mountGame(mount, client);
-  },
-};
-
-export const AuctionWithCurrentBlueprint: Story = {
-  play: async ({ canvasElement, mount }) => {
-    const smallCoalPlant = createPowerPlantBlueprint({
-      id: "coal_plant_small",
-      name: "Small Coal Plant",
-      playerId: SERVER_ONLY_ID,
-      powerGenerationKW: 1000,
-      pricePerKWh: 0.05,
-      startingPrice: 10,
-    });
-
-    const mediumCoalPlant = createPowerPlantBlueprint({
-      id: "coal_plant_medium",
-      name: "Medium Coal Plant",
-      playerId: SERVER_ONLY_ID,
-      powerGenerationKW: 2000,
-      pricePerKWh: 0.05,
-      startingPrice: 18,
-      requiredRegionName: "California",
-    });
-
-    const largeCoalPlant = createPowerPlantBlueprint({
-      id: "coal_plant_large",
-      name: "Large Coal Plant",
-      playerId: SERVER_ONLY_ID,
-      powerGenerationKW: 3000,
-      pricePerKWh: 0.05,
-      startingPrice: 25,
-      requiredRegionName: "Texas",
-    });
-
-    // Use the entities from the powerPlantBlueprints.json file for the auction
-    const smallCoalPlantBlueprint = powerPlantBlueprints[0];
-    const mediumCoalPlantBlueprint = powerPlantBlueprints[1];
-    const largeCoalPlantBlueprint = powerPlantBlueprints[2];
-
-    const entities: Record<string, Entity> = {
-      [smallCoalPlant.id]: smallCoalPlant,
-      [mediumCoalPlant.id]: mediumCoalPlant,
-      [largeCoalPlant.id]: largeCoalPlant,
-    };
-
-    const auction = {
-      availableBlueprintIds: [mediumCoalPlantBlueprint.id, largeCoalPlantBlueprint.id],
-      currentBlueprint: {
-        blueprintId: smallCoalPlantBlueprint.id,
-        bids: [
-          {
-            playerId: PLAYER_ID,
-            amount: 10,
-          },
-          {
-            playerId: PLAYER_2_ID,
-            amount: 12,
-          },
-          {
-            playerId: PLAYER_3_ID,
-            passed: true,
-          },
-        ],
-      },
-      purchases: [],
-      passedPlayerIds: [PLAYER_3_ID],
-      isPassingAllowed: true,
-    };
-
-    const client = createActorKitMockClient<GameMachine>({
-      initialSnapshot: {
-        public: {
-          id: "game-123",
-          players: {
-            [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 100, true),
-            [PLAYER_2_ID]: {
-              ...createPlayer(PLAYER_2_ID, "Player 2", 2, 100),
-              powerSoldKWh: 1000,
-            },
-            [PLAYER_3_ID]: {
-              ...createPlayer(PLAYER_3_ID, "Player 3", 3, 100),
-              powerSoldKWh: 500,
-            },
-          },
-          time: { totalTicks: 0, isPaused: false },
-          auction,
-          hexGrid: hexGrid as HexGrid,
-          randomSeed: 123,
-          commodityMarket: initializeCommodityMarket(),
-          entitiesById: entities,
-        },
-        private: createEmptyPrivateContext(),
-        value: { auction: "biddingOnBlueprint" },
       },
     });
 
@@ -499,7 +327,6 @@ export const BuildablePlacementInCalifornia: Story = {
             [PLAYER_ID]: createPlayer(PLAYER_ID, "Player 1", 1, 1000, true),
           },
           time: { totalTicks: 10, isPaused: false },
-          auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
@@ -612,7 +439,6 @@ export const GridConnectivityValidation: Story = {
             [PLAYER_2_ID]: createPlayer(PLAYER_2_ID, "Player 2", 2, 1000),
           },
           time: { totalTicks: 0, isPaused: false },
-          auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
@@ -693,7 +519,6 @@ export const WithCommodityMarket: Story = {
             [PLAYER_2_ID]: createPlayer(PLAYER_2_ID, "Player 2", 2, 1000),
           },
           time: { totalTicks: 24, isPaused: false }, // Set to day 2
-          auction: null,
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,
           commodityMarket: initializeCommodityMarket(),
@@ -796,7 +621,6 @@ export const WithSurveys: Story = {
             [PLAYER_2_ID]: createPlayer(PLAYER_2_ID, "Player 2", 2, 100),
           },
           time: { totalTicks: currentTick, isPaused: false },
-          auction: null,
           entitiesById: {},
           hexGrid: hexGrid as HexGrid,
           randomSeed: 123,

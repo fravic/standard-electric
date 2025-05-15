@@ -28,6 +28,8 @@ import {
   IonCardTitle,
   IonProgressBar,
   IonList,
+  IonCardSubtitle,
+  IonListHeader,
 } from "@ionic/react";
 
 export const HexDetails: React.FC = () => {
@@ -82,11 +84,7 @@ export const HexDetails: React.FC = () => {
     >
       <IonHeader>
         <IonToolbar>
-          <IonTitle className="font-serif-extra">
-            {entitiesAtHex.length > 0
-              ? `${entitiesAtHex.length} ${entitiesAtHex.length === 1 ? "Entity" : "Entities"}`
-              : "Selected Hex"}
-          </IonTitle>
+          <IonTitle className="font-serif-extra">Selected Hex</IonTitle>
           <IonButtons slot="end">
             <IonButton onClick={handleClose}>Close</IonButton>
           </IonButtons>
@@ -305,86 +303,51 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
   // If we're rendering this for a specific entity with survey results, use that
   if (entity?.surveyResult) {
     const surveyResult = entity.surveyResult;
-
-    // If survey is in progress but not complete
-    if (!SurveySystem.isSurveyComplete(surveyResult.surveyStartTick, currentTick)) {
-      const progress = Math.min(
-        ((currentTick - surveyResult.surveyStartTick) / SURVEY_DURATION_TICKS) * 100,
-        100
-      );
-
-      return (
-        <>
-          <IonItem lines="none">
-            <IonLabel>
-              <strong className="opacity-80">Survey in Progress:</strong>
-            </IonLabel>
-          </IonItem>
-          <IonProgressBar value={progress / 100} color="primary" className="my-2"></IonProgressBar>
-        </>
-      );
-    }
-
-    // If survey is complete and resources were found
-    const resource = surveyResult.resource;
     const isComplete = surveyResult.isComplete;
-    if (isComplete && resource) {
-      return (
-        <IonCard className="mt-4">
-          <IonCardHeader>
-            <IonCardTitle className="text-lg capitalize font-serif-extra">
-              Survey Results
-            </IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem lines="none">
-              <IonLabel>
-                <IonGrid>
-                  <IonRow>
-                    <IonCol size="7">
-                      <strong className="opacity-80">Resource Found:</strong>
-                    </IonCol>
-                    <IonCol size="5" className="ion-text-end capitalize">
-                      {resource.resourceType}
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonLabel>
-            </IonItem>
-            <IonItem lines="none">
-              <IonLabel>
-                <IonGrid>
-                  <IonRow>
-                    <IonCol size="7">
-                      <strong className="opacity-80">Amount:</strong>
-                    </IonCol>
-                    <IonCol size="5" className="ion-text-end">
-                      {resource.resourceAmount} units
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonLabel>
-            </IonItem>
-          </IonCardContent>
-        </IonCard>
-      );
-    }
+    const resource = surveyResult.resource;
 
-    // If survey is complete but no resources were found
-    if (isComplete) {
-      return (
-        <IonCard className="mt-4">
-          <IonCardHeader>
-            <IonCardTitle className="text-lg capitalize font-serif-extra">
-              Survey Results
-            </IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent>
-            <div className="text-foreground">No resources found in this hex.</div>
-          </IonCardContent>
-        </IonCard>
-      );
-    }
+    return (
+      <IonList className="mt-2">
+        <IonListHeader className="font-serif-extra">Survey Results</IonListHeader>
+
+        {/* Survey in progress */}
+        {!SurveySystem.isSurveyComplete(surveyResult.surveyStartTick, currentTick) && (
+          <>
+            <IonItem lines="none">
+              <IonLabel>
+                <strong className="opacity-80">Survey in progress</strong>
+              </IonLabel>
+            </IonItem>
+            <IonProgressBar
+              value={Math.min(
+                (currentTick - surveyResult.surveyStartTick) / SURVEY_DURATION_TICKS,
+                1
+              )}
+              className="my-2"
+            />
+          </>
+        )}
+
+        {/* Survey completed */}
+        {isComplete && (
+          <>
+            {resource ? (
+              <IonItem lines="none">
+                <IonLabel className="flex items-center justify-between">
+                  <div className="capitalize">
+                    {resource.resourceAmount} {resource.resourceType}
+                  </div>
+                </IonLabel>
+              </IonItem>
+            ) : (
+              <IonItem lines="none">
+                <IonLabel>No resources found in this hex</IonLabel>
+              </IonItem>
+            )}
+          </>
+        )}
+      </IonList>
+    );
   }
 
   // Otherwise, check if there's any survey result entity for the selected hex
@@ -412,26 +375,26 @@ const SurveyDetails: React.FC<{ entity?: Entity }> = ({ entity }) => {
     });
   };
 
-  // If no survey data and no active survey, show the survey button
-  if (canSurvey) {
-    return (
-      <IonButton onClick={handleStartSurvey} expand="block" disabled={!canSurvey}>
-        Survey This Hex
-      </IonButton>
-    );
-  }
-
   // If there's a survey result entity but we don't have it directly
   if (surveyResultForCell) {
     return <SurveyDetails entity={surveyResultForCell} />;
   }
 
-  // Fallback
-  return null;
+  // Only show the button if the hex hasn't been surveyed
+  return !surveyResultForCell ? (
+    <IonButton onClick={handleStartSurvey} expand="block" disabled={!canSurvey}>
+      Survey This Hex
+    </IonButton>
+  ) : null;
 };
 
 // Renders various entity details
 const EntityDetails: React.FC<{ entity: Entity }> = ({ entity }) => {
+  // Don't render survey result entities as they're displayed separately
+  if (entity.surveyResult) {
+    return null;
+  }
+
   const { players } = GameContext.useSelector((state) => state.public);
 
   return (
