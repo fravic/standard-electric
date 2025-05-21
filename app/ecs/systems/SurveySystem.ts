@@ -58,7 +58,7 @@ export interface ResourceConfig {
 }
 
 // Define how many ticks a survey takes to complete
-export const SURVEY_DURATION_TICKS = 4;
+export const SURVEY_DURATION_TICKS = 2;
 
 // Server-only player ID for storing ground truth about resources
 export const SERVER_ONLY_ID = "__SERVER_ONLY__";

@@ -24,6 +24,7 @@ import { AuthContext } from "@/auth.context";
 import { HighlightedHexCells } from "./HighlightedHexCells";
 import { useMapEditor } from "@/routes/mapEditor";
 import { SurveyProgressIndicator } from "./SurveyProgressIndicator";
+import { SurveyedHexPrisms } from "./SurveyedHexPrisms";
 import { With } from "miniplex";
 import { Entity, SurveyResultComponent } from "@/ecs/entity";
 import { useWorld } from "../WorldContext";
@@ -276,6 +277,10 @@ export const HexGridChunk = React.memo(function HexGridChunk({
         surveyedHexCoords={surveyedHexCoords}
       />
       <HexGridWater cells={cells} grid={grid} />
+
+      {/* Add 3D prisms for surveyed cells */}
+      <SurveyedHexPrisms cells={cells} surveyedHexCoords={surveyedHexCoords} />
+
       {highlightedCells.length > 0 && (
         <HighlightedHexCells
           cells={highlightedCells}

@@ -296,7 +296,9 @@ export const HexGridTerrain = React.memo(function HexGridTerrain({
         <CityLabel key={`city-${coordinatesToString(cell.coordinates)}`} cell={cell} />
       ))}
 
-      <HexGridDecorations cells={cells} />
+      <HexGridDecorations
+        cells={cells.filter((cell) => surveyedHexCoords.has(coordinatesToString(cell.coordinates)))}
+      />
     </>
   );
 });
