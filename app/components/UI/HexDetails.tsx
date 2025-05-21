@@ -73,7 +73,9 @@ export const HexDetails: React.FC = () => {
     <IonModal
       key={modalKey}
       ref={modalRef}
-      isOpen={Boolean(selectedHexCoordinates)}
+      isOpen={
+        selectedHexCoordinates !== null && modalKey === coordinatesToString(selectedHexCoordinates)
+      }
       initialBreakpoint={0.25}
       breakpoints={[0, 0.25, 0.5, 0.75, 1]}
       backdropBreakpoint={0.75}
